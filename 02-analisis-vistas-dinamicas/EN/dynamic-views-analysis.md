@@ -583,7 +583,7 @@ flowchart TD
     showqr --> extpay[Customer pays from their bank app<br/>outside the platform]
     extpay --> upload[Uploads receipt + declared amount + reference code]
     upload --> dup{Reference code<br/>already used in another booking?}
-    dup -->|Yes| rejectref[Reject: TRANSACTIONREFERENCEREUSED]
+    dup -->|Yes| rejectref[Reject: TRANSACTION_REFERENCE_REUSED]
     rejectref --> stop1([End])
     dup -->|No| inreview["Payment → Under review (linked to the booking)"]
     inreview --> stop2([End: waiting for the admin])

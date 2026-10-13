@@ -293,7 +293,7 @@ flowchart TB
 | notification-service | 3006 | Java 21, Spring Boot 4 | Notification inbox, push, emails and reminders. |
 | Web application | — | Angular 21 | Interface for the three roles in the browser. |
 | Mobile application | — | React Native 0.86, Expo SDK 57 | Interface for the three roles on Android. |
-| SQL Server | 1433 | SQL Server 2022 | Database: 9 schemas and 47 tables, versioned with Liquibase. |
+| SQL Server | 1433 | SQL Server 2022 | Database: 9 schemas and 49 tables, versioned with Liquibase. |
 | RabbitMQ | 5672 | RabbitMQ 4 | Domain event bus (exchange `carwash.events`). |
 
 ### 3.2 Product Functions
@@ -549,7 +549,7 @@ Priority follows the MoSCoW technique: Essential (must have), Desirable (should 
 | RF-013b | **Receipt upload.** For a digital method, the system must allow the customer to upload the receipt with the declared amount and the transaction reference code. | • JPG or PNG images of up to 10 MB are accepted; the app compresses them before sending.<br>• The payment goes to Under review and is linked to the booking.<br>• Cash does not require a receipt. | Essential | Implemented |
 | RF-014 | **Payment review.** The system must allow the administrator to approve or reject a payment under review by comparing the declared amount with the amount due, and to record cash payments directly. | • Rejection requires a reason; the customer is notified and can send another receipt.<br>• A booking can have at most one approved payment.<br>• Approval credits the loyalty points (RF-026). | Essential | Implemented |
 | RF-015 | **Payment history.** The system must show the customer their payment history sorted by date and linked to each service. | • With no payments, a message says so. | Desirable | **Partial.** The customer can see their payments; the API does not offer filters by date or by service. |
-| RF-016 | **Payment constraints.** The system must not capture or store card data and must reject a receipt whose reference code already appears in the payment of another booking. | • The rejection returns the error code `TRANSACTIONREFERENCEREUSED`. | Essential | Implemented |
+| RF-016 | **Payment constraints.** The system must not capture or store card data and must reject a receipt whose reference code already appears in the payment of another booking. | • The rejection returns the error code `TRANSACTION_REFERENCE_REUSED`. | Essential | Implemented |
 | RF-035 | **Refund.** The system must allow the administrator to mark an approved payment as refunded. | • Only an Approved payment can move to Refunded; the `payment.refunded` event is published. | Optional | Implemented |
 
 **Evidence:**
@@ -1296,7 +1296,7 @@ The services publish events to RabbitMQ to notify other services without blockin
 
 ### 9.1 Data Ownership
 
-The database has 9 schemas and 47 tables. Each schema has a single owner service, which is the only one allowed to write to it (see Table 53).
+The database has 9 schemas and 49 tables. Each schema has a single owner service, which is the only one allowed to write to it (see Table 53).
 
 **Table 53**
 *Data Schemas and Owner Service*
@@ -1311,7 +1311,7 @@ The database has 9 schemas and 47 tables. Each schema has a single owner service
 | `payment` | payment-service | Payment methods and accounts, payments, receipts and points ledger. |
 | `promotion` | payment-service | Promotions, discount types and redemptions per booking. |
 | `notification` | notification-service | Notifications, types, push devices, reminders and processed events. |
-| `audit` | Shared | Change audit log. |
+| `audit` | security-service | Change audit log. |
 
 ### 9.2 Integrity and Retention Rules
 

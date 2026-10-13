@@ -293,7 +293,7 @@ flowchart TB
 | notification-service | 3006 | Java 21, Spring Boot 4 | Bandeja de notificaciones, push, correos y recordatorios. |
 | Aplicación web | — | Angular 21 | Interfaz para los tres roles en navegador. |
 | Aplicación móvil | — | React Native 0.86, Expo SDK 57 | Interfaz para los tres roles en Android. |
-| SQL Server | 1433 | SQL Server 2022 | Base de datos: 9 esquemas y 47 tablas, versionados con Liquibase. |
+| SQL Server | 1433 | SQL Server 2022 | Base de datos: 9 esquemas y 49 tablas, versionados con Liquibase. |
 | RabbitMQ | 5672 | RabbitMQ 4 | Bus de eventos de dominio (exchange `carwash.events`). |
 
 ### 3.2 Funciones del Producto
@@ -549,7 +549,7 @@ La prioridad sigue la técnica MoSCoW: Esencial (debe tener), Deseable (debería
 | RF-013b | **Carga del comprobante.** Para un método digital, el sistema debe permitir que el cliente suba el comprobante con el valor declarado y el código de referencia de la transacción. | • Se aceptan imágenes JPG o PNG de hasta 10 MB; la aplicación las comprime antes de enviarlas.<br>• El pago queda En revisión y ligado a la reserva.<br>• El efectivo no requiere comprobante. | Esencial | Implementado |
 | RF-014 | **Revisión del pago.** El sistema debe permitir que el administrador apruebe o rechace un pago en revisión comparando el valor declarado con el valor a pagar, y registre directamente los pagos en efectivo. | • El rechazo exige un motivo; el cliente es notificado y puede enviar otro comprobante.<br>• Una reserva admite como máximo un pago aprobado.<br>• La aprobación acredita los puntos de fidelización (RF-026). | Esencial | Implementado |
 | RF-015 | **Historial de pagos.** El sistema debe mostrar al cliente su historial de pagos ordenado por fecha y asociado a cada servicio. | • Sin pagos, se muestra un mensaje que lo indica. | Deseable | **Parcial.** El cliente consulta sus pagos; la API no ofrece filtros por fecha ni por servicio. |
-| RF-016 | **Restricciones de pago.** El sistema no debe capturar ni almacenar datos de tarjeta y debe rechazar un comprobante cuyo código de referencia ya figure en el pago de otra reserva. | • El rechazo devuelve el código de error `TRANSACTIONREFERENCEREUSED`. | Esencial | Implementado |
+| RF-016 | **Restricciones de pago.** El sistema no debe capturar ni almacenar datos de tarjeta y debe rechazar un comprobante cuyo código de referencia ya figure en el pago de otra reserva. | • El rechazo devuelve el código de error `TRANSACTION_REFERENCE_REUSED`. | Esencial | Implementado |
 | RF-035 | **Reembolso.** El sistema debe permitir que el administrador marque como reembolsado un pago aprobado. | • Solo un pago Aprobado puede pasar a Reembolsado; se publica el evento `payment.refunded`. | Opcional | Implementado |
 
 **Evidencia:**
@@ -1296,7 +1296,7 @@ Los servicios publican eventos en RabbitMQ para avisar a otros servicios sin blo
 
 ### 9.1 Propiedad de los Datos
 
-La base de datos tiene 9 esquemas y 47 tablas. Cada esquema tiene un único servicio dueño, que es el único autorizado para escribir en él (véase la Tabla 53).
+La base de datos tiene 9 esquemas y 49 tablas. Cada esquema tiene un único servicio dueño, que es el único autorizado para escribir en él (véase la Tabla 53).
 
 **Tabla 53**
 *Esquemas de Datos y Servicio Dueño*
@@ -1311,7 +1311,7 @@ La base de datos tiene 9 esquemas y 47 tablas. Cada esquema tiene un único serv
 | `payment` | payment-service | Métodos y cuentas de pago, pagos, comprobantes y libro de puntos. |
 | `promotion` | payment-service | Promociones, tipos de descuento y canjes por reserva. |
 | `notification` | notification-service | Notificaciones, tipos, dispositivos push, recordatorios y eventos procesados. |
-| `audit` | Compartido | Registro de auditoría de cambios. |
+| `audit` | security-service | Registro de auditoría de cambios. |
 
 ### 9.2 Reglas de Integridad y Conservación
 
