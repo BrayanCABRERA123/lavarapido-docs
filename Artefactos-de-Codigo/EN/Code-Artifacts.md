@@ -15,7 +15,7 @@
 | Apprentices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 9, 2026 |
+| Date | October 15, 2026 |
 
 The system's code lives in 10 GitHub repositories: the web application, the mobile application, and 8 backend repositories. This document inventories the two clients and explains how to build and run them; the backend is described only as far as the clients need it. Source code is not reproduced.
 
@@ -23,20 +23,20 @@ The system's code lives in 10 GitHub repositories: the web application, the mobi
 
 **Table 2**
 
-*System repositories (`develop` branch, as of October 9, 2026)*
+*System repositories (`develop` branch, as of October 15, 2026)*
 
 | Artifact | Repository | Technology | Commits | Last commit |
 | --- | --- | --- | --- | --- |
-| Web application | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.7, TypeScript 5.9 | 285 | 2026-10-09 |
-| Mobile application | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 86 | 2026-10-09 |
-| Infrastructure | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 21 | 2026-10-09 |
-| API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 4 | 2026-10-07 |
-| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 28 | 2026-10-09 |
+| Web application | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.7, TypeScript 5.9 | 324 | 2026-10-15 |
+| Mobile application | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 125 | 2026-10-15 |
+| Infrastructure | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 27 | 2026-10-14 |
+| API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 10 | 2026-10-14 |
+| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 38 | 2026-10-15 |
 | customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 14 | 2026-10-05 |
-| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 31 | 2026-10-07 |
-| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 7 | 2026-10-07 |
-| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 30 | 2026-10-09 |
-| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 17 | 2026-10-09 |
+| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 40 | 2026-10-15 |
+| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 25 | 2026-10-15 |
+| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 33 | 2026-10-14 |
+| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 24 | 2026-10-14 |
 
 **Table 3**
 
@@ -44,8 +44,8 @@ The system's code lives in 10 GitHub repositories: the web application, the mobi
 
 | Artifact | Source files (`.ts`, `.tsx`, `.html`, `.scss`) | Lines | Screens |
 | --- | --- | --- | --- |
-| Web (`Web/src`) | 407 | 44,681 | 34 routes |
-| Mobile (`LavadoVehicular-Movil/src`) | 254 | 30,442 | 30 screens |
+| Web (`Web/src`) | 410 | 45,220 | 34 routes |
+| Mobile (`LavadoVehicular-Movil/src`) | 260 | 31,612 | 30 screens |
 
 > *Note.* Counted with `find` and `wc -l`; includes tests and comments.
 
@@ -64,7 +64,7 @@ The web client is an Angular 21 SPA (Angular, n.d.) with standalone components, 
 | `core/constants` | `API_BASE_URL = '/api/v1'` (`core/constants/api.ts:4`) |
 | `core/guards` | `authGuard` (session and role) and `guestGuard` (hides login from users who already have a session) |
 | `core/interceptors` | `authInterceptor`: adds the JWT and ends the session on a 401 |
-| `core/services` | 16 HTTP and state services: `auth`, `booking-api`, `vehicles`, `operations-api`, `payments-api`, `promotions-api`, `loyalty-api`, `notifications`, `preferences`, `role-permissions-api`, `user-admin`, `user-session`, `inspection-store`, `photo-storage`, `local-storage`, `api` |
+| `core/services` | 16 HTTP and state services: `auth`, `booking-api`, `vehicles`, `operations-api`, `payments-api`, `promotions-api`, `loyalty-api`, `notifications`, `preferences`, `role-permissions-api`, `user-admin`, `user-session`, `inspection-api`, `inspection-photos`, `local-storage`, `api` |
 | `core/models`, `core/utils` | DTO interfaces and utilities (for example, API error translation) |
 | `features/landing` | Public page: navbar, hero, services, features, contact, footer |
 | `features/auth` | Login, sign-up, and three-step password recovery |
@@ -103,13 +103,13 @@ npm run build        # production build in dist/web/browser
 npm test             # unit tests (Vitest)
 ```
 
-The proxy lives in `Web/proxy.conf.json` and is enabled in `angular.json` (`proxyConfig`). The production build has size budgets: it fails if the initial bundle exceeds 1 MB or a component style exceeds 16 kB (`angular.json`, `budgets`). In production, `dist/web/browser` can be served by any static server that forwards `/api` to the gateway. `[TO COMPLETE: production server and domain, if any]`
+The proxy lives in `Web/proxy.conf.json` and is enabled in `angular.json` (`proxyConfig`). The production build has size budgets: it fails if the initial bundle exceeds 1 MB or a component style exceeds 16 kB (`angular.json`, `budgets`). In production, `dist/web/browser` can be served by any static server that forwards `/api` to the gateway.
 
-According to SRS v4 (RNF-008), the web client must work on current versions of Chrome, Firefox, and Edge and be usable from 360 px wide.
+According to SRS v6 (RNF-008), the web client must work on current versions of Chrome, Firefox, and Edge and be usable from 360 px wide.
 
 ## 3. Mobile Application
 
-The mobile app is built with Expo 57 on React Native 0.86 (Expo, n.d.; React Native, n.d.) and targets Android 8.0 or later (RNF-008 in SRS v4). The web build (`react-native-web`) is used only for development and testing. It talks only to the gateway and discovers the IP of the computer running Expo by itself, so no setup is needed on a local network.
+The mobile app is built with Expo 57 on React Native 0.86 (Expo, n.d.; React Native, n.d.) and targets Android 8.0 or later (RNF-008 in SRS v6). The web build (`react-native-web`) is used only for development and testing. It talks only to the gateway and discovers the IP of the computer running Expo by itself, so no setup is needed on a local network.
 
 ### 3.1 Structure
 
@@ -186,9 +186,9 @@ docker compose --profile app up -d --build   # the whole backend in containers
 | Group | Variables |
 | --- | --- |
 | Database | `DB_PASSWORD` (required), `DB_NAME`, `DB_USERNAME`, `DB_URL` |
-| Security | `JWT_SECRET` (required), `INTERNAL_API_KEY`, `CORS_ALLOWED_ORIGINS` |
+| Security | `JWT_SECRET` (required), `INTERNAL_API_KEY` (calls between services and automatic assignment), `CORS_ALLOWED_ORIGINS` |
 | Email | `MAIL_ENABLED`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` |
-| Messaging | `MESSAGING_ENABLED`, `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD` |
+| Messaging | `MESSAGING_ENABLED`, `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD`; `AUTO_ASSIGN_ENABLED=false` (optional) turns off only the automatic assignment |
 | Push | `PUSH_ENABLED` (and `EXPO_ACCESS_TOKEN` in the compose file) |
 
 To run a Java service from the console, use its Maven Wrapper (`./mvnw spring-boot:run` inside the service folder) with Java 21 (Spring, n.d.). payment-service runs with `dotnet run --project src/PaymentService.Api` and requires the .NET 8 SDK (Microsoft, n.d.). When starting with `--profile app`, the folders must be named after their repositories (`lavarapido-security-service`, `lavarapido-operation-service`), because that is how the compose file references them.
@@ -205,10 +205,7 @@ To run a Java service from the console, use its Maven Wrapper (`./mvnw spring-bo
 | RabbitMQ | Dashboard at `http://localhost:15672` |
 | Mailpit | Inbox at `http://localhost:8025` |
 
-## 5. Open Items `[TO COMPLETE]`
-
-- [ ] Production server and domain for the web client, if any (2.3).
-- [ ] Validate this inventory with the instructor.
+With everything up, `lavarapido-infra/e2e` has three Node 22 scripts: the cross-service booking flow (`node --test "e2e/*.test.js"`), the response time measurement (`node e2e/performance.js`) and the check of the web at 360 px wide (`node e2e/width-360.js`, after `npm install --prefix e2e`). They need `MESSAGING_ENABLED=true` and `INTERNAL_API_KEY` in the `.env`.
 
 ## References
 
