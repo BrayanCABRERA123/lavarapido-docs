@@ -8,13 +8,13 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 1.0, 9 de octubre de 2026
+Versión 1.1, 15 de octubre de 2026
 
 ---
 
 ## Resumen
 
-LavaRápido es un sistema para administrar un lavadero de vehículos: reservas por horario y bahía, asignación de operarios, pagos digitales con comprobante, puntos de fidelización y notificaciones, con una aplicación web y una aplicación Android, ambas para los tres roles. En esta propuesta están la solución técnica (arquitectura, tecnologías y alternativas evaluadas), los requerimientos y recursos, el cronograma por esfuerzo, el equipo y los costos de ejecutar el proyecto en condiciones reales: 28 semanas de trabajo con salida a producción en la semana 23, un costo total de **COP 212.925.240** y una operación mensual de **COP 2.391.070** después del lanzamiento. El problema y los objetivos están en el *Informe de especificación de requisitos* (secciones 1 y 2).
+LavaRápido es un sistema para administrar un lavadero de vehículos: reservas por horario y bahía, asignación automática de operarios, informe de inspección del vehículo, pagos digitales con comprobante, puntos de fidelización y notificaciones, con una aplicación web y una aplicación Android, ambas para los tres roles. En esta propuesta están la solución técnica (arquitectura, tecnologías y alternativas evaluadas), los requerimientos y recursos, el cronograma por esfuerzo, el equipo y los costos de ejecutar el proyecto en condiciones reales: 28 semanas de trabajo con salida a producción en la semana 23, un costo total de **COP 212.925.240** y una operación mensual de **COP 2.391.070** después del lanzamiento. El problema y los objetivos están en el *Informe de especificación de requisitos* (secciones 1 y 2).
 
 ---
 
@@ -39,11 +39,11 @@ flowchart TB
     gateway["API Gateway<br/>Spring Cloud Gateway · :8080<br/>enrutamiento + CORS"]
 
     subgraph services["Spring Boot 4 · Java 21 · hexagonal — payment: .NET 8"]
-        security["security-service :3001<br/>cuentas, roles, JWT, preferencias"]
+        security["security-service :3001<br/>cuentas, roles, JWT, bloqueo, preferencias"]
         customer["customer-service :3002<br/>clientes, vehículos"]
-        booking["booking-service :3003<br/>catálogo, horario, bahías, reservas"]
-        notification["notification-service :3006<br/>bandeja, push, correo, recordatorios"]
-        operations["operations-service :3004<br/>operarios, asignación, ejecución, calificaciones"]
+        booking["booking-service :3003<br/>catálogo, horario, bahías, reservas, datos del negocio"]
+        notification["notification-service :3006<br/>bandeja, push, correo, recordatorios, alertas"]
+        operations["operations-service :3004<br/>operarios, asignación, ejecución, calificaciones, inspección"]
         payment["payment-service :3005 · .NET 8<br/>cuentas de pago, pagos, comprobantes, promociones"]
     end
 
@@ -69,8 +69,8 @@ flowchart TB
     booking -- "REST (JWT usuario)<br/>valida vehículo" --> customer
     customer -- "REST (JWT usuario)<br/>/users/me" --> security
     notification -- "REST (X-Internal-Key)<br/>/internal/v1/users" --> security
-    operations -- "REST (JWT usuario)<br/>reservas, estado" --> booking
-    operations -- "REST (JWT admin)<br/>cuentas de operario" --> security
+    operations -- "REST (JWT usuario o X-Internal-Key)<br/>reservas, estado" --> booking
+    operations -- "REST (JWT admin o X-Internal-Key)<br/>cuentas y contacto" --> security
     payment -- "REST (JWT usuario)<br/>total de la reserva" --> booking
 
     security -- user_registered --> rabbit
@@ -78,6 +78,7 @@ flowchart TB
     operations -- "execution.*" --> rabbit
     payment -- "payment.* / promotion_redeemed" --> rabbit
     rabbit -- user_registered --> customer
+    rabbit -- "booking.confirmed<br/>(asignación automática)" --> operations
     rabbit -- "eventos de usuario, reserva y ejecución" --> notification
 
     security --> sql
@@ -271,7 +272,7 @@ El lavadero no necesita hardware especial: no hay lectores de código de barras,
 |---|---|---|---|---|---|---|
 | 1.1 | Reunión de arranque con el lavadero: alcance, roles y plan de trabajo | — | 2 | S1 | 32 | Líder de proyecto, Líder de backend, Líder de frontend |
 | 1.2 | Levantamiento de requisitos: entrevistas y observación de la operación del lavadero | 1.1 | 5 | S1–S2 | 60 | Líder de proyecto, Líder de frontend |
-| 1.3 | Especificación de requisitos (38 RF, 12 RNF) y casos de uso | 1.2 | 6 | S2–S3 | 72 | Líder de proyecto, Líder de backend |
+| 1.3 | Especificación de requisitos (41 RF, 12 RNF) y casos de uso | 1.2 | 6 | S2–S3 | 72 | Líder de proyecto, Líder de backend |
 | 1.4 | Revisión y aprobación de los requisitos con el cliente | 1.3 | 2 | S3 | 16 | Líder de proyecto |
 | ◆ H1 | **Requisitos aprobados** | 1.4 | 0 | S3 | — | — |
 
@@ -311,14 +312,14 @@ El lavadero no necesita hardware especial: no hay lectores de código de barras,
 | ID | Tarea | Depende de | Duración (días hábiles) | Semanas | Esfuerzo (h) | Responsables |
 |---|---|---|---|---|---|---|
 | 4.1 | security-service: registro, inicio de sesión y emisión de JWT | 3.4 | 6 | S7–S8 | 48 | Líder de backend |
-| 4.2 | security-service: roles y permisos, recuperación de contraseña, preferencias y usuarios | 4.1 | 10 | S8–S10 | 80 | Líder de backend |
+| 4.2 | security-service: roles y permisos, bloqueo por intentos fallidos, recuperación de contraseña, preferencias, dirección y usuarios | 4.1 | 10 | S8–S10 | 80 | Líder de backend |
 | 4.3 | customer-service: clientes y vehículos, alta automática del cliente al registrarse | 3.4 | 8 | S7–S8 | 64 | Backend 2 |
-| 4.4 | booking-service: catálogo de servicios, horario de atención y bahías | 4.3 | 8 | S9–S10 | 64 | Backend 2 |
+| 4.4 | booking-service: catálogo de servicios, horario de atención, bahías y datos del negocio | 4.3 | 8 | S9–S10 | 64 | Backend 2 |
 | 4.5 | booking-service: reservas con control de cupos, estados y cancelación | 4.2, 4.4 | 12 | S10–S12 | 96 | Líder de backend |
 | 4.6 | payment-service (.NET): cuentas de pago con QR, pagos con comprobante y revisión | 4.4 | 12 | S10–S12 | 96 | Backend 2 |
 | 4.7 | payment-service (.NET): promociones y puntos de fidelización | 4.6 | 8 | S13–S14 | 64 | Backend 2 |
-| 4.8 | operations-service: operarios, turnos, ausencias, asignación, ejecución y calificaciones | 4.5 | 15 | S13–S15 | 120 | Líder de backend |
-| 4.9 | notification-service: bandeja, correo, push y recordatorios | 4.7 | 13 | S14–S17 | 104 | Backend 2 |
+| 4.8 | operations-service: operarios y su ficha, turnos, ausencias, asignación automática y manual, ejecución, calificaciones, métricas e informe de inspección | 4.5 | 15 | S13–S15 | 120 | Líder de backend |
+| 4.9 | notification-service: bandeja, correo, push, recordatorios y alertas, en el idioma de cada cuenta | 4.7 | 13 | S14–S17 | 104 | Backend 2 |
 | 4.10 | API Gateway: rutas, CORS y salud de los servicios | 4.8 | 3 | S16 | 24 | Líder de backend |
 | 4.11 | Integración entre servicios (REST y eventos) y pruebas de integración | 4.9, 4.10 | 4 | S17 | 64 | Líder de backend, Backend 2 |
 | ◆ H3 | **Backend integrado** | 4.11 | 0 | S17 | — | — |
@@ -330,8 +331,8 @@ El lavadero no necesita hardware especial: no hay lectores de código de barras,
 
 | ID | Tarea | Depende de | Duración (días hábiles) | Semanas | Esfuerzo (h) | Responsables |
 |---|---|---|---|---|---|---|
-| 5.1 | Módulo del cliente: vehículos, reservas, pagos, historial, calificaciones, puntos y perfil | 3.5 | 15 | S7–S10 | 120 | Líder de frontend |
-| 5.2 | Módulo del administrador: catálogo, horario, bahías, operarios, asignación, pagos, promociones, usuarios y roles | 5.1 | 20 | S10–S14 | 160 | Líder de frontend |
+| 5.1 | Módulo del cliente: vehículos, reservas con elección de operario, pagos, historial, calificaciones, puntos y perfil | 3.5 | 15 | S7–S10 | 120 | Líder de frontend |
+| 5.2 | Módulo del administrador: catálogo, horario, bahías, datos del negocio, operarios, asignación, informe de inspección, pagos, promociones, usuarios y roles | 5.1 | 20 | S10–S14 | 160 | Líder de frontend |
 | 5.3 | Módulo del operario: servicios asignados, inicio y fin del servicio, calificaciones | 5.2 | 5 | S14–S15 | 40 | Líder de frontend |
 | 5.4 | Conexión con la API real a través del gateway y ajustes | 5.3, 4.11 | 4 | S18 | 32 | Líder de frontend |
 
@@ -343,7 +344,7 @@ El lavadero no necesita hardware especial: no hay lectores de código de barras,
 | ID | Tarea | Depende de | Duración (días hábiles) | Semanas | Esfuerzo (h) | Responsables |
 |---|---|---|---|---|---|---|
 | 6.1 | Base de la app: navegación, sesión segura y registro para notificaciones push | 5.1 | 5 | S10–S11 | 40 | Móvil |
-| 6.2 | Flujos del cliente: vehículos, reservas, pago con foto del comprobante, notificaciones y puntos | 6.1 | 16 | S11–S14 | 128 | Móvil |
+| 6.2 | Flujos del cliente: vehículos, reservas con elección de operario, pago con foto del comprobante, notificaciones y puntos | 6.1 | 16 | S11–S14 | 128 | Móvil |
 | 6.3 | Flujos del operario: servicios asignados, inicio y fin del servicio | 6.2 | 5 | S14–S15 | 40 | Móvil |
 | 6.4 | Módulo del administrador: panel, reservas, pagos, operarios, horario, gestión, reportes y perfil | 6.3 | 11 | S15–S17 | 88 | Móvil |
 | 6.5 | Conexión con la API real y ajustes | 6.4, 4.11 | 4 | S18 | 32 | Móvil |
@@ -423,7 +424,7 @@ El lavadero no necesita hardware especial: no hay lectores de código de barras,
 | Salarios de referencia | Valor medio-bajo de cada rango salarial del país | Contratación remota con base en Neiva, Huila (supuesto) |
 | Tasa de cambio | COP 3.300 por dólar | TRM de octubre de 2026 con margen por variación (supuesto) |
 | IVA de servicios digitales del exterior | 19 % | Se aplica a todos los cobros en dólares (supuesto) |
-| Contingencia | 10 % del costo directo | Alcance cerrado (38 RF validados); riesgo en la integración de seis servicios, en la contratación de cuatro roles y en la revisión de Google Play (supuesto) |
+| Contingencia | 10 % del costo directo | Alcance cerrado (41 RF validados); riesgo en la integración de seis servicios, en la contratación de cuatro roles y en la revisión de Google Play (supuesto) |
 
 ### 8.1 Recursos humanos
 

@@ -8,13 +8,13 @@ Software Analysis and Development Technologist program (ADSO), group (ficha) 314
 
 Instructor: Karol Daniela Correa
 
-Version 1.0, October 9, 2026
+Version 1.1, October 15, 2026
 
 ---
 
 ## Abstract
 
-LavaRápido is a system to manage a car wash: bookings by time slot and bay, operator assignment, digital payments with a receipt, loyalty points and notifications, with a web application and an Android application, both for the three roles. This proposal covers the technical solution (architecture, technologies and alternatives evaluated), the requirements and resources, the effort-based schedule, the team, and the cost of carrying out the project under real conditions: 28 weeks of work with go-live in week 23, a total cost of **COP 212,925,240** and a monthly operating cost of **COP 2,391,070** after launch. The problem and the objectives are in the *Software Requirements Specification* (sections 1 and 2).
+LavaRápido is a system to manage a car wash: bookings by time slot and bay, automatic operator assignment, vehicle inspection report, digital payments with a receipt, loyalty points and notifications, with a web application and an Android application, both for the three roles. This proposal covers the technical solution (architecture, technologies and alternatives evaluated), the requirements and resources, the effort-based schedule, the team, and the cost of carrying out the project under real conditions: 28 weeks of work with go-live in week 23, a total cost of **COP 212,925,240** and a monthly operating cost of **COP 2,391,070** after launch. The problem and the objectives are in the *Software Requirements Specification* (sections 1 and 2).
 
 ---
 
@@ -39,11 +39,11 @@ flowchart TB
     gateway["API Gateway<br/>Spring Cloud Gateway · :8080<br/>routing + CORS"]
 
     subgraph services["Spring Boot 4 · Java 21 · hexagonal (payment: .NET 8)"]
-        security["security-service :3001<br/>accounts, roles, JWT, preferences"]
+        security["security-service :3001<br/>accounts, roles, JWT, lockout, preferences"]
         customer["customer-service :3002<br/>customers, vehicles"]
-        booking["booking-service :3003<br/>catalog, hours, bays, bookings"]
-        notification["notification-service :3006<br/>inbox, push, email, reminders"]
-        operations["operations-service :3004<br/>operators, assignment, execution, ratings"]
+        booking["booking-service :3003<br/>catalog, hours, bays, bookings, business data"]
+        notification["notification-service :3006<br/>inbox, push, email, reminders, alerts"]
+        operations["operations-service :3004<br/>operators, assignment, execution, ratings, inspection"]
         payment["payment-service :3005 · .NET 8<br/>payment accounts, payments, receipts, promotions"]
     end
 
@@ -69,8 +69,8 @@ flowchart TB
     booking -- "REST (user JWT)<br/>validates vehicle" --> customer
     customer -- "REST (user JWT)<br/>/users/me" --> security
     notification -- "REST (X-Internal-Key)<br/>/internal/v1/users" --> security
-    operations -- "REST (user JWT)<br/>bookings, status" --> booking
-    operations -- "REST (admin JWT)<br/>operator accounts" --> security
+    operations -- "REST (user JWT or X-Internal-Key)<br/>bookings, status" --> booking
+    operations -- "REST (admin JWT or X-Internal-Key)<br/>accounts and contact" --> security
     payment -- "REST (user JWT)<br/>booking total" --> booking
 
     security -- user_registered --> rabbit
@@ -78,6 +78,7 @@ flowchart TB
     operations -- "execution.*" --> rabbit
     payment -- "payment.* / promotion_redeemed" --> rabbit
     rabbit -- user_registered --> customer
+    rabbit -- "booking.confirmed<br/>(automatic assignment)" --> operations
     rabbit -- "user, booking and execution events" --> notification
 
     security --> sql
@@ -271,7 +272,7 @@ The car wash does not need special hardware: there are no barcode readers, fisca
 |---|---|---|---|---|---|---|
 | 1.1 | Kickoff meeting with the car wash: scope, roles and work plan | — | 2 | W1 | 32 | Project lead, Backend lead, Frontend lead |
 | 1.2 | Requirements gathering: interviews and observation of the car wash operation | 1.1 | 5 | W1–W2 | 60 | Project lead, Frontend lead |
-| 1.3 | Requirements specification (38 RF, 12 RNF) and use cases | 1.2 | 6 | W2–W3 | 72 | Project lead, Backend lead |
+| 1.3 | Requirements specification (41 RF, 12 RNF) and use cases | 1.2 | 6 | W2–W3 | 72 | Project lead, Backend lead |
 | 1.4 | Review and approval of the requirements with the client | 1.3 | 2 | W3 | 16 | Project lead |
 | ◆ M1 | **Requirements approved** | 1.4 | 0 | W3 | — | — |
 
@@ -311,14 +312,14 @@ The car wash does not need special hardware: there are no barcode readers, fisca
 | ID | Task | Depends on | Duration (working days) | Weeks | Effort (h) | Responsible |
 |---|---|---|---|---|---|---|
 | 4.1 | security-service: registration, sign-in and JWT issuing | 3.4 | 6 | W7–W8 | 48 | Backend lead |
-| 4.2 | security-service: roles and permissions, password recovery, preferences and users | 4.1 | 10 | W8–W10 | 80 | Backend lead |
+| 4.2 | security-service: roles and permissions, lockout after failed attempts, password recovery, preferences, address and users | 4.1 | 10 | W8–W10 | 80 | Backend lead |
 | 4.3 | customer-service: customers and vehicles, automatic customer creation on registration | 3.4 | 8 | W7–W8 | 64 | Backend 2 |
-| 4.4 | booking-service: service catalog, opening hours and bays | 4.3 | 8 | W9–W10 | 64 | Backend 2 |
+| 4.4 | booking-service: service catalog, opening hours, bays and business data | 4.3 | 8 | W9–W10 | 64 | Backend 2 |
 | 4.5 | booking-service: bookings with slot control, statuses and cancellation | 4.2, 4.4 | 12 | W10–W12 | 96 | Backend lead |
 | 4.6 | payment-service (.NET): payment accounts with QR, payments with receipt and review | 4.4 | 12 | W10–W12 | 96 | Backend 2 |
 | 4.7 | payment-service (.NET): promotions and loyalty points | 4.6 | 8 | W13–W14 | 64 | Backend 2 |
-| 4.8 | operations-service: operators, shifts, absences, assignment, execution and ratings | 4.5 | 15 | W13–W15 | 120 | Backend lead |
-| 4.9 | notification-service: inbox, email, push and reminders | 4.7 | 13 | W14–W17 | 104 | Backend 2 |
+| 4.8 | operations-service: operators and their profile, shifts, absences, automatic and manual assignment, execution, ratings, metrics and inspection report | 4.5 | 15 | W13–W15 | 120 | Backend lead |
+| 4.9 | notification-service: inbox, email, push, reminders and alerts, in each account's language | 4.7 | 13 | W14–W17 | 104 | Backend 2 |
 | 4.10 | API Gateway: routes, CORS and service health | 4.8 | 3 | W16 | 24 | Backend lead |
 | 4.11 | Integration between services (REST and events) and integration tests | 4.9, 4.10 | 4 | W17 | 64 | Backend lead, Backend 2 |
 | ◆ M3 | **Backend integrated** | 4.11 | 0 | W17 | — | — |
@@ -330,8 +331,8 @@ The car wash does not need special hardware: there are no barcode readers, fisca
 
 | ID | Task | Depends on | Duration (working days) | Weeks | Effort (h) | Responsible |
 |---|---|---|---|---|---|---|
-| 5.1 | Customer module: vehicles, bookings, payments, history, ratings, points and profile | 3.5 | 15 | W7–W10 | 120 | Frontend lead |
-| 5.2 | Administrator module: catalog, opening hours, bays, operators, assignment, payments, promotions, users and roles | 5.1 | 20 | W10–W14 | 160 | Frontend lead |
+| 5.1 | Customer module: vehicles, bookings with operator choice, payments, history, ratings, points and profile | 3.5 | 15 | W7–W10 | 120 | Frontend lead |
+| 5.2 | Administrator module: catalog, opening hours, bays, business data, operators, assignment, inspection report, payments, promotions, users and roles | 5.1 | 20 | W10–W14 | 160 | Frontend lead |
 | 5.3 | Operator module: assigned services, service start and finish, ratings | 5.2 | 5 | W14–W15 | 40 | Frontend lead |
 | 5.4 | Connection to the real API through the gateway, and adjustments | 5.3, 4.11 | 4 | W18 | 32 | Frontend lead |
 
@@ -343,7 +344,7 @@ The car wash does not need special hardware: there are no barcode readers, fisca
 | ID | Task | Depends on | Duration (working days) | Weeks | Effort (h) | Responsible |
 |---|---|---|---|---|---|---|
 | 6.1 | App foundation: navigation, secure session and push notification registration | 5.1 | 5 | W10–W11 | 40 | Mobile |
-| 6.2 | Customer flows: vehicles, bookings, payment with a photo of the receipt, notifications and points | 6.1 | 16 | W11–W14 | 128 | Mobile |
+| 6.2 | Customer flows: vehicles, bookings with operator choice, payment with a photo of the receipt, notifications and points | 6.1 | 16 | W11–W14 | 128 | Mobile |
 | 6.3 | Operator flows: assigned services, service start and finish | 6.2 | 5 | W14–W15 | 40 | Mobile |
 | 6.4 | Administrator module: dashboard, bookings, payments, operators, opening hours, management, reports and profile | 6.3 | 11 | W15–W17 | 88 | Mobile |
 | 6.5 | Connection to the real API, and adjustments | 6.4, 4.11 | 4 | W18 | 32 | Mobile |
@@ -422,7 +423,7 @@ The car wash does not need special hardware: there are no barcode readers, fisca
 | Reference salaries | Lower-middle value of each national salary range | Remote hiring based in Neiva, Huila (assumption) |
 | Exchange rate | COP 3,300 per US dollar | October 2026 official exchange rate (TRM) with a margin for fluctuation (assumption) |
 | VAT on foreign digital services | 19% | Applied to every charge in US dollars (assumption) |
-| Contingency | 10% of the direct cost | Closed scope (38 validated RF); risk in integrating six services, hiring four roles and the Google Play review (assumption) |
+| Contingency | 10% of the direct cost | Closed scope (41 validated RF); risk in integrating six services, hiring four roles and the Google Play review (assumption) |
 
 ### 8.1 Human resources
 
