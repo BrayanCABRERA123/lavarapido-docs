@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" width="640" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#000"/>
+    </marker>
+  </defs>
+
+  <!-- Clients -->
+  <rect fill="#ffffff" stroke="#000000" stroke-width="1.2" x="140" y="10" width="190" height="48" rx="4"/>
+  <text text-anchor="middle" font-weight="bold" x="235" y="30">Web application</text>
+  <text text-anchor="middle" font-size="10" x="235" y="46">Angular 21 · localhost:4200</text>
+  <rect fill="#ffffff" stroke="#000000" stroke-width="1.2" x="370" y="10" width="190" height="48" rx="4"/>
+  <text text-anchor="middle" font-weight="bold" x="465" y="30">Mobile application</text>
+  <text text-anchor="middle" font-size="10" x="465" y="46">React Native + Expo (Android)</text>
+
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M235,58 L235,82 L330,82 L330,104" marker-end="url(#arr)"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M465,58 L465,82 L370,82 L370,104"/>
+  <text font-size="10" font-style="italic" x="482" y="94">HTTP + JSON, Bearer JWT, /api/v1/**</text>
+
+  <!-- Gateway -->
+  <rect fill="#ffffff" stroke="#000000" stroke-width="1.2" x="210" y="106" width="280" height="48" rx="4"/>
+  <text text-anchor="middle" font-weight="bold" x="350" y="126">API Gateway · :8080</text>
+  <text text-anchor="middle" font-size="10" x="350" y="142">Spring Cloud Gateway · routes by path · CORS (no JWT validation)</text>
+
+  <!-- Routing bus -->
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M350,154 L350,176"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M62,176 L638,176"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M62,176 L62,196" marker-end="url(#arr)"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M177,176 L177,196" marker-end="url(#arr)"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M292,176 L292,196" marker-end="url(#arr)"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M407,176 L407,196" marker-end="url(#arr)"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M522,176 L522,196" marker-end="url(#arr)"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M638,176 L638,196" marker-end="url(#arr)"/>
+
+  <!-- Services -->
+  <rect fill="#e8e8e8" stroke="#000000" stroke-width="1.2" x="10" y="198" width="104" height="66" rx="4"/>
+  <text text-anchor="middle" font-weight="bold" x="62" y="216">security</text>
+  <text text-anchor="middle" font-size="10" x="62" y="231">Java · :3001</text>
+  <text text-anchor="middle" font-size="10" x="62" y="246">security, audit</text>
+
+  <rect fill="#e8e8e8" stroke="#000000" stroke-width="1.2" x="125" y="198" width="104" height="66" rx="4"/>
+  <text text-anchor="middle" font-weight="bold" x="177" y="216">customer</text>
+  <text text-anchor="middle" font-size="10" x="177" y="231">Java · :3002</text>
+  <text text-anchor="middle" font-size="10" x="177" y="246">customer</text>
+
+  <rect fill="#e8e8e8" stroke="#000000" stroke-width="1.2" x="240" y="198" width="104" height="66" rx="4"/>
+  <text text-anchor="middle" font-weight="bold" x="292" y="216">booking</text>
+  <text text-anchor="middle" font-size="10" x="292" y="231">Java · :3003</text>
+  <text text-anchor="middle" font-size="10" x="292" y="246">catalog, booking</text>
+
+  <rect fill="#e8e8e8" stroke="#000000" stroke-width="1.2" x="355" y="198" width="104" height="66" rx="4"/>
+  <text text-anchor="middle" font-weight="bold" x="407" y="216">operations</text>
+  <text text-anchor="middle" font-size="10" x="407" y="231">Java · :3004</text>
+  <text text-anchor="middle" font-size="10" x="407" y="246">execution</text>
+
+  <rect fill="#e8e8e8" stroke="#000000" stroke-width="1.2" x="470" y="198" width="104" height="66" rx="4"/>
+  <text text-anchor="middle" font-weight="bold" x="522" y="216">payment</text>
+  <text text-anchor="middle" font-size="10" x="522" y="231">.NET 8 · :3005</text>
+  <text text-anchor="middle" font-size="10" x="522" y="246">payment, promotion</text>
+
+  <rect fill="#e8e8e8" stroke="#000000" stroke-width="1.2" x="586" y="198" width="104" height="66" rx="4"/>
+  <text text-anchor="middle" font-weight="bold" x="638" y="216">notification</text>
+  <text text-anchor="middle" font-size="10" x="638" y="231">Java · :3006</text>
+  <text text-anchor="middle" font-size="10" x="638" y="246">notification</text>
+
+  <!-- Data bus -->
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M62,264 L62,290"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M177,264 L177,290"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M292,264 L292,290"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M407,264 L407,290"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M522,264 L522,290"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M638,264 L638,290"/>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M62,290 L638,290"/>
+
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M135,290 L135,330" marker-end="url(#arr)"/>
+  <text font-size="10" font-style="italic" x="141" y="315">JDBC / EF Core</text>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M400,290 L400,330" marker-end="url(#arr)"/>
+  <text font-size="10" font-style="italic" x="406" y="315">AMQP</text>
+  <path stroke="#000000" stroke-width="1.2" fill="none" d="M612,290 L612,330" marker-end="url(#arr)"/>
+  <text font-size="10" font-style="italic" x="560" y="315">SMTP / HTTPS</text>
+
+  <!-- Infrastructure -->
+  <rect fill="#ffffff" stroke="#000000" stroke-width="1.2" x="10" y="332" width="250" height="70" rx="4"/>
+  <text text-anchor="middle" font-weight="bold" x="135" y="352">SQL Server 2022</text>
+  <text text-anchor="middle" font-size="10" x="135" y="368">database LavaRapido · 9 schemas · 49 tables</text>
+  <text text-anchor="middle" font-size="10" x="135" y="383">one owner service per schema (ADR-003)</text>
+
+  <rect fill="#ffffff" stroke="#000000" stroke-width="1.2" x="275" y="332" width="250" height="70" rx="4"/>
+  <text text-anchor="middle" font-weight="bold" x="400" y="352">RabbitMQ 4</text>
+  <text text-anchor="middle" font-size="10" x="400" y="368">topic exchange carwash.events</text>
+  <text text-anchor="middle" font-size="10" x="400" y="383">publish: security, booking, operations, payment</text>
+  <text text-anchor="middle" font-size="10" x="400" y="396">consume: customer, notification</text>
+
+  <rect fill="#f2f2f2" stroke="#000000" stroke-width="1.2" stroke-dasharray="5 3" x="540" y="332" width="150" height="70" rx="4"/>
+  <text text-anchor="middle" font-weight="bold" x="615" y="352">External services</text>
+  <text text-anchor="middle" font-size="10" x="615" y="368">Mailpit or Gmail (SMTP)</text>
+  <text text-anchor="middle" font-size="10" x="615" y="383">Expo Push API</text>
+
+  <text font-size="10" x="10" y="428">Shaded boxes: domain services. Dashed box: external systems.</text>
+</svg>
