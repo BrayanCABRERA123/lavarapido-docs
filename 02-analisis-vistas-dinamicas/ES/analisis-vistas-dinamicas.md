@@ -8,7 +8,7 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 1.0, 9 de octubre de 2026
+Versión 2.0, 15 de octubre de 2026
 
 ---
 
@@ -19,9 +19,9 @@ Este documento muestra cómo se comporta LavaRápido cuando alguien lo usa: qué
 1. **Casos de uso por actor**, con sus relaciones `«include»`/`«extend»`.
 2. **Diagramas de secuencia** de los flujos principales: de la pantalla al gateway, del gateway al servicio, del servicio a la base de datos o a otro servicio.
 3. **Diagramas de actividades** de los procesos de negocio.
-4. **Diagramas de estados** de las entidades que cambian de estado (reserva, pago, ejecución del servicio).
+4. **Diagramas de estados** de las entidades que cambian de estado (reserva, pago, ejecución del servicio, promoción e informe de inspección).
 
-Los diagramas están hechos en Mermaid y se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026. Al final está el inventario de pantallas, con capturas por rol.
+Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol.
 
 La especificación completa de cada requisito y caso de uso (actores, precondición, flujo normal, flujos alternos y postcondición) está en el *Informe de especificación de requisitos*, secciones 5 y 7.3; aquí se citan por su identificador (RF-XXX, CUXX).
 
@@ -31,7 +31,7 @@ La especificación completa de cada requisito y caso de uso (actores, precondici
 
 ### 1.1 Diagrama de Casos de Uso
 
-Los 29 casos de uso se presentan en cuatro diagramas, uno por actor, agrupados por módulo.
+Los 30 casos de uso se presentan en cuatro diagramas, uno por actor, agrupados por módulo.
 
 **Casos de uso comunes a los tres roles**
 
@@ -83,6 +83,10 @@ flowchart LR
         CU15(["CU15 Calificar servicio"])
     end
 
+    subgraph INS["Inspección"]
+        CU30(["CU30 Registrar informe de inspección"])
+    end
+
     Cliente --- CU02
     Cliente --- CU26
     Cliente --- CU05
@@ -91,6 +95,7 @@ flowchart LR
     Cliente --- CU14
     Cliente --- CU15
     Cliente --- CU25
+    Cliente -. "consulta por enlace" .- CU30
     Sistema --- CU06
 
     CU05 -. "«include»" .-> CU06
@@ -107,7 +112,7 @@ flowchart LR
     Operario(["Operario"])
     CU10(["CU10 Consultar servicios asignados"])
     CU11(["CU11 Iniciar y finalizar servicio"])
-    CU22(["CU22 Gestionar disponibilidad de operarios"])
+    CU22(["CU22 Gestionar operarios y su disponibilidad"])
 
     Operario --- CU10
     Operario --- CU11
@@ -128,14 +133,15 @@ flowchart LR
         CU27(["CU27 Administrar usuarios y permisos"])
     end
     subgraph CAT["Catálogo, horario y bahías"]
-        CU20(["CU20 Configurar horario y bahías"])
+        CU20(["CU20 Configurar horario, bahías y datos del negocio"])
         CU21(["CU21 Gestionar catálogo y precios"])
     end
     subgraph RES["Reservas y operación"]
         CU08(["CU08 Asignar operario automáticamente"])
         CU09(["CU09 Asignar o reasignar operario"])
-        CU22b(["CU22 Gestionar disponibilidad de operarios"])
+        CU22b(["CU22 Gestionar operarios y su disponibilidad"])
         CU29(["CU29 Gestionar reservas"])
+        CU30b(["CU30 Registrar informe de inspección"])
     end
     subgraph PAG["Pagos y promociones"]
         CU13(["CU13 Revisar pago"])
@@ -152,6 +158,7 @@ flowchart LR
     Administrador --- CU09
     Administrador --- CU22b
     Administrador --- CU29
+    Administrador --- CU30b
     Administrador --- CU13
     Administrador --- CU28
     Administrador --- CU24
@@ -162,25 +169,25 @@ flowchart LR
     class Administrador,Sistema actor
 ```
 
-*Nota.* `«include»` indica que CU05 siempre ejecuta CU06; `«extend»` indica que CU25 amplía opcionalmente CU12. CU22 aparece como consulta para el operario y como gestión para el administrador, que es quien registra los turnos y las ausencias (RF-022).
+*Nota.* `«include»` indica que CU05 siempre ejecuta CU06; `«extend»` indica que CU25 amplía opcionalmente CU12. CU22 aparece como consulta para el operario y como gestión para el administrador, que es quien registra los turnos, las ausencias y la ficha del operario (RF-022, RF-038). El sistema ejecuta CU08 cada vez que se confirma una reserva. El cliente no registra el informe de inspección (CU30): lo consulta por el enlace que le comparte el administrador.
 
 ### 1.2 Matriz de Actores y Casos de Uso
 
 | Actor | Casos de uso |
 |---|---|
 | Todos los roles | CU01, CU03, CU04, CU16, CU17, CU18, CU19 |
-| Cliente | CU02, CU05, CU06, CU07, CU12, CU14, CU15, CU25, CU26 |
+| Cliente | CU02, CU05, CU06, CU07, CU12, CU14, CU15, CU25, CU26, CU30 (consulta) |
 | Operario | CU10, CU11, CU22 (consulta) |
-| Administrador | CU09, CU13, CU20, CU21, CU22, CU23, CU24, CU27, CU28, CU29 |
+| Administrador | CU09, CU13, CU20, CU21, CU22, CU23, CU24, CU27, CU28, CU29, CU30 |
 | Sistema | CU06 (incluido en CU05), CU08 |
 
-La especificación de cada uno de los 29 casos de uso (precondición, flujo normal, flujos alternos, postcondición, estado) está en el *Informe de especificación de requisitos*, Tablas 23 a 51.
+La especificación de cada uno de los 30 casos de uso (precondición, flujo normal, flujos alternos, postcondición, estado) está en el *Informe de especificación de requisitos*, Tablas 23 a 52.
 
 ---
 
 ## 2. Diagramas de Secuencia
 
-Cada diagrama sigue el recorrido de la petición (pantalla, gateway, servicios, base de datos y RabbitMQ) con los nombres de clases y endpoints del código. Los cinco primeros parten de los diagramas de `vehicle-w-docs/08-uml/diagrams/source/`; los dos últimos cubren la fidelización y los roles y permisos.
+Cada diagrama sigue el recorrido de la petición (pantalla, gateway, servicios, base de datos y RabbitMQ) con los nombres de clases y endpoints del código. Los cinco primeros parten de los diagramas de `vehicle-w-docs/08-uml/diagrams/source/`; los siguientes cubren la fidelización, los roles y permisos, el bloqueo de cuenta y el informe de inspección.
 
 ### 2.1 Registro y bienvenida (RF-001, RF-018)
 
@@ -218,7 +225,7 @@ sequenceDiagram
 
 *Fuente:* `security-service` (`AccountRegistrationService`, `AuthenticationService`), evento `security.user_registered`.
 
-### 2.2 Reservar un lavado (RF-005, RF-006)
+### 2.2 Reservar un lavado (RF-005, RF-006, RF-010)
 
 ```mermaid
 sequenceDiagram
@@ -231,20 +238,25 @@ sequenceDiagram
     participant MQ as RabbitMQ
     participant N as notification-service
     participant S as security-service
+    participant OP as operations-service
 
     C->>W: Elige vehículo, servicio y fecha
     W->>B: GET /api/v1/bookings/availability?date=…&vehicleTypeId=…&serviceIds=…
     B->>DB: horario, excepciones, bahías, reservas del día
     B-->>W: horas libres
-    C->>W: Confirma una hora
-    W->>B: POST /api/v1/bookings
+    C->>W: Elige una hora
+    W->>OP: GET /api/v1/operators/available?date=…&time=…&minutes=…
+    OP-->>W: operarios libres (primer nombre y calificación)
+    C->>W: Elige un operario (opcional) y confirma
+    W->>B: POST /api/v1/bookings {…, preferredOperatorId}
     B->>CU: GET /api/v1/vehicles/{id} (JWT del cliente)
     CU-->>B: vehículo + tipo (se valida la propiedad, INV-BOOK-002)
     B->>DB: sp_getapplock (bloqueo del horario)
     alt hay bahía libre y el vehículo no tiene otra reserva a esa hora
         B->>DB: INSERT reserva CONFIRMED + bahía + líneas con precios congelados
         B-->>W: 201 reserva (código RES-000042)
-        B-)MQ: BookingConfirmed (booking.confirmed), tras el commit
+        B-)MQ: BookingConfirmed (booking.confirmed, con preferredOperatorId), tras el commit
+        MQ-)OP: BookingConfirmed: asignación automática (sección 2.4)
         MQ-)N: BookingConfirmed
         N->>S: GET /internal/v1/users/{id}/contact (X-Internal-Key)
         N->>N: Notificación BOOKING_CONFIRMED + recordatorios (24 h, 1 h)
@@ -254,9 +266,9 @@ sequenceDiagram
     end
 ```
 
-*Fuente:* `booking-service` (`BookingService.confirmNew`), contrato en `07-api/contracts/openapi/booking-service.yaml`.
+*Fuente:* `booking-service` (`BookingService.confirmNew`), `operations-service` (`AvailableOperatorsController`), contratos en `07-api/contracts/openapi/`.
 
-### 2.3 Recordatorio de reserva (ADR-011 §7)
+### 2.3 Recordatorios y alerta de reserva sin operario (ADR-011)
 
 ```mermaid
 sequenceDiagram
@@ -270,20 +282,24 @@ sequenceDiagram
 
     MQ-)N: BookingConfirmed (nueva o reprogramada)
     N->>DB: Reemplaza recordatorios pendientes: uno por anticipación (24 h, 1 h) que siga en el futuro
-    MQ-)N: BookingCancelled
+    MQ-)N: BookingCancelled, ServiceStarted o ServiceCompleted
     N->>DB: Cancela los recordatorios pendientes de esa reserva (borrado lógico)
+    MQ-)N: OperatorAssigned
+    N->>DB: La reserva ya tiene operario (booking_tracking)
     loop cada 5 minutos (REMINDER_CHECK_INTERVAL)
         J->>DB: Recordatorios vencidos (remind_at <= ahora, no enviados)
-        J->>S: GET /internal/v1/users/{id}/contact (X-Internal-Key)
-        J->>N: Notificación BOOKING_REMINDER
+        J->>S: GET /internal/v1/users/{id}/contact (X-Internal-Key): correo e idioma
+        J->>N: Notificación BOOKING_REMINDER en el idioma de la cuenta
         N-->>C: bandeja + push + correo
         J->>DB: marca sent_at (nunca se envía dos veces)
+        J->>DB: Reservas confirmadas que empiezan en menos de 2 h sin operario y sin alerta
+        J->>N: Alerta a cada administrador activo y marca unassigned_alert_at
     end
 ```
 
-*Fuente:* `notification-service` (`BookingReminderService`, `ReminderScheduler`).
+*Fuente:* `notification-service` (`BookingReminderService`, `ReminderScheduler`, `StaffNotificationService`, migración 031).
 
-### 2.4 Asignación de operario, ejecución y calificación (RF-009, RF-011, RF-012, RF-012b)
+### 2.4 Asignación de operario, ejecución y calificación (RF-008, RF-009, RF-010, RF-011, RF-012, RF-012b)
 
 ```mermaid
 sequenceDiagram
@@ -298,6 +314,19 @@ sequenceDiagram
     participant DB as SQL Server (execution)
     participant MQ as RabbitMQ
     participant N as notification-service
+
+    MQ-)OP: BookingConfirmed (bookingId, preferredOperatorId)
+    OP->>B: GET /internal/v1/bookings/{id} y ?from=&to= (X-Internal-Key)
+    OP->>S: GET /internal/v1/users/{id}/contact (cuenta activa)
+    OP->>DB: turnos, ausencias, ejecuciones del día
+    alt hay operarios libres
+        OP->>OP: AutoAssignmentPolicy: el elegido por el cliente si está libre o, si no, el de menos reservas ese día
+        OP->>DB: una service_execution PENDING por línea (actor: sistema)
+        OP-)MQ: OperatorAssigned (execution.operator_assigned)
+        MQ-)N: notifica al operario y al cliente
+    else nadie libre o la reserva ya tenía operario
+        OP->>OP: no asigna (el administrador recibe la alerta, sección 2.3)
+    end
 
     A->>W: Abre una reserva → Asignación de operario
     W->>OP: GET /api/v1/admin/assignments/{bookingId}/candidates
@@ -316,8 +345,11 @@ sequenceDiagram
         OP-->>W: 409 OPERATOR_INACTIVE | OPERATOR_NOT_ON_SHIFT | OPERATOR_ABSENT | OPERATOR_BUSY
     end
 
-    O->>W: Servicios asignados → Iniciar servicio (solo el día de la reserva)
+    O->>W: Servicios asignados → Iniciar servicio
     W->>OP: POST /api/v1/operator/services/{bookingId}/start
+    alt faltan más de 15 minutos (StartPolicy)
+        OP-->>W: 409 SERVICE_TOO_EARLY
+    end
     OP->>B: PATCH /operator/bookings/{id}/status IN_PROGRESS (JWT operario)
     OP->>DB: líneas → IN_PROGRESS, started_at
     OP-)MQ: ServiceStarted (execution.service_started)
@@ -326,16 +358,16 @@ sequenceDiagram
     OP->>B: PATCH /operator/bookings/{id}/status COMPLETED
     OP->>DB: líneas → COMPLETED, finished_at
     OP-)MQ: ServiceCompleted (execution.service_completed)
-    MQ-)N: avisa al cliente que el lavado terminó
+    MQ-)N: avisa al cliente que el lavado terminó y cancela los recordatorios
 
     C->>W: Historial → califica la reserva completada
-    W->>OP: POST /api/v1/ratings/{bookingId} {puntuación 1–5, comentario}
+    W->>OP: POST /api/v1/ratings/{bookingId} {puntuación 1–5, comentario ≤ 500}
     OP->>B: GET /bookings/{id} (JWT cliente: solo sus reservas)
     OP->>DB: calificación en cada línea (una sola vez)
     OP-->>W: 201 calificación
 ```
 
-*Fuente:* `operations-service` (`OperationsService.candidates / assign / start / finish / rate`, `AssignmentPolicy`, ADR-014).
+*Fuente:* `operations-service` (`BookingConfirmedListener`, `OperationsService.autoAssign / candidates / assign / start / finish / rate`, `AssignmentPolicy`, `AutoAssignmentPolicy`, `StartPolicy`, ADR-014).
 
 ### 2.5 Pago por comprobante y revisión (RF-013, RF-013b, RF-014)
 
@@ -459,6 +491,73 @@ sequenceDiagram
 
 *Fuente:* `security-service` (`RolePermissionController`, `RolePermissionAdministrationService`, migración `026-security-role-permissions.sql`), ADR-015.
 
+### 2.8 Inicio de sesión con bloqueo por intentos fallidos (RF-002, RF-004b)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Usuario
+    participant W as Web o app
+    participant GW as API Gateway
+    participant S as security-service
+    participant DB as SQL Server (security)
+
+    U->>W: Correo y contraseña
+    W->>GW: POST /api/v1/auth/login
+    GW->>S: enruta
+    S->>DB: cuenta por correo y su fila de login_lockout
+    alt cuenta bloqueada (locked_until en el futuro)
+        S-->>W: 423 ACCOUNT_LOCKED
+        W-->>U: Mensaje de cuenta bloqueada (en la app, con la opción de recuperar la contraseña)
+    else contraseña incorrecta
+        S->>DB: suma el fallo (ventana de 15 min) y al quinto pone locked_until en ahora + 15 min
+        S-->>W: 401 INVALID_CREDENTIALS (o 423 si este fallo la bloqueó)
+    else contraseña correcta
+        S->>DB: borra el conteo de fallos, registra la sesión
+        S-->>W: 200 JWT (1 h)
+    end
+    Note over S,DB: Restablecer la contraseña con el código (RF-003) también borra el bloqueo
+```
+
+*Fuente:* `security-service` (`AuthenticationService.login`, `LoginLockout`, `PasswordRecoveryService`, migración `034-security-login-lockout.sql`).
+
+### 2.9 Informe de inspección del vehículo (RF-036)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor A as Administrador
+    actor C as Cliente
+    participant W as Web (vía gateway)
+    participant OP as operations-service
+    participant B as booking-service
+    participant DB as SQL Server (execution)
+    participant MQ as RabbitMQ
+    participant N as notification-service
+
+    A->>W: Reserva de 180 min o más → Informe de inspección
+    W->>OP: POST /api/v1/admin/inspections/{bookingId}
+    OP->>B: GET /admin/bookings/{id} (JWT admin)
+    alt reserva larga y Confirmada o En proceso
+        OP->>DB: informe con 5 fases PENDING y un código público aleatorio
+        OP-->>W: 201 informe
+    else corta, cancelada o completada
+        OP-->>W: 409 INSPECTION_NOT_EDITABLE
+    end
+    A->>W: Marca fases y registra hallazgos con fotos
+    W->>OP: PATCH /phases/{phase} y POST /findings (multipart, hasta 5 fotos)
+    OP->>DB: fases, hallazgos y fotos
+    A->>W: Publicar y compartir
+    W->>OP: POST /publish y POST /share
+    OP-)MQ: InspectionShared (execution.inspection_shared)
+    MQ-)N: notificación al cliente con el enlace, en su idioma
+    C->>W: Abre el enlace /report/{token}
+    W->>OP: GET /api/v1/public/inspections/{token} (sin sesión)
+    OP-->>W: informe publicado con la placa enmascarada
+```
+
+*Fuente:* `operations-service` (`InspectionReport`, migración `033-execution-inspection-report.sql`), `notification-service` (aviso del informe compartido).
+
 ---
 
 ## 3. Diagramas de Actividades
@@ -489,8 +588,9 @@ flowchart TD
     d2 --> v3{¿Cuenta existe,<br/>activa y contraseña correcta?}
     v3 -->|No| e3[Mensaje genérico de error]
     e3 --> d2
-    v3 -->|"5 fallos en 15 min"| lock["Bloquear cuenta 15 min (RF-004b, pendiente)"]
-    lock --> stop2([Fin])
+    v3 -->|"5 fallos en 15 min"| lock["Bloquear cuenta 15 min (RF-004b)"]
+    lock --> offer[Ofrecer recuperar la contraseña]
+    offer --> stop2([Fin])
     v3 -->|Sí| ok2[Emitir JWT y redirigir al panel del rol]
     ok2 --> stop3([Fin])
 
@@ -504,7 +604,10 @@ flowchart TD
     d4 --> v5{¿Código válido<br/>y no vencido?}
     v5 -->|No, 5 intentos| e5[Pedir código nuevo]
     e5 --> f3
-    v5 -->|Sí| ok3[Actualizar contraseña, invalidar código]
+    v5 -->|Sí| same{¿Nueva contraseña<br/>igual a la actual?}
+    same -->|Sí| e7[Pedir una contraseña distinta]
+    e7 --> d4
+    same -->|No| ok3[Actualizar contraseña, invalidar código y levantar el bloqueo]
     ok3 --> stop5([Fin])
 
     choice -->|Cambiar contraseña| auth{¿Usuario autenticado?}
@@ -517,7 +620,7 @@ flowchart TD
     ok4 --> stop7([Fin])
 ```
 
-### 3.2 Reservar un lavado (RF-005, RF-006, RF-007)
+### 3.2 Reservar un lavado (RF-005, RF-006, RF-007, RF-010)
 
 ```mermaid
 flowchart TD
@@ -527,12 +630,15 @@ flowchart TD
     veh -->|Sí| sel[Elegir vehículo y uno o más servicios]
     sel --> price[Mostrar precio según el tipo de vehículo]
     price --> date[Elegir fecha y hora]
-    date --> check[Validar horario del local, excepciones y bahías]
+    date --> op{"¿Quiere elegir operario?<br/>(lista de libres a esa hora)"}
+    op -->|Sí| pickop[Elegir un operario libre]
+    op -->|No| check[Validar horario del local, excepciones y bahías]
+    pickop --> check
     check --> avail{¿Hay bahía libre<br/>en esa franja?}
     avail -->|No| alt[Ofrecer hasta 5 horas alternativas del mismo día]
     alt --> date
     avail -->|Sí| confirm[Confirmar reserva: asignar bahía, congelar precios]
-    confirm --> notif[Notificar confirmación y programar recordatorios 24h/1h]
+    confirm --> notif["Notificar confirmación, programar recordatorios 24h/1h<br/>y asignar operario (sección 3.3)"]
     notif --> stop1([Fin: reserva Confirmada])
 
     stop1 -.-> manage{¿El cliente quiere<br/>modificar o cancelar?}
@@ -545,15 +651,18 @@ flowchart TD
     free --> stop3([Fin])
 ```
 
-### 3.3 Asignación de operario y ejecución del servicio (RF-008, RF-009, RF-011, RF-012b)
+### 3.3 Asignación de operario y ejecución del servicio (RF-008, RF-009, RF-010, RF-011, RF-012b)
 
 ```mermaid
 flowchart TD
-    start([Reserva Confirmada sin operario]) --> auto{"¿Asignación automática<br/>encuentra un elegible?<br/>(RF-008, parcial)"}
-    auto -->|Sí| pick[Elegir el de menos trabajos abiertos<br/>empate: menor identificador]
-    pick --> notifyop[Notificar al operario]
+    start([Reserva Confirmada sin operario]) --> auto{"¿Asignación automática<br/>encuentra un elegible?<br/>(RF-008)"}
+    auto -->|Sí| pref{"¿El cliente eligió un operario<br/>y sigue libre? (RF-010)"}
+    pref -->|Sí| chosen[Asignar al operario elegido]
+    pref -->|No| pick[Elegir el de menos reservas ese día<br/>empate: menor identificador]
+    chosen --> notifyop[Notificar al cliente y al operario]
+    pick --> notifyop
     notifyop --> stopA([Fin])
-    auto -->|No hay elegibles| manual[Notificar al administrador para asignación manual]
+    auto -->|No hay elegibles| manual["Reserva sin operario; alerta al administrador<br/>cuando faltan menos de 2 h"]
     manual --> list[Admin ve candidatos: disponibles primero, con calificación]
     list --> chooseop[Admin elige un operario]
     chooseop --> valid{¿Operario activo, en turno,<br/>sin ausencia y sin cruce de horario?}
@@ -562,13 +671,14 @@ flowchart TD
     valid -->|Sí| assign[Crear ejecución PENDING, notificar al operario]
     assign --> stopB([Fin])
 
-    stopB -.-> today{¿Es el día de la reserva?}
-    today -->|No| blockday[Bloquear inicio del servicio]
+    stopA -.-> today{"¿Faltan 15 minutos o menos<br/>para la hora de la reserva?"}
+    stopB -.-> today
+    today -->|No| blockday[Botón deshabilitado: SERVICE_TOO_EARLY]
     blockday --> stopC([Fin])
     today -->|Sí| startsvc[Operario marca Iniciar servicio]
     startsvc --> inprog[Ejecución → En proceso]
     inprog --> finish[Operario marca Finalizar servicio]
-    finish --> completed[Ejecución → Completada; reserva → Completada]
+    finish --> completed[Ejecución → Completada; reserva → Completada;<br/>se cancelan los recordatorios]
     completed --> rate["Cliente puede calificar (CU15)"]
     rate --> stopD([Fin])
 ```
@@ -711,6 +821,28 @@ stateDiagram-v2
 
 *Fuente:* `payment-service`, `Promotion.IsAvailableOn` (activa y dentro de vigencia). Una promoción `INACTIVA` o `VENCIDA` no se puede canjear (RF-024, RN-PROMO-01).
 
+### 4.5 Informe de inspección y sus fases (RF-036)
+
+```mermaid
+stateDiagram-v2
+    [*] --> BORRADOR : crear (reserva de 180 min o más, Confirmada o En proceso)
+    BORRADOR --> BORRADOR : marcar fases y registrar hallazgos
+    BORRADOR --> PUBLICADO : publicar (el enlace empieza a mostrarlo)
+    PUBLICADO --> PUBLICADO : editar mientras la reserva siga Confirmada o En proceso
+    PUBLICADO --> PUBLICADO : compartir (notifica al cliente)
+    PUBLICADO --> [*] : la reserva se completa (solo lectura)
+
+    state "Cada fase" as fase {
+        [*] --> PENDING
+        PENDING --> IN_PROGRESS : marcar en curso o registrar un hallazgo
+        IN_PROGRESS --> DONE : terminar
+        DONE --> IN_PROGRESS : reabrir
+        IN_PROGRESS --> PENDING : volver a pendiente
+    }
+```
+
+*Fuente:* `operations-service`, `InspectionReport` (`publish`, `requirePublished`, `setPhaseStatus`, `addFinding`). Las fases son recepción, exterior, interior, motor y entrega; solo se puede compartir un informe publicado.
+
 ---
 
 ## 5. Inventario de Pantallas (mockup)
@@ -785,11 +917,13 @@ Pantalla por pantalla y por rol, incluyendo los modales de crear/editar de cada 
 | Vista dinámica de este documento | Requisitos que ilustra |
 |---|---|
 | §2.1 Registro y bienvenida | RF-001, RF-018 |
-| §2.2 Reservar un lavado | RF-005, RF-006 |
-| §2.3 Recordatorio de reserva | RF-018 |
-| §2.4 Asignación y ejecución | RF-008, RF-009, RF-011, RF-012, RF-012b |
+| §2.2 Reservar un lavado | RF-005, RF-006, RF-010 |
+| §2.3 Recordatorios y alerta | RF-018 |
+| §2.4 Asignación y ejecución | RF-008, RF-009, RF-010, RF-011, RF-012, RF-012b |
 | §2.5 Pago por comprobante | RF-013, RF-013b, RF-014, RF-016 |
 | §2.6 Canje de cupón y puntos | RF-024, RF-025, RF-026 |
 | §2.7 Roles y permisos | RF-029 |
+| §2.8 Inicio de sesión con bloqueo | RF-002, RF-003, RF-004b |
+| §2.9 Informe de inspección | RF-036, RF-018 |
 | §3.1 a §3.6 Actividades | Todo el módulo de autenticación, reservas, operación, pagos y promociones |
-| §4.1 a §4.4 Estados | RF-006, RF-007, RF-012b, RF-013b, RF-014, RF-024 |
+| §4.1 a §4.5 Estados | RF-006, RF-007, RF-012b, RF-013b, RF-014, RF-024, RF-036 |

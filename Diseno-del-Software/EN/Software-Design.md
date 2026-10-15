@@ -15,8 +15,8 @@
 | Apprentices | Brayan Estiven Patiño Cabrera (project lead), Juan Camilo Guilombo Osorio (frontend lead), Merari Urbano (backend lead) |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 9, 2026 |
-| Version | 1.0 |
+| Date | October 15, 2026 |
+| Version | 1.1 |
 
 > *Note.* Cover data was taken from the project's Technical Manual v2.0. All design content was derived from the source code in the `Sistema Lavado Vehicular` repository (Backend, Web, and LavadoVehicular-Movil) and must be validated with the instructor.
 
@@ -46,7 +46,7 @@ This document describes the design as built: user interfaces, architectural mode
 
 > *Note.* Versions taken from `pom.xml`, `Directory.Build.props`, and `package.json`. Official documentation: Spring (n.d.), Microsoft (n.d.-a, n.d.-b), RabbitMQ (n.d.), Liquibase (n.d.), Angular (n.d.), React Native (n.d.), and Expo (n.d.).
 
-Out of scope: requirements (see SRS v4, `SRS-VERSION4/SRS_V4.docx`), dynamic diagrams (analysis deliverable), and costs.
+Out of scope: requirements (see SRS v6, `lavarapido-docs/01-informe-especificacion-requisitos`), dynamic diagrams (analysis deliverable), and costs.
 
 ## 2. User Interfaces
 
@@ -60,32 +60,32 @@ The web client has 34 routed screens and the mobile app has 30; both split the a
 
 | Route | Screen | Role | Purpose | Services / endpoints consumed |
 | --- | --- | --- | --- | --- |
-| `/` | Landing | Public | Presents the car wash, its services, and contact info | None (static content) |
+| `/` | Landing | Public | Presents the car wash, its services, and contact info | `GET /establishment` (business email and phone) |
 | `/auth` | Login | Public | Authenticate with email and password | `POST /auth/login` |
 | `/auth/register` | Sign-up | Public | Create a customer account | `POST /auth/register` |
 | `/auth/forgot-password` | Password recovery (3 steps) | Public | Email → code → new password | `POST /auth/password/forgot`, `/verify`, `/reset` |
-| `/report/:token` | Inspection report | Public | View the report shared by the admin | None: data in localStorage/IndexedDB (mock) |
-| `/client` | Customer home | CLIENT | Summary, next booking, and points | `GET /bookings/me`, `/vehicles`, `/loyalty/balance` |
-| `/client/reserve` | Book | CLIENT | Choose vehicle, service, date, and time | `GET /catalog/services`, `/bookings/availability`; `POST /bookings` |
+| `/report/:token` | Inspection report | Public | View the report shared by the admin | `GET /public/inspections/{token}` and its photos |
+| `/client` | Customer home | CLIENT | Summary, next booking with its operator, and points | `GET /bookings/me`, `/vehicles`, `/loyalty/balance`, `/operators/my-bookings` |
+| `/client/reserve` | Book | CLIENT | Choose vehicle, service, date, and time | `GET /catalog/services`, `/bookings/availability`, `/operators/available`; `POST /bookings` |
 | `/client/payment` | Payments | CLIENT | Pay for a booking and upload a receipt | `GET /payment-accounts`, `/payments/me/bookings`; `POST /payments`; `/loyalty/*` |
 | `/client/history` | History | CLIENT | Past bookings, payments, and rating | `/bookings/me`, `/payments/me`, `POST /ratings/{bookingId}` |
 | `/client/vehicles` | My vehicles | CLIENT | Vehicle CRUD | `GET/POST/PUT/DELETE /vehicles`, `GET /vehicle-types` |
 | `/client/notifications` | Notifications | CLIENT | Notification inbox | `/notifications/*` |
-| `/client/profile` | Profile | CLIENT | Personal data, email, and password | `/users/me`, `/users/me/password`, `/users/me/email` |
+| `/client/profile` | Profile | CLIENT | Personal data, address, email, and password | `/users/me`, `/users/me/address`, `/users/me/password`, `/users/me/email` |
 | `/client/configuration` | Settings | CLIENT | Theme, language, and notification channels | `/users/me/preferences` |
-| `/admin` | Dashboard | ADMIN | Daily indicators and alerts | Booking, payment, operator, and schedule stores |
+| `/admin` | Dashboard | ADMIN | Daily indicators and alerts | `GET /admin/bookings/day-summary` and booking, payment, operator, and schedule stores |
 | `/admin/reservations` | Bookings | ADMIN | Create, reschedule, change status, and assign an operator | `/admin/bookings/*`, `/admin/assignments/*` |
-| `/admin/reservations/:id/inspection` | Inspection | ADMIN | Record findings with photos | None: mock in localStorage/IndexedDB |
+| `/admin/reservations/:id/inspection` | Inspection | ADMIN | Go through the phases, record findings with photos, publish and share | `/admin/inspections/{bookingId}/**` |
 | `/admin/payments` | Payments | ADMIN | Review, approve, reject, and refund | `/admin/payments/*` |
 | `/admin/management` | Management | ADMIN | Users, roles and permissions, services, promotions | `/admin/users`, `/admin/roles-permissions`, `/admin/catalog/services`, `/admin/promotions` |
 | `/admin/schedule` | Schedule and bays | ADMIN | Weekly hours, exceptions, and bays | `/admin/schedule/*`, `/admin/bays/*` |
-| `/admin/operators` | Operators | ADMIN | Operator list and creation | `/admin/operators`, `POST /admin/users` |
-| `/admin/operators/:id` | Operator detail | ADMIN | Availability and absences | `/admin/operators/{id}/availability`, `/absences` |
+| `/admin/operators` | Operators | ADMIN | Operator list, team summary, and creation | `/admin/operators`, `/admin/operators/summary`, `POST /admin/users` |
+| `/admin/operators/:id` | Operator detail | ADMIN | Availability, absences, profile, and weekly metrics | `/admin/operators/{id}/availability`, `/absences`, `/metrics`, `/admin/operators/profiles`, `PUT /admin/operators/{id}/profile` |
 | `/admin/operators/:id/calendar` | Operator calendar | ADMIN | Operator agenda | `/admin/assignments` |
 | `/admin/reports` | Reports | ADMIN | Revenue and services; export PDF/Excel | Payment and booking stores (jsPDF, xlsx) |
 | `/admin/notifications` | Notifications | ADMIN | Inbox and sending notices | `/notifications/*`, `POST /admin/notifications` |
 | `/admin/profile` | Profile | ADMIN | Account data | `/users/me` |
-| `/admin/settings` | Settings | ADMIN | Business data and payment methods | `/admin/payment-accounts`; business data in localStorage (mock) |
+| `/admin/settings` | Settings | ADMIN | Business data and payment methods | `/admin/payment-accounts`, `GET/PUT /admin/establishment` |
 | `/operator` | Operator home | OPERATOR | Pending services and statistics | `/operator/services`, `/notifications` |
 | `/operator/assigned-services` | Assigned services | OPERATOR | Start and finish services | `POST /operator/services/{id}/start`, `/finish` |
 | `/operator/schedule` | Agenda | OPERATOR | Service calendar | `GET /operator/services` |
@@ -254,12 +254,12 @@ The web and mobile clients only call port 8080. The gateway forwards the `Author
 
 | Container | Responsibility | Owned schemas | Public routes (gateway) |
 | --- | --- | --- | --- |
-| security-service | Sign-up, JWT login, password recovery, profile, preferences, users, roles, and permissions | `security`, `audit` | `/auth/**`, `/users/**`, `/admin/users/**`, `/admin/roles-permissions/**` |
+| security-service | Sign-up, JWT login with lockout after failed attempts, password recovery, profile and address, preferences, users, roles, and permissions | `security`, `audit` | `/auth/**`, `/users/**`, `/admin/users/**`, `/admin/roles-permissions/**` |
 | customer-service | Customers, vehicles, and vehicle types | `customer` | `/vehicles/**`, `/vehicle-types/**`, `/admin/vehicles/**` |
-| booking-service | Catalog and prices, business hours, bays, availability, and bookings | `catalog`, `booking` | `/catalog/**`, `/schedule/**`, `/establishment`, `/bookings/**`, `/admin/bookings/**`, `/admin/catalog/**`, `/admin/schedule/**`, `/admin/bays/**`, `/operator/bookings/**` |
-| operations-service | Operators, availability, absences, assignment, execution, and ratings | `execution` | `/admin/operators/**`, `/admin/assignments/**`, `/operator/services/**`, `/operator/ratings`, `/ratings/**` |
+| booking-service | Catalog and prices, business hours, bays, availability, bookings, day summary, and business data | `catalog`, `booking` | `/catalog/**`, `/schedule/**`, `/establishment`, `/bookings/**`, `/admin/bookings/**`, `/admin/catalog/**`, `/admin/schedule/**`, `/admin/bays/**`, `/admin/establishment`, `/operator/bookings/**` |
+| operations-service | Operators and their profile, availability, absences, automatic and manual assignment, execution, ratings, metrics, and inspection report | `execution` | `/admin/operators/**`, `/operators/**`, `/admin/inspections/**`, `/public/inspections/**`, `/admin/assignments/**`, `/operator/services/**`, `/operator/ratings`, `/ratings/**` |
 | payment-service (.NET) | Payments with receipts, payment accounts, promotions, and loyalty points | `payment`, `promotion` | `/payments/**`, `/payment-accounts`, `/admin/payments/**`, `/admin/payment-accounts/**`, `/admin/payment-methods`, `/admin/promotions/**`, `/loyalty/**` |
-| notification-service | Notification inbox, email, push (Expo), and scheduled reminders | `notification` | `/notifications/**`, `/admin/notifications/**` |
+| notification-service | Notification inbox, email, push (Expo), scheduled reminders, and alerts for bookings without an operator, in each account's language | `notification` | `/notifications/**`, `/admin/notifications/**` |
 
 > *Note.* Source: routes in `Backend/lavarapido-api-gateway/src/main/resources/application.yml` and each service's Liquibase changelogs.
 
@@ -275,10 +275,10 @@ There are two styles. Queries that need an immediate answer use synchronous REST
 | --- | --- | --- | --- |
 | booking | customer | Check that the vehicle belongs to the customer | `CUSTOMER_SERVICE_URL` |
 | customer | security | Get the `person_id` if the sign-up event did not arrive | `SECURITY_SERVICE_URL` |
-| operations | booking | Read, start, and finish bookings | `BOOKING_SERVICE_URL` |
-| operations | security | Operator and customer names (internal route with a shared key) | `SECURITY_SERVICE_URL`, `SECURITY_INTERNAL_URL`, `INTERNAL_API_KEY` |
+| operations | booking | Read, start, and finish bookings with the user's token; read bookings without a user for automatic assignment and free operators (`/internal/v1/bookings`) | `BOOKING_SERVICE_URL`, `BOOKING_INTERNAL_URL`, `INTERNAL_API_KEY` |
+| operations | security | Operator and customer names, and whether the account is still active (internal route with a shared key) | `SECURITY_SERVICE_URL`, `SECURITY_INTERNAL_URL`, `INTERNAL_API_KEY` |
 | payment | booking | Look up the booking and the amount due | `BOOKING_SERVICE_URL` |
-| notification | security | Customer email and administrator list (`/internal/v1/users`) | `SECURITY_SERVICE_URL`, `INTERNAL_API_KEY` |
+| notification | security | Email and language of each account and administrator list (`/internal/v1/users`) | `SECURITY_SERVICE_URL`, `INTERNAL_API_KEY` |
 
 > *Note.* Source: `Backend/lavarapido-infra/docker-compose.yml`.
 
@@ -290,13 +290,14 @@ There are two styles. Queries that need an immediate answer use synchronous REST
 | --- | --- | --- |
 | `security.user_registered` | security | customer (creates the customer profile), notification (welcome) |
 | `customer.provisioned` | customer (only written to the log) | None |
-| `booking.confirmed`, `booking.cancelled` | booking | notification |
-| `execution.operator_assigned`, `execution.service_started`, `execution.service_completed` | operations | notification |
+| `booking.confirmed` | booking | notification (notice and reminders), operations (automatic assignment, with the operator the customer chose) |
+| `booking.cancelled` | booking | notification |
+| `execution.operator_assigned`, `execution.service_started`, `execution.service_completed`, `execution.inspection_shared` | operations | notification |
 | `payment.confirmed`, `payment.rejected`, `payment.refunded`, `payment.promotion_redeemed`, `payment.loyalty_points_earned` | payment | notification |
 
-> *Note.* Source: `BookingEvent.java:17-18`, `ExecutionEvent.java:14-16`, `PaymentIntegrationEvents.cs`, `CustomerProvisioned.java:15`, and the `ROUTING_KEYS` list in `notification-service/.../RabbitMessagingConfig.java`. notification also listens to `booking.created`, but no service publishes that key.
+> *Note.* Source: `BookingEvent.java:17-18`, `ExecutionEvent.java:14-16`, `InspectionSharedEvent.java:15`, `PaymentIntegrationEvents.cs`, `CustomerProvisioned.java:15`, and the `ROUTING_KEYS` list in `notification-service/.../RabbitMessagingConfig.java`. notification also listens to `booking.created`, but no service publishes that key.
 
-Each queue has its own dead-letter queue. notification stores the `event_id` of each event in `notification.processed_event` to ignore duplicates, because delivery is "at least once" (`DomainEventConsumerService.java:61-72`). Messaging is enabled with `MESSAGING_ENABLED`; when it is off, the Java services use a publisher that only writes to the log (`LoggingDomainEventPublisher.java:16`).
+The notification and customer queues have their own dead-letter queue. The operations queue (`operations-service.events`, only `booking.confirmed`) does not: if automatic assignment fails, it is logged and the booking is left for the unassigned-booking alert and manual assignment (`BookingConfirmedListener.java`). notification stores the `event_id` of each event in `notification.processed_event` to ignore duplicates, because delivery is "at least once" (`DomainEventConsumerService.java:61-72`). Messaging is enabled with `MESSAGING_ENABLED`; when it is off, the Java services use a publisher that only writes to the log (`LoggingDomainEventPublisher.java:16`).
 
 ### 3.4 Internal Layers of Each Service (Hexagonal)
 
@@ -368,7 +369,7 @@ flowchart TB
 
 ## 4. Design Patterns
 
-The code applies 16 verifiable patterns: 5 architectural, 7 backend design patterns, and 4 in the clients. The code itself names some of them in its comments (Strategy, Factory, Unit of Work). Pattern names follow the catalogs of Gamma et al. (1994), Fowler (2002), and Hohpe and Woolf (2003).
+The code applies 17 verifiable patterns: 5 architectural, 8 backend design patterns, and 4 in the clients. The code itself names some of them in its comments (Strategy, Factory, Unit of Work). Pattern names follow the catalogs of Gamma et al. (1994), Fowler (2002), and Hohpe and Woolf (2003).
 
 **Table 8**
 
@@ -392,6 +393,7 @@ The code applies 16 verifiable patterns: 5 architectural, 7 backend design patte
 | 14 | Dependency injection | `DomainConfig.java` (`@Bean`), `DependencyInjection.cs` (.NET), `inject()` in Angular, `AuthServiceProvider` on mobile | Objects receive their dependencies; tests pass in doubles |
 | 15 | Null Object / alternate implementation by configuration | `LoggingDomainEventPublisher.java:16` and `NullIntegrationEventPublisher.cs` | With `MESSAGING_ENABLED=false` the system works without RabbitMQ |
 | 16 | Guard + Interceptor (chain of responsibility) | `Web/src/app/core/guards/auth-guard.ts:10-34`, `core/interceptors/auth-interceptor.ts:14-38` | Control access by role and attach the token only to the system's own API |
+| 17 | Domain policy (Specification) | `AssignmentPolicy.java`, `AutoAssignmentPolicy.java`, `StartPolicy.java` (operations); `LoginLockout.java` (security) | Each business rule (who can take a booking, who gets it automatically, when it can start, when an account is locked) lives in a pure domain class that is tested without a database |
 
 > *Note.* Other mechanisms present: the `X-Correlation-Id` correlation filter (`CorrelationIdFilter.java:23-39`), Angular signal-based stores for admin state (`features/admin/services/*-store.ts`), and lazy loading of modules per role (`loadChildren` in `app.routes.ts`).
 
@@ -454,7 +456,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
 ## 5. Data Model
 
-The `LavaRapido` database (SQL Server 2022) has 49 tables in 9 schemas, created by each service's Liquibase changelogs. Foreign keys only exist within a single schema; references to another service are indexed columns without an FK, validated through the API.
+The `LavaRapido` database (SQL Server 2022) has 57 tables in 9 schemas, created by each service's Liquibase changelogs. Foreign keys only exist within a single schema; references to another service are indexed columns without an FK, validated through the API.
 
 **Table 9**
 
@@ -462,12 +464,12 @@ The `LavaRapido` database (SQL Server 2022) has 49 tables in 9 schemas, created 
 
 | Schema | Owning service | Tables | Changelog |
 | --- | --- | --- | --- |
-| `security` | security-service | 9 | `001`–`030` in `security-service/src/main/resources/db/changelog` |
+| `security` | security-service | 11 | `001`–`036` in `security-service/src/main/resources/db/changelog` |
 | `audit` | security-service | 1 | `002-create-security-and-audit-core.sql` |
 | `customer` | customer-service | 3 | `004`, `014`, `015` |
 | `catalog` | booking-service | 3 | `005`, `022` |
-| `booking` | booking-service | 10 | `005`, `018`, `021`, `024` |
-| `execution` | operations-service | 5 | `007` |
+| `booking` | booking-service | 10 | `005`, `018`, `021`, `024`, `032` |
+| `execution` | operations-service | 11 | `007`, `033`, `037` |
 | `payment` | payment-service | 7 | `lavarapido-payment-service/db/changelog/changes/008`–`020` |
 | `promotion` | payment-service | 5 | `003`–`007`, `017`, `018` |
 | `notification` | notification-service | 6 | `010`–`031` |
@@ -476,7 +478,7 @@ The `LavaRapido` database (SQL Server 2022) has 49 tables in 9 schemas, created 
 
 ### 5.1 Common Conventions
 
-- **Audit block.** Almost every domain table ends with `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, and `row_version`. It is absent from the base `security` tables (`person`, `app_user`, `role`, `permission`, `role_permission`, `user_role`, `user_session`, `password_reset_token`), `audit.audit_log`, `booking.schedule_history`, and `notification.booking_tracking`.
+- **Audit block.** Almost every domain table ends with `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, and `row_version`. It is absent from the base `security` tables (`person`, `app_user`, `role`, `permission`, `role_permission`, `user_role`, `user_session`, `password_reset_token`), `audit.audit_log`, `booking.schedule_history`, and `notification.booking_tracking`. The tables added in October (`security.login_lockout`, `security.person_address`, `execution.operator_profile`, `execution.operator_skill`, and the four inspection report tables) do not have the full block either: they only keep the date and author columns they use.
 - **Soft delete.** A non-null `deleted_at` marks a deleted row; several unique indexes are filtered with `WHERE deleted_at IS NULL`.
 - **Optimistic concurrency.** A `tr_touch_<table>` trigger updates `updated_at` and adds 1 to `row_version` on every UPDATE.
 - **UTC dates.** All default values use `SYSUTCDATETIME()`.
@@ -504,6 +506,11 @@ erDiagram
   VEHICLE_TYPE ||--o{ CUSTOMER_VEHICLE : "classifies"
   PERSON ||..o| CUSTOMER : "person_id (logical)"
   APP_USER ||..o| CUSTOMER : "user_id (logical)"
+  APP_USER ||--o| LOGIN_LOCKOUT : "counts failures"
+  PERSON ||--o| PERSON_ADDRESS : "has"
+  LOGIN_LOCKOUT { bigint user_id PK
+    int failed_count
+    datetime2 locked_until }
   PERSON { bigint person_id PK
     nvarchar document_number UK
     nvarchar first_name
@@ -590,6 +597,20 @@ erDiagram
   APP_USER ||..o{ DEVICE_TOKEN : "user_id (logical)"
   BOOKING ||..o{ BOOKING_REMINDER : "booking_id (logical)"
   BOOKING ||..o| BOOKING_TRACKING : "booking_id (logical)"
+  OPERATOR ||--o| OPERATOR_PROFILE : "has profile"
+  OPERATOR ||--o{ OPERATOR_SKILL : "masters"
+  INSPECTION_REPORT ||--|{ INSPECTION_PHASE : "goes through"
+  INSPECTION_REPORT ||--o{ INSPECTION_FINDING : "records"
+  INSPECTION_FINDING ||--o{ INSPECTION_PHOTO : "supports"
+  BOOKING ||..o| INSPECTION_REPORT : "booking_id (logical)"
+  INSPECTION_REPORT { bigint inspection_report_id PK
+    bigint booking_id UK
+    nvarchar public_token UK
+    bit is_published }
+  INSPECTION_FINDING { bigint inspection_finding_id PK
+    bigint inspection_report_id FK
+    nvarchar phase
+    nvarchar severity }
   SERVICE_EXECUTION { bigint service_execution_id PK
     bigint booking_service_id UK
     int operator_id FK
@@ -650,7 +671,8 @@ erDiagram
 Notation: PK = primary key, UK = unique value, → = foreign key, ⇢ = logical reference to another service (no FK). The audit block is omitted.
 
 - `security.person(person_id PK, document_number UK, first_name, last_name, phone, email)`
-- `security.app_user(user_id PK, person_id → person UK, username UK, password_hash, is_active, last_login)`
+- `security.app_user(user_id PK, person_id → person UK, username UK, password_hash, is_active, last_login, created_at)`
+- `security.login_lockout(user_id PK → app_user, failed_count, first_failed_at, locked_until, updated_at)` · `security.person_address(person_id PK → person, address, updated_at)`
 - `security.role(role_id PK, code UK, name)` · `security.permission(permission_id PK, code UK, name, resource, action)`
 - `security.role_permission(role_permission_id PK, role_id → role, permission_id → permission)` · `security.user_role(user_role_id PK, user_id → app_user, role_id → role)`
 - `security.user_session(user_session_id PK, user_id → app_user, refresh_token_hash, started_at, expires_at, revoked_at, ip_address, user_agent)`
@@ -663,7 +685,7 @@ Notation: PK = primary key, UK = unique value, → = foreign key, ⇢ = logical 
 - `catalog.service_category(service_category_id PK, code UK, name, description, display_order, is_active)`
 - `catalog.service(service_id PK, code UK, name, description, service_category_id → service_category, loyalty_points, is_active)`
 - `catalog.service_price(service_price_id PK, service_id → service, vehicle_type_id ⇢ customer.vehicle_type, price, estimated_minutes, valid_from, valid_to)`
-- `booking.establishment(establishment_id PK, legal_name, trade_name, tax_id, address, phone, email, logo_url, singleton UK)`
+- `booking.establishment(establishment_id PK, legal_name, trade_name, tax_id, address, phone, email, logo_url, singleton UK, business_type, founded_on, legal_representative, legal_representative_document, website, tax_regime, ciiu_activity, dian_resolution, invoice_prefix, invoice_range, instagram, facebook, support_line, service_hours_note)`
 - `booking.business_hour(business_hour_id PK, day_of_week UK, opens_at, closes_at, break_starts_at, break_ends_at, is_active)`
 - `booking.business_hour_exception(business_hour_exception_id PK, exception_date UK, is_closed, opens_at, closes_at, reason)`
 - `booking.bay_status(bay_status_id PK, code UK, name, accepts_bookings, display_order)` · `booking.service_bay(service_bay_id PK, code UK, name, bay_status_id → bay_status)`
@@ -676,6 +698,9 @@ Notation: PK = primary key, UK = unique value, → = foreign key, ⇢ = logical 
 - `execution.operator_availability(operator_availability_id PK, operator_id → operator, day_of_week, starts_at, ends_at, is_active)`
 - `execution.operator_absence(operator_absence_id PK, operator_id → operator, starts_at, ends_at, reason)`
 - `execution.service_execution(service_execution_id PK, booking_service_id ⇢ booking.booking_service UK, operator_id → operator, execution_status_id → execution_status, started_at, finished_at, quality_rating, quality_comment, rated_at, is_comment_visible)`
+- `execution.operator_profile(operator_id PK → operator, specialty, updated_at, updated_by)` · `execution.operator_skill(operator_skill_id PK, operator_id → operator, name, skill_level, display_order)`
+- `execution.inspection_report(inspection_report_id PK, booking_id ⇢ booking.booking UK, booking_code, vehicle, plate, services, booking_date, booking_time, duration_minutes, public_token UK, is_published, published_at)`
+- `execution.inspection_phase(inspection_phase_id PK, inspection_report_id → inspection_report, phase, status, started_at, finished_at)` · `execution.inspection_finding(inspection_finding_id PK, inspection_report_id → inspection_report, phase, area, severity, note)` · `execution.inspection_photo(inspection_photo_id PK, inspection_finding_id → inspection_finding, content_type, content, size_bytes)`
 - `payment.payment_method_type(payment_method_type_id PK, code UK, name, requires_account, requires_receipt, display_order, is_active)`
 - `payment.payment_account(payment_account_id PK, payment_method_type_id → payment_method_type, account_holder, account_number, qr_image_url, instructions, is_active)`
 - `payment.payment_status(payment_status_id PK, code UK, name, is_final, display_order, is_active)`
@@ -697,7 +722,7 @@ Notation: PK = primary key, UK = unique value, → = foreign key, ⇢ = logical 
 
 ### 5.4 Data Dictionary
 
-There is one dictionary for each of the 49 tables, grouped by schema. The "Null" column shows whether the field accepts NULL; PK = primary key, FK = foreign key, UK = unique value, and ⇢ = logical reference to another service (no FK). Tables that carry the audit block (section 5.1) show it as a single row at the end.
+There is one dictionary for each of the 57 tables, grouped by schema. The "Null" column shows whether the field accepts NULL; PK = primary key, FK = foreign key, UK = unique value, and ⇢ = logical reference to another service (no FK). Tables that carry the audit block (section 5.1) show it as a single row at the end.
 
 #### Schema `security`
 
@@ -728,6 +753,7 @@ Accounts, roles, permissions, sessions, and preferences. Owner: security-service
 | password_hash | NVARCHAR(255) | No |  | BCrypt password hash |
 | is_active | BIT | No |  | Account enabled (default 1) |
 | last_login | DATETIME2(3) | Yes |  | Last login |
+| created_at | DATETIME2(3) | No |  | Account registration date (migration `036`) |
 
 **Table 12**
 
@@ -815,11 +841,33 @@ Accounts, roles, permissions, sessions, and preferences. Owner: security-service
 | promotions_enabled | BIT | No |  | Promotion notices |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
+**Table 19**
+
+*Data dictionary for `security.login_lockout` — lockout after failed attempts*
+
+| Field | Type | Null | Key | Description |
+| --- | --- | --- | --- | --- |
+| user_id | BIGINT | No | PK, FK → app_user | Account with recent failures or locked |
+| failed_count | INT | No |  | Failures within the current window, 0 to 4 (default 0) |
+| first_failed_at | DATETIME2(3) | Yes |  | Start of the 15-minute window |
+| locked_until | DATETIME2(3) | Yes |  | Locked until this time; NULL if not locked |
+| updated_at | DATETIME2(3) | No |  | Last change |
+
+**Table 20**
+
+*Data dictionary for `security.person_address` — contact address*
+
+| Field | Type | Null | Key | Description |
+| --- | --- | --- | --- | --- |
+| person_id | BIGINT | No | PK, FK → person | Person who owns the address |
+| address | NVARCHAR(200) | No |  | Profile contact address; cannot be blank |
+| updated_at | DATETIME2(3) | No |  | Last change |
+
 #### Schema `audit`
 
 Change log. Owner: security-service.
 
-**Table 19**
+**Table 21**
 
 *Data dictionary of `audit.audit_log` — change log*
 
@@ -838,7 +886,7 @@ Change log. Owner: security-service.
 
 Customers and vehicles. Owner: customer-service.
 
-**Table 20**
+**Table 22**
 
 *Data dictionary of `customer.vehicle_type` — vehicle types*
 
@@ -852,7 +900,7 @@ Customers and vehicles. Owner: customer-service.
 | is_active | BIT | No |  | Type in use |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 21**
+**Table 23**
 
 *Data dictionary of `customer.customer` — customers*
 
@@ -865,7 +913,7 @@ Customers and vehicles. Owner: customer-service.
 | customer_since | DATE | No |  | Sign-up date |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 22**
+**Table 24**
 
 *Data dictionary of `customer.customer_vehicle` — customers' vehicles*
 
@@ -884,7 +932,7 @@ Customers and vehicles. Owner: customer-service.
 
 Service catalog and prices. Owner: booking-service.
 
-**Table 23**
+**Table 25**
 
 *Data dictionary of `catalog.service_category` — service categories*
 
@@ -898,7 +946,7 @@ Service catalog and prices. Owner: booking-service.
 | is_active | BIT | No |  | Category in use |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 24**
+**Table 26**
 
 *Data dictionary of `catalog.service` — wash services*
 
@@ -913,7 +961,7 @@ Service catalog and prices. Owner: booking-service.
 | loyalty_points | INT | No |  | Points awarded on completion (changelog `022`) |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 25**
+**Table 27**
 
 *Data dictionary of `catalog.service_price` — prices per vehicle type*
 
@@ -932,7 +980,7 @@ Service catalog and prices. Owner: booking-service.
 
 Establishment, business hours, bays, and bookings. Owner: booking-service.
 
-**Table 26**
+**Table 28**
 
 *Data dictionary of `booking.establishment` — car wash data*
 
@@ -946,10 +994,24 @@ Establishment, business hours, bays, and bookings. Owner: booking-service.
 | phone | NVARCHAR(20) | Yes |  | Phone |
 | email | NVARCHAR(120) | Yes |  | Email |
 | logo_url | NVARCHAR(500) | Yes |  | Logo |
+| business_type | NVARCHAR(100) | Yes |  | Business type (migration `032`) |
+| founded_on | DATE | Yes |  | Foundation date; cannot be in the future (migration `032`) |
+| legal_representative | NVARCHAR(150) | Yes |  | Legal representative (migration `032`) |
+| legal_representative_document | NVARCHAR(30) | Yes |  | Legal representative ID (migration `032`) |
+| website | NVARCHAR(200) | Yes |  | Website (migration `032`) |
+| tax_regime | NVARCHAR(150) | Yes |  | Tax regime (migration `032`) |
+| ciiu_activity | NVARCHAR(150) | Yes |  | CIIU economic activity (migration `032`) |
+| dian_resolution | NVARCHAR(60) | Yes |  | DIAN invoicing resolution (migration `032`) |
+| invoice_prefix | NVARCHAR(10) | Yes |  | Invoice prefix (migration `032`) |
+| invoice_range | NVARCHAR(30) | Yes |  | Invoice range (migration `032`) |
+| instagram | NVARCHAR(100) | Yes |  | Instagram (migration `032`) |
+| facebook | NVARCHAR(150) | Yes |  | Facebook (migration `032`) |
+| support_line | NVARCHAR(30) | Yes |  | Support line (migration `032`) |
+| service_hours_note | NVARCHAR(150) | Yes |  | Service hours shown to the customer (migration `032`) |
 | singleton | BIT | No | UK | Always 1: prevents a second row |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 27**
+**Table 29**
 
 *Data dictionary of `booking.business_hour` — weekly hours*
 
@@ -964,7 +1026,7 @@ Establishment, business hours, bays, and bookings. Owner: booking-service.
 | break_ends_at | TIME(0) | Yes |  | Break end |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 28**
+**Table 30**
 
 *Data dictionary of `booking.business_hour_exception` — schedule exceptions*
 
@@ -978,7 +1040,7 @@ Establishment, business hours, bays, and bookings. Owner: booking-service.
 | reason | NVARCHAR(120) | No |  | Reason |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 29**
+**Table 31**
 
 *Data dictionary of `booking.bay_status` — bay statuses*
 
@@ -991,7 +1053,7 @@ Establishment, business hours, bays, and bookings. Owner: booking-service.
 | display_order | SMALLINT | No |  | Display order |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 30**
+**Table 32**
 
 *Data dictionary of `booking.service_bay` — wash bays*
 
@@ -1003,7 +1065,7 @@ Establishment, business hours, bays, and bookings. Owner: booking-service.
 | bay_status_id | SMALLINT | No | FK → bay_status | Status (default 1, active) |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 31**
+**Table 33**
 
 *Data dictionary of `booking.booking_status` — booking statuses*
 
@@ -1017,7 +1079,7 @@ Establishment, business hours, bays, and bookings. Owner: booking-service.
 | is_active | BIT | No |  | Status in use |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 32**
+**Table 34**
 
 *Data dictionary of `booking.cancellation_reason` — cancellation reasons*
 
@@ -1031,7 +1093,7 @@ Establishment, business hours, bays, and bookings. Owner: booking-service.
 | is_active | BIT | No |  | Reason in use |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 33**
+**Table 35**
 
 *Data dictionary of `booking.booking` — bookings*
 
@@ -1050,7 +1112,7 @@ Establishment, business hours, bays, and bookings. Owner: booking-service.
 | notes | NVARCHAR(300) | Yes |  | Notes |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 34**
+**Table 36**
 
 *Data dictionary of `booking.booking_service` — service lines of each booking*
 
@@ -1062,7 +1124,7 @@ Establishment, business hours, bays, and bookings. Owner: booking-service.
 | quantity | SMALLINT | No |  | Quantity (> 0) |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 35**
+**Table 37**
 
 *Data dictionary of `booking.schedule_history` — schedule change history*
 
@@ -1079,7 +1141,7 @@ Establishment, business hours, bays, and bookings. Owner: booking-service.
 
 Operators and service execution. Owner: operations-service.
 
-**Table 36**
+**Table 38**
 
 *Data dictionary of `execution.execution_status` — execution statuses*
 
@@ -1093,7 +1155,7 @@ Operators and service execution. Owner: operations-service.
 | is_active | BIT | No |  | Status in use |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 37**
+**Table 39**
 
 *Data dictionary of `execution.operator` — operators*
 
@@ -1105,7 +1167,7 @@ Operators and service execution. Owner: operations-service.
 | is_active | BIT | No |  | Eligible for assignments |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 38**
+**Table 40**
 
 *Data dictionary of `execution.operator_availability` — operator weekly shift*
 
@@ -1119,7 +1181,7 @@ Operators and service execution. Owner: operations-service.
 | is_active | BIT | No |  | Shift in use |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 39**
+**Table 41**
 
 *Data dictionary of `execution.operator_absence` — operator absences*
 
@@ -1132,7 +1194,7 @@ Operators and service execution. Owner: operations-service.
 | reason | NVARCHAR(120) | No |  | Reason |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 40**
+**Table 42**
 
 *Data dictionary of `execution.service_execution` — execution of each service line*
 
@@ -1150,11 +1212,88 @@ Operators and service execution. Owner: operations-service.
 | is_comment_visible | BIT | No |  | Whether the comment is shown |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
+**Table 43**
+
+*Data dictionary for `execution.operator_profile` — operator specialty*
+
+| Field | Type | Null | Key | Description |
+| --- | --- | --- | --- | --- |
+| operator_id | INT | No | PK, FK → operator | Operator |
+| specialty | NVARCHAR(80) | Yes |  | Specialty |
+| updated_at | DATETIME2(3) | No |  | Last change |
+| updated_by | BIGINT | Yes |  | Administrator who changed it ⇢ security.app_user |
+
+**Table 44**
+
+*Data dictionary for `execution.operator_skill` — operator skills*
+
+| Field | Type | Null | Key | Description |
+| --- | --- | --- | --- | --- |
+| operator_skill_id | INT IDENTITY | No | PK | Identifier |
+| operator_id | INT | No | FK → operator | Operator |
+| name | NVARCHAR(60) | No | UK with operator_id | Skill name |
+| skill_level | NVARCHAR(12) | No |  | `CERTIFIED`, `EXPERT` or `ADVANCED` |
+| display_order | SMALLINT | No |  | Order in the profile |
+
+**Table 45**
+
+*Data dictionary for `execution.inspection_report` — vehicle inspection report*
+
+| Field | Type | Null | Key | Description |
+| --- | --- | --- | --- | --- |
+| inspection_report_id | BIGINT IDENTITY | No | PK | Identifier |
+| booking_id | BIGINT | No | UK, ⇢ booking.booking | Inspected booking (one report per booking) |
+| booking_code, vehicle, plate, services | NVARCHAR | Yes |  | Copy of the booking data when the report is created |
+| booking_date, booking_time, duration_minutes | DATE, TIME(0), INT | No |  | Booking date, time, and duration |
+| public_token | NVARCHAR(64) | No | UK | Random code of the public link |
+| is_published | BIT | No |  | The link shows the report (default 0) |
+| published_at | DATETIME2(3) | Yes |  | Publication date; required when published |
+| created_at, created_by, updated_at, updated_by, row_version | — | — |  | Audit |
+
+**Table 46**
+
+*Data dictionary for `execution.inspection_phase` — report phases*
+
+| Field | Type | Null | Key | Description |
+| --- | --- | --- | --- | --- |
+| inspection_phase_id | BIGINT IDENTITY | No | PK | Identifier |
+| inspection_report_id | BIGINT | No | FK → inspection_report; UK with phase | Report |
+| phase | NVARCHAR(20) | No |  | `RECEPTION`, `EXTERIOR`, `INTERIOR`, `ENGINE` or `DELIVERY` |
+| status | NVARCHAR(20) | No |  | `PENDING`, `IN_PROGRESS` or `DONE` |
+| started_at, finished_at | DATETIME2(3) | Yes |  | Phase start and end |
+
+**Table 47**
+
+*Data dictionary for `execution.inspection_finding` — report findings*
+
+| Field | Type | Null | Key | Description |
+| --- | --- | --- | --- | --- |
+| inspection_finding_id | BIGINT IDENTITY | No | PK | Identifier |
+| inspection_report_id | BIGINT | No | FK → inspection_report | Report |
+| phase | NVARCHAR(20) | No |  | Phase where it was found |
+| area | NVARCHAR(120) | No |  | Vehicle area |
+| severity | NVARCHAR(10) | No |  | `INFO`, `MINOR` or `MAJOR` |
+| note | NVARCHAR(500) | Yes |  | Note |
+| created_at, created_by, deleted_at, deleted_by | — | — |  | Creation and soft delete |
+
+**Table 48**
+
+*Data dictionary for `execution.inspection_photo` — finding photos*
+
+| Field | Type | Null | Key | Description |
+| --- | --- | --- | --- | --- |
+| inspection_photo_id | BIGINT IDENTITY | No | PK | Identifier |
+| inspection_finding_id | BIGINT | No | FK → inspection_finding | Finding (up to 5 photos each) |
+| content_type | NVARCHAR(30) | No |  | `image/jpeg` or `image/png` |
+| content | VARBINARY(MAX) | No |  | Image |
+| size_bytes | INT | No |  | Size, up to 2 MB |
+| created_at, created_by | — | — |  | Creation |
+
 #### Schema `payment`
 
 Payments, payment accounts, and points. Owner: payment-service.
 
-**Table 41**
+**Table 49**
 
 *Data dictionary of `payment.payment_method_type` — payment methods*
 
@@ -1169,7 +1308,7 @@ Payments, payment accounts, and points. Owner: payment-service.
 | is_active | BIT | No |  | Method in use |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 42**
+**Table 50**
 
 *Data dictionary of `payment.payment_account` — car wash receiving accounts*
 
@@ -1184,7 +1323,7 @@ Payments, payment accounts, and points. Owner: payment-service.
 | is_active | BIT | No |  | Account visible to the customer |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 43**
+**Table 51**
 
 *Data dictionary of `payment.payment_status` — payment statuses*
 
@@ -1198,7 +1337,7 @@ Payments, payment accounts, and points. Owner: payment-service.
 | is_active | BIT | No |  | Status in use |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 44**
+**Table 52**
 
 *Data dictionary of `payment.payment` — payments*
 
@@ -1214,7 +1353,7 @@ Payments, payment accounts, and points. Owner: payment-service.
 | rejection_reason | NVARCHAR(200) | Yes |  | Rejection reason |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 45**
+**Table 53**
 
 *Data dictionary of `payment.payment_receipt` — payment receipts*
 
@@ -1232,7 +1371,7 @@ Payments, payment accounts, and points. Owner: payment-service.
 | review_comment | NVARCHAR(300) | Yes |  | Review comment |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 46**
+**Table 54**
 
 *Data dictionary of `payment.loyalty_movement_type` — points movement types*
 
@@ -1246,7 +1385,7 @@ Payments, payment accounts, and points. Owner: payment-service.
 | is_active | BIT | No |  | Type in use |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 47**
+**Table 55**
 
 *Data dictionary of `payment.loyalty_transaction` — points ledger*
 
@@ -1267,7 +1406,7 @@ Payments, payment accounts, and points. Owner: payment-service.
 
 Promotions and coupons. Owner: payment-service.
 
-**Table 48**
+**Table 56**
 
 *Data dictionary of `promotion.discount_type` — discount types*
 
@@ -1280,7 +1419,7 @@ Promotions and coupons. Owner: payment-service.
 | is_active | BIT | No |  | Type in use |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 49**
+**Table 57**
 
 *Data dictionary of `promotion.promotion` — promotions*
 
@@ -1309,7 +1448,7 @@ Promotions and coupons. Owner: payment-service.
 | required_points | INT | No |  | Points needed to redeem (≥ 0; changelog `018`) |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 50**
+**Table 58**
 
 *Data dictionary of `promotion.promotion_service` — services each promotion applies to*
 
@@ -1320,7 +1459,7 @@ Promotions and coupons. Owner: payment-service.
 | service_id | INT | No | ⇢ catalog.service | Service |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 51**
+**Table 59**
 
 *Data dictionary of `promotion.promotion_customer` — target customers of each promotion*
 
@@ -1333,7 +1472,7 @@ Promotions and coupons. Owner: payment-service.
 | assigned_by | BIGINT | Yes |  | Assigning user |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 52**
+**Table 60**
 
 *Data dictionary of `promotion.booking_promotion` — promotion redemptions on bookings*
 
@@ -1349,7 +1488,7 @@ Promotions and coupons. Owner: payment-service.
 
 Notifications, devices, and reminders. Owner: notification-service.
 
-**Table 53**
+**Table 61**
 
 *Data dictionary of `notification.notification_type` — notification types*
 
@@ -1362,7 +1501,7 @@ Notifications, devices, and reminders. Owner: notification-service.
 | is_active | BIT | No |  | Type in use |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 54**
+**Table 62**
 
 *Data dictionary of `notification.notification` — notifications*
 
@@ -1380,7 +1519,7 @@ Notifications, devices, and reminders. Owner: notification-service.
 | sent_at | DATETIME2(3) | No |  | Send date |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 55**
+**Table 63**
 
 *Data dictionary of `notification.device_token` — push notification devices*
 
@@ -1394,7 +1533,7 @@ Notifications, devices, and reminders. Owner: notification-service.
 | last_seen_at | DATETIME2(3) | No |  | Last device registration |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 56**
+**Table 64**
 
 *Data dictionary of `notification.processed_event` — already handled events*
 
@@ -1406,7 +1545,7 @@ Notifications, devices, and reminders. Owner: notification-service.
 | processed_at | DATETIME2(3) | No |  | Processing date |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 57**
+**Table 65**
 
 *Data dictionary of `notification.booking_reminder` — booking reminders*
 
@@ -1422,7 +1561,7 @@ Notifications, devices, and reminders. Owner: notification-service.
 | sent_at | DATETIME2(3) | Yes |  | When it was sent |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
-**Table 58**
+**Table 66**
 
 *Data dictionary of `notification.booking_tracking` — local copy of booking state*
 
@@ -1467,6 +1606,7 @@ classDiagram
     -HashedPassword passwordHash
     -boolean active
     -Instant lastLogin
+    -Instant createdAt
     -Set~RoleCode~ roles
     +registerCustomer(person, email, passwordHash) UserAccount$
     +create(person, email, passwordHash, roles) UserAccount$
@@ -1596,6 +1736,17 @@ classDiagram
   class AccountDeactivated {
     <<event>>
   }
+  class LoginLockout {
+    <<value object>>
+    +long userId
+    +int failedCount
+    +Instant firstFailedAt
+    +Instant lockedUntil
+    +none(userId) LoginLockout$
+    +isLocked(now) boolean
+    +registerFailure(now) LoginLockout
+  }
+  LoginLockout ..> UserAccount : userId
   UserAccount "1" *-- "1" Person
   UserAccount *-- EmailAddress
   UserAccount *-- HashedPassword
@@ -1734,7 +1885,29 @@ classDiagram
     <<interface>>
     +publish(event)
   }
+  class PersonAddressService {
+    <<application service>>
+    implements PersonAddressUseCase
+    +getAddress(userId) String
+    +updateAddress(userId, address) String
+  }
+  class LoginLockoutRepository {
+    <<interface>>
+    +findByUserId(userId) Optional~LoginLockout~
+    +save(lockout)
+    +clear(userId)
+  }
+  class PersonAddressRepository {
+    <<interface>>
+    +findByPersonId(personId) Optional~String~
+    +save(personId, address)
+    +delete(personId)
+  }
   AuthenticationService --> UserAccountRepository
+  AuthenticationService --> LoginLockoutRepository
+  PasswordRecoveryService --> LoginLockoutRepository
+  PersonAddressService --> UserAccountRepository
+  PersonAddressService --> PersonAddressRepository
   AuthenticationService --> UserSessionRepository
   AuthenticationService --> PasswordHasher
   AuthenticationService --> TokenIssuer
@@ -1759,7 +1932,7 @@ classDiagram
   RolePermissionAdministrationService --> RolePermissionRepository
 ```
 
-> *Note.* Outbound adapters: `UserAccountPersistenceAdapter`, `UserSessionPersistenceAdapter`, `PasswordResetTokenPersistenceAdapter`, `UserPreferencePersistenceAdapter`, and `RolePermissionPersistenceAdapter` (JPA); `BCryptPasswordHasher`; `JwtTokenIssuer`; `SecureRandomResetCodeGenerator`; `EmailResetCodeNotifier`, `LoggingResetCodeNotifier`, and `UndeliveredResetCodeNotifier`; `InMemoryResetAttemptCounter`; `RabbitDomainEventPublisher` and `LoggingDomainEventPublisher`. Inbound adapters: `AuthController`, `UserProfileController`, `UserAdministrationController`, `RolePermissionController`, and `InternalUserController`. Source: `security-service/src/main/java/com/lavarapido/security/`.
+> *Note.* Outbound adapters: `UserAccountPersistenceAdapter`, `UserSessionPersistenceAdapter`, `PasswordResetTokenPersistenceAdapter`, `UserPreferencePersistenceAdapter`, `RolePermissionPersistenceAdapter`, `LoginLockoutPersistenceAdapter`, and `PersonAddressPersistenceAdapter` (JPA); `BCryptPasswordHasher`; `JwtTokenIssuer`; `SecureRandomResetCodeGenerator`; `EmailResetCodeNotifier`, `LoggingResetCodeNotifier`, and `UndeliveredResetCodeNotifier`; `InMemoryResetAttemptCounter`; `RabbitDomainEventPublisher` and `LoggingDomainEventPublisher`. Inbound adapters: `AuthController`, `UserProfileController`, `UserAdministrationController`, `RolePermissionController`, `UserAddressController`, and `InternalUserController`. Source: `security-service/src/main/java/com/lavarapido/security/`.
 
 ### 6.2 customer-service
 
@@ -2048,6 +2221,10 @@ classDiagram
     +String legalName
     +String tradeName
     +String taxId
+    +String address
+    +String supportLine
+    +String serviceHoursNote
+    +requireValid(today) Establishment
   }
   class ScheduleHistoryEntry {
     <<value object>>
@@ -2117,6 +2294,9 @@ classDiagram
     +operatorDay(date, to, caller) List~BookingView~
     +operatorAdvance(bookingId, status, caller) BookingView
     +cancellationReasons() List~CancellationReason~
+    +daySummary(date, caller) DaySummary
+    +getForService(bookingId) BookingView
+    +listForService(from, to) List~BookingView~
   }
   class CatalogService {
     <<application service>>
@@ -2139,6 +2319,7 @@ classDiagram
     +createBay(name, status, actor) ServiceBay
     +deleteBay(bayId, actor)
     +establishment() Establishment
+    +updateEstablishment(establishment, actor) Establishment
     +history() List~ScheduleHistoryEntry~
   }
   class BookingSettings {
@@ -2206,7 +2387,7 @@ classDiagram
   ScheduleService --> BookingRepository
 ```
 
-> *Note.* Outbound adapters: `BookingPersistenceAdapter`, `CatalogPersistenceAdapter`, `SchedulePersistenceAdapter`, and `BayPersistenceAdapter` (JPA); `CustomerServiceDirectory` (REST to customer-service); `RabbitDomainEventPublisher` and `LoggingDomainEventPublisher`. Inbound adapters: `BookingController`, `AdminBookingController`, `OperatorBookingController`, `CatalogController`, and `ScheduleController`. Source: `lavarapido-booking-service/src/main/java/com/lavarapido/booking/`.
+> *Note.* Outbound adapters: `BookingPersistenceAdapter`, `CatalogPersistenceAdapter`, `SchedulePersistenceAdapter`, and `BayPersistenceAdapter` (JPA); `CustomerServiceDirectory` (REST to customer-service); `RabbitDomainEventPublisher` and `LoggingDomainEventPublisher`. Inbound adapters: `BookingController`, `AdminBookingController`, `OperatorBookingController`, `CatalogController`, `ScheduleController`, and `InternalBookingController` (`/internal/v1/bookings`, with `X-Internal-Key`). Source: `lavarapido-booking-service/src/main/java/com/lavarapido/booking/`.
 
 ### 6.4 operations-service
 
@@ -2309,6 +2490,32 @@ classDiagram
     +finish(bookingId, operatorUserId) OperatorServiceView
     +rate(bookingId, rating, comment, customerUserId) RatingView
     +myRatings(operatorUserId) List~RatingView~
+    +autoAssign(bookingId, customerUserId, preferredOperatorId) Optional~AssignmentView~
+    +availableOperators(date, time, minutes) List~AvailableOperatorView~
+    +metrics(operatorId, weekOf) OperatorWeekMetrics
+    +teamSummary(weekOf) TeamSummary
+    +myBookingOperators() List~BookingOperatorView~
+  }
+  class AutoAssignmentPolicy {
+    <<domain service>>
+    +choose(available, preferredOperatorId) Optional~Integer~$
+  }
+  class OperatorProfile {
+    <<value object>>
+    +String specialty
+    +List~Skill~ skills
+    +of(specialty, skills) OperatorProfile$
+  }
+  class OperatorProfileService {
+    <<application service>>
+    implements OperatorProfileUseCase
+    +profiles() List~OperatorProfileView~
+    +updateProfile(operatorId, specialty, skills, adminId) OperatorProfileView
+  }
+  class OperatorProfileRepository {
+    <<interface>>
+    +findAll() Map~Integer, OperatorProfile~
+    +replace(operatorId, profile, actor)
   }
   class OperatorRepository {
     <<interface>>
@@ -2332,12 +2539,15 @@ classDiagram
     +forAdmin(bookingId) Optional~BookingSnapshot~
     +forOperator(from, to) List~BookingSnapshot~
     +forCustomer(bookingId) Optional~BookingSnapshot~
+    +forService(bookingId) Optional~BookingSnapshot~
+    +forService(from, to) List~BookingSnapshot~
     +advance(bookingId, status)
   }
   class UserDirectory {
     <<interface>>
     +operators() List~UserSnapshot~
     +firstNameOf(userId) String
+    +contactOf(userId) Optional~ContactSnapshot~
   }
   class DomainEventPublisher {
     <<interface>>
@@ -2357,14 +2567,109 @@ classDiagram
   OperationsService --> DomainEventPublisher
   OperationsService ..> AssignmentPolicy
   OperationsService ..> StartPolicy
+  OperationsService ..> AutoAssignmentPolicy
+  OperatorProfileService --> OperatorProfileRepository
+  OperatorProfileService --> OperatorRepository
+  OperatorProfileRepository ..> OperatorProfile
   OperationsService ..> ExecutionEvent
 ```
 
-> *Note.* Outbound adapters: `OperatorPersistenceAdapter` and `ExecutionPersistenceAdapter` (JPA); `BookingServiceDirectory` (REST to booking-service); `SecurityUserDirectory` (REST to security-service); `RabbitDomainEventPublisher` and `LoggingDomainEventPublisher`. Inbound adapter: `OperationsControllers` (administrator, operator, and rating routes). Source: `lavarapido-operations-service/src/main/java/com/lavarapido/operations/`.
+> *Note.* Outbound adapters: `OperatorPersistenceAdapter`, `ExecutionPersistenceAdapter`, `OperatorProfilePersistenceAdapter`, and `InspectionPersistenceAdapter` (JPA); `BookingServiceDirectory` (REST to booking-service, with the user's token or the internal key); `SecurityUserDirectory` (REST to security-service); `RabbitDomainEventPublisher` and `LoggingDomainEventPublisher`. Inbound adapters: `OperationsControllers` (administrator, operator, and rating routes), `AvailableOperatorsController`, `OperatorProfileController`, `InspectionControllers`, and `BookingConfirmedListener` (RabbitMQ, automatic assignment). Source: `lavarapido-operations-service/src/main/java/com/lavarapido/operations/`.
+
+**Figure 26**
+
+*Inspection report in operations-service*
+
+```mermaid
+classDiagram
+  direction LR
+  class InspectionReport {
+    <<aggregate root>>
+    -Long id
+    -long bookingId
+    -String publicToken
+    -boolean published
+    -Instant publishedAt
+    +availableFor(booking) boolean$
+    +editableFor(booking) boolean$
+    +start(booking, publicToken, now) InspectionReport$
+    +setPhaseStatus(phase, status, now)
+    +addFinding(phase, area, severity, note, photoCount, now) InspectionFinding
+    +removeFinding(findingId, now) InspectionFinding
+    +publish(now)
+    +requirePublished()
+    +maskedPlate() String
+  }
+  class InspectionFinding {
+    <<entity>>
+    +Long id
+    +InspectionPhase phase
+    +String area
+    +FindingSeverity severity
+    +String note
+  }
+  class InspectionPhase {
+    <<enumeration>>
+    RECEPTION
+    EXTERIOR
+    INTERIOR
+    ENGINE
+    DELIVERY
+  }
+  class InspectionPhaseStatus {
+    <<enumeration>>
+    PENDING
+    IN_PROGRESS
+    DONE
+  }
+  class FindingSeverity {
+    <<enumeration>>
+    INFO
+    MINOR
+    MAJOR
+  }
+  class InspectionSharedEvent {
+    <<event>>
+    +long bookingId
+    +Long customerUserId
+    +String publicToken
+  }
+  class InspectionService {
+    <<application service>>
+    implements InspectionUseCase
+    +forBooking(bookingId) InspectionView
+    +start(bookingId, adminId) InspectionView
+    +setPhaseStatus(bookingId, phase, status, adminId) InspectionView
+    +addFinding(bookingId, phase, area, severity, note, photos, adminId) InspectionView
+    +removeFinding(bookingId, findingId, adminId) InspectionView
+    +publish(bookingId, adminId) InspectionView
+    +share(bookingId, adminId)
+    +published(publicToken) InspectionReport
+  }
+  class InspectionRepository {
+    <<interface>>
+    +findByBooking(bookingId) Optional~InspectionReport~
+    +findByPublicToken(publicToken) Optional~InspectionReport~
+    +save(report, actor) InspectionReport
+    +addPhoto(findingId, contentType, content, actor) long
+    +photo(photoId) Optional~StoredPhoto~
+  }
+  InspectionReport "1" *-- "0..*" InspectionFinding
+  InspectionReport --> InspectionPhaseStatus
+  InspectionFinding --> InspectionPhase
+  InspectionFinding --> FindingSeverity
+  InspectionService --> InspectionRepository
+  InspectionService --> BookingDirectory
+  InspectionService --> DomainEventPublisher
+  InspectionService ..> InspectionReport
+  InspectionService ..> InspectionSharedEvent
+```
+
+> *Note.* The report only exists for bookings of 180 minutes or more, can be edited while the booking is Confirmed or In progress, and can only be shared once published; the public link uses `publicToken` and shows a masked license plate. Adapters: `InspectionPersistenceAdapter` (JPA) and `InspectionControllers` (`/admin/inspections/**` and `/public/inspections/**` routes).
 
 ### 6.5 payment-service (.NET)
 
-**Figure 26**
+**Figure 27**
 
 *payment-service domain model*
 
@@ -2533,7 +2838,7 @@ classDiagram
   LoyaltyTransaction ..> LoyaltyBalance
 ```
 
-**Figure 27**
+**Figure 28**
 
 *payment-service application services and ports*
 
@@ -2683,7 +2988,7 @@ classDiagram
 
 ### 6.6 notification-service
 
-**Figure 28**
+**Figure 29**
 
 *notification-service domain model*
 
@@ -2811,7 +3116,7 @@ classDiagram
   StaffNotificationFactory ..> TrackedBooking
 ```
 
-**Figure 29**
+**Figure 30**
 
 *notification-service application services and ports*
 
@@ -2946,7 +3251,7 @@ classDiagram
 
 ### 6.7 States of the Main Entities
 
-**Table 59**
+**Table 67**
 
 *State transitions allowed by the domain*
 
@@ -2959,17 +3264,21 @@ classDiagram
 | Execution | PENDING → IN_PROGRESS → COMPLETED | `start()` and `finish()` (`ServiceExecution.java:65-80`) |
 | Execution | Rating | Only when COMPLETED and only once (`ServiceExecution.java:82-90`) |
 | Payment | Created → in review → approved, rejected, or refunded | Methods `SubmitForReview`, `Approve`, `Reject`, `Refund` (`Payment.cs:116-157`) |
+| Execution | Start | Only from 15 minutes before the booking time (`StartPolicy.java`) |
+| Account | Locked for 15 minutes | On the fifth failure within 15 minutes; a correct sign-in or a password reset clears it (`LoginLockout.java`) |
+| Inspection report | Draft → published | `publish()`; only a published report can be shared (`InspectionReport.java`) |
+| Inspection phase | PENDING ↔ IN\_PROGRESS ↔ DONE | `setPhaseStatus()`; a finding in a pending phase moves it to IN\_PROGRESS (`InspectionReport.java`) |
 
 ## 7. Design Findings and Open Items
 
-**Table 60**
+**Table 68**
 
 *Inconsistencies found when comparing the code with earlier documentation*
 
 | # | Finding | Evidence |
 | --- | --- | --- |
 | 1 | Technical Manual v2.0 says all six microservices are in Java 21; payment-service is in .NET 8 | `lavarapido-payment-service/Directory.Build.props` (`net8.0`) |
-| 2 | `MODELO-DE-DATOS.md` documents 43 tables and SRS v4 (Table 6) says 47; the changelogs create 49 | Table 9 of this document |
+| 2 | `MODELO-DE-DATOS.md` documented 43 tables and SRS v4 (Table 6) said 47; the changelogs create 57 as of October 15, 2026 | Table 9 of this document |
 | 3 | notification subscribes to `booking.created`, but booking only publishes `booking.confirmed` and `booking.cancelled` | `BookingEvent.java:17-18` and notification's `ROUTING_KEYS` |
 | 4 | customer defines the `customer.provisioned`, `VehicleRegistered`, `VehicleUpdated`, `VehicleRemoved`, and `LoyaltyPointsChanged` events, but its only publisher writes them to the log: they never reach RabbitMQ and have no consumer | `CustomerProvisioned.java:15`, `customer/.../adapter/out/messaging/LoggingDomainEventPublisher.java` |
 | 5 | Vehicle inspection, its public report, and the business data in Settings are simulated: they are stored in the browser, not in the backend | `Web/src/app/core/services/inspection-store.ts:20`, `features/admin/services/business-store.ts:52`; on mobile `scheduleMock.ts`, `settingsMock.ts` |
@@ -2980,10 +3289,7 @@ classDiagram
 | 10 | In the operator's "Assigned services" (web), the Customer column shows the license plate | `operator/pages/assigned-services/assigned-services.ts:141` |
 | 11 | The brand name is inconsistent across clients ("AquaWash", "Car Wash", "Lavado Vehicular", "Express Car Wash") and the landing page advertises a "mobile service… wherever you are", although SRS v4 defines a single location | Figures 2 and 7 |
 
-**Open items `[TO COMPLETE]`**
-
-- [ ] Confirm with the team whether findings 3 to 11 will be fixed or documented as future scope.
-- [ ] Validate the document with the instructor.
+> *Note.* Code review of October 15, 2026: finding 5 is fixed (the inspection report, its public link, and the business data are stored in operations-service and booking-service; on mobile, `settingsMock.ts` only keeps the initial notification preferences) and so is finding 7 (`bin/` is now in booking-service's `.gitignore`). Findings 3, 4, 8, 9, 10, and 11 are still in the code.
 
 ## References
 
