@@ -1,0 +1,766 @@
+<!-- running-head: IMPLEMENTATION PROCEDURE: VEHICLE WASHING SYSTEM -->
+
+# Software Implementation Procedure
+
+Vehicle Washing Management System (Vehicle Washing)
+
+Planning, Environment Preparation, Deployment, Initial Data Load, Acceptance Testing, Training, Go-Live, and Rollback
+
+Brayan Estiven Patiño Cabrera (Project Leader), Juan Camilo Guilombo Osorio (Frontend Leader), and Merari Urbano (Backend Leader)
+
+Technologist in Software Analysis and Development (ADSO), Servicio Nacional de Aprendizaje (SENA), Training Center: Industria
+
+Ficha 3145556
+
+Instructor: Karol Daniela Correa
+
+October 9, 2026
+
+Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 1.0
+
+## Version Control
+
+Table 1 records the change history of this document. Each time the implementation strategy, the target environment, or a step of the procedure changes, a row must be added with the version, the date, the description, and the person responsible.
+
+**Table 1**
+
+*Version History of the Implementation Procedure*
+
+| Version | Date | Description of the change | Responsible |
+|---|---|---|---|
+| 1.0 | 2026-10-09 | Creation of the procedure (in Spanish and English) from the code of the eleven repositories (*develop* branch as of October 9, 2026), *lavarapido-infra/docker-compose.yml*, and the project documentation on deployment, environments, operations, and quality. | Development team |
+
+*Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
+
+## Table of Contents
+
+<!-- toc -->
+
+- [Version Control](#version-control)
+- [4. Introduction](#4-introduction)
+  - [4.1 Meaning of the Term "Implementation"](#41-meaning-of-the-term-implementation)
+  - [4.2 Sources of This Document](#42-sources-of-this-document)
+- [5. Objective](#5-objective)
+  - [5.1 General Objective](#51-general-objective)
+  - [5.2 Specific Objectives](#52-specific-objectives)
+- [6. Scope](#6-scope)
+  - [6.1 What This Procedure Covers](#61-what-this-procedure-covers)
+  - [6.2 What This Procedure Does Not Cover](#62-what-this-procedure-does-not-cover)
+- [7. Roles and Responsibilities](#7-roles-and-responsibilities)
+- [8. Implementation Strategy](#8-implementation-strategy)
+  - [8.1 Starting Point](#81-starting-point)
+  - [8.2 Selected Strategy](#82-selected-strategy)
+  - [8.3 Relationship With the ISO/IEC/IEEE 12207 Processes](#83-relationship-with-the-isoiecieee-12207-processes)
+- [9. Target Environment and Components](#9-target-environment-and-components)
+- [10. Entry Criteria](#10-entry-criteria)
+- [11. Step-by-Step Procedure](#11-step-by-step-procedure)
+  - [11.1 Phase 0: Planning and Approval](#111-phase-0-planning-and-approval)
+  - [11.2 Phase 1: Environment Preparation](#112-phase-1-environment-preparation)
+  - [11.3 Phase 2: Building and Verifying the Release](#113-phase-2-building-and-verifying-the-release)
+  - [11.4 Phase 3: Pre-Implementation Backup](#114-phase-3-pre-implementation-backup)
+  - [11.5 Phase 4: Infrastructure and Database](#115-phase-4-infrastructure-and-database)
+  - [11.6 Phase 5: Backend Services and Gateway](#116-phase-5-backend-services-and-gateway)
+  - [11.7 Phase 6: Client Applications](#117-phase-6-client-applications)
+  - [11.8 Phase 7: Initial Business Configuration](#118-phase-7-initial-business-configuration)
+  - [11.9 Phase 8: Smoke Tests](#119-phase-8-smoke-tests)
+  - [11.10 Phase 9: Acceptance Testing](#1110-phase-9-acceptance-testing)
+  - [11.11 Phase 10: Training](#1111-phase-10-training)
+  - [11.12 Phase 11: Go-Live and Post-Implementation Support](#1112-phase-11-go-live-and-post-implementation-support)
+  - [11.13 Phase 12: Closure](#1113-phase-12-closure)
+- [12. Rollback Plan](#12-rollback-plan)
+- [13. Release Configuration Management](#13-release-configuration-management)
+- [14. Implementation Risks](#14-implementation-risks)
+- [15. Communication Plan](#15-communication-plan)
+- [16. Exit Criteria](#16-exit-criteria)
+- [17. Glossary](#17-glossary)
+- [References](#references)
+- [18. Annexes](#18-annexes)
+  - [Annex A. Pre-Implementation Checklist](#annex-a-pre-implementation-checklist)
+  - [Annex B. Acceptance Test Cases](#annex-b-acceptance-test-cases)
+  - [Annex C. Acceptance Record Template](#annex-c-acceptance-record-template)
+  - [Annex D. Implementation Log Template](#annex-d-implementation-log-template)
+  - [Annex E. Command Summary](#annex-e-command-summary)
+
+<!-- /toc -->
+
+## 4. Introduction
+
+The Vehicle Washing Management System (Vehicle Washing), internally called *LavaRapido*, replaces the manual procedure of a car wash (a paper schedule, work distributed at the manager's discretion, and payments without a record) with a digital platform for bookings, operator assignment, execution and rating of services, verification of payments by QR code, and a loyalty points program. Technically, it consists of a gateway, six microservices (five in Java 21 with Spring Boot 4 and one in C# with .NET 8), a SQL Server 2022 database, a RabbitMQ message broker, and two clients: an Angular 21 web application and an Android application in React Native with Expo (Vehicle Washing Development Team, 2026a).
+
+This document defines the procedure to **implement** a release of the system in its target environment: how it is planned, what must be met before starting, in which order the components are deployed, how the initial business data is loaded, how the result is verified and accepted, how users are trained, how the system goes live, and how it is rolled back if something fails. It starts from the premise that an implementation must be repeatable, automatable, and verifiable (Humble & Farley, 2010), and that the configuration that changes between environments must reside in the environment and not in the code (Wiggins, 2017).
+
+### 4.1 Meaning of the Term "Implementation"
+
+In the context of the ADSO program, "software implementation" means **putting a release into operation** in the environment where its users will use it. In ISO/IEC/IEEE 12207:2017, that activity corresponds mainly to the **Transition** process (6.4.10), supported by the Integration (6.4.8), Verification (6.4.9), Validation (6.4.11), and Operation (6.4.12) processes, and by the technical management processes of Configuration Management (6.3.5), Risk Management (6.3.4), and Quality Assurance (6.3.8) (International Organization for Standardization [ISO] et al., 2017). The standard uses the word *implementation* (6.4.7) for the construction of the software element; to avoid confusion, this document calls that activity "building" and calls "implementation" the putting into operation. Section 8.3 relates each phase to its process.
+
+### 4.2 Sources of This Document
+
+The procedure was verified against the code of the eleven repositories of the project (*develop* branch as of October 9, 2026), especially *lavarapido-infra/docker-compose.yml* and *.env.example*, and against the project documentation on deployment, environments, continuous integration, operations, quality, and project control (Vehicle Washing Development Team, 2026a, 2026b). The detailed installation, administration, and usage procedures are not repeated here: the reader is referred to the Installation Manual, the Administrator Manual, and the User Manual, version 3.1, which belong to the same document set.
+
+## 5. Objective
+
+### 5.1 General Objective
+
+To establish an orderly, verifiable, and reversible procedure for putting a release of the Vehicle Washing Management System into operation in its target environment, with the initial business data loaded, the users trained, and the formal acceptance of the business owner.
+
+### 5.2 Specific Objectives
+
+- Define the roles, the responsibilities, and the implementation strategy.
+- Set the entry and exit criteria that determine when the implementation can start and when it is considered finished.
+- Describe, by phases, the preparation, deployment, initial configuration, verification, acceptance, training, and go-live steps, with their person responsible and their evidence.
+- Establish a rollback plan that allows returning to the previous release without data loss.
+- Identify the risks of the implementation and their treatment measures.
+
+## 6. Scope
+
+### 6.1 What This Procedure Covers
+
+- The implementation of a tagged release of the backend (six services and the gateway), the database, the messaging, and the web application on a server or machine with Docker, which is the only environment that the project documentation declares within its scope (Vehicle Washing Development Team, 2026a).
+- The initial implementation (first go-live at the car wash or on the evaluation machine) and later implementations of new releases.
+- The load of the master data of the business (opening hours, bays, services, prices, points, payment accounts, operators, and promotions).
+- The smoke tests, the acceptance tests, the training, the go-live, the post-implementation support, and the rollback.
+
+### 6.2 What This Procedure Does Not Cover
+
+- A cloud or high-availability production environment: the documentation declares it outside the academic scope. Section 14 lists what would be missing to reach it.
+- The publication of the mobile application in app stores; the Android application is still under development and is implemented only as a development build (section 11.7).
+- Continuous integration: Jenkins is planned but not configured (technical debt TD-006), so the release is built with the commands of section 11.3.
+- The migration of historical data: the business has no previous system; the paper schedule is not digitized (section 8.1).
+
+## 7. Roles and Responsibilities
+
+Table 2 assigns the responsibilities with the RACI convention: R (responsible for doing the work), A (approves and is accountable), C (consulted), and I (informed).
+
+**Table 2**
+
+*RACI Matrix of the Implementation*
+
+| Activity | Project leader (Brayan Estiven Patiño Cabrera) | Backend leader (Merari Urbano) | Frontend leader (Juan Camilo Guilombo Osorio) | IT administrator | Business owner or instructor |
+|---|---|---|---|---|---|
+| Planning and approval of the window | A | C | C | C | I |
+| Environment preparation | I | C | I | R | — |
+| Building and verifying the release | A | R | R | I | — |
+| Pre-implementation backup | I | C | — | R | — |
+| Deployment of infrastructure, database, and services | A | R | I | R | — |
+| Deployment of the clients | A | I | R | C | — |
+| Initial business configuration | A | C | C | R | C |
+| Smoke tests | A | R | R | R | — |
+| Acceptance tests | R | C | C | C | A |
+| Training | A | R | R | C | I |
+| Go-live and post-implementation support | A | R | R | R | I |
+| Rollback decision | A | R | R | R | I |
+| Closure and lessons learned | R | C | C | C | I |
+
+*Note.* The IT administrator is not an application role: it is the person who operates the server, Docker, and SQL Server. In the academic team, this role is taken by the person designated by the project leader. Prepared by the authors.
+
+## 8. Implementation Strategy
+
+### 8.1 Starting Point
+
+Before the system, the car wash did not use software: bookings were written down by hand, slots overlapped, and cash payments left no record of the customer. For that reason, **there is no legacy data to migrate** and no previous system that must coexist with the new one. The data that the system needs to operate is master data that the administrator loads from the panel (section 11.8), plus the catalogs that the migrations load automatically (roles, vehicle types, statuses, categories, notification types, and three sample services).
+
+### 8.2 Selected Strategy
+
+A **direct implementation by technical phases, with a controlled pilot period**, is adopted:
+
+1. **Technical phases.** First the infrastructure and the database, then the services and the gateway, then the web application. Each phase has its verification, and the procedure does not advance if it fails (section 11).
+2. **Pilot.** During the first week of operation, the system is used with a reduced group of customers and with all the operators, while the administrator keeps the paper schedule as a contingency backup (not as a parallel system: the official source is the system).
+3. **Cutover.** Once the pilot ends without open incidents of severity P0 or P1, registration is opened to all customers and the paper schedule is retired.
+
+A full parallel implementation (operating on paper and in the system at the same time for weeks) is discarded because it duplicates the work of the staff without providing comparability: the previous process does not produce data that can be reconciled with the system's data. An implementation by functional modules is discarded because the flows depend on each other (there is no payment without a booking and no assignment without an operator).
+
+### 8.3 Relationship With the ISO/IEC/IEEE 12207 Processes
+
+**Table 3**
+
+*Phases of the Procedure and Processes of ISO/IEC/IEEE 12207:2017*
+
+| Phase | Main process of the standard | Supporting processes |
+|---|---|---|
+| 0. Planning and approval | Transition (6.4.10): prepare for the transition | Project planning (6.3.1), Decision management (6.3.3) |
+| 1. Environment preparation | Transition (6.4.10) | Infrastructure management (6.2.2) |
+| 2. Building and verifying the release | Integration (6.4.8) and Verification (6.4.9) | Configuration management (6.3.5) |
+| 3. Pre-implementation backup | Transition (6.4.10) | Risk management (6.3.4) |
+| 4 to 6. Deployment | Transition (6.4.10): perform the transition | Configuration management (6.3.5) |
+| 7. Initial business configuration | Transition (6.4.10) | Information management (6.3.6) |
+| 8. Smoke tests | Verification (6.4.9) | Quality assurance (6.3.8) |
+| 9. Acceptance tests | Validation (6.4.11) | Quality assurance (6.3.8) |
+| 10. Training | Transition (6.4.10) and Operation (6.4.12) | Knowledge management (6.2.6) |
+| 11. Go-live and support | Operation (6.4.12) | Maintenance (6.4.13) |
+| 12. Closure | Project assessment and control (6.3.2) | Knowledge management (6.2.6) |
+
+*Note.* Prepared by the authors from ISO et al. (2017). The numbers in parentheses are the clauses of the standard.
+
+## 9. Target Environment and Components
+
+The target environment is a server or machine with Docker (Windows 10 or 11 with WSL 2, Ubuntu 22.04 or later, or macOS) that runs all the components of Table 4 with *docker compose --profile app*. The hardware, software, and port requirements are those of sections 6 and 7 of the Installation Manual (minimum 4 cores, 8 GB of RAM with 5 GB for Docker, and 20 GB of free disk; recommended 16 GB of RAM and an SSD).
+
+**Table 4**
+
+*Components That Are Implemented*
+
+| Component | Source | Port | Implemented in |
+|---|---|---|---|
+| sqlserver | Image *mcr.microsoft.com/mssql/server:2022-latest* | 1433 | Phase 4 |
+| db-init | Same image; runs once and creates the *LavaRapido* database | — | Phase 4 |
+| payment-migrate | Image *liquibase/liquibase:4.29*; applies the payment changelogs | — | Phase 4 |
+| rabbitmq | Image *rabbitmq:4-management* | 5672 and 15672 | Phase 4 |
+| mailpit (tests only) or real SMTP | Image *axllent/mailpit* or Gmail | 1025 and 8025 | Phase 4 |
+| security-service | Repository *lavarapido-security-service* (Dockerfile) | 3001 | Phase 5 |
+| customer-service | Repository *lavarapido-customer-service* | 3002 | Phase 5 |
+| booking-service | Repository *lavarapido-booking-service* | 3003 | Phase 5 |
+| operations-service | Repository *lavarapido-operation-service* (singular name) | 3004 | Phase 5 |
+| payment-service (.NET 8) | Repository *lavarapido-payment-service* (Dockerfile) | 3005 | Phase 5 |
+| notification-service | Repository *lavarapido-notification-service* | 3006 | Phase 5 |
+| api-gateway | Repository *lavarapido-api-gateway* | 8080 | Phase 5 |
+| Web application | Repository *Front-end-proyecto-web* | 4200 | Phase 6 |
+| Mobile application (development build) | Repository *LavadoVehicular-Movil* | 8081 (Metro) | Phase 6, optional |
+
+*Note.* Prepared by the authors from *docker-compose.yml* (October 9, 2026). Since October 8, 2026, payment-service has a Dockerfile and a service in the Compose file, and the gateway container receives *ROUTE_PAYMENT_URL*; the TD-014 limitations described in version 3.0 of the manuals are resolved.
+
+## 10. Entry Criteria
+
+The implementation **does not start** until all the criteria of Table 5 are met. The project leader verifies each one and records the evidence in the log (Annex D).
+
+**Table 5**
+
+*Entry Criteria*
+
+| No. | Criterion | Evidence |
+|---|---|---|
+| E1 | The code of the release is merged into *develop* (or *main*) of the eleven repositories, with no uncommitted work. | Clean *git status* and *git log* with the last commit of each repository. |
+| E2 | The automated backend tests pass: *./mvnw -B verify* in the Java services and the gateway, and *dotnet test* in payment-service. | Output with BUILD SUCCESS and an xUnit summary without failures. |
+| E3 | The web application builds in production mode (*npx ng build*). | Folder *dist/* generated without errors. |
+| E4 | The release is tagged in each repository (for example, *v1.0.0*) (section 13). | *git tag* in each repository. |
+| E5 | The installation, administrator, and user manuals correspond to the release (version 3.1 or later). | Version control of the manuals. |
+| E6 | Open incidents of severity P0 and P1 are resolved; P2 and P3 incidents are recorded with their action in the corrective, preventive, and improvement actions document. | Updated action register. |
+| E7 | The target environment meets the hardware, software, and port requirements. | Checklist of Annex A. |
+| E8 | The production secrets are generated and stored outside the repository (*DB_PASSWORD*, *JWT_SECRET*, *INTERNAL_API_KEY*, *RABBITMQ_PASSWORD*, and the mail app password). | Verbal confirmation of the IT administrator; never a copy of the value. |
+| E9 | If the environment already has data, there is a verified backup less than 24 hours old (phase 3). | *.bak* file and output of RESTORE VERIFYONLY. |
+| E10 | The implementation window is approved and communicated (section 15). | Approval message of the project leader. |
+
+*Note.* Prepared by the authors from the definition of done and the testing strategy of the project (Vehicle Washing Development Team, 2026a).
+
+## 11. Step-by-Step Procedure
+
+Each phase states its person responsible, its estimated duration, the steps, and the evidence recorded in the log (Annex D). The durations are estimates of this document for a first implementation on a machine that meets the requirements; later implementations of a new release take less time because phases 1 and 7 are shorter.
+
+### 11.1 Phase 0: Planning and Approval
+
+**Responsible:** project leader. **Estimated duration:** 1 hour.
+
+1. Define the release to be implemented (tag) and the scope of changes compared with the previous one.
+2. Choose the window: outside the opening hours of the car wash (Monday to Saturday, 7:00 a.m. to 6:30 p.m. in the initial data), with at least three hours available.
+3. Review the risks of section 14 and confirm the measures.
+4. Confirm the people for each role of Table 2 and a team communication channel.
+5. Communicate the window to the people affected (section 15).
+
+**Evidence:** record of the release, the window, and the participants in the log.
+
+### 11.2 Phase 1: Environment Preparation
+
+**Responsible:** IT administrator. **Estimated duration:** 1 to 2 hours (first time).
+
+1. Install and check Git, Docker with Compose v2, JDK 21, the .NET 8 SDK, and Node.js 22 LTS (Installation Manual, section 7.1). On Windows, confirm that Docker uses the Linux engine with WSL 2.
+2. Check that ports 1433, 5672, 15672, 1025, 8025, 3001 to 3006, 8080, and 4200 are free. If a native Windows SQL Server uses port 1433, stop the *MSSQLSERVER* service.
+3. Clone the repositories **side by side and with their original names**, at the release tag. The operations repository is called *lavarapido-operation-service* (singular), and *docker-compose.yml* builds it with that name: cloning it with another name makes the build fail.
+
+```bash
+mkdir Backend && cd Backend
+for repo in lavarapido-infra lavarapido-security-service lavarapido-api-gateway \
+            lavarapido-notification-service lavarapido-operation-service; do
+  git clone -b v1.0.0 https://github.com/BrayanCABRERA123/$repo.git
+done
+git clone -b v1.0.0 https://github.com/camiloguilombo12/lavarapido-customer-service.git
+git clone -b v1.0.0 https://github.com/camiloguilombo12/lavarapido-booking-service.git
+git clone -b v1.0.0 https://github.com/merari0322/lavarapido-payment-service.git
+cd .. && mkdir Frontend && cd Frontend
+git clone -b v1.0.0 https://github.com/BrayanCABRERA123/Front-end-proyecto-web.git
+```
+
+4. Create the configuration file and check that Git ignores it:
+
+```bash
+cd ../Backend/lavarapido-infra
+cp .env.example .env
+git check-ignore -v .env      # must show the .gitignore rule
+```
+
+5. Fill in the *.env* file with the implementation values of Table 6.
+
+**Table 6**
+
+*Configuration Values for the Implementation*
+
+| Variable | Implementation value | Reason |
+|---|---|---|
+| DB_PASSWORD | New strong password (8 or more characters with uppercase, lowercase, number, and symbol). | SQL Server rejects weak ones; never reuse the development password. |
+| JWT_SECRET | Random value of at least 32 bytes (*openssl rand -base64 48*). | Signs the tokens; the same for all services. |
+| INTERNAL_API_KEY | Random value (*node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"*). | Without it, booking and payment notices and reminders are not sent by email. |
+| SPRING_PROFILES_ACTIVE | *prod* (any value other than *dev*). | With *dev* (the default value of the Compose file), demonstration accounts are created and Swagger is published. |
+| MESSAGING_ENABLED | *true* | With *false* (the default value), no notifications, point notices, or event-driven profiles are generated. |
+| RABBITMQ_USERNAME, RABBITMQ_PASSWORD | New user and password (not *guest*). | The RabbitMQ console must not keep default credentials. |
+| MAIL_ENABLED, MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM, MAIL_DOCKER_HOST | *true*, *smtp.gmail.com*, *587*, business account, app password, and *smtp.gmail.com* for Docker. | Mailpit only catches emails; real operation uses a real SMTP server. |
+| CORS_ALLOWED_ORIGINS | Real origin of the web application (for example, *http://carwash-server:4200*). | Browsers reject other origins. |
+| PUSH_ENABLED | *false* until there is a build of the mobile application made with EAS. | Expo Go does not receive remote push notifications. |
+| BOOKING_ZONE | *America/Bogota* | Time zone of the car wash; the system stores UTC. |
+
+*Note.* Prepared by the authors from *.env.example* and *docker-compose.yml*. Secret values are written only in the *.env* file; never in a message, a shared document, or a repository.
+
+**Evidence:** output of the version commands, list of repositories cloned at the tag, and confirmation that *.env* is ignored.
+
+### 11.3 Phase 2: Building and Verifying the Release
+
+**Responsible:** backend leader and frontend leader. **Estimated duration:** 30 to 45 minutes.
+
+1. Run the tests of each Java service and of the gateway (*./mvnw -B verify*; on Windows, *.\mvnw.cmd -B verify*).
+2. Run the tests of payment-service (*dotnet test* from *lavarapido-payment-service*).
+3. Build the web application (*npm ci* and *npx ng build*). The web test suite (*ng test*) does not compile while the six outdated *.spec.ts* files exist (TD-001); until they are fixed, its result does not block the implementation and is recorded as an exception approved by the project leader.
+4. Validate the Compose file and build the images:
+
+```bash
+cd Backend/lavarapido-infra
+docker compose config --quiet && echo "Compose file is valid"
+docker compose --profile app build
+```
+
+**Evidence:** test summaries (number of tests and zero failures), output of *ng build*, and the list of *lavarapido/\*:local* images built.
+
+### 11.4 Phase 3: Pre-Implementation Backup
+
+**Responsible:** IT administrator. **Estimated duration:** 15 minutes. **Applies** when the environment already has data (later implementations).
+
+1. Generate a full backup with a checksum and verify it (Administrator Manual, section 14.3):
+
+```bash
+docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
+  "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/pre_v1.0.0.bak' WITH INIT, CHECKSUM, COMPRESSION"
+docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
+  "RESTORE VERIFYONLY FROM DISK = N'/var/opt/mssql/data/pre_v1.0.0.bak' WITH CHECKSUM"
+docker cp lavarapido-sqlserver:/var/opt/mssql/data/pre_v1.0.0.bak ./backups/
+```
+
+2. Keep an encrypted copy of the current *.env* file, separate from the data backup.
+3. Write down the tag of the release in operation: it is the release to return to if a rollback is needed (section 12).
+
+**Evidence:** name, size, and verification result of the backup.
+
+### 11.5 Phase 4: Infrastructure and Database
+
+**Responsible:** IT administrator with the backend leader. **Estimated duration:** 10 to 15 minutes.
+
+1. Start the infrastructure:
+
+```bash
+cd Backend/lavarapido-infra
+docker compose up -d
+docker compose ps
+```
+
+2. Wait until *lavarapido-sqlserver* and *lavarapido-rabbitmq* are *healthy* and *db-init* and *payment-migrate* end with exit code 0.
+3. Check that the *payment* and *promotion* schemas exist (created by *payment-migrate*). The other schemas are created by each Java service with Liquibase when it starts in phase 5.
+
+**Criterion to continue:** healthy containers and payment migrations with exit code 0. If *payment-migrate* fails, do not continue (section 12).
+
+**Evidence:** output of *docker compose ps*.
+
+### 11.6 Phase 5: Backend Services and Gateway
+
+**Responsible:** backend leader. **Estimated duration:** 10 to 20 minutes.
+
+1. Start the services and the gateway:
+
+```bash
+docker compose --profile app up -d
+docker compose ps
+```
+
+2. Follow the log of each Java service until Liquibase has applied its changelogs and the application has started (*docker compose logs -f security-service*, and so on with the others).
+3. Check the health of the seven components:
+
+```bash
+for port in 3001 3002 3003 3004 3005 3006 8080; do
+  echo "$port: $(curl -s http://localhost:$port/actuator/health)"
+done
+```
+
+4. Check that the database has 49 tables in the nine schemas (Installation Manual, section 11.5) and that the RabbitMQ topology exists (exchange *carwash.events*, queues *customer-service.events* and *notification-service.events* with their *.dlq*).
+
+**Criterion to continue:** the seven responses are *UP* and the number of tables is the expected one. The health endpoint of payment-service answers *UP* even if the database is down (TD-017); its real connection is confirmed in phase 8 with a query of payment accounts.
+
+**Evidence:** output of the health loop and of the table count.
+
+### 11.7 Phase 6: Client Applications
+
+**Responsible:** frontend leader. **Estimated duration:** 15 minutes.
+
+1. **Web application.** In the current scope, it is published with the Angular server, which forwards */api* to the gateway through *proxy.conf.json*:
+
+```bash
+cd Frontend/Front-end-proyecto-web
+npm ci
+npx ng serve --host 0.0.0.0    # reachable from other machines on the local network
+```
+
+For a production environment, the *dist/* folder generated in phase 2 must be published on a web server behind the gateway and with HTTPS (section 14, risk R-I08).
+
+2. **Mobile application (optional).** Set *EXPO_PUBLIC_API_URL* to the IPv4 address of the server (for example, *http://192.168.1.10:8080/api/v1*) and start Expo (*npx expo start*). Push notifications require a build made with EAS and *PUSH_ENABLED=true*.
+
+**Evidence:** screenshot of the welcome screen served from the server, with the address bar visible.
+
+### 11.8 Phase 7: Initial Business Configuration
+
+**Responsible:** IT administrator with the business administrator. **Estimated duration:** 1 to 2 hours.
+
+Because the *dev* profile is disabled, there are no demonstration accounts. The master data is loaded in the order of Table 7, because each step depends on the previous ones.
+
+**Table 7**
+
+*Load Order of the Master Data*
+
+| Step | Data | Where it is loaded | Reference |
+|---|---|---|---|
+| 1 | First administrator account | Public registration and assignment of the ADMIN role in *security.user_role* | Administrator Manual, section 8.4 |
+| 2 | Weekly hours, break, and holidays of the year | Hours & Bays > Business hours | Administrator Manual, section 11.2 |
+| 3 | Washing bays and their status | Hours & Bays > Wash bays | Administrator Manual, section 11.3 |
+| 4 | Services, prices, and duration by vehicle type, and loyalty points | Management > Services | Administrator Manual, section 12.2 |
+| 5 | Payment accounts with their QR code | Settings > Payment methods | Administrator Manual, section 11.4 |
+| 6 | Operator accounts and other administrators | Management > Users or Operators > New operator | Administrator Manual, section 9.3 |
+| 7 | Weekly shift of each operator | Operators > Edit availability | Administrator Manual, section 12.1 |
+| 8 | Promotions (discount coupons unlocked with points) | Management > Promotions | Administrator Manual, section 12.8 |
+| 9 | Verification of the payment accounts | Scan each QR code from a test customer account and confirm the holder | Administrator Manual, section 11.4 |
+
+*Note.* The business data of Settings > Business data is saved only in the browser (TD-013); the data of the premises that customers see (address, phone, and email) comes from the table *booking.establishment*, loaded by seed 109, and is corrected with SQL if it does not belong to the car wash. Prepared by the authors.
+
+**Evidence:** screenshot of each configured screen and list of the accounts created (without passwords).
+
+### 11.9 Phase 8: Smoke Tests
+
+**Responsible:** backend and frontend leaders and IT administrator. **Estimated duration:** 20 minutes.
+
+The smoke tests confirm that the release works end to end before handing it over for acceptance. Table 8 is run with test accounts that are deactivated at the end.
+
+**Table 8**
+
+*Smoke Tests*
+
+| No. | Test | Expected result |
+|---|---|---|
+| H1 | Protected route without a token through the gateway (*curl -i http://localhost:8080/api/v1/bookings/me*). | 401 returned by booking-service. |
+| H2 | Registration of a test customer and login. | Panel */client*; welcome email received. |
+| H3 | Password recovery. | Six-digit code received by email. |
+| H4 | Registration of a vehicle and a booking at a free time. | Booking confirmed with a bay and the points shown in the summary. |
+| H5 | Query of the payment accounts from the payment screen. | The active accounts are listed with their QR code (confirms the connection of payment-service to the database). |
+| H6 | Assignment of an operator by the administrator. | Notification to the operator. |
+| H7 | Start and finish of the service by the operator. | Booking COMPLETED; notifications to the customer. |
+| H8 | Payment report with a test receipt and approval by the administrator. | Payment approved; payment confirmed email and points credited. |
+| H9 | Dead-letter queues. | *notification-service.events.dlq* and *customer-service.events.dlq* at zero. |
+
+*Note.* Prepared by the authors from the checklist before a review session of the project (Vehicle Washing Development Team, 2026a).
+
+**Criterion to continue:** the nine tests pass. A failure in H1 to H8 triggers the rollback evaluation (section 12).
+
+### 11.10 Phase 9: Acceptance Testing
+
+**Responsible:** project leader. **Approves:** business owner or instructor. **Estimated duration:** 1 to 2 hours.
+
+1. Run, with the business owner, the acceptance cases of Annex B, which cover the flows of the three roles with the real master data.
+2. Record the result of each case (passed or failed) and the remarks.
+3. Classify each remark with the severity of the project's incident management (P0 to P3) and record it in the corrective, preventive, and improvement actions document.
+4. Sign the acceptance record (Annex C). Acceptance can be **full** (all cases passed), **conditional** (only P2 or P3 remarks, with a correction date), or **rejected** (a case failed because of a P0 or P1 defect).
+
+**Evidence:** signed acceptance record and results of the cases.
+
+### 11.11 Phase 10: Training
+
+**Responsible:** backend and frontend leaders. **Estimated duration:** 3 hours in total.
+
+**Table 9**
+
+*Training Plan by Role*
+
+| Audience | Content | Material | Duration |
+|---|---|---|---|
+| Business administrator | Panel, bookings, manual operator assignment, review, approval, and refund of payments, services, prices, and points, promotions, hours, bays, reports, and notifications. | Administrator Manual, sections 8 to 13 | 90 minutes |
+| IT administrator | Start and stop, logs, backup and restoration, preventive maintenance, incidents, and rollback. | Administrator Manual, sections 14 to 17; this procedure, section 12 | 45 minutes |
+| Operators | Schedule, assigned services, start and finish, notifications, and ratings. | User Manual, section 10.2 | 30 minutes |
+| Customer service staff | Registration, booking, payment by QR code, coupons and points, history, and rating, to guide customers. | User Manual, section 10.1 | 30 minutes |
+
+*Note.* Each session ends with a practical exercise in the implemented environment with test accounts. Prepared by the authors.
+
+**Evidence:** attendance list with date, topic, and signature.
+
+### 11.12 Phase 11: Go-Live and Post-Implementation Support
+
+**Responsible:** the whole team. **Duration:** one-week pilot and two weeks of reinforced support.
+
+1. Deactivate the test accounts created in phases 8 and 9.
+2. Enable the system for the pilot group and then for all customers (section 8.2).
+3. During the first two weeks, the IT administrator performs the tasks of Table 10 every day, and the team handles incidents with the times of the project's incident management (P0 immediately; P1 the same day).
+
+**Table 10**
+
+*Daily Monitoring During Post-Implementation Support*
+
+| Task | How it is checked |
+|---|---|
+| Health of the seven components | Loop of section 11.6. |
+| Errors of the last 24 hours | *docker compose logs --since 24h \| grep -i error* |
+| Dead-letter queues | RabbitMQ console (*http://localhost:15672*). |
+| Payments to review and bookings without an operator | Administrator panel. |
+| Daily backup generated and verified | File of the day and backup log. |
+| Disk space | *docker system df*; usage below 80%. |
+
+*Note.* Adapted from the preventive maintenance plan of the Administrator Manual, section 17.6.
+
+**Evidence:** daily record of the monitoring and of the incidents handled.
+
+### 11.13 Phase 12: Closure
+
+**Responsible:** project leader. **Estimated duration:** 1 hour.
+
+1. Confirm the exit criteria (section 16).
+2. Hold a retrospective of the implementation and record the lessons learned in the corrective, preventive, and improvement actions document.
+3. Update the risk register, the technical backlog, and the manuals if the implementation revealed differences.
+4. File the log, the acceptance record, and the attendance lists with the implemented release.
+
+## 12. Rollback Plan
+
+The rollback returns the environment to the previous release when the new one cannot operate. It is decided with the criteria of Table 11 and performed by the backend leader with the IT administrator.
+
+**Table 11**
+
+*Rollback Criteria*
+
+| Situation | Decision |
+|---|---|
+| *payment-migrate* or a Liquibase migration of a Java service fails | Roll back immediately. |
+| A smoke test H1 to H8 fails and is not fixed within 30 minutes | Roll back. |
+| P0 incident in the first 24 hours of operation | Roll back. |
+| P1 incident without a fix or a workaround on the same day | Evaluate with the project leader; roll back if it affects bookings or payments. |
+| P2 or P3 remarks | Do not roll back; fix in a later release. |
+
+*Note.* Prepared by the authors from the severity classification of the project.
+
+**Rollback steps:**
+
+1. Communicate the decision and stop user access.
+2. Stop the services and the gateway, leaving SQL Server running:
+
+```bash
+docker compose stop api-gateway security-service customer-service booking-service \
+  operations-service payment-service notification-service
+```
+
+3. Restore the pre-implementation backup of phase 3 (Administrator Manual, section 15.2). Liquibase changesets only move forward, so **a migration is not undone with another one**: the database is restored to its state before the release.
+4. In each repository, return to the previous tag (*git checkout v0.9.0*), rebuild, and start: *docker compose --profile app up -d --build*.
+5. Restore the previous *.env* file if the release had added variables.
+6. Repeat the smoke tests of section 11.9.
+7. Communicate the restoration, stating the date and time of the last recovered data; payments received after the backup are reconciled with the bank statement.
+8. Record the rollback as a nonconformity in the corrective, preventive, and improvement actions document, with its root cause analysis.
+
+**Target rollback time:** 1 hour from the decision. **Maximum data loss:** the records after the backup of phase 3.
+
+## 13. Release Configuration Management
+
+- **Tagging.** Each implemented release is tagged in the eleven repositories with the same name (semantic versioning: *vMAJOR.MINOR.PATCH*, for example, *v1.0.0*). Tags make it possible to rebuild exactly what was implemented and to roll back.
+- **Branches.** Releases are implemented from *develop* or *main* (conventions of *00-governance/git-conventions.md*); never from a *feature/\** branch.
+- **Images.** The Compose file builds *lavarapido/\<service\>:local* images. To keep the previous release, each image can be tagged with the current release before rebuilding (*docker tag lavarapido/booking-service:local lavarapido/booking-service:v0.9.0*).
+- **Database.** The schema is versioned with Liquibase; each service keeps its history in *DATABASECHANGELOG_\<SERVICE\>* (payments in *DATABASECHANGELOG_PAYMENT*). An executed changeset is never edited.
+- **Configuration.** *.env.example* is versioned; *.env* is not. Every new variable is added to *.env.example* with a comment and to the *environment* block of the service in *docker-compose.yml*.
+- **Documentation.** The version control of each manual records the software release it corresponds to.
+
+## 14. Implementation Risks
+
+**Table 12**
+
+*Implementation-Specific Risks and Their Treatment*
+
+| ID | Risk | Probability | Impact | Treatment |
+|---|---|---|---|---|
+| R-I01 | The operations repository is cloned as *lavarapido-operations-service* and the Compose build fails. | Medium | High | Clone with the original name *lavarapido-operation-service* (phase 1). |
+| R-I02 | *MESSAGING_ENABLED=false* or an empty *INTERNAL_API_KEY* remain, and notifications and emails do not arrive. | Medium | Medium | Values of Table 6 and tests H2, H7, and H8. |
+| R-I03 | The release is implemented with the *dev* profile, leaving demonstration accounts and Swagger exposed. | Medium | High | *SPRING_PROFILES_ACTIVE=prod*; Annex A. |
+| R-I04 | The health endpoint of payment-service says *UP* with the database down (TD-017). | Low | Medium | Test H5 with a real query. |
+| R-I05 | There is no login attempt limit (TD-003). | Medium | High | Do not expose the system to the internet; long and unique passwords for administrators. |
+| R-I06 | A wrongly loaded QR code or payment account sends the money to a third party. | Low | High | Step 9 of Table 7. |
+| R-I07 | Data loss caused by *docker compose down -v* or a damaged volume. | Low | High | Pre-implementation backup (phase 3) and daily backup. |
+| R-I08 | The web application is served with *ng serve* and without HTTPS outside the local network. | Medium | High | Keep the system on the local network; for production, serve *dist/* behind the gateway with TLS 1.2 or later. |
+| R-I09 | The web test suite does not compile (TD-001) and a client regression goes undetected. | Medium | Medium | Complete manual smoke and acceptance tests; fix TD-001. |
+| R-I10 | The role permissions editable in the panel are mistaken for real access control (ADR-015). | Low | Medium | Explain it in the training; real authorization comes from the role in the token. |
+
+*Note.* Prepared by the authors from the risk register, the technical backlog, and the verification of the code (Vehicle Washing Development Team, 2026a).
+
+To take the system to a real production environment, the following would also be missing: continuous integration per repository, hosted SQL Server and RabbitMQ with the secrets in the provider's secret store, the web application built and served behind the gateway, HTTPS, one database login per service instead of *sa*, and an Outbox for events if losing an event during a broker outage is not acceptable (Vehicle Washing Development Team, 2026a).
+
+## 15. Communication Plan
+
+**Table 13**
+
+*Communication Plan of the Implementation*
+
+| Moment | Message | Recipients | Channel | Responsible |
+|---|---|---|---|---|
+| 48 hours before | Release, window, impact, and contact. | Team, business owner, and operators | Team chat and notice at the car wash | Project leader |
+| Start of the window | Start of the implementation. | Team | Team chat | Project leader |
+| End of each phase | Result and evidence. | Team | Team chat and log | Person responsible for the phase |
+| Rollback decision | Reason and estimated time. | Team and business owner | Team chat | Project leader |
+| Go-live | System available, access address, and support channel. | Car wash staff and pilot customers | Administrator announcement from the panel (*SYSTEM_MESSAGE*) and direct message | Business administrator |
+| Closure | Result, lessons learned, and pending items. | Team, business owner, and instructor | Closing meeting | Project leader |
+
+*Note.* Prepared by the authors from the incident management of the project.
+
+## 16. Exit Criteria
+
+The implementation is considered **finished** when all the following criteria are met:
+
+- The smoke tests of Table 8 pass in the implemented environment.
+- The acceptance record is signed with full or conditional acceptance (Annex C).
+- The master data of Table 7 is loaded and verified.
+- The people of each role received the training (Table 9).
+- There is a verified backup taken after the initial configuration, and the daily backup is scheduled.
+- The post-implementation support period ended without open P0 or P1 incidents.
+- The log, the record, and the lessons learned are filed with the release.
+
+## 17. Glossary
+
+**Table 14**
+
+*Glossary of Implementation Terms*
+
+| Term | Definition |
+|---|---|
+| Acceptance record | Signed document in which the business owner accepts, conditions, or rejects the implemented release. |
+| Acceptance test | Test performed by the business owner to confirm that the system meets their needs (validation). |
+| Compose profile | Group of services that starts only when requested (*--profile app*). |
+| Entry criterion | Condition that must be met before starting the implementation. |
+| Exit criterion | Condition that must be met to consider the implementation finished. |
+| Implementation log | Chronological record of the steps performed, the people responsible, and their evidence. |
+| Implementation window | Agreed period, outside opening hours, in which the implementation is performed. |
+| Master data | Business configuration data that the system needs to operate (hours, bays, services, prices, and payment accounts). |
+| Pilot | Initial period of operation with a reduced group of users. |
+| RACI | Matrix that shows who is responsible, who approves, who is consulted, and who is informed for each activity. |
+| Rollback | Controlled return to the previous release of the software and the data. |
+| Smoke test | Quick test that confirms that the main functions work after a deployment (verification). |
+| Tag | Fixed name that Git assigns to a commit to identify a release. |
+| Transition | ISO/IEC/IEEE 12207 process that establishes the capability of a system to operate in its target environment. |
+
+*Note.* Prepared by the authors from ISO et al. (2017) and the project documentation.
+
+## References
+
+Humble, J., & Farley, D. (2010). *Continuous delivery: Reliable software releases through build, test, and deployment automation*. Addison-Wesley.
+
+International Organization for Standardization, International Electrotechnical Commission, & Institute of Electrical and Electronics Engineers. (2017). *Systems and software engineering — Software life cycle processes* (ISO/IEC/IEEE 12207:2017). https://www.iso.org/standard/63712.html
+
+Servicio Nacional de Aprendizaje. (2026). *Guía para elaborar manuales de software: Manual de usuario, manual técnico, manual de instalación y manual de administrador* [Guide for writing software manuals: User manual, technical manual, installation manual, and administrator manual] [Unpublished instructional material]. Technologist in Software Analysis and Development program.
+
+Vehicle Washing Development Team. (2026a). *Vehicle washing management system: Project documentation* (vehicle-w-docs) [Unpublished project documentation]. GitHub. https://github.com/code-sena/vehicle-w-docs
+
+Vehicle Washing Development Team. (2026b). *lavarapido-infra* (develop branch) [Computer software]. GitHub. https://github.com/BrayanCABRERA123/lavarapido-infra
+
+Wiggins, A. (2017). *The twelve-factor app: III. Config*. https://12factor.net/config
+
+## 18. Annexes
+
+### Annex A. Pre-Implementation Checklist
+
+**Table 15**
+
+*Pre-Implementation Checklist*
+
+| Control | Met |
+|---|---|
+| Entry criteria E1 to E10 met (Table 5) | Yes / No |
+| Repositories cloned at the tag, side by side and with their original names (including *lavarapido-operation-service*) | Yes / No |
+| *.env* created, ignored by Git, and with the values of Table 6 | Yes / No |
+| *SPRING_PROFILES_ACTIVE* other than *dev* | Yes / No |
+| *MESSAGING_ENABLED=true* and *INTERNAL_API_KEY* defined | Yes / No |
+| RabbitMQ credentials other than *guest* | Yes / No |
+| Real SMTP configured and tested | Yes / No |
+| Free ports and native SQL Server stopped | Yes / No |
+| Verified pre-implementation backup (if the environment had data) | Yes / No |
+| Only the gateway and the web application reachable from outside the server | Yes / No |
+
+*Note.* Prepared by the authors.
+
+### Annex B. Acceptance Test Cases
+
+**Table 16**
+
+*Acceptance Test Cases*
+
+| ID | Role | Case | Expected result | Result |
+|---|---|---|---|---|
+| CA-01 | Customer | Register with valid data and accept the legal documents. | Account created and welcome email. | Passed / Failed |
+| CA-02 | Customer | Try to register with an email that does not end in @gmail.com. | Validation message; the account is not created. | Passed / Failed |
+| CA-03 | Customer | Register a vehicle with a valid plate and another with an invalid plate. | The first is saved; the second is rejected with its message. | Passed / Failed |
+| CA-04 | Customer | Book a service at a free time. | Booking confirmed with a bay, total, and the points it adds. | Passed / Failed |
+| CA-05 | Customer | Try to book a time that another person has just taken. | "Time taken" message and up to five alternatives. | Passed / Failed |
+| CA-06 | Customer | Cancel a booking before its time. | Booking cancelled and email notice. | Passed / Failed |
+| CA-07 | Administrator | Assign an available operator and see the blocking reason of an unavailable one. | Assignment confirmed; reason visible for the unavailable one. | Passed / Failed |
+| CA-08 | Operator | Start and finish the assigned service on the day of the booking. | Statuses In progress and Completed; notices to the customer. | Passed / Failed |
+| CA-09 | Customer | Pay with a QR code, attaching the receipt and the reference. | Payment in review. | Passed / Failed |
+| CA-10 | Administrator | Approve the payment after confirming the money in the bank. | Payment approved; email to the customer; points credited. | Passed / Failed |
+| CA-11 | Administrator | Reject a payment with a reason. | Payment rejected; email to the customer with the reason. | Passed / Failed |
+| CA-12 | Customer | Redeem an unlocked coupon when paying. | Discount applied to the total and coupon redeemed email. | Passed / Failed |
+| CA-13 | Customer | Rate a completed service. | Rating visible to the operator; rating twice is not allowed. | Passed / Failed |
+| CA-14 | Administrator | Register a holiday and check that the day offers no times. | The customer sees "The car wash is closed that day". | Passed / Failed |
+| CA-15 | Administrator | Export the report of the month to PDF and Excel. | Files downloaded with the data of the period. | Passed / Failed |
+| CA-16 | All | Change the language and the theme, log out, and log in again. | Preferences kept in the account. | Passed / Failed |
+
+*Note.* Prepared by the authors from the functional requirements and the user and administrator manuals.
+
+### Annex C. Acceptance Record Template
+
+**Table 17**
+
+*Implementation Acceptance Record*
+
+| Field | Content |
+|---|---|
+| System and release | Vehicle Washing Management System, release ____ |
+| Date and place |  |
+| Implemented environment | Server ____, access address ____ |
+| Acceptance cases run and passed | ____ of 16 |
+| Remarks and severity |  |
+| Decision | Full acceptance / Conditional acceptance / Rejection |
+| Commitments and dates (if conditional) |  |
+| Signature of the business owner or instructor |  |
+| Signature of the project leader |  |
+
+### Annex D. Implementation Log Template
+
+**Table 18**
+
+*Implementation Log*
+
+| Date and time | Phase and step | Responsible | Result (correct / with issues) | Evidence | Remarks |
+|---|---|---|---|---|---|
+|  |  |  |  |  |  |
+
+### Annex E. Command Summary
+
+```bash
+# Phase 2: building and verification
+./mvnw -B verify                                   # each Java service and the gateway
+dotnet test                                        # lavarapido-payment-service
+npm ci && npx ng build                             # Front-end-proyecto-web
+docker compose config --quiet && docker compose --profile app build
+
+# Phase 3: pre-implementation backup (see section 11.4)
+
+# Phase 4: infrastructure and database
+docker compose up -d && docker compose ps
+
+# Phase 5: services and gateway
+docker compose --profile app up -d
+for port in 3001 3002 3003 3004 3005 3006 8080; do curl -s http://localhost:$port/actuator/health; echo; done
+
+# Phase 6: web application
+npx ng serve --host 0.0.0.0
+
+# Rollback (see section 12)
+docker compose stop api-gateway security-service customer-service booking-service \
+  operations-service payment-service notification-service
+```
