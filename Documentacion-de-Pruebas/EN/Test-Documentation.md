@@ -15,15 +15,15 @@
 | Apprentices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 9, 2026 |
+| Date | October 15, 2026 |
 
-This document gathers the test plan, the inventory of automated tests already in the repositories, their actual results when run on October 9, 2026, and the functional test cases traced to the SRS v4 requirements (`SRS-VERSION4/SRS_V4.docx`). Its structure follows the ISO/IEC/IEEE 29119-3 standard for test documentation (International Organization for Standardization [ISO], 2021). No result in this document is assumed: anything not executed is marked `[TO COMPLETE after execution]`.
+This document gathers the test plan, the inventory of automated tests in the repositories, their actual results when run on October 15, 2026, and the functional test cases, run on October 9, 2026, traced to the SRS v6 requirements (`lavarapido-docs/01-informe-especificacion-requisitos`). Its structure follows the ISO/IEC/IEEE 29119-3 standard for test documentation (International Organization for Standardization [ISO], 2021). No result in this document is assumed.
 
 ## 1. Test Plan
 
 ### 1.1 Scope
 
-The web application, the mobile application, and the seven backend services on their `develop` branch are tested. Out of scope: load testing, offensive security testing, and the requirements that SRS v4 marks as pending (RF-004b and RF-010), along with the unbuilt part of RF-008 (automatic assignment when a booking is confirmed).
+The web application, the mobile application, and the seven backend services on their `develop` branch are tested. Offensive security testing is out of scope; load is only checked through the RNF-001 response time measurement.
 
 ### 1.2 Test Types and Tools
 
@@ -40,6 +40,7 @@ The web application, the mobile application, and the seven backend services on t
 | Persistence integration | EF Core mapping against a real SQL Server | xUnit + `DatabaseFixture` | `PaymentService.Infrastructure.IntegrationTests` (requires a database) |
 | Web UI unit tests | Angular components, guards, and services | Vitest 4 + jsdom (`@angular/build:unit-test`) | `Web/src/**/*.spec.ts` |
 | Functional / acceptance | End-to-end flows per role against the deployed system | Manual, with Postman or Swagger UI for the API and a browser / Expo Go for the UI | Cases CP-01 to CP-33 (section 4) |
+| Cross-service and RNF | Booking flow through the gateway with operator choice, automatic assignment and notices; 95th percentile response time (RNF-001); web screens at 360 px (RNF-008) | Node 22 (`node:test` and `fetch`) and Playwright Core with headless Edge | `lavarapido-infra/e2e` |
 
 > *Note.* Tools documented in JUnit (n.d.), xUnit.net (n.d.), and Vitest (n.d.).
 
@@ -47,16 +48,16 @@ The web application, the mobile application, and the seven backend services on t
 
 **Table 3**
 
-*Execution environment for the automated tests*
+*Execution environment for the tests*
 
-| Item | Version used on October 9, 2026 |
+| Item | Version |
 | --- | --- |
-| Operating system | Windows 11 Home Single Language 10.0.26200 |
-| Node.js / npm | 24.12.0 / 11.6.2 |
-| JDK | Java 24 (projects compile for Java 21) with each service's Maven Wrapper |
-| .NET SDK | 9.0.300 (the project targets `net8.0`) |
-| Database and messaging | SQL Server 2022, RabbitMQ 4, and Mailpit on Docker 28.4 (Docker Desktop) |
-| Services | The 7 services run on the machine (Spring Boot JARs and `dotnet run`); email was redirected to Mailpit so no real emails were sent |
+| Operating system | Windows 11 Home Single Language 10.0.26300 (October 15); 10.0.26200 (October 9) |
+| Node.js / npm | 24.14.0 / 11.9.0 |
+| JDK | Java 25 (the projects compile for Java 21) with each service's Maven Wrapper |
+| .NET SDK | 9.0.306; the project targets `net8.0` and the tests were run with `DOTNET_ROLL_FORWARD=Major` |
+| Database and messaging | Not needed by the automated tests. The October 9 functional cases used SQL Server 2022, RabbitMQ 4 and Mailpit on Docker 28.4 (Docker Desktop) |
+| Services | For the functional cases, the 7 services on the machine (Spring Boot JARs and `dotnet run`); email was redirected to Mailpit so no real emails were sent |
 
 ### 1.4 Criteria
 
@@ -67,22 +68,22 @@ The web application, the mobile application, and the seven backend services on t
 
 ## 2. Automated Test Inventory
 
-The repositories contain 452 test methods: 416 in the backend and 36 in the web client. The mobile app has no automated tests.
+The repositories have 504 test methods: 468 in the backend and 36 in the web client. The mobile app has no automated tests.
 
 **Table 4**
 
 *Tests per artifact (count of `@Test`/`@ParameterizedTest`, `[Fact]`/`[Theory]`/`[IntegrationFact]`, and `it()`)*
 
-| Artifact | Files | Methods | Coverage |
+| Artifact | Files | Methods | What they cover |
 | --- | --- | --- | --- |
-| api-gateway | 1 | 8 | Routing of each `/api/v1/**` prefix to its service (`GatewayRoutesTest`) |
-| security-service | 14 | 107 | Sign-up, login, password recovery, profile and user administration, roles and permissions, preferences, value objects, password policy, JWT issuance, and HTTP security per role (`ApiSecurityWebTest`, 21 methods) |
-| customer-service | 6 | 50 | Customer account, license plates, vehicle CRUD, `security.user_registered` listener, and web API |
-| booking-service | 5 | 34 | Booking lifecycle, availability, catalog, and web API |
-| operations-service | 5 | 25 | Operator assignment, service start and finish, rating, and web API |
-| notification-service | 9 | 87 | Notification use cases, per-event message factory, reminders, unassigned-booking alerts, device tokens, and admin controller |
-| payment-service (.NET) | 9 | 105 | Payment and receipt (35), promotions (23), loyalty points, payment policy, command and query services, and 7 persistence tests against SQL Server |
-| Web (Angular) | 35 | 36 | Creation of components, guards, and services (`should create` smoke tests) |
+| api-gateway | 1 | 8 | Routing of each `/api/v1/**` prefix to its service, and that `/internal/**` is not exposed by the gateway (`GatewayRoutesTest`) |
+| security-service | 15 | 119 | Registration, sign-in with lockout after failed attempts, password recovery, profile and address, user administration, roles and permissions, preferences, value objects, password policy, JWT issuing and HTTP security by role (`ApiSecurityWebTest`) |
+| customer-service | 6 | 50 | Customer account, license plates, vehicle CRUD, `security.user_registered` listener and web API |
+| booking-service | 6 | 38 | Booking life cycle, availability, catalog, business data (`EstablishmentTest`), preferred operator in the event and web API |
+| operations-service | 10 | 49 | Manual and automatic assignment, free operators, start window, execution, rating, operator metrics, team summary, operator profile, inspection report and web API |
+| notification-service | 10 | 94 | Notification use cases, message factory per event, notices in the account's language, reminders, alerts for bookings without an operator, device tokens and admin controller |
+| payment-service (.NET) | 9 | 110 | Payment and receipt, reused reference, history with filters, promotions, loyalty points, payment policy, command and query services, and 7 persistence tests against SQL Server |
+| Web (Angular) | 35 | 36 | Creation of components, guards and services (`should create` smoke tests) |
 | Mobile | 0 | 0 | No automated tests |
 
 > *Note.* Support files (`Fakes.java`, `InMemory*.java`, `InMemoryPorts.cs`, `DatabaseFixture.cs`) are not counted as tests. The 7 payment persistence tests skip themselves when the SQL Server connection variable is not set (`DatabaseFixture.cs:20-21`).
@@ -91,37 +92,37 @@ Backend tests are domain and application tests with in-memory doubles, plus cont
 
 ## 3. Execution Results
 
-On October 9, 2026, the eight automated suites were run: 552 tests, all passed. The 7 payment persistence tests ran against an isolated database (`LavaRapidoPaymentIT`) created with the same changelogs, because they insert rows and must not run on the development database.
+On October 15, 2026 the eight automated suites were run: 601 tests, all passed. The 7 payment persistence tests were skipped because the test database was not set; on October 9 they had been run against an isolated database (`LavaRapidoPaymentIT`) created with the same changelogs, and they passed.
 
 **Table 5**
 
-*Actual results per artifact*
+*Actual results per artifact (October 15, 2026)*
 
 | Artifact | Command | Run | Passed | Failed | Skipped | Duration |
 | --- | --- | --- | --- | --- | --- | --- |
-| Web (Angular) | `npx ng test --watch=false` | 36 | 36 | 0 | 0 | 56.2 s |
-| api-gateway | `./mvnw test` | 30 | 30 | 0 | 0 | 18.0 s |
-| security-service | `./mvnw test` | 123 | 123 | 0 | 0 | 20.5 s |
-| customer-service | `./mvnw test` | 68 | 68 | 0 | 0 | 10.3 s |
-| booking-service | `./mvnw test` | 34 | 34 | 0 | 0 | 9.6 s |
-| operations-service | `./mvnw test` | 25 | 25 | 0 | 0 | 7.4 s |
-| notification-service | `./mvnw test` | 93 | 93 | 0 | 0 | 0.9 s |
+| Web (Angular) | `npx ng test --watch=false` | 36 | 36 | 0 | 0 | 23.5 s |
+| api-gateway | `./mvnw test` | 34 | 34 | 0 | 0 | 10.9 s |
+| security-service | `./mvnw test` | 135 | 135 | 0 | 0 | 18.0 s |
+| customer-service | `./mvnw test` | 68 | 68 | 0 | 0 | 8.0 s |
+| booking-service | `./mvnw test` | 38 | 38 | 0 | 0 | 8.6 s |
+| operations-service | `./mvnw test` | 49 | 49 | 0 | 0 | 9.7 s |
+| notification-service | `./mvnw test` | 100 | 100 | 0 | 0 | 0.5 s |
 | payment-service: domain | `dotnet test PaymentService.sln` | 113 | 113 | 0 | 0 | 0.1 s |
-| payment-service: application | (same command) | 23 | 23 | 0 | 0 | 0.1 s |
-| payment-service: integration | `dotnet test` with `PAYMENT_INTEGRATION_DB` | 7 | 7 | 0 | 0 | ≈ 3 s |
-| **Total** | | **552** | **552** | **0** | **0** | |
+| payment-service: application | (same command) | 28 | 28 | 0 | 0 | 0.1 s |
+| payment-service: integration | (same command, without `PAYMENT_INTEGRATION_DB`) | 0 | 0 | 0 | 7 | — |
+| **Total** | | **601** | **601** | **0** | **7** | |
 
-> *Note.* Sources: Vitest output, the `target/surefire-reports/*.xml` files of each Java service (generated between 13:35 and 13:36), and `dotnet test` output. Maven durations add up the time of the test classes, excluding compilation. More tests ran than there are methods in Table 4 because parameterized tests (`@ParameterizedTest`, `[Theory]`) run once per data row.
+> *Note.* Sources: Vitest output, the `target/surefire-reports/*.xml` files of each Java service and the `dotnet test` output. Maven durations add up the time of the test classes, without compilation. There are more tests run than methods in Table 4 because parameterized tests (`@ParameterizedTest`, `[Theory]`) run once per data row.
 
 Execution notes:
 
 - The line `ERROR ... Could not send the password recovery email: SMTP down` in the security-service log is triggered on purpose by `EmailResetCodeNotifierTest`, which simulates an SMTP outage. It is not a failure.
 - Vitest prints a build warning: `src/test-providers.ts` is not included in `tsconfig`. It does not affect the results.
-- The run used JDK 24 and .NET SDK 9 on projects targeting Java 21 and .NET 8; for the final delivery it should be repeated with the project's exact versions.
+- The run used JDK 25 and .NET SDK 9 on projects targeting Java 21 and .NET 8; for the final delivery it should be repeated with the project's exact versions.
 
 ## 4. Functional Test Cases
 
-The 33 cases cover the SRS v4 requirements that are implemented or partial. They were run on October 9, 2026, between 15:40 and 15:45, against the full system through the API Gateway (the same calls the web and mobile clients make), using an automated script. All 33 passed.
+The 33 cases cover the requirements that were implemented or partial in SRS v4. They were run on October 9, 2026, between 15:40 and 15:45, against the full system through the API Gateway (the same calls the web and mobile clients make), using an automated script. All 33 passed. The requirements implemented afterwards (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037 and RF-038) are covered by automated tests (section 5), and the booking flow with operator choice and automatic assignment is also run by `lavarapido-infra/e2e/booking-flow.test.js`.
 
 **Table 6**
 
@@ -167,54 +168,57 @@ The 33 cases cover the SRS v4 requirements that are implemented or partial. They
 
 ## 5. Traceability Matrix
 
-Of the 38 requirements in SRS v4, 2 are pending (RF-004b and RF-010) and have no case. Of the remaining 36, 30 have a functional case and 33 have a related automated test; RF-023 (reports) has neither, and RF-032 and RF-034 only have a functional case.
+Of the 41 requirements in SRS v6, 30 have a functional case and 39 a related automated test; RF-032 and RF-034 only have a functional case.
 
 **Table 7**
 
 *RF → status → endpoint / screen → test case*
 
-| RF | Status (SRS v4) | Endpoint (prefix `/api/v1`) | Web screen | Functional case | Related automated test |
+| RF | Status (SRS v6) | Endpoint (prefix `/api/v1`) | Web screen | Functional case | Related automated test |
 | --- | --- | --- | --- | --- | --- |
 | RF-001 | Implemented | `POST /auth/register` | `/auth/register` | CP-01, CP-02 | `AccountRegistrationServiceTest`, `UserRegisteredListenerTest` |
 | RF-002 | Implemented | `POST /auth/login` | `/auth` | CP-03, CP-04 | `AuthenticationServiceTest`, `JwtTokenIssuerTest`, `ApiSecurityWebTest` |
 | RF-003 | Implemented | `POST /auth/password/forgot`, `/verify`, `/reset` | `/auth/forgot-password` | CP-05, CP-06 | `PasswordRecoveryServiceTest`, `PasswordResetTokenTest` |
 | RF-004 | Implemented | `PUT /users/me/password` | `/client/profile` | CP-07 | `UserProfileAndAdministrationTest`, `PasswordPolicyTest` |
-| RF-004b | Pending | — | — | No case (pending) | — |
-| RF-027 | Implemented | `GET/PATCH /users/me`, `PUT /users/me/email`, `POST /auth/logout`, `POST /users/me/deactivate` | `/client/profile` | CP-25 | `UserProfileAndAdministrationTest`, `AuthenticationServiceTest` |
+| RF-004b | Implemented | `POST /auth/login` (423 `ACCOUNT_LOCKED`) | `/auth` | — | `AuthenticationServiceTest` (lockout and window), `PasswordRecoveryServiceTest` (a reset lifts it), `ApiSecurityWebTest` (423) |
+| RF-027 | Implemented | `GET/PATCH /users/me`, `GET/PUT /users/me/address`, `PUT /users/me/email`, `POST /auth/logout`, `POST /users/me/deactivate` | `/client/profile` | CP-25 | `UserProfileAndAdministrationTest`, `PersonAddressServiceTest`, `AuthenticationServiceTest` |
 | RF-028 | Implemented | `GET/POST /admin/users`, `PATCH /admin/users/{id}/status` | `/admin/management`, `/admin/operators` | CP-26 | `UserProfileAndAdministrationTest`, `ApiSecurityWebTest` |
 | RF-029 | Implemented | `GET /admin/roles-permissions`, `PUT /admin/roles-permissions/{role}` | `/admin/management` | CP-27 | `RolePermissionAdministrationServiceTest` |
 | RF-030 | Implemented | `/vehicles`, `GET /vehicle-types`, `GET /admin/vehicles` | `/client/vehicles` | CP-28 | `CustomerVehicleServiceTest`, `LicensePlateTest`, `CustomerApiWebTest` |
 | RF-031 | Implemented | `GET /catalog/services`, `/admin/catalog/services` | `/admin/management` | CP-29 | `CatalogServiceTest` |
 | RF-021 | Implemented | `PUT /admin/schedule/business-hours`, `POST /admin/schedule/exceptions` | `/admin/schedule` | CP-22 | `AvailabilityPolicyTest` |
 | RF-032 | Implemented | `/admin/bays` | `/admin/schedule` | CP-30 | — |
+| RF-037 | Implemented | `GET/PUT /admin/establishment`, `GET /establishment` | `/admin/settings` | — | `EstablishmentTest`, `BookingApiWebTest` |
 | RF-005 | Implemented | `POST /bookings`, `GET /catalog/services` | `/client/reserve` | CP-08 | `BookingServiceTest`, `BookingTest` |
 | RF-006 | Implemented | `GET /bookings/availability` | `/client/reserve` | CP-09 | `AvailabilityPolicyTest` |
 | RF-007 | Implemented | `PUT /bookings/{id}`, `POST /bookings/{id}/cancel` | `/client/history` | CP-10, CP-11 | `BookingTest`, `BookingApiWebTest` |
 | RF-033 | Implemented | `GET /admin/bookings`, `PATCH /admin/bookings/{id}/status` | `/admin/reservations` | CP-31 | `BookingTest`, `BookingServiceTest` |
-| RF-008 | Partial | `GET /admin/assignments/{id}/candidates` | `/admin/reservations` | CP-12 (built part) | `AssignmentPolicyTest` |
+| RF-008 | Implemented | `booking.confirmed` event, `GET /internal/v1/bookings` | `/admin/reservations` | — | `AutoAssignmentPolicyTest`, `OperationsServiceTest` (automatic assignment, deactivated account), `booking-flow.test.js` |
 | RF-009 | Implemented | `GET /admin/assignments/{id}/candidates`, `PUT /admin/assignments/{id}` | `/admin/reservations` | CP-12 | `AssignmentPolicyTest`, `OperationsServiceTest` |
-| RF-010 | Pending | — | — | No case (pending) | — |
+| RF-010 | Implemented | `GET /operators/available`, `POST /bookings` (`preferredOperatorId`) | `/client/reserve` | — | `OperationsServiceTest` (free operators), `OperationsApiWebTest`, `booking-flow.test.js` |
 | RF-011 | Implemented | `GET /operator/services` | `/operator/assigned-services` | CP-13 | `OperationsServiceTest` |
 | RF-012b | Implemented | `POST /operator/services/{id}/start`, `/finish` | `/operator/assigned-services` | CP-14 | `StartPolicyTest`, `ServiceExecutionTest` |
 | RF-012 | Implemented | `POST /ratings/{bookingId}` | `/client/history` | CP-15 | `ServiceExecutionTest` |
-| RF-022 | Partial | `PUT /admin/operators/{id}/availability`, `/absences` | `/admin/operators/:id` | No dedicated case | `AssignmentPolicyTest` |
+| RF-022 | Implemented | `PUT /admin/operators/{id}/availability`, `/absences`, `GET /admin/operators/summary` | `/admin/operators/:id` | — | `AssignmentPolicyTest`, `TeamSummaryCalculatorTest` |
+| RF-036 | Implemented | `/admin/inspections/{bookingId}/**`, `GET /public/inspections/{token}` | `/admin/reservations/:id/inspection`, `/report/:token` | — | `InspectionReportTest`, `OperationsApiWebTest` |
+| RF-038 | Implemented | `GET /admin/operators/profiles`, `PUT /admin/operators/{id}/profile` | `/admin/operators/:id` | — | `OperatorProfileServiceTest` |
 | RF-034 | Implemented | `/admin/payment-accounts`, `GET /payment-accounts` | `/admin/settings` | CP-32 | — |
 | RF-013 | Implemented | `GET /payment-accounts` | `/client/payment` | CP-16 | `PaymentQueryServiceTests` |
 | RF-013b | Implemented | `POST /payments` | `/client/payment` | CP-17 | `PaymentTests`, `PaymentCommandServiceTests` |
 | RF-014 | Implemented | `POST /admin/payments/{id}/approve`, `/reject` | `/admin/payments` | CP-18 | `PaymentTests`, `PaymentCommandServiceTests` |
-| RF-015 | Partial | `GET /payments/me` | `/client/history` | No dedicated case | `PaymentQueryServiceTests` |
-| RF-016 | Implemented | `POST /payments` | `/client/payment` | CP-19 | `PaymentPolicyTests` |
+| RF-015 | Implemented | `GET /payments/me?from=&to=&service=` | `/client/history` | — | `PaymentQueryServiceTests` (order and filters) |
+| RF-016 | Implemented | `POST /payments` | `/client/payment` | CP-19 | `PaymentPolicyTests`, `PaymentCommandServiceTests` (reused reference) |
 | RF-035 | Implemented | `POST /admin/payments/{id}/refund` | `/admin/payments` | CP-33 | `PaymentTests`, `PaymentCommandServiceTests` |
-| RF-017 | Implemented | Several (dashboard stores) | `/client`, `/operator`, `/admin` | No dedicated case | Web smoke tests (`dashboard.spec.ts`) |
-| RF-018 | Implemented | `/notifications/*` + RabbitMQ events | `/*/notifications` | CP-20 | `NotificationUseCasesTest`, `NotificationFactoryTest`, `BookingReminderServiceTest` |
-| RF-019 | Implemented | `PUT /users/me/preferences` | `/*/configuration` | No dedicated case (covered by CP-21) | `UserPreferenceServiceTest` |
+| RF-017 | Implemented | `GET /admin/bookings/day-summary`, `GET /operators/my-bookings` and dashboard stores | `/client`, `/operator`, `/admin` | — | `BookingServiceTest` (day summary), web smoke tests (`dashboard.spec.ts`) |
+| RF-018 | Implemented | `/notifications/*` + RabbitMQ events | `/*/notifications` | CP-20 | `NotificationUseCasesTest`, `NotificationFactoryTest`, `BookingReminderServiceTest`, `LocalizedNotificationsTest`, `UnassignedBookingAlertTest`, `StaffNotificationsTest` |
+| RF-019 | Implemented | `PUT /users/me/preferences` | `/*/configuration` | Covered by CP-21 | `UserPreferenceServiceTest` |
 | RF-020 | Implemented | `PUT /users/me/preferences` | `/*/configuration` | CP-21 | `UserPreferenceServiceTest`, `UserPreferenceTest` |
-| RF-023 | Partial | Payment and booking stores | `/admin/reports` | No dedicated case | — |
+| RF-023 | Partial | `GET /admin/operators/{id}/metrics`, `GET /admin/operators/summary`, payment and booking stores | `/admin/reports`, `/admin/operators/:id` | — | `OperatorMetricsCalculatorTest`, `TeamSummaryCalculatorTest` |
 | RF-024 | Implemented | `/admin/promotions` | `/admin/management` | CP-23 | `PromotionTests` |
-| RF-025 | Implemented | `POST /loyalty/redeem` | `/client/payment` | No dedicated case | `CustomerPromotionServiceTests` |
+| RF-025 | Implemented | `POST /loyalty/redeem` | `/client/payment` | — | `CustomerPromotionServiceTests` |
 | RF-026 | Implemented | `GET /loyalty/balance` | `/client` | CP-24 | `LoyaltyTransactionTests` |
 
-> *Note.* The automated test column points to the file whose name and methods match the requirement; code coverage was not measured.
+> *Note.* The automated test column points to the file whose name and methods match the requirement; code coverage was not measured. `booking-flow.test.js` is in `lavarapido-infra/e2e` and needs the system running.
 
 ## 6. Findings and Open Items
 
@@ -227,8 +231,9 @@ Of the 38 requirements in SRS v4, 2 are pending (RF-004b and RF-010) and have no
 | 1 | The mobile app has no automated tests | Add Jest with `jest-expo`, at least for validators (`shared/validators`) and services (`core/services`) |
 | 2 | The 36 web tests only check that the component is created | Test real rules: `authGuard` by role, `authInterceptor` on 401, booking form |
 | 3 | The 7 payment persistence tests need a migrated database and skip without it | Document in the README how to create the test database and set `PAYMENT_INTEGRATION_DB` |
-| 4 | RF-023 (reports) has no test at all | Add a functional case for reports and PDF/Excel export |
+| 4 | For RF-023 (reports) only the operator metrics and the team summary are tested; the PDF/Excel export has no test | Add a functional case for reports and the PDF/Excel export |
 | 5 | RF-032 (bays) and RF-034 (payment accounts) have no dedicated automated tests: `ScheduleService` and `PaymentAccountService` have no test class | Add unit tests for those two services |
+| 6 | The requirements implemented after October 9 (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037 and RF-038) have automated tests but no functional case of their own | Add their CP cases and run them against the full system |
 
 **Table 9**
 
@@ -243,10 +248,7 @@ Of the 38 requirements in SRS v4, 2 are pending (RF-004b and RF-010) and have no
 | 5 | The landing page advertises a "mobile wash service" and "wherever you are", but SRS v4 defines a single-location car wash | Landing screenshot; SRS v4, section 1 | Low |
 | 6 | If there are two accounts of the same method (two Nequi), the payment screen shows both selected at once | Customer Payments screenshot | Low |
 
-**Open items `[TO COMPLETE]`**
-
-- [ ] Repeat the functional cases from the UI (web and mobile) if the instructor asks for visual evidence; this document's run was through the API.
-- [ ] Validate the document with the instructor.
+> *Note.* Code review of October 15, 2026: defect 3 is fixed (the customer home shows the name of the assigned operator, on the web and on mobile). Defects 1, 2, 4 and 5 are still in the code; defect 6 was not checked again.
 
 ## References
 
