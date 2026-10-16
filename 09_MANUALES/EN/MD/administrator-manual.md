@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 9, 2026
+October 16, 2026
 
-Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 3.1
+Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.0
 
 ## Version Control
 
@@ -31,6 +31,7 @@ Table 1 records the change history of this document. Each time an administrative
 | 2.0 | 2026-10-06 | Creation of the administrator manual (in Spanish) from the project documentation, within version 2.0 of the manual set. | Development team |
 | 3.0 | 2026-10-07 | Translation into English, APA Style (7th ed.) formatting, and verification against the source code. The administration module of the web application is now documented screen by screen (it was described as nonexistent). Corrected: implementation status of each function, creation of accounts from the panel, absence of account lockout, manual operator assignment, payment review and manual payments, functions saved only in the browser (business data, roles, and promotions), real names of containers and database, and the state of the audit trail. | Development team |
 | 3.1 | 2026-10-09 | Update against the code of October 9, 2026 (ADR-011 sections 9 to 12 and ADR-015), and creation of the Spanish version (Manual_administrador_LavadoVehicular_3145556_ES.md). Updated: implementation status table; permission matrix of the three fixed roles saved on the server (informative, not enforced); loyalty points per service; promotions as real percentage coupons unlocked with points; refunds from the interface with reversal of points; comparison of the declared amount; validation of reused references; customer notices of payment results; staff notifications for administrators; inspection report notified to the customer instead of WhatsApp; payment-service in Docker; new notification types and dead-letter checks. | Development team |
+| 4.0 | 2026-10-16 | Review against the code of October 16, 2026. The figures changed from placeholders to real screenshots. Updated: account lockout after failed attempts, automatic operator assignment with the optional choice of the customer, business data and inspection reports saved on the server, consent to the legal documents stored at registration, translated refund texts, new traces in Table 15, risks in Table 16, and Annex B items that were resolved. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -114,7 +115,7 @@ Table 1 records the change history of this document. Each time an administrative
 - [18. Glossary](#18-glossary)
 - [References](#references)
 - [19. Annexes](#19-annexes)
-  - [Annex A. List of Figures Pending Capture](#annex-a-list-of-figures-pending-capture)
+  - [Annex A. Source of the Screenshots](#annex-a-source-of-the-screenshots)
   - [Annex B. Information to Confirm Before Delivery](#annex-b-information-to-confirm-before-delivery)
   - [Annex C. Incident Record Template](#annex-c-incident-record-template)
   - [Annex D. Delivery Checklist](#annex-d-delivery-checklist)
@@ -129,9 +130,9 @@ This manual is addressed to business administrators and information technology (
 
 ### 4.1 Sources and State of the Documentation
 
-The manual was verified against the source code of the web application and of the services (Vehicle Washing Development Team, 2026b, 2026c, 2026d) and against the project documentation updated on October 9, 2026 (Vehicle Washing Development Team, 2026a). The web application includes a complete administration module under the route */admin*, restricted to the ADMIN role. The names of the screens, buttons, and messages are written exactly as they appear when the interface language is English.
+The manual was verified against the source code of the web application and of the services (Vehicle Washing Development Team, 2026b, 2026c, 2026d) and against the project documentation updated on October 16, 2026 (Vehicle Washing Development Team, 2026a). The web application includes a complete administration module under the route */admin*, restricted to the ADMIN role. The names of the screens, buttons, and messages are written exactly as they appear when the interface language is English.
 
-Not all the screens of the module save their data on the server. Some functions are complete (the server applies and stores them), while others still keep their data only in the browser of the administrator and do not affect the rest of the system. Section 6.3 states the status of each function so that the administrator knows which data are official. When the documentation does not define a value (for example, a retention policy or a recovery objective), the manual presents it as a **recommendation** and lists it in Annex B so that the team approves it, as the guide for writing manuals requires (Servicio Nacional de Aprendizaje [SENA], 2026).
+Almost every screen of the module saves its data on the server. The exceptions are the reports, which are calculated in the browser from the bookings and payments, and the permission matrix, which is saved on the server but does not yet change what each role can do. Section 6.3 states the status of each function so that the administrator knows which data are official. When the documentation does not define a value (for example, a retention policy or a recovery objective), the manual presents it as a **recommendation** and lists it in Annex B so that the team approves it, as the guide for writing manuals requires (Servicio Nacional de Aprendizaje [SENA], 2026).
 
 ## 5. Objective
 
@@ -160,12 +161,12 @@ To guide the administrator in the management, configuration, and supervision of 
 - The use of the system by customers and operators (User Manual).
 - The internal architecture, the complete data model, and the API contracts (Technical Manual).
 - The initial installation of the environment (Installation Manual).
-- The administration screens of the Android application, which is still under development.
+- The administration screens of the Android application, which offers modules equivalent to those of the web and is downloaded from the home page.
 - Staging and production environments, which the documentation declares outside the academic scope; the recommendations of this manual for those environments are indicative.
 
 ### 6.3 Implementation Status of the Administrative Functions
 
-Table 2 summarizes the real status of each function in the version of October 9, 2026. It must be confirmed against the final version of the software before publishing the manual.
+Table 2 summarizes the real status of each function in the version of October 16, 2026, reviewed against the code and with the system running.
 
 **Table 2**
 
@@ -179,12 +180,12 @@ Table 2 summarizes the real status of each function in the version of October 9,
 | Services, prices, durations by vehicle type, and loyalty points | Management > Services | Complete. | 12.2 |
 | Promotions and coupons | Management > Promotions | Complete: percentage coupons saved in payment-service, unlocked with points and applied when the customer pays. | 12.8 |
 | Weekly hours, exceptions, and bays | Hours & Bays | Complete. | 11.2 and 11.3 |
-| Business data | Settings > Business data | Only in the browser: they do not change the data shown to customers. | 11.1 |
+| Business data | Settings > Business data | Complete: saved in booking-service, and they are the data customers see on the home page and in the help center. | 11.1 |
 | Payment methods (accounts and QR codes) | Settings > Payment methods | Complete. | 11.4 |
 | Operators, weekly availability, and absences | Operators | Complete. | 12.1 |
 | Bookings: create, reschedule, change status, and cancel | Bookings | Complete. | 12.3 |
-| Manual assignment of operators | Bookings, Dashboard | Complete. Automatic assignment is pending (technical debt TD-020). | 12.4 |
-| Vehicle inspection report | Bookings > Inspection | Partial: the report stays only in the browser, but its summary is sent to the customer by notification and email (**Notify customer**). | 12.5 |
+| Operator assignment | Bookings, Dashboard | Complete: the system assigns a free operator when the booking is confirmed (the one chosen by the customer, if still free), and the administrator changes it by hand or assigns the bookings left without an operator. | 12.4 |
+| Vehicle inspection report | Bookings > Inspection | Complete: the report and photos are saved in operations-service, and the customer receives the summary with the link to the report by notification and email (**Notify customer**). | 12.5 |
 | Payment review, approval, rejection, and refund; manual payments | Payments | Complete. | 12.6 |
 | Reports and export to Excel or PDF | Reports | Complete (calculated in the browser from bookings and payments). | 13 |
 | Inbox of notifications, including staff notices | Notifications | Complete. Free announcements to users are sent only through the API. | 12.7 |
@@ -213,7 +214,7 @@ The system defines three fixed roles: Administrator (code ADMIN), Operator (OPER
 ### 7.2 Responsibilities
 
 - Keep up to date the opening hours, the bays, the services, the prices, and the payment accounts.
-- Assign an operator to every booking, because automatic assignment is not yet available.
+- Check the **Bookings without an operator** block and assign by hand the bookings the system could not assign because no operator was free.
 - Verify digital payments against the receipt and the bank, and record cash payments.
 - Create, deactivate, and supervise the operator and administrator accounts.
 - Consult the reports and the traces, and detect anomalous behavior.
@@ -255,13 +256,13 @@ Each person who administers the system must use an individual and secure account
 3. Type the email address (ending in @gmail.com) and the password of the administrator account.
 4. Click **Login**. The system validates the credentials and opens the administration panel (route */admin*).
 
-The session lasts one hour; when it expires, the administrator must log in again. The current version **does not lock accounts after failed attempts** (technical debt TD-003), so administrator passwords must be long and unique (section 17.1).
+The session lasts one hour; when it expires, the administrator must log in again. After five failed attempts within 15 minutes, the account is locked for 15 minutes; resetting the password unlocks it right away. Even so, administrator passwords must be long and unique (section 17.1).
 
 **Figure 1**
 
 *Administrator Login*
 
-> **Screenshot to insert.** **Screen:** Login (route */auth*). **Content:** form with the Email Address and Password fields, the "Forgot your password?" link, and the Login button, filled in with a test account and without showing the password.
+![Administrator Login](capturas/administrator-01-administrator-login.jpg)
 
 ### 8.3 General Control Panel
 
@@ -289,7 +290,7 @@ The control panel (route */admin*, menu option **Dashboard**) summarizes what th
 
 *General Control Panel*
 
-> **Screenshot to insert.** **Screen:** Dashboard (route */admin*). **Content:** the greeting, the indicator cards, the revenue chart for the last 7 days, the operators status, the payments pending review, and the bookings without an operator, with test data.
+![General Control Panel](capturas/administrator-02-general-control-panel.jpg)
 
 ### 8.4 First Administrator Account
 
@@ -335,7 +336,7 @@ A system account consists of a person (*security.person*: ID number, first names
 
 *User List*
 
-> **Screenshot to insert.** **Screen:** Management > Users (route */admin/management*). **Content:** the filters, the Create user button, and the table with at least three accounts of different roles, without real personal data.
+![User List](capturas/administrator-03-user-list.jpg)
 
 ### 9.3 Creating an Operator or Administrator Account
 
@@ -352,7 +353,7 @@ Operators can also be created from **Operators > New operator** (section 12.1), 
 
 *Create User Window*
 
-> **Screenshot to insert.** **Screen:** Management > Users > Create user. **Content:** the window with the ID number, names, email, phone, temporary password, and Assigned role fields filled in with test data.
+![Create User Window](capturas/administrator-04-create-user-window.jpg)
 
 ### 9.4 Activating and Deactivating an Account
 
@@ -435,7 +436,7 @@ The panel does not offer an option to change the role of an existing account. Wh
 
 ### 11.1 Business Data
 
-**Settings > Business data** (route */admin/settings*) shows the legal name, tax ID, legal representative, address, phones, email, tax information, and official channels of the business. In the current version **these data are kept only in the browser of the administrator** (technical debt TD-013): they do not change the information that customers see. The address, phone, and email shown to customers in the help center come from the establishment record of booking-service (*booking.establishment*), which is corrected with SQL by the IT administrator. The screen can be used as a reference, but changes must not be expected to reach other users.
+**Settings > Business data** (route */admin/settings*) shows the legal name, tax ID, legal representative, address, phones, email, tax information, and official channels of the business. These data are saved in booking-service (*GET* and *PUT /api/v1/admin/establishment*), which validates each field before saving it. They are the same data customers see on the home page, in the footer, and in the help center, so a change reaches every user when the page is reloaded. The accounts and QR codes to receive payments are configured separately, in **Payment methods** (section 11.4).
 
 ### 11.2 Opening Hours and Exceptions
 
@@ -452,7 +453,7 @@ A change applies to future availability; bookings already confirmed are not relo
 
 *Business Hours and Exceptions*
 
-> **Screenshot to insert.** **Screen:** Hours & Bays > Business hours (route */admin/schedule*). **Content:** the weekly schedule of the seven days with opening, closing, and break, and the list of exceptions with date, type, applicable hours, and reason.
+![Business Hours and Exceptions](capturas/administrator-05-business-hours-and-exceptions.jpg)
 
 ### 11.3 Washing Bays
 
@@ -479,7 +480,7 @@ The QR images and the receipts are stored inside the database as images (data UR
 
 *Payment Methods Configuration*
 
-> **Screenshot to insert.** **Screen:** Settings > Payment methods (route */admin/settings*). **Content:** the list of accounts with method, holder, account number, status, and the QR image of one of them.
+![Payment Methods Configuration](capturas/administrator-06-payment-methods-configuration.jpg)
 
 *Note.* Use a test account and QR code.
 
@@ -492,7 +493,7 @@ The QR images and the receipts are stored inside the database as images (data UR
 | Parameter | Value | Where it is configured |
 |---|---|---|
 | Access token validity | 1 hour; there is no refresh token | security-service (JWT_ACCESS_TOKEN_TTL). |
-| Account lockout after failed attempts | Not implemented (TD-003) | — |
+| Account lockout after failed attempts | 5 failed attempts within 15 minutes lock the account for 15 minutes; resetting the password unlocks it | security-service (*security.login_lockout*). |
 | Recovery code | 6 digits, valid for 15 minutes, single use, 5 failed attempts | security-service. |
 | Password | 8 to 72 characters, one uppercase letter, one number, one special character, no spaces | security-service and web interface. |
 | Password storage | BCrypt with cost factor 12 | security-service. |
@@ -525,7 +526,7 @@ Some indicators of the detail screen (for example, punctuality, revenue goal, or
 
 *Operator Detail With Availability and Absences*
 
-> **Screenshot to insert.** **Screen:** Operators > operator detail (route */admin/operators/{id}*). **Content:** the operator card, the Edit availability, Register absence, and Assign bay / shift buttons, and the list of services of the day.
+![Operator Detail With Availability and Absences](capturas/administrator-07-operator-detail-with-availability-and-absences.jpg)
 
 ### 12.2 Services, Prices, and Points
 
@@ -572,11 +573,11 @@ The life cycle rules are the same for everyone: a booking cannot fall outside th
 
 *Booking Management*
 
-> **Screenshot to insert.** **Screen:** Bookings (route */admin/reservations*). **Content:** the indicators, the filters, the New Booking and Export buttons, and the table with bookings in different statuses, one of them unassigned.
+![Booking Management](capturas/administrator-08-booking-management.jpg)
 
 ### 12.4 Assigning an Operator
 
-In the current version **the system does not assign operators automatically** (requirement RF-008 is pending, technical debt TD-020), and the customer does not choose the operator. The administrator must assign an operator to every booking.
+When a booking is confirmed, **the system assigns the operator automatically** (RF-008): if the customer chose one who is still free, that operator is assigned; otherwise, the free operator with the fewest bookings that day. An operator is free when the account is active, has a shift at that time, has no recorded absence, and is not serving another booking at that time. If nobody is free, the booking is left without an operator and appears in the **Bookings without an operator** block of the Dashboard. A rescheduled booking keeps its operator. The administrator assigns by hand in two cases: when the booking was left without an operator and when the assigned one must be changed.
 
 1. In the **Dashboard** (block **Bookings without an operator**) or in **Bookings**, click **Assign** on the booking.
 2. The window "Assign Operator to Booking [code]" shows the details of the appointment and the list of operators. The available operators appear first; the others show why they cannot take the booking: **Inactive**, **No shift at that time**, **Absent**, or **Busy at that time**.
@@ -591,7 +592,7 @@ Only bookings in SCHEDULED or CONFIRMED status can be assigned, and the operator
 
 *Manual Assignment of an Operator*
 
-> **Screenshot to insert.** **Screen:** Bookings > Assign. **Content:** the "Assign Operator to Booking" window with the appointment details, the list of operators with their availability or blocking reason, the notes field, and the Confirm Assignment button.
+![Manual Assignment of an Operator](capturas/administrator-09-manual-assignment-of-an-operator.jpg)
 
 ### 12.5 Vehicle Inspection Report
 
@@ -601,9 +602,9 @@ For long services (180 minutes or more), the administrator can record the condit
 2. Click **Start report** when the vehicle arrives.
 3. In each phase, click **Start phase**, add the findings with **Add finding** (vehicle part, type: note, minor damage, or major damage; description; and up to five JPG or PNG photos of up to 10 MB), and click **Finish phase**.
 4. Click **Publish and copy link**; **View as customer** shows the public version (route */report/{token}*).
-5. Click **Notify customer**. The system sends the customer a notification and an email (type *INSPECTION_REPORT*) with the summary of the inspection: phases finished, number of findings, major findings, and affected areas. The message "Customer notified" confirms the sending.
+5. Click **Notify customer**. The system sends the customer a notification and an email (type *INSPECTION_REPORT*) with the summary of the inspection: phases finished, number of findings, major findings, and affected areas, together with the link to the report. The message "Customer notified" confirms the sending.
 
-**Important limitation:** the reports and photos are stored only in the browser where they were created (there is no server for this function yet). The public link opens only in that same browser; for that reason, the notice to the customer carries the summary and not the link, and the details and photos are shown to the customer when the vehicle is handed over.
+**Where it is saved:** the report, its phases, the findings, and the photos are saved in operations-service (tables *execution.inspection_report*, *execution.inspection_phase*, *execution.inspection_finding*, and *execution.inspection_photo*). The photos are compressed in the browser before they are sent. The public link (route */report/{token}*) only works after the report is published and opens from any device without logging in, which is why the notice to the customer includes it.
 
 ### 12.6 Payment Review and Approval
 
@@ -634,7 +635,7 @@ The system does not integrate a payment gateway (ADR-008). The customer pays out
 
 **Recording a cash or counter payment.** Click **Register manual payment**, choose the booking and the method, and confirm. The window shows the real amount due of the booking (with the coupon discount, if any), and the manual payment is approved immediately with that amount and credits the points. Use it only when the money was received.
 
-**Refunding a payment.** Open an approved payment and click **Reembolsar** (refund). Confirm that the money was returned to the customer: the payment changes to Refunded, the points that the booking earned are reversed, and the customer receives a notice and an email. The refund cannot be undone. In the current version, the texts of this option appear in Spanish in every language (ACO-06 of the actions document).
+**Refunding a payment.** Open an approved payment and click **Refund**. Confirm that the money was returned to the customer: the payment changes to Refunded, the points that the booking earned are reversed, and the customer receives a notice and an email. The refund cannot be undone.
 
 **Export reconciliation** downloads the list in Excel, PDF, or CSV. Customer notices require *MESSAGING_ENABLED=true* in payment-service and notification-service.
 
@@ -642,7 +643,7 @@ The system does not integrate a payment gateway (ADR-008). The customer pays out
 
 *Payment Review*
 
-> **Screenshot to insert.** **Screen:** Payments > Review (route */admin/payments*). **Content:** the "Review payment" window with the receipt image, the booking data, the reference, the amounts, the rejection reason field, and the Reject and Approve payment buttons.
+![Payment Review](capturas/administrator-10-payment-review.jpg)
 
 *Note.* Use a test receipt, without real bank data.
 
@@ -693,7 +694,7 @@ For queries that the screen does not offer, the IT administrator can use the sup
 
 *Administrative Reports*
 
-> **Screenshot to insert.** **Screen:** Reports (route */admin/reports*). **Content:** the filters, the charts of services and revenue, the summaries of day, week, and month, and the best-selling services.
+![Administrative Reports](capturas/administrator-11-administrative-reports.jpg)
 
 ### 13.1 Support Queries
 
@@ -819,7 +820,7 @@ The *CHECKSUM* option detects damaged pages when backing up and when verifying.
 
 *Backup Generated and Verified*
 
-> **Screenshot to insert.** **Screen:** terminal of the IT administrator. **Content:** output of BACKUP DATABASE with the number of pages processed and of RESTORE VERIFYONLY with the message that the backup set is valid.
+![Backup Generated and Verified](capturas/administrator-12-backup-generated-and-verified.png)
 
 ### 14.4 Automating the Daily Backup
 
@@ -917,7 +918,7 @@ Liquibase changesets are forward-only. Undoing a migration therefore means resto
 
 *Post-Restoration Verification*
 
-> **Screenshot to insert.** **Screen:** terminal or SQL client. **Content:** result of the verification queries: the nine schemas and the fixed status identifiers.
+![Post-Restoration Verification](capturas/administrator-13-post-restoration-verification.png)
 
 ## 16. Auditing and Action History
 
@@ -933,6 +934,8 @@ The project design foresees an audit table, *audit.audit_log*, fed by database t
 |---|---|---|
 | security.user_session | Logins: user, start, expiry, revocation, IP address, and agent. | Detect unusual logins. |
 | security.app_user.last_login | Last login of each account. | Identify unused accounts. |
+| security.login_lockout | Failed attempts of each account and until when it is locked. | Detect attempts to guess passwords. |
+| security.app_user (terms_accepted_at, data_policy_accepted_at) | Date each person accepted the legal documents. | Handle requests about consent. |
 | payment.payment (approved_by, processed_at, rejection_reason) | Who approved a payment, when, and why it was rejected. | Review the approvals. |
 | payment.payment_receipt (uploaded_by, uploaded_at) | Who uploaded each receipt and when. | Review the receipts. |
 | payment.loyalty_transaction | Each point movement (earned and reversed) with its resulting balance. | Handle point claims. |
@@ -982,7 +985,7 @@ WHERE last_login IS NULL OR last_login < DATEADD(day, -90, SYSUTCDATETIME());
 
 *Session History Query*
 
-> **Screenshot to insert.** **Screen:** SQL client or sqlcmd. **Content:** result of the query of the latest logins, without real personal data visible.
+![Session History Query](capturas/administrator-14-session-history-query.png)
 
 ## 17. Security Recommendations
 
@@ -991,7 +994,7 @@ The project's security policy is based on defense in depth, least privilege, sec
 ### 17.1 Accounts and Passwords
 
 - Do not share the administrator password and use individual accounts.
-- Use long and unique passwords stored in a password manager. Because the system does not lock accounts after failed attempts, a weak password can be guessed by brute force.
+- Use long and unique passwords stored in a password manager. The temporary lockout slows down repeated attempts, but it does not replace a strong password.
 - Change any temporary password immediately.
 - Deactivate the accounts of people who leave the process on the same day.
 - Review the list of administrators quarterly: it must be as short as possible.
@@ -999,7 +1002,7 @@ The project's security policy is based on defense in depth, least privilege, sec
 
 ### 17.2 Personal Data
 
-The system processes personal data (ID number, names, phone, email, vehicles, and payments) and must comply with Statutory Law 1581 of 2012 (Congreso de la República de Colombia, 2012). Registration requires accepting the Terms and Conditions and the Personal Data Processing Policy; those documents are samples prepared for a training project and must be reviewed by a lawyer before real commercial use. In addition, the acceptance is not yet stored on the server (action ACO-03 of the corrective, preventive, and improvement actions document). The administrator must consult only the data needed for the function, must not copy them to personal media, and must handle the requests of access or correction of the data subjects. No card data are collected. Backups and exports inherit the obligation of protection.
+The system processes personal data (ID number, names, phone, email, vehicles, and payments) and must comply with Statutory Law 1581 of 2012 (Congreso de la República de Colombia, 2012). Registration requires accepting the Terms and Conditions and the Personal Data Processing Policy; those documents are samples prepared for a training project and must be reviewed by a lawyer before real commercial use. When a person registers, the server stores the date and time each document was accepted (*security.app_user*, columns *terms_accepted_at* and *data_policy_accepted_at*), which serves as proof of consent. The administrator must consult only the data needed for the function, must not copy them to personal media, and must handle the requests of access or correction of the data subjects. No card data are collected. Backups and exports inherit the obligation of protection.
 
 ### 17.3 Secrets and Configuration
 
@@ -1012,7 +1015,7 @@ The system processes personal data (ID number, names, phone, email, vehicles, an
 
 - Only the gateway (port 8080) and the web application should be exposed outside the machine; SQL Server, RabbitMQ, Mailpit, and the ports 3001 to 3006 must not be accessible from outside.
 - Outside the local environment, use HTTPS with TLS 1.2 or higher.
-- The gateway does not apply a request rate limit and the system does not lock accounts: if the system is exposed to the internet, both controls must be implemented first.
+- The gateway does not apply a request rate limit. Account lockout stops someone trying to guess passwords, but on a server exposed to the internet a rate limit should also be added in the proxy (Caddy) or in the gateway.
 
 ### 17.5 Accepted Risks the Administrator Must Know
 
@@ -1024,7 +1027,7 @@ The system processes personal data (ID number, names, phone, email, vehicles, an
 |---|---|
 | A token is not revoked before it expires (1 hour). | Deactivate the account and, if serious, rotate the JWT secret. |
 | HS256 signature with a secret shared among services. | Protect the .env file and rotate the secret periodically. |
-| No limit of login attempts (TD-003). | Strong passwords; do not expose the system to the internet. |
+| No request rate limit in the gateway. | Strong passwords; watch the Caddy and gateway logs for bursts of requests. |
 | Role permissions are editable but not enforced (ADR-015). | Do not use the matrix as access control; real access depends on the role. |
 | Without an Outbox, an event can be lost between the commit and its publication. | Review missing notifications and the dead-letter queues. |
 | Audit trail not populated. | Use the traces of section 16 and request the audit triggers. |
@@ -1086,7 +1089,7 @@ docker compose logs --since 30m booking-service | grep -i error
 | Everyone receives 401 | Expired token or a JWT secret different among services. | Log in again; verify that all the services read the same JWT_SECRET. |
 | Bookings cannot be created (503 CUSTOMER_SERVICE_UNAVAILABLE) | customer-service down or misconfigured. | Restart the service; review CUSTOMER_SERVICE_URL. |
 | Operators cannot start services (503 BOOKING_SERVICE_UNAVAILABLE) | booking-service down. | Restart booking-service. |
-| Bookings without an operator | Automatic assignment does not exist. | Assign manually (section 12.4) every day. |
+| Bookings without an operator | No operator was free when the booking was confirmed (no shift, absent, or busy). | Assign by hand (section 12.4) and review the shifts and absences of the operators. |
 | Payments fail through the gateway in Docker | The payment-service container is not running or payment-migrate failed. | Check *docker compose ps* and the log of payment-service (Installation Manual, section 17). |
 | A payment cannot be approved | There is already an approved payment for the booking. | Review the payments of the booking and reject the duplicate. |
 | Payment approved without the money | Fake or poorly verified receipt. | Review who approved it (approved_by); contact the customer; refund it from Payments (section 12.6). |
@@ -1127,7 +1130,7 @@ Every incident must be recorded with the date, who detected it, the description,
 | Term | Definition |
 |---|---|
 | Administrator | ADMIN role: runs the business and manages accounts, payments, and configuration. |
-| Assignment | Link between an operator and a booking, made by the administrator. |
+| Assignment | Link between an operator and a booking; created by the system when the booking is confirmed or by the administrator by hand. |
 | Audit trail | Record of data changes with their author and date. |
 | Bay | Physical washing spot; the number of active bays defines the capacity. |
 | Coupon | Percentage discount that the customer unlocks with points and redeems when paying. |
@@ -1173,9 +1176,9 @@ Vehicle Washing Development Team. (2026d). *lavarapido-security-service* (develo
 
 ## 19. Annexes
 
-### Annex A. List of Figures Pending Capture
+### Annex A. Source of the Screenshots
 
-Before delivery, the team must replace each of the 14 placeholders with a real and sharp screenshot of the final version, ordered according to the flow. No screenshot may show passwords, bank accounts, real QR codes, or real personal data.
+The figures in this manual were taken on October 16, 2026, on the version of the *develop* branch, with the whole system running in Docker and the web at *http://localhost:4200*. The terminal screenshots show the real output of the commands. Test accounts, bookings, payments, and payment methods were used, so no real passwords, bank accounts, QR codes, or personal data appear. If a screen changes, the screenshot must be taken again with the same file name in the *capturas* folder.
 
 ### Annex B. Information to Confirm Before Delivery
 
@@ -1185,17 +1188,12 @@ Before delivery, the team must replace each of the 14 placeholders with a real a
 
 | Topic | What is missing or contradictory | Section |
 |---|---|---|
-| Account lockout | RF-004b requires it but it is not implemented (TD-003). | 8.2 and 17 |
-| Automatic assignment | RF-008 pending (TD-020); every booking is assigned by hand. | 12.4 |
-| Business data | Saved only in the browser (TD-013). | 6.3 and 11.1 |
 | Role permissions | Saved on the server but not enforced (ADR-015). | 10 |
-| Inspection reports | Saved only in the browser; the public link does not work on other devices. | 12.5 |
-| Refund texts | They appear in Spanish in every language (ACO-06). | 12.6 |
 | Audit trail | audit.audit_log is not populated. | 16 |
-| Personal data consent | The acceptance of the legal documents is not stored on the server (ACO-03). | 17.2 |
 | Backup policy and RPO and RTO objectives | Not defined; the proposed values must be approved. | 14 |
 | Retention of traces | No policy defined. | 16.3 |
 | One login per service | The services connect with the sa account. | 17.3 |
+| Request rate limit | Neither the gateway nor Caddy limits the requests per client. | 17.4 |
 
 *Note.* Prepared by the authors from the verification of the source code and the technical backlog of the project.
 
@@ -1233,7 +1231,7 @@ Before delivery, the team must replace each of the 14 placeholders with a real a
 | All figures replaced by real screenshots | Yes / No |
 | Backup and restoration procedures tested on a real installation | Yes / No |
 | No credentials, keys, or sensitive data | Yes / No |
-| Pending items of Annex B reviewed | Yes / No |
+| Items of Annex B reviewed | Yes / No |
 | Exported to PDF with the name Manual_administrador_LavadoVehicular_3145556.pdf | Yes / No |
 
 *Note.* Adapted from the checklist of the guide for writing software manuals (SENA, 2026).

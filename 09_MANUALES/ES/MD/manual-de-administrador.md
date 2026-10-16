@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-9 de octubre de 2026
+16 de octubre de 2026
 
-Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 3.1
+Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.0
 
 ## Control de Versiones
 
@@ -31,6 +31,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 2.0 | 2026-10-06 | Creación del manual de administrador (en español) a partir de la documentación del proyecto, dentro de la versión 2.0 del conjunto de manuales. | Equipo de desarrollo |
 | 3.0 | 2026-10-07 | Traducción al inglés, formato APA (7.ª ed.) y verificación contra el código fuente. El módulo de administración de la aplicación web se documenta pantalla por pantalla (se describía como inexistente). Se corrigieron: estado de implementación de cada función, creación de cuentas desde el panel, ausencia de bloqueo de cuenta, asignación manual de operarios, revisión de pagos y pagos manuales, funciones guardadas solo en el navegador, nombres reales de contenedores y base de datos, y estado de la auditoría. | Equipo de desarrollo |
 | 3.1 | 2026-10-09 | Actualización contra el código del 9 de octubre de 2026 (ADR-011, secciones 9 a 12, y ADR-015) y creación de esta versión en español (la versión en inglés es Manual_administrador_LavadoVehicular_3145556_EN.md). Se actualizaron: tabla de estado de implementación; matriz de permisos de los tres roles fijos guardada en el servidor (informativa, no aplicada); puntos de fidelización por servicio; promociones como cupones porcentuales desbloqueables con puntos; reembolsos desde la interfaz con reversión de puntos; comparación del monto declarado; validación de referencias reutilizadas; avisos al cliente de los resultados de pago; avisos al personal para los administradores; informe de inspección notificado al cliente en lugar de WhatsApp; payment-service en Docker; nuevos tipos de notificación y revisiones de colas de mensajes muertos. | Equipo de desarrollo |
+| 4.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026. Las figuras pasaron de marcadores a capturas reales. Se actualizaron: bloqueo de la cuenta por intentos fallidos, asignación automática de operarios con la elección opcional del cliente, datos del negocio e informes de inspección guardados en el servidor, consentimiento de los documentos legales guardado al registrarse, textos del reembolso traducidos, nuevas trazas de la Tabla 15, riesgos de la Tabla 16 y temas del Anexo B que quedaron resueltos. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -114,7 +115,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 - [18. Glosario](#18-glosario)
 - [Referencias](#referencias)
 - [19. Anexos](#19-anexos)
-  - [Anexo A. Lista de Figuras Pendientes de Captura](#anexo-a-lista-de-figuras-pendientes-de-captura)
+  - [Anexo A. Origen de las Capturas](#anexo-a-origen-de-las-capturas)
   - [Anexo B. Información por Confirmar Antes de la Entrega](#anexo-b-información-por-confirmar-antes-de-la-entrega)
   - [Anexo C. Plantilla de Registro de Incidentes](#anexo-c-plantilla-de-registro-de-incidentes)
   - [Anexo D. Lista de Verificación para la Entrega](#anexo-d-lista-de-verificación-para-la-entrega)
@@ -129,9 +130,9 @@ Este manual está dirigido a los administradores del negocio y a los administrad
 
 ### 4.1 Fuentes y Estado de la Documentación
 
-El manual se verificó contra el código fuente de la aplicación web y de los servicios (Equipo de Desarrollo Vehicle Washing, 2026b, 2026c, 2026d) y contra la documentación del proyecto actualizada al 9 de octubre de 2026 (Equipo de Desarrollo Vehicle Washing, 2026a). La aplicación web incluye un módulo de administración completo bajo la ruta */admin*, restringido al rol ADMIN. Los nombres de las pantallas, botones y mensajes se escriben tal como aparecen cuando el idioma de la interfaz es el español.
+El manual se verificó contra el código fuente de la aplicación web y de los servicios (Equipo de Desarrollo Vehicle Washing, 2026b, 2026c, 2026d) y contra la documentación del proyecto actualizada al 16 de octubre de 2026 (Equipo de Desarrollo Vehicle Washing, 2026a). La aplicación web incluye un módulo de administración completo bajo la ruta */admin*, restringido al rol ADMIN. Los nombres de las pantallas, botones y mensajes se escriben tal como aparecen cuando el idioma de la interfaz es el español.
 
-No todas las pantallas del módulo guardan sus datos en el servidor. Algunas funciones están completas (el servidor las aplica y las guarda), mientras que otras todavía conservan sus datos solo en el navegador del administrador y no afectan al resto del sistema. La sección 6.3 indica el estado de cada función para que el administrador sepa qué datos son oficiales. Cuando la documentación no define un valor (por ejemplo, una política de retención o un objetivo de recuperación), el manual lo presenta como **recomendación** y lo lista en el Anexo B para que el equipo lo apruebe, como exige la guía para elaborar manuales (Servicio Nacional de Aprendizaje [SENA], 2026).
+Casi todas las pantallas del módulo guardan sus datos en el servidor. Las excepciones son los reportes, que se calculan en el navegador a partir de las reservas y los pagos, y la matriz de permisos, que se guarda en el servidor pero todavía no cambia lo que puede hacer cada rol. La sección 6.3 indica el estado de cada función para que el administrador sepa qué datos son oficiales. Cuando la documentación no define un valor (por ejemplo, una política de retención o un objetivo de recuperación), el manual lo presenta como **recomendación** y lo lista en el Anexo B para que el equipo lo apruebe, como exige la guía para elaborar manuales (Servicio Nacional de Aprendizaje [SENA], 2026).
 
 ## 5. Objetivo
 
@@ -160,12 +161,12 @@ Guiar al administrador en la gestión, configuración y supervisión del Sistema
 - El uso del sistema por parte de clientes y operarios (Manual de Usuario).
 - La arquitectura interna, el modelo de datos completo y los contratos de la API (Manual Técnico).
 - La instalación inicial del entorno (Manual de Instalación) y la puesta en operación de una versión (Procedimiento de Implementación).
-- Las pantallas de administración de la aplicación Android, que sigue en desarrollo.
+- Las pantallas de administración de la aplicación Android, que ofrece módulos equivalentes a los de la web y se descarga desde la página de inicio.
 - Los entornos de pruebas y de producción, que la documentación declara fuera del alcance académico; las recomendaciones de este manual para esos entornos son indicativas.
 
 ### 6.3 Estado de Implementación de las Funciones Administrativas
 
-La Tabla 2 resume el estado real de cada función en la versión del 9 de octubre de 2026. Se debe confirmar contra la versión final del software antes de publicar el manual.
+La Tabla 2 resume el estado real de cada función en la versión del 16 de octubre de 2026, revisada contra el código y con el sistema en funcionamiento.
 
 **Tabla 2**
 
@@ -179,12 +180,12 @@ La Tabla 2 resume el estado real de cada función en la versión del 9 de octubr
 | Servicios, precios, duraciones por tipo de vehículo y puntos de fidelización | Gestión > Servicios | Completa. | 12.2 |
 | Promociones y cupones | Gestión > Promociones | Completa: cupones porcentuales guardados en payment-service, desbloqueables con puntos y aplicados cuando el cliente paga. | 12.8 |
 | Horario semanal, excepciones y bahías | Horarios y bahías | Completa. | 11.2 y 11.3 |
-| Datos del negocio | Configuración > Datos del negocio | Solo en el navegador: no cambian los datos que ven los clientes. | 11.1 |
+| Datos del negocio | Configuración > Datos del negocio | Completa: se guardan en booking-service y son los que ven los clientes en la página de inicio y en el centro de ayuda. | 11.1 |
 | Medios de pago (cuentas y códigos QR) | Configuración > Medios de pago | Completa. | 11.4 |
 | Operarios, disponibilidad semanal y ausencias | Operarios | Completa. | 12.1 |
 | Reservas: crear, reprogramar, cambiar el estado y cancelar | Reservas | Completa. | 12.3 |
-| Asignación manual de operarios | Reservas, Dashboard | Completa. La asignación automática está pendiente (deuda técnica TD-020). | 12.4 |
-| Informe de inspección del vehículo | Reservas > Inspección | Parcial: el informe queda solo en el navegador, pero su resumen se envía al cliente por notificación y correo (**Notificar al cliente**). | 12.5 |
+| Asignación de operarios | Reservas, Dashboard | Completa: el sistema asigna un operario libre al confirmarse la reserva (el que eligió el cliente, si sigue libre) y el administrador lo cambia a mano o asigna las reservas que quedaron sin operario. | 12.4 |
+| Informe de inspección del vehículo | Reservas > Inspección | Completa: el informe y las fotos se guardan en operations-service y el cliente recibe el resumen con el enlace al informe por notificación y correo (**Notificar al cliente**). | 12.5 |
 | Revisión, aprobación, rechazo y reembolso de pagos; pagos manuales | Pagos | Completa. | 12.6 |
 | Reportes y exportación a Excel o PDF | Reportes | Completa (calculados en el navegador a partir de reservas y pagos). | 13 |
 | Bandeja de notificaciones, incluidos los avisos al personal | Notificaciones | Completa. Los avisos libres a usuarios se envían solo por la API. | 12.7 |
@@ -213,7 +214,7 @@ El sistema define tres roles fijos: Administrador (código ADMIN), Operario (OPE
 ### 7.2 Responsabilidades
 
 - Mantener actualizados el horario, las bahías, los servicios, los precios, los puntos, las promociones y las cuentas de pago.
-- Asignar un operario a cada reserva, porque la asignación automática todavía no está disponible.
+- Revisar el bloque **Reservas sin operario** y asignar a mano las reservas que el sistema no pudo asignar porque no había operarios libres.
 - Verificar los pagos digitales contra el comprobante y el banco, registrar los pagos en efectivo y hacer los reembolsos que correspondan.
 - Crear, desactivar y supervisar las cuentas de operarios y administradores.
 - Consultar los reportes y las trazas, y detectar comportamientos anómalos.
@@ -255,13 +256,13 @@ Cada persona que administra el sistema debe usar una cuenta individual y segura.
 3. Escribir el correo (terminado en @gmail.com) y la contraseña de la cuenta de administrador.
 4. Hacer clic en **Iniciar Sesión**. El sistema valida las credenciales y abre el panel de administración (ruta */admin*).
 
-La sesión dura una hora; al vencerse, el administrador debe ingresar de nuevo. La versión actual **no bloquea las cuentas después de intentos fallidos** (deuda técnica TD-003), por lo que las contraseñas de administrador deben ser largas y únicas (sección 17.1).
+La sesión dura una hora; al vencerse, el administrador debe ingresar de nuevo. Después de cinco intentos fallidos en menos de 15 minutos, la cuenta queda bloqueada durante 15 minutos; restablecer la contraseña la desbloquea de inmediato. Aun así, las contraseñas de administrador deben ser largas y únicas (sección 17.1).
 
 **Figura 1**
 
 *Ingreso del Administrador*
 
-> **Captura por insertar.** **Pantalla:** Iniciar Sesión (ruta */auth*). **Contenido:** formulario con los campos Correo Electrónico y Contraseña, el enlace "¿Olvidaste tu contraseña?" y el botón Iniciar Sesión, diligenciado con una cuenta de prueba y sin mostrar la contraseña.
+![Ingreso del Administrador](capturas/administrador-01-ingreso-del-administrador.jpg)
 
 ### 8.3 Panel de Control General
 
@@ -289,7 +290,7 @@ El panel de control (ruta */admin*, opción del menú **Dashboard**) resume lo q
 
 *Panel de Control General*
 
-> **Captura por insertar.** **Pantalla:** Dashboard (ruta */admin*). **Contenido:** el saludo, las tarjetas de indicadores, la gráfica de ingresos de los últimos 7 días, el estado de los operarios, los pagos pendientes de revisión y las reservas sin operario, con datos de prueba.
+![Panel de Control General](capturas/administrador-02-panel-de-control-general.jpg)
 
 ### 8.4 Primera Cuenta de Administrador
 
@@ -335,7 +336,7 @@ Una cuenta del sistema está formada por una persona (*security.person*: número
 
 *Lista de Usuarios*
 
-> **Captura por insertar.** **Pantalla:** Gestión > Usuarios (ruta */admin/management*). **Contenido:** los filtros, el botón Crear usuario y la tabla con al menos tres cuentas de roles distintos, sin datos personales reales.
+![Lista de Usuarios](capturas/administrador-03-lista-de-usuarios.jpg)
 
 ### 9.3 Creación de una Cuenta de Operario o Administrador
 
@@ -352,7 +353,7 @@ Los operarios también se pueden crear desde **Operarios > Nuevo operario** (sec
 
 *Ventana para Crear un Usuario*
 
-> **Captura por insertar.** **Pantalla:** Gestión > Usuarios > Crear usuario. **Contenido:** la ventana con los campos de número de documento, nombres, correo, teléfono, contraseña temporal y Rol asignado diligenciados con datos de prueba.
+![Ventana para Crear un Usuario](capturas/administrador-04-ventana-para-crear-un-usuario.jpg)
 
 ### 9.4 Activación y Desactivación de una Cuenta
 
@@ -435,7 +436,7 @@ El panel no ofrece una opción para cambiar el rol de una cuenta existente. Cuan
 
 ### 11.1 Datos del Negocio
 
-**Configuración > Datos del negocio** (ruta */admin/settings*) muestra la razón social, el NIT, el representante legal, la dirección, los teléfonos, el correo, la información tributaria y los canales oficiales del lavadero. En la versión actual **estos datos se guardan solo en el navegador del administrador** (deuda técnica TD-013): no cambian la información que ven los clientes. La dirección, el teléfono y el correo que ven los clientes en el centro de ayuda provienen del registro del establecimiento en booking-service (*booking.establishment*), que corrige el administrador de TI con SQL. La pantalla se puede usar como referencia, pero no se debe esperar que los cambios lleguen a otros usuarios.
+**Configuración > Datos del negocio** (ruta */admin/settings*) muestra la razón social, el NIT, el representante legal, la dirección, los teléfonos, el correo, la información tributaria y los canales oficiales del lavadero. Estos datos se guardan en booking-service (*GET* y *PUT /api/v1/admin/establishment*), que valida cada campo antes de guardarlo. Son los mismos que ven los clientes en la página de inicio, en el pie de página y en el centro de ayuda, por lo que un cambio se refleja para todos los usuarios al recargar la página. Las cuentas y los códigos QR para recibir pagos se configuran aparte, en **Medios de pago** (sección 11.4).
 
 ### 11.2 Horario de Atención y Excepciones
 
@@ -452,7 +453,7 @@ Un cambio aplica a la disponibilidad futura; las reservas ya confirmadas no se r
 
 *Horario de Atención y Excepciones*
 
-> **Captura por insertar.** **Pantalla:** Horarios y bahías > Horario de atención (ruta */admin/schedule*). **Contenido:** el horario semanal de los siete días con apertura, cierre y pausa, y la lista de excepciones con fecha, tipo, horario aplicable y motivo.
+![Horario de Atención y Excepciones](capturas/administrador-05-horario-de-atencion-y-excepciones.jpg)
 
 ### 11.3 Bahías de Lavado
 
@@ -479,7 +480,7 @@ Las imágenes de los QR y los comprobantes se guardan dentro de la base de datos
 
 *Configuración de los Medios de Pago*
 
-> **Captura por insertar.** **Pantalla:** Configuración > Medios de pago (ruta */admin/settings*). **Contenido:** la lista de cuentas con método, titular, número de cuenta, estado y la imagen del QR de una de ellas.
+![Configuración de los Medios de Pago](capturas/administrador-06-configuracion-de-los-medios-de-pago.jpg)
 
 *Nota.* Usar una cuenta y un código QR de prueba.
 
@@ -492,7 +493,7 @@ Las imágenes de los QR y los comprobantes se guardan dentro de la base de datos
 | Parámetro | Valor | Dónde se configura |
 |---|---|---|
 | Vigencia del token de acceso | 1 hora; no hay token de actualización | security-service (JWT_ACCESS_TOKEN_TTL). |
-| Bloqueo de cuenta por intentos fallidos | No implementado (TD-003) | — |
+| Bloqueo de cuenta por intentos fallidos | 5 intentos fallidos en 15 minutos bloquean la cuenta durante 15 minutos; restablecer la contraseña la desbloquea | security-service (*security.login_lockout*). |
 | Código de recuperación | 6 dígitos, válido 15 minutos, de un solo uso, 5 intentos fallidos | security-service. |
 | Contraseña | De 8 a 72 caracteres, una mayúscula, un número, un carácter especial, sin espacios | security-service e interfaz web. |
 | Almacenamiento de la contraseña | BCrypt con factor de costo 12 | security-service. |
@@ -525,7 +526,7 @@ Algunos indicadores de la pantalla de detalle (por ejemplo, puntualidad, meta de
 
 *Detalle del Operario con Disponibilidad y Ausencias*
 
-> **Captura por insertar.** **Pantalla:** Operarios > detalle del operario (ruta */admin/operators/{id}*). **Contenido:** la tarjeta del operario, los botones Editar disponibilidad y Registrar ausencia, y la lista de servicios del día con su bahía.
+![Detalle del Operario con Disponibilidad y Ausencias](capturas/administrador-07-detalle-del-operario-con-disponibilidad-y-ausenc.jpg)
 
 ### 12.2 Servicios, Precios y Puntos
 
@@ -572,11 +573,11 @@ Las reglas del ciclo de vida son las mismas para todos: una reserva no puede que
 
 *Gestión de Reservas*
 
-> **Captura por insertar.** **Pantalla:** Reservas (ruta */admin/reservations*). **Contenido:** los indicadores, los filtros, los botones Nueva Reserva y Exportar, y la tabla con reservas en distintos estados, una de ellas sin operario.
+![Gestión de Reservas](capturas/administrador-08-gestion-de-reservas.jpg)
 
 ### 12.4 Asignación de un Operario
 
-En la versión actual **el sistema no asigna operarios automáticamente** (el requisito RF-008 está pendiente, deuda técnica TD-020) y el cliente no elige el operario. El administrador debe asignar un operario a cada reserva.
+Cuando se confirma una reserva, **el sistema asigna el operario automáticamente** (RF-008): si el cliente eligió uno y sigue libre, se le asigna ese; si no, el operario libre con menos reservas ese día. Un operario está libre cuando su cuenta está activa, tiene turno a esa hora, no tiene una ausencia registrada y no atiende otra reserva en ese horario. Si ninguno está libre, la reserva queda sin operario y aparece en el bloque **Reservas sin operario** del Dashboard. Una reserva reprogramada conserva su operario. El administrador asigna a mano en dos casos: cuando la reserva quedó sin operario y cuando necesita cambiar el que se asignó.
 
 1. En el **Dashboard** (bloque **Reservas sin operario**) o en **Reservas**, hacer clic en **Asignar** en la reserva.
 2. La ventana de asignación muestra los detalles de la cita y la lista de operarios. Los operarios disponibles aparecen primero; los demás indican por qué no pueden tomar la reserva: **Inactivo**, **Sin turno a esa hora**, **Ausente** u **Ocupado a esa hora**.
@@ -591,7 +592,7 @@ Solo se pueden asignar reservas en estado SCHEDULED o CONFIRMED, y el operario s
 
 *Asignación Manual de un Operario*
 
-> **Captura por insertar.** **Pantalla:** Reservas > Asignar. **Contenido:** la ventana de asignación con los detalles de la cita, la lista de operarios con su disponibilidad o motivo de bloqueo, el campo de notas y el botón Confirmar Asignación.
+![Asignación Manual de un Operario](capturas/administrador-09-asignacion-manual-de-un-operario.jpg)
 
 ### 12.5 Informe de Inspección del Vehículo
 
@@ -601,9 +602,9 @@ Para los servicios largos (180 minutos o más), el administrador puede registrar
 2. Hacer clic en **Iniciar reporte** cuando llegue el vehículo.
 3. En cada fase, hacer clic en **Iniciar fase**, agregar los hallazgos con **Agregar hallazgo** (parte del vehículo; tipo: nota, daño menor o daño mayor; descripción; y hasta cinco fotos JPG o PNG de hasta 10 MB) y hacer clic en **Terminar fase**.
 4. Hacer clic en **Publicar y copiar enlace**; **Ver como cliente** muestra la versión pública (ruta */report/{token}*).
-5. Hacer clic en **Notificar al cliente**. El sistema envía al cliente una notificación y un correo (tipo *INSPECTION_REPORT*) con el resumen de la inspección: fases terminadas, número de hallazgos, hallazgos mayores y áreas afectadas. El mensaje "Cliente notificado" confirma el envío.
+5. Hacer clic en **Notificar al cliente**. El sistema envía al cliente una notificación y un correo (tipo *INSPECTION_REPORT*) con el resumen de la inspección: fases terminadas, número de hallazgos, hallazgos mayores y áreas afectadas, junto con el enlace al informe. El mensaje "Cliente notificado" confirma el envío.
 
-**Limitación importante:** los informes y las fotos se guardan solo en el navegador donde se crearon (todavía no hay un servidor para esta función). El enlace público solo abre en ese mismo navegador; por eso el aviso al cliente lleva el resumen y no el enlace, y los detalles y las fotos se le muestran al cliente cuando se le entrega el vehículo.
+**Dónde se guarda:** el informe, sus fases, los hallazgos y las fotos se guardan en operations-service (tablas *execution.inspection_report*, *execution.inspection_phase*, *execution.inspection_finding* y *execution.inspection_photo*). Las fotos se comprimen en el navegador antes de enviarse. El enlace público (ruta */report/{token}*) solo funciona después de publicar el informe y abre desde cualquier dispositivo sin iniciar sesión, por eso el aviso al cliente lo incluye.
 
 ### 12.6 Revisión y Aprobación de Pagos
 
@@ -642,7 +643,7 @@ El sistema no integra una pasarela de pagos (ADR-008). El cliente paga por fuera
 
 *Revisión de Pagos*
 
-> **Captura por insertar.** **Pantalla:** Pagos > Revisar (ruta */admin/payments*). **Contenido:** la ventana de revisión con la imagen del comprobante, los datos de la reserva, la referencia, la comparativa de montos, el campo del motivo del rechazo y los botones Rechazar y Aprobar pago.
+![Revisión de Pagos](capturas/administrador-10-revision-de-pagos.jpg)
 
 *Nota.* Usar un comprobante de prueba, sin datos bancarios reales.
 
@@ -693,7 +694,7 @@ Para las consultas que la pantalla no ofrece, el administrador de TI puede usar 
 
 *Reportes Administrativos*
 
-> **Captura por insertar.** **Pantalla:** Reportes (ruta */admin/reports*). **Contenido:** los filtros, las gráficas de servicios e ingresos, los resúmenes del día, la semana y el mes, y los servicios más vendidos.
+![Reportes Administrativos](capturas/administrador-11-reportes-administrativos.jpg)
 
 ### 13.1 Consultas de Soporte
 
@@ -780,7 +781,7 @@ La documentación del proyecto no define una estrategia de respaldos, porque la 
 | Frecuencia | Un respaldo completo diario fuera del horario de atención, y otro inmediatamente antes de cada migración o cambio importante. |
 | Retención | 14 respaldos diarios, 8 semanales y 12 mensuales. |
 | Regla 3-2-1 | Tres copias, en dos medios distintos, una de ellas fuera del equipo donde corre el sistema. |
-| Nombre del archivo | backup_LavaRapido_AAAA-MM-DD_HHMM.bak (por ejemplo, backup_LavaRapido_2026-10-09_0200.bak). |
+| Nombre del archivo | backup_LavaRapido_AAAA-MM-DD_HHMM.bak (por ejemplo, backup_LavaRapido_2026-10-16_0200.bak). |
 | Cifrado y acceso | Guardar las copias en una carpeta de acceso restringido y cifrar las que salen del equipo: contienen datos personales protegidos por la Ley 1581 de 2012. |
 | Objetivos de recuperación | Pérdida máxima de datos aceptable (RPO): 24 horas. Tiempo máximo de recuperación (RTO): 4 horas. |
 | Verificación | Comprobar cada respaldo y restaurar uno en un entorno de pruebas al menos una vez al mes. |
@@ -802,15 +803,15 @@ cd lavarapido-infra
 # 1) Respaldo completo dentro del contenedor
 docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd \
   -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
-  "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/backup_LavaRapido_2026-10-09_0200.bak' WITH INIT, CHECKSUM, COMPRESSION"
+  "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/backup_LavaRapido_2026-10-16_0200.bak' WITH INIT, CHECKSUM, COMPRESSION"
 
 # 2) Verificar que el archivo se puede restaurar
 docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd \
   -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
-  "RESTORE VERIFYONLY FROM DISK = N'/var/opt/mssql/data/backup_LavaRapido_2026-10-09_0200.bak' WITH CHECKSUM"
+  "RESTORE VERIFYONLY FROM DISK = N'/var/opt/mssql/data/backup_LavaRapido_2026-10-16_0200.bak' WITH CHECKSUM"
 
 # 3) Copiar al equipo anfitrión
-docker cp lavarapido-sqlserver:/var/opt/mssql/data/backup_LavaRapido_2026-10-09_0200.bak ./backups/
+docker cp lavarapido-sqlserver:/var/opt/mssql/data/backup_LavaRapido_2026-10-16_0200.bak ./backups/
 ```
 
 La opción *CHECKSUM* detecta páginas dañadas al respaldar y al verificar.
@@ -819,7 +820,7 @@ La opción *CHECKSUM* detecta páginas dañadas al respaldar y al verificar.
 
 *Respaldo Generado y Verificado*
 
-> **Captura por insertar.** **Pantalla:** terminal del administrador de TI. **Contenido:** salida de BACKUP DATABASE con el número de páginas procesadas y de RESTORE VERIFYONLY con el mensaje de que el conjunto de respaldo es válido.
+![Respaldo Generado y Verificado](capturas/administrador-12-respaldo-generado-y-verificado.png)
 
 ### 14.4 Automatización del Respaldo Diario
 
@@ -917,7 +918,7 @@ Los changesets de Liquibase solo avanzan. Deshacer una migración significa, por
 
 *Verificación Posterior a la Restauración*
 
-> **Captura por insertar.** **Pantalla:** terminal o cliente SQL. **Contenido:** resultado de las consultas de verificación: los nueve esquemas y los identificadores fijos de estado.
+![Verificación Posterior a la Restauración](capturas/administrador-13-verificacion-posterior-a-la-restauracion.png)
 
 ## 16. Auditoría e Historial de Acciones
 
@@ -933,6 +934,8 @@ El diseño del proyecto prevé una tabla de auditoría, *audit.audit_log*, alime
 |---|---|---|
 | security.user_session | Ingresos: usuario, inicio, vencimiento, revocación, dirección IP y agente. | Detectar ingresos inusuales. |
 | security.app_user.last_login | Último ingreso de cada cuenta. | Identificar cuentas sin uso. |
+| security.login_lockout | Intentos fallidos de cada cuenta y hasta cuándo está bloqueada. | Detectar intentos de adivinar contraseñas. |
+| security.app_user (terms_accepted_at, data_policy_accepted_at) | Fecha en que cada persona aceptó los documentos legales. | Atender solicitudes sobre el consentimiento. |
 | payment.payment (approved_by, processed_at, rejection_reason) | Quién aprobó un pago, cuándo y por qué se rechazó. | Revisar las aprobaciones. |
 | payment.payment_receipt (uploaded_by, uploaded_at) | Quién subió cada comprobante y cuándo. | Revisar los comprobantes. |
 | payment.loyalty_transaction | Cada movimiento de puntos (ganados y revertidos) con su saldo resultante. | Atender reclamos de puntos. |
@@ -982,7 +985,7 @@ WHERE last_login IS NULL OR last_login < DATEADD(day, -90, SYSUTCDATETIME());
 
 *Consulta del Historial de Sesiones*
 
-> **Captura por insertar.** **Pantalla:** cliente SQL o sqlcmd. **Contenido:** resultado de la consulta de los últimos ingresos, sin datos personales reales visibles.
+![Consulta del Historial de Sesiones](capturas/administrador-14-consulta-del-historial-de-sesiones.png)
 
 ## 17. Recomendaciones de Seguridad
 
@@ -991,7 +994,7 @@ La política de seguridad del proyecto se basa en la defensa en profundidad, el 
 ### 17.1 Cuentas y Contraseñas
 
 - No compartir la contraseña de administrador y usar cuentas individuales.
-- Usar contraseñas largas y únicas guardadas en un gestor de contraseñas. Como el sistema no bloquea las cuentas después de intentos fallidos, una contraseña débil se puede adivinar por fuerza bruta.
+- Usar contraseñas largas y únicas guardadas en un gestor de contraseñas. El bloqueo temporal frena los intentos repetidos, pero no reemplaza una contraseña fuerte.
 - Cambiar de inmediato cualquier contraseña temporal.
 - Desactivar el mismo día las cuentas de las personas que salen del proceso.
 - Revisar cada trimestre la lista de administradores: debe ser lo más corta posible.
@@ -999,7 +1002,7 @@ La política de seguridad del proyecto se basa en la defensa en profundidad, el 
 
 ### 17.2 Datos Personales
 
-El sistema trata datos personales (número de documento, nombres, teléfono, correo, vehículos, pagos y puntos) y debe cumplir la Ley Estatutaria 1581 de 2012 (Congreso de la República de Colombia, 2012). El registro exige aceptar los Términos y Condiciones y la Política de Tratamiento de Datos Personales; esos documentos son modelos elaborados para un proyecto de formación y los debe revisar un abogado antes de un uso comercial real. Además, la aceptación todavía no se guarda en el servidor (acción ACO-03 del documento de acciones correctivas, preventivas y de mejoramiento). El administrador debe consultar solo los datos necesarios para su función, no copiarlos en medios personales y atender las solicitudes de acceso o corrección de los titulares. No se recogen datos de tarjetas. Los respaldos y las exportaciones heredan la obligación de protección.
+El sistema trata datos personales (número de documento, nombres, teléfono, correo, vehículos, pagos y puntos) y debe cumplir la Ley Estatutaria 1581 de 2012 (Congreso de la República de Colombia, 2012). El registro exige aceptar los Términos y Condiciones y la Política de Tratamiento de Datos Personales; esos documentos son modelos elaborados para un proyecto de formación y los debe revisar un abogado antes de un uso comercial real. Cuando una persona se registra, el servidor guarda la fecha y la hora en que aceptó cada documento (*security.app_user*, columnas *terms_accepted_at* y *data_policy_accepted_at*), lo que sirve como prueba del consentimiento. El administrador debe consultar solo los datos necesarios para su función, no copiarlos en medios personales y atender las solicitudes de acceso o corrección de los titulares. No se recogen datos de tarjetas. Los respaldos y las exportaciones heredan la obligación de protección.
 
 ### 17.3 Secretos y Configuración
 
@@ -1012,7 +1015,7 @@ El sistema trata datos personales (número de documento, nombres, teléfono, cor
 
 - Solo el gateway (puerto 8080) y la aplicación web deben estar expuestos fuera del equipo; SQL Server, RabbitMQ, Mailpit y los puertos 3001 a 3006 no deben ser accesibles desde fuera.
 - Fuera del entorno local, usar HTTPS con TLS 1.2 o superior.
-- El gateway no aplica un límite de solicitudes y el sistema no bloquea cuentas: si el sistema se expone a internet, primero se deben implementar ambos controles.
+- El gateway no aplica un límite de solicitudes. El bloqueo de cuentas frena a quien intenta adivinar contraseñas, pero en un servidor expuesto a internet conviene agregar también un límite de solicitudes en el proxy (Caddy) o en el gateway.
 
 ### 17.5 Riesgos Aceptados que el Administrador Debe Conocer
 
@@ -1024,7 +1027,7 @@ El sistema trata datos personales (número de documento, nombres, teléfono, cor
 |---|---|
 | Un token no se revoca antes de vencer (1 hora). | Desactivar la cuenta y, si es grave, rotar el secreto JWT. |
 | Firma HS256 con un secreto compartido entre servicios. | Proteger el archivo .env y rotar el secreto periódicamente. |
-| Sin límite de intentos de inicio de sesión (TD-003). | Contraseñas fuertes; no exponer el sistema a internet. |
+| Sin límite de solicitudes en el gateway. | Contraseñas fuertes; vigilar los registros de Caddy y del gateway en busca de ráfagas de solicitudes. |
 | Permisos por rol editables pero no aplicados (ADR-015). | No usar la matriz como control de acceso; el acceso real depende del rol. |
 | Sin Outbox, un evento se puede perder entre el commit y su publicación. | Revisar las notificaciones faltantes y las colas de mensajes muertos. |
 | Auditoría no poblada. | Usar las trazas de la sección 16 y solicitar los disparadores de auditoría. |
@@ -1086,7 +1089,7 @@ docker compose logs --since 30m booking-service | grep -i error
 | Todos reciben 401 | Token vencido o un secreto JWT distinto entre servicios. | Ingresar de nuevo; verificar que todos los servicios lean el mismo JWT_SECRET. |
 | No se pueden crear reservas (503 CUSTOMER_SERVICE_UNAVAILABLE) | customer-service caído o mal configurado. | Reiniciar el servicio; revisar CUSTOMER_SERVICE_URL. |
 | Los operarios no pueden iniciar servicios (503 BOOKING_SERVICE_UNAVAILABLE) | booking-service caído. | Reiniciar booking-service. |
-| Reservas sin operario | La asignación automática no existe. | Asignar manualmente (sección 12.4) todos los días. |
+| Reservas sin operario | No había operarios libres cuando se confirmó la reserva (sin turno, ausentes u ocupados). | Asignar a mano (sección 12.4) y revisar los turnos y las ausencias de los operarios. |
 | Los pagos fallan a través del gateway en Docker | El contenedor de payment-service no está en ejecución o payment-migrate falló. | Revisar *docker compose ps* y el registro de payment-service (Manual de Instalación, sección 17). |
 | Un pago no se puede aprobar | Ya hay un pago aprobado para la reserva. | Revisar los pagos de la reserva y rechazar el duplicado. |
 | Pago aprobado sin el dinero | Comprobante falso o mal verificado. | Revisar quién lo aprobó (approved_by); contactar al cliente; reembolsarlo desde Pagos (sección 12.6). |
@@ -1127,7 +1130,7 @@ Todo incidente se debe registrar con la fecha, quién lo detectó, la descripci�
 | Término | Definición |
 |---|---|
 | Administrador | Rol ADMIN: dirige el negocio y gestiona cuentas, pagos y configuración. |
-| Asignación | Vínculo entre un operario y una reserva, hecho por el administrador. |
+| Asignación | Vínculo entre un operario y una reserva; lo crea el sistema al confirmarse la reserva o el administrador a mano. |
 | Auditoría | Registro de los cambios de los datos con su autor y su fecha. |
 | Bahía | Puesto físico de lavado; el número de bahías activas define la capacidad. |
 | BCrypt | Algoritmo con el que las contraseñas se guardan como hashes irreversibles. |
@@ -1173,9 +1176,9 @@ Swanson, M., Bowen, P., Phillips, A. W., Gallup, D., y Lynes, D. (2010). *Contin
 
 ## 19. Anexos
 
-### Anexo A. Lista de Figuras Pendientes de Captura
+### Anexo A. Origen de las Capturas
 
-Antes de la entrega, el equipo debe reemplazar cada uno de los 14 marcadores por una captura real y nítida de la versión final, ordenada según el flujo. Ninguna captura puede mostrar contraseñas, cuentas bancarias, códigos QR reales ni datos personales reales.
+Las figuras de este manual se tomaron el 16 de octubre de 2026 sobre la versión de la rama *develop*, con el sistema completo corriendo en Docker y la web en *http://localhost:4200*. Las capturas de terminal muestran la salida real de los comandos. Se usaron cuentas, reservas, pagos y medios de pago de prueba, por lo que no aparecen contraseñas, cuentas bancarias, códigos QR ni datos personales reales. Si una pantalla cambia, la captura se debe tomar de nuevo con el mismo nombre de archivo de la carpeta *capturas*.
 
 ### Anexo B. Información por Confirmar Antes de la Entrega
 
@@ -1185,17 +1188,12 @@ Antes de la entrega, el equipo debe reemplazar cada uno de los 14 marcadores por
 
 | Tema | Qué falta o qué es contradictorio | Sección |
 |---|---|---|
-| Bloqueo de cuenta | RF-004b lo exige, pero no está implementado (TD-003). | 8.2 y 17 |
-| Asignación automática | RF-008 pendiente (TD-020); cada reserva se asigna a mano. | 12.4 |
-| Datos del negocio | Se guardan solo en el navegador (TD-013). | 6.3 y 11.1 |
 | Permisos por rol | Se guardan en el servidor, pero no se aplican (ADR-015). | 10 |
-| Informes de inspección | Se guardan solo en el navegador; el enlace público no funciona en otros dispositivos. | 12.5 |
-| Textos del reembolso | Aparecen en español en todos los idiomas (ACO-06). | 12.6 |
 | Auditoría | audit.audit_log no se alimenta. | 16 |
-| Consentimiento de datos personales | La aceptación de los documentos legales no se guarda en el servidor (ACO-03). | 17.2 |
 | Política de respaldos y objetivos RPO y RTO | No definidos; los valores propuestos se deben aprobar. | 14 |
 | Retención de trazas | No hay una política definida. | 16.3 |
 | Un inicio de sesión por servicio | Los servicios se conectan con la cuenta sa. | 17.3 |
+| Límite de solicitudes | El gateway y Caddy no limitan las solicitudes por cliente. | 17.4 |
 
 *Nota.* Elaborado por los autores a partir de la verificación del código fuente y del backlog técnico del proyecto.
 
@@ -1233,7 +1231,7 @@ Antes de la entrega, el equipo debe reemplazar cada uno de los 14 marcadores por
 | Todas las figuras reemplazadas por capturas reales | Sí / No |
 | Procedimientos de respaldo y restauración probados en una instalación real | Sí / No |
 | Sin credenciales, llaves ni datos sensibles | Sí / No |
-| Pendientes del Anexo B revisados | Sí / No |
+| Temas del Anexo B revisados | Sí / No |
 | Exportado a PDF con el nombre Manual_administrador_LavadoVehicular_3145556.pdf | Sí / No |
 
 *Nota.* Adaptado de la lista de verificación de la guía para elaborar manuales de software (SENA, 2026).
