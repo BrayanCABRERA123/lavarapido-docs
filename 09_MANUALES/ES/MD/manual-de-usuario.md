@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-9 de octubre de 2026
+16 de octubre de 2026
 
-Tipo de manual: Manual de usuario (roles Cliente y Operario) · Versión 3.1
+Tipo de manual: Manual de usuario (roles Cliente y Operario) · Versión 4.0
 
 ## Control de Versiones
 
@@ -32,6 +32,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 2.0 | 2026-10-05 | Datos de portada completados (ficha, instructora y centro de formación) y nombre del sistema ajustado a Vehicle Washing. | Equipo de desarrollo |
 | 3.0 | 2026-10-07 | Traducción al inglés, formato según las normas APA (7.ª ed.), reestructuración según la guía del SENA y verificación contra el código fuente de la aplicación web. Se corrigieron: rutas de las pantallas, campos del registro (número de documento, nombres, apellidos y aceptación de los documentos legales), reglas de la contraseña, ausencia de bloqueo de cuenta, flujo de reserva (sin elección de operario ni reprogramación desde la web), flujo de pago (reglas de la referencia), filtros del historial, notificaciones por correo y estados del operario. | Equipo de desarrollo |
 | 3.1 | 2026-10-09 | Actualización contra el código del 9 de octubre de 2026 y creación de esta versión en español (la versión en inglés es Manual_usuario_LavadoVehicular_3145556_EN.md). Se agregaron: puntos de fidelización por servicio y en el resumen de la reserva, progreso de fidelidad y cupones desbloqueados en el panel, canje de cupones al pagar, lista de datos faltantes bajo el botón de confirmar, estado del pago en el historial y botón Pagar ahora solo cuando la reserva se puede pagar, avisos por correo de pagos aprobados, rechazados y reembolsados, de puntos ganados, de cupones desbloqueados y de informes de inspección, interruptores de notificaciones guardados en la cuenta, avisos al operario y nuevos mensajes. Se retiró WhatsApp del centro de ayuda. | Equipo de desarrollo |
+| 4.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026. Las figuras pasaron de marcadores a capturas reales del sistema funcionando con datos de prueba. Se agregaron: elección opcional del operario al reservar y asignación automática de uno libre, bloqueo de la cuenta por 15 minutos después de cinco intentos fallidos, mensajes que explican por qué una hora no se puede reservar, inicio del servicio desde 15 minutos antes de la hora reservada y descarga de la aplicación Android desde la web. Se retiró el botón Reportar progreso, que ya no existe en la pantalla del operario. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -69,7 +70,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 - [14. Glosario](#14-glosario)
 - [Referencias](#referencias)
 - [15. Anexos](#15-anexos)
-  - [Anexo A. Lista de Figuras Pendientes de Captura](#anexo-a-lista-de-figuras-pendientes-de-captura)
+  - [Anexo A. Origen de las Capturas](#anexo-a-origen-de-las-capturas)
   - [Anexo B. Lista de Verificación para la Entrega](#anexo-b-lista-de-verificación-para-la-entrega)
 
 <!-- /toc -->
@@ -86,7 +87,7 @@ El documento sigue la estructura de la guía para elaborar manuales de software 
 
 ### 4.1 Fuentes y Convenciones de Este Manual
 
-Las pantallas, rutas, botones y mensajes descritos corresponden a la rama *develop* de la aplicación web al 9 de octubre de 2026. Los nombres de botones, menús y mensajes se escriben en **negrita** o entre comillas tal como aparecen cuando el idioma de la interfaz es el español; la interfaz también está disponible en inglés, francés y portugués. Una ruta como */client/vehicles* es la parte de la dirección web que sigue al dominio del sistema (por ejemplo, *http://localhost:4200/client/vehicles* en el entorno local).
+Las pantallas, rutas, botones y mensajes descritos corresponden a la rama *develop* de la aplicación web al 16 de octubre de 2026. En la interfaz el sistema aparece con su nombre comercial, **LavaRápido**. Los nombres de botones, menús y mensajes se escriben en **negrita** o entre comillas tal como aparecen cuando el idioma de la interfaz es el español; la interfaz también está disponible en inglés, francés y portugués. Una ruta como */client/vehicles* es la parte de la dirección web que sigue al dominio del sistema (por ejemplo, *http://localhost:4200/client/vehicles* en el entorno local).
 
 ## 5. Objetivo
 
@@ -115,13 +116,13 @@ Explicar paso a paso cómo el cliente y el operario deben ingresar, navegar y us
 
 - Las funciones del rol **Administrador** (reservas, asignación de operarios, revisión de pagos, horarios y bahías, usuarios, servicios, promociones, reportes y configuración), que se explican en el Manual de Administrador.
 - La instalación, la configuración y la construcción interna del software, que se explican en el Manual de Instalación y en el Manual Técnico.
-- La aplicación móvil Android (React Native con Expo), que ofrece módulos equivalentes para los tres roles pero sigue en desarrollo; este manual documenta solo la versión web.
+- La aplicación móvil Android (React Native con Expo), que ofrece módulos equivalentes para los tres roles. Se descarga desde la página de inicio de la web con el botón de descarga o el código QR; este manual documenta solo la versión web.
 - El lavado a domicilio: en la versión actual el cliente lleva el vehículo al lavadero en la fecha y la hora reservadas.
 - La facturación electrónica ante la DIAN, las pasarelas de pago y la gestión de insumos o inventario.
 
 ### 6.3 Sobre las Capturas de Pantalla
 
-Las figuras de este manual son marcadores que indican la pantalla y los elementos que debe mostrar cada captura. Antes de la entrega final, el equipo debe reemplazar cada marcador por una captura real de la versión final del software, con buena resolución y ordenada según el flujo de uso (Anexo A).
+Las figuras de este manual son capturas reales del sistema funcionando en el entorno local, tomadas el 16 de octubre de 2026 con cuentas y datos de prueba. Están ordenadas según el flujo de uso y su origen se explica en el Anexo A.
 
 ## 7. Requisitos para Usar el Sistema
 
@@ -170,7 +171,7 @@ El sistema reconoce tres roles fijos. Cada persona ve solo las opciones de su ro
 
 *Pantalla de Bienvenida del Sistema*
 
-> **Captura por insertar.** **Pantalla:** dirección principal del sistema (ruta */*), sin sesión iniciada. **Contenido:** vista completa con la barra superior (logo, Inicio, Nosotros, Servicios, selector de idioma, Iniciar Sesión y Registrarse), el bloque principal con los botones Comenzar ahora y Ya tengo cuenta, y las tarjetas de servicios.
+![Pantalla de Bienvenida del Sistema](capturas/usuario-01-pantalla-de-bienvenida-del-sistema.jpg)
 
 *Nota.* Captura en un navegador de escritorio con la ventana completa.
 
@@ -225,7 +226,7 @@ Toda persona debe tener una cuenta para usar las funciones del sistema. Los clie
 
 *Formulario de Registro de Clientes*
 
-> **Captura por insertar.** **Pantalla:** "Crear Cuenta" (ruta */auth/register*). **Contenido:** formulario con los campos Número de Documento, Nombres, Apellidos, Correo Electrónico, Teléfono, Contraseña (con la lista de requisitos) y Confirmar Contraseña, las dos casillas de aceptación y el botón Registrarse, diligenciado con datos de prueba.
+![Formulario de Registro de Clientes](capturas/usuario-02-formulario-de-registro-de-clientes.jpg)
 
 *Nota.* En la captura no debe aparecer información personal real.
 
@@ -233,7 +234,7 @@ Toda persona debe tener una cuenta para usar las funciones del sistema. Los clie
 
 *Mensajes de Validación en el Registro*
 
-> **Captura por insertar.** **Pantalla:** "Crear Cuenta" (ruta */auth/register*). **Contenido:** formulario con al menos dos campos en estado de error (borde rojo y mensaje debajo del campo), por ejemplo un correo que no termina en @gmail.com y contraseñas que no coinciden.
+![Mensajes de Validación en el Registro](capturas/usuario-03-mensajes-de-validacion-en-el-registro.jpg)
 
 *Nota.* Apoya la Tabla 11 de la sección 11.
 
@@ -257,13 +258,13 @@ Toda persona debe tener una cuenta para usar las funciones del sistema. Los clie
 
 **Resultado esperado:** El sistema abre la pantalla de inicio del rol de la persona: */client* para el cliente, */operator* para el operario o */admin* para el administrador. El tema y el idioma guardados en la cuenta se aplican automáticamente.
 
-**Observaciones o restricciones:** Si el correo o la contraseña son incorrectos, el sistema muestra "Correo o contraseña incorrectos" y no revela cuál de los dos falló. El sistema no bloquea la cuenta después de intentos fallidos, por lo que la persona puede intentarlo de nuevo o usar la recuperación de la contraseña. La sesión dura una hora; al vencerse, el sistema vuelve a la pantalla de inicio de sesión con el mensaje "Tu sesión expiró. Inicia sesión de nuevo." Una cuenta desactivada no puede ingresar y recibe el mensaje "Tu cuenta está desactivada. Contacta al administrador."
+**Observaciones o restricciones:** Si el correo o la contraseña son incorrectos, el sistema muestra "Correo o contraseña incorrectos" y no revela cuál de los dos falló. Después de cinco intentos fallidos en menos de 15 minutos, la cuenta queda bloqueada durante 15 minutos y el sistema muestra "Demasiados intentos fallidos. Tu cuenta quedó bloqueada 15 minutos; espera o usa "¿Olvidaste tu contraseña?" para entrar ya." Si la persona restablece la contraseña, puede entrar de inmediato. La sesión dura una hora; al vencerse, el sistema vuelve a la pantalla de inicio de sesión con el mensaje "Tu sesión expiró. Inicia sesión de nuevo." Una cuenta desactivada no puede ingresar y recibe el mensaje "Tu cuenta está desactivada. Contacta al administrador."
 
 **Figura 4**
 
 *Pantalla de Inicio de Sesión*
 
-> **Captura por insertar.** **Pantalla:** "Iniciar Sesión" (ruta */auth*). **Contenido:** formulario con los campos Correo Electrónico y Contraseña, el enlace "¿Olvidaste tu contraseña?", el botón Iniciar Sesión, el enlace para registrarse y el panel lateral de la pantalla.
+![Pantalla de Inicio de Sesión](capturas/usuario-04-pantalla-de-inicio-de-sesion.jpg)
 
 *Nota.* Usar un correo de prueba; no mostrar contraseñas reales.
 
@@ -294,25 +295,25 @@ Toda persona debe tener una cuenta para usar las funciones del sistema. Los clie
 
 *Recuperación de la Contraseña, Paso 1: Correo Electrónico*
 
-> **Captura por insertar.** **Pantalla:** "Recuperar Contraseña" (ruta */auth/forgot-password*), paso 1. **Contenido:** indicador de tres pasos con el número 1 resaltado, el campo Correo Electrónico, el botón Enviar Código y el enlace para volver al inicio de sesión.
+![Recuperación de la Contraseña, Paso 1: Correo Electrónico](capturas/usuario-05-recuperacion-de-la-contrasena-paso-1-correo-elec.jpg)
 
 **Figura 6**
 
 *Recuperación de la Contraseña, Paso 2: Código de Verificación*
 
-> **Captura por insertar.** **Pantalla:** "Verificación", paso 2. **Contenido:** indicador con el número 2 resaltado, el texto "Ingresa el código de 6 dígitos enviado a" seguido del correo, las seis casillas, el enlace para reenviar y el botón Verificar Código.
+![Recuperación de la Contraseña, Paso 2: Código de Verificación](capturas/usuario-06-recuperacion-de-la-contrasena-paso-2-codigo-de-v.jpg)
 
 **Figura 7**
 
 *Recuperación de la Contraseña, Paso 3: Nueva Contraseña*
 
-> **Captura por insertar.** **Pantalla:** "Nueva Contraseña", paso 3. **Contenido:** indicador con el número 3 resaltado, los campos de nueva contraseña y confirmación, la lista de los cuatro requisitos con algunos marcados y el botón Actualizar Contraseña.
+![Recuperación de la Contraseña, Paso 3: Nueva Contraseña](capturas/usuario-07-recuperacion-de-la-contrasena-paso-3-nueva-contr.jpg)
 
 **Figura 8**
 
 *Confirmación del Cambio de Contraseña*
 
-> **Captura por insertar.** **Pantalla:** pantalla final de la recuperación. **Contenido:** el mensaje "¡Contraseña actualizada!", el texto "Tu contraseña se cambió correctamente. Ya puedes iniciar sesión con tu nueva contraseña." y el botón Ir a iniciar sesión.
+![Confirmación del Cambio de Contraseña](capturas/usuario-08-confirmacion-del-cambio-de-contrasena.jpg)
 
 ## 9. Menú Principal
 
@@ -342,7 +343,7 @@ Después de iniciar sesión, el sistema muestra un menú lateral con las opcione
 
 *Menú Lateral del Rol Cliente*
 
-> **Captura por insertar.** **Pantalla:** menú lateral izquierdo, visible en todas las pantallas del cliente. **Contenido:** iniciales, nombre y correo del cliente, las ocho opciones en el orden de la Tabla 5 y la opción Cerrar Sesión al final.
+![Menú Lateral del Rol Cliente](capturas/usuario-09-menu-lateral-del-rol-cliente.jpg)
 
 ### 9.2 Menú del Operario
 
@@ -368,7 +369,7 @@ Después de iniciar sesión, el sistema muestra un menú lateral con las opcione
 
 *Menú Lateral del Rol Operario*
 
-> **Captura por insertar.** **Pantalla:** menú lateral izquierdo, visible en todas las pantallas del operario. **Contenido:** iniciales, nombre y correo del operario, las ocho opciones en el orden de la Tabla 6 y la opción Cerrar Sesión al final.
+![Menú Lateral del Rol Operario](capturas/usuario-10-menu-lateral-del-rol-operario.jpg)
 
 ## 10. Módulos del Sistema
 
@@ -402,7 +403,7 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 
 *Panel del Cliente*
 
-> **Captura por insertar.** **Pantalla:** Dashboard (ruta */client*). **Contenido:** el saludo con el nombre del cliente, las tres tarjetas de resumen, el bloque Tu próximo servicio con su avance, los Accesos rápidos y el bloque de beneficios con el progreso de fidelidad y una promoción desbloqueada.
+![Panel del Cliente](capturas/usuario-11-panel-del-cliente.jpg)
 
 #### 10.1.2 Mis Vehículos
 
@@ -432,13 +433,13 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 
 *Lista de Vehículos del Cliente*
 
-> **Captura por insertar.** **Pantalla:** Mis vehículos (ruta */client/vehicles*). **Contenido:** los tres indicadores, el botón Registrar vehículo y al menos dos tarjetas de vehículos con tipo, color, placa, último lavado, servicio y total de lavados.
+![Lista de Vehículos del Cliente](capturas/usuario-12-lista-de-vehiculos-del-cliente.jpg)
 
 **Figura 13**
 
 *Formulario para Registrar un Vehículo*
 
-> **Captura por insertar.** **Pantalla:** Mis vehículos > Registrar vehículo. **Contenido:** la ventana "Registrar nuevo vehículo" con todos los campos diligenciados con datos de prueba, la ayuda del formato de la placa y los botones para cancelar y Guardar vehículo.
+![Formulario para Registrar un Vehículo](capturas/usuario-13-formulario-para-registrar-un-vehiculo.jpg)
 
 #### 10.1.3 Reservar un Lavado
 
@@ -456,17 +457,19 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 2. **Paso 1 (Elige tu vehículo):** seleccionar uno de los vehículos registrados. Si el vehículo no aparece, usar el enlace **Mis Vehículos** para registrarlo primero.
 3. **Paso 2 (Tipo de servicio):** seleccionar Básico, Premium o Completo. Cada tarjeta muestra qué incluye, la duración, el precio para el tipo de vehículo elegido y los puntos de fidelización que suma ("Suma N puntos").
 4. **Paso 3 (Fecha y hora):** elegir la fecha y luego una de las horas libres que aparecen en **Selecciona una hora**. Las horas se ofrecen cada 30 minutos, dentro del horario de atención, fuera del descanso y solo cuando hay una bahía de lavado libre durante toda la duración del servicio.
-5. Revisar el **Resumen de tu reserva**: vehículo, placa, servicio, duración estimada, fecha, hora, ubicación, total y **Puntos que ganas**.
-6. Hacer clic en **Reservar Ahora**.
+5. Si se desea, elegir en **Operario (opcional)** uno de los operarios libres a esa hora. Si se deja en "Sin preferencia: te asignamos uno libre", el sistema asigna uno automáticamente.
+6. Revisar el **Resumen de tu reserva**: vehículo, placa, servicio, duración estimada, fecha, hora, ubicación, total y **Puntos que ganas**.
+7. Hacer clic en **Reservar Ahora**.
 
 **Resultado esperado:** La reserva se crea de inmediato con el estado Confirmada y una bahía de lavado. El sistema muestra "¡Reserva creada!" con el código de la reserva, y el botón **Ir a pagar** abre la pantalla de pago de esa reserva. El cliente recibe la confirmación en sus notificaciones y por correo.
 
 **Observaciones o restricciones:**
 
-- El cliente no elige el operario: el administrador lo asigna después y el cliente es informado en el panel y en las notificaciones.
+- Elegir el operario es opcional. Si el operario elegido ya no está libre al confirmar, el sistema asigna otro ("Si el operario que elegiste ya no está libre al confirmar, te asignamos otro."). El operario asignado se ve en el panel y en las notificaciones, y el administrador puede cambiarlo después.
 - Las reservas se pueden hacer con hasta 60 días de anticipación.
 - Si el día está cerrado, el sistema muestra "Ese día el lavadero está cerrado"; si no hay horas libres, "No hay horas libres ese día".
 - Si otra persona toma la hora mientras el cliente está reservando, el sistema no guarda nada, muestra "Esa hora ya se ocupó" y lista las horas libres más cercanas de ese mismo día (hasta cinco) para que el cliente elija otra.
+- Si la hora elegida no se puede reservar por otro motivo, el sistema explica cuál: "El lavadero no abre ese día. Elige otra fecha.", "A esa hora el servicio no cabe en el horario de atención. Elige otra hora." o "Esa hora ya pasó. Elige una hora más tarde."
 - Un vehículo no puede tener dos reservas a la misma hora ("Ese vehículo ya tiene una reserva a esa hora.").
 - El servicio se presta en el lavadero: el cliente debe llevar el vehículo en la fecha y la hora reservadas.
 
@@ -474,19 +477,19 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 
 *Reservar un Lavado, Pasos 1 y 2: Vehículo y Servicio*
 
-> **Captura por insertar.** **Pantalla:** Reservar lavado (ruta */client/reserve*). **Contenido:** las tarjetas de vehículos con una seleccionada y las tarjetas de los servicios Básico, Premium y Completo con una seleccionada, sus precios y los puntos que suma cada una.
+![Reservar un Lavado, Pasos 1 y 2: Vehículo y Servicio](capturas/usuario-14-reservar-un-lavado-pasos-1-y-2-vehiculo-y-servic.jpg)
 
 **Figura 15**
 
 *Reservar un Lavado, Paso 3 y Resumen*
 
-> **Captura por insertar.** **Pantalla:** Reservar lavado, parte inferior. **Contenido:** la fecha y la hora seleccionadas y la tarjeta "Resumen de tu reserva" con todos los datos completos, los puntos que se ganan y el botón Reservar Ahora.
+![Reservar un Lavado, Paso 3 y Resumen](capturas/usuario-15-reservar-un-lavado-paso-3-y-resumen.jpg)
 
 **Figura 16**
 
 *Confirmación de la Reserva*
 
-> **Captura por insertar.** **Pantalla:** Reservar lavado, después de hacer clic en Reservar Ahora. **Contenido:** la ventana "¡Reserva creada!" con el código de la reserva, la bahía, el resumen y el botón Ir a pagar.
+![Confirmación de la Reserva](capturas/usuario-16-confirmacion-de-la-reserva.jpg)
 
 #### 10.1.4 Consultar o Cancelar una Reserva
 
@@ -528,7 +531,7 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 
 *Confirmación de la Cancelación de una Reserva*
 
-> **Captura por insertar.** **Pantalla:** Historial > Cancelar reserva. **Contenido:** la ventana "¿Cancelar reserva?" con el código de la reserva y los botones Sí, cancelar y Volver.
+![Confirmación de la Cancelación de una Reserva](capturas/usuario-17-confirmacion-de-la-cancelacion-de-una-reserva.jpg)
 
 #### 10.1.5 Pagar un Servicio
 
@@ -595,13 +598,13 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 
 *Selección del Método de Pago y Resumen de la Reserva*
 
-> **Captura por insertar.** **Pantalla:** Pagar servicio (ruta */client/payment*). **Contenido:** los cuatro métodos de pago con uno seleccionado, el campo Código del cupón con un cupón aplicado y la tarjeta Resumen de la reserva con subtotal, descuento y total a pagar.
+![Selección del Método de Pago y Resumen de la Reserva](capturas/usuario-18-seleccion-del-metodo-de-pago-y-resumen-de-la-res.jpg)
 
 **Figura 19**
 
 *Código QR y Carga del Comprobante*
 
-> **Captura por insertar.** **Pantalla:** Pagar servicio, después de elegir un método digital. **Contenido:** el código QR, la llave o cuenta autorizada con el botón Copiar número, el monto a pagar, el área de carga del comprobante, los campos Referencia de la transacción y Monto pagado, y la lista de datos faltantes bajo el botón deshabilitado.
+![Código QR y Carga del Comprobante](capturas/usuario-19-codigo-qr-y-carga-del-comprobante.jpg)
 
 *Nota.* Usar un código QR de prueba; no mostrar cuentas bancarias reales.
 
@@ -632,13 +635,13 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 
 *Historial con Filtros*
 
-> **Captura por insertar.** **Pantalla:** Historial (ruta */client/history*). **Contenido:** los filtros Todas, Activas, Completadas y Canceladas, el rango de fechas, el cuadro de búsqueda y al menos dos tarjetas de reservas con estados de reserva y de pago distintos.
+![Historial con Filtros](capturas/usuario-20-historial-con-filtros.jpg)
 
 **Figura 21**
 
 *Calificación de un Servicio Completado*
 
-> **Captura por insertar.** **Pantalla:** Historial > Calificar Servicio. **Contenido:** la ventana "Calificar servicio" con las cinco estrellas (algunas seleccionadas), el campo "Comentarios (opcional)" con un texto de ejemplo y el botón Enviar calificación.
+![Calificación de un Servicio Completado](capturas/usuario-21-calificacion-de-un-servicio-completado.jpg)
 
 #### 10.1.7 Notificaciones
 
@@ -667,7 +670,7 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 
 *Centro de Notificaciones*
 
-> **Captura por insertar.** **Pantalla:** Notificaciones (ruta */client/notifications*). **Contenido:** el contador de no leídas, las pestañas por tipo, los filtros, el botón Marcar todo como leído y una lista con notificaciones leídas y no leídas, entre ellas un aviso de puntos ganados.
+![Centro de Notificaciones](capturas/usuario-22-centro-de-notificaciones.jpg)
 
 #### 10.1.8 Perfil
 
@@ -695,7 +698,7 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 
 *Perfil del Usuario*
 
-> **Captura por insertar.** **Pantalla:** Perfil. **Contenido:** las iniciales, el nombre, la fecha de vinculación, los campos en modo de consulta, el botón Editar perfil y las secciones Contraseña y Cuenta.
+![Perfil del Usuario](capturas/usuario-23-perfil-del-usuario.jpg)
 
 #### 10.1.9 Configuración
 
@@ -724,7 +727,7 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 
 *Pantalla de Configuración*
 
-> **Captura por insertar.** **Pantalla:** Configuración (ruta */client/configuration*). **Contenido:** las secciones Notificaciones, Ayuda, Apariencia, Idiomas y Legal y privacidad, con el idioma actual seleccionado.
+![Pantalla de Configuración](capturas/usuario-24-pantalla-de-configuracion.jpg)
 
 ### 10.2 Módulos del Rol Operario
 
@@ -755,7 +758,7 @@ El operario recibe la cuenta del administrador del negocio. El operario solo pue
 
 *Panel del Operario*
 
-> **Captura por insertar.** **Pantalla:** Dashboard (ruta */operator*). **Contenido:** el saludo con el número de servicios pendientes, los indicadores, la barra de avance y la lista Servicios de hoy con un servicio en curso y otro pendiente.
+![Panel del Operario](capturas/usuario-25-panel-del-operario.jpg)
 
 #### 10.2.2 Mi Agenda
 
@@ -783,7 +786,7 @@ El operario recibe la cuenta del administrador del negocio. El operario solo pue
 
 *Agenda del Operario*
 
-> **Captura por insertar.** **Pantalla:** Mi Agenda (ruta */operator/schedule*). **Contenido:** el calendario con un día seleccionado, los totales, el bloque Próximo servicio y la lista de reservas del día con sus botones Iniciar o Finalizar.
+![Agenda del Operario](capturas/usuario-26-agenda-del-operario.jpg)
 
 #### 10.2.3 Servicios Asignados
 
@@ -808,7 +811,7 @@ El operario recibe la cuenta del administrador del negocio. El operario solo pue
 
 **Resultado esperado:** El estado cambia a En progreso y luego a Completado ("¡Servicio finalizado!"). El cliente recibe los avisos y puede calificar el servicio.
 
-**Observaciones o restricciones:** El botón **Reportar progreso** solo muestra una confirmación en la versión actual; aunque el mensaje dice que el cliente recibirá la actualización, no se envía ningún aviso (acción ACO-07 del documento de acciones correctivas, preventivas y de mejoramiento). El operario solo puede actualizar los servicios que tiene asignados.
+**Observaciones o restricciones:** El servicio se puede iniciar desde 15 minutos antes de la hora reservada. El operario solo puede actualizar los servicios que tiene asignados.
 
 **Tabla 10**
 
@@ -816,7 +819,7 @@ El operario recibe la cuenta del administrador del negocio. El operario solo pue
 
 | Estado | Significado | Acción disponible |
 |---|---|---|
-| Pendiente | El servicio fue asignado y todavía no ha comenzado. | Iniciar Servicio (solo el día de la reserva). |
+| Pendiente | El servicio fue asignado y todavía no ha comenzado. | Iniciar Servicio (desde 15 minutos antes de la hora reservada). |
 | En progreso | El operario inició el lavado. | Finalizar Servicio. |
 | Completado | El lavado terminó y el cliente puede calificarlo. | Solo consulta. |
 
@@ -826,13 +829,13 @@ El operario recibe la cuenta del administrador del negocio. El operario solo pue
 
 *Lista de Servicios Asignados con Filtros*
 
-> **Captura por insertar.** **Pantalla:** Servicios asignados (ruta */operator/assigned-services*). **Contenido:** las tarjetas de resumen, los filtros de fecha y de tipo de servicio, y la tabla con las columnas ID, Tipo de servicio, fecha y hora, Vehículo, Cliente y Estado, con al menos cuatro filas.
+![Lista de Servicios Asignados con Filtros](capturas/usuario-27-lista-de-servicios-asignados-con-filtros.jpg)
 
 **Figura 28**
 
 *Información del Servicio y Botones de Acción*
 
-> **Captura por insertar.** **Pantalla:** Servicios asignados > clic en un servicio. **Contenido:** el panel Información del servicio con los datos del servicio y los botones Iniciar Servicio y Finalizar Servicio.
+![Información del Servicio y Botones de Acción](capturas/usuario-28-informacion-del-servicio-y-botones-de-accion.jpg)
 
 #### 10.2.4 Notificaciones del Operario
 
@@ -842,7 +845,7 @@ Las notificaciones del operario funcionan como las del cliente (sección 10.1.7)
 
 *Notificaciones del Operario*
 
-> **Captura por insertar.** **Pantalla:** Notificaciones (ruta */operator/notifications*). **Contenido:** el contador de no leídas, las pestañas por tipo y una lista que incluya el aviso de un nuevo servicio asignado y el de un servicio reprogramado.
+![Notificaciones del Operario](capturas/usuario-29-notificaciones-del-operario.jpg)
 
 #### 10.2.5 Historial de Servicios
 
@@ -870,7 +873,7 @@ Las notificaciones del operario funcionan como las del cliente (sección 10.1.7)
 
 *Historial de Servicios del Operario*
 
-> **Captura por insertar.** **Pantalla:** Historial (ruta */operator/service-history*). **Contenido:** los indicadores, las pestañas de estado final y la tabla con fecha, servicio, vehículo, pago, monto, calificación y estado final.
+![Historial de Servicios del Operario](capturas/usuario-30-historial-de-servicios-del-operario.jpg)
 
 #### 10.2.6 Calificaciones Recibidas
 
@@ -897,7 +900,7 @@ Las notificaciones del operario funcionan como las del cliente (sección 10.1.7)
 
 *Calificaciones Recibidas por el Operario*
 
-> **Captura por insertar.** **Pantalla:** Calificaciones (ruta */operator/qualifications*). **Contenido:** el promedio y el total de calificaciones, los filtros y al menos tres calificaciones con comentarios.
+![Calificaciones Recibidas por el Operario](capturas/usuario-31-calificaciones-recibidas-por-el-operario.jpg)
 
 #### 10.2.7 Perfil y Configuración del Operario
 
@@ -946,6 +949,10 @@ El sistema valida la información mientras la persona escribe. Cuando un dato no
 | Ya existe un vehículo registrado con esta placa | La placa pertenece a un vehículo activo. | Verificar la placa. |
 | El formato de la placa no corresponde al tipo de vehículo | La placa no sigue el formato oficial del tipo elegido. | Corregir la placa o el tipo. |
 | Esa hora ya se ocupó | El turno se tomó mientras se reservaba. | Elegir una de las horas sugeridas. |
+| El lavadero no abre ese día. Elige otra fecha. | El día elegido está marcado como cerrado. | Elegir otra fecha. |
+| A esa hora el servicio no cabe en el horario de atención. Elige otra hora. | El servicio terminaría después del cierre o cruza el descanso. | Elegir otra de las horas libres. |
+| Esa hora ya pasó. Elige una hora más tarde. | La hora elegida ya pasó. | Elegir una hora más tarde. |
+| Demasiados intentos fallidos. Tu cuenta quedó bloqueada 15 minutos... | Se escribió mal la contraseña cinco veces en menos de 15 minutos. | Esperar 15 minutos o usar ¿Olvidaste tu contraseña?. |
 | Ese vehículo ya tiene una reserva a esa hora. | El vehículo ya está reservado en ese turno. | Elegir otra hora. |
 | La fecha no es válida para reservar. | La fecha ya pasó o está fuera de la ventana de reservas. | Elegir una fecha válida. |
 | Esta reserva ya no se puede cambiar. | La reserva ya empezó o se cerró. | Contactar al lavadero. |
@@ -973,7 +980,7 @@ Cerrar la sesión al terminar evita que otra persona use la cuenta, especialment
 
 *Confirmación del Cierre de Sesión*
 
-> **Captura por insertar.** **Pantalla:** menú lateral > Cerrar Sesión. **Contenido:** la ventana "Cerrar sesión" con el mensaje "¿Estás seguro de cerrar sesión?" y los botones Sí, cerrar y Cancelar.
+![Confirmación del Cierre de Sesión](capturas/usuario-32-confirmacion-del-cierre-de-sesion.jpg)
 
 ## 13. Preguntas Frecuentes
 
@@ -987,7 +994,7 @@ El sistema solo acepta correos terminados en @gmail.com, y cada correo y cada n�
 
 ##### ¿Mi cuenta se puede bloquear por escribir mal la contraseña?
 
-No. La versión actual no bloquea cuentas por intentos fallidos. Si no recuerda la contraseña, use la recuperación de la contraseña.
+Sí. Después de cinco intentos fallidos en menos de 15 minutos, la cuenta queda bloqueada durante 15 minutos. Puede esperar ese tiempo o usar **¿Olvidaste tu contraseña?** para crear una contraseña nueva y entrar de inmediato.
 
 ##### ¿Cómo sé si mi reserva quedó confirmada?
 
@@ -999,7 +1006,7 @@ La pantalla solo ofrece horas libres. Si otra persona toma la hora mientras uste
 
 ##### ¿Puedo elegir quién lava mi vehículo?
 
-No. El administrador asigna el operario. Usted puede ver el operario asignado en el panel y recibe una notificación cuando se asigna.
+Sí, es opcional. Al reservar, en **Operario (opcional)** aparecen los operarios libres a esa hora. Si no elige ninguno, el sistema asigna uno libre automáticamente. Puede ver el operario asignado en el panel y recibe una notificación cuando se asigna o cambia.
 
 ##### ¿Cómo cambio la fecha de una reserva?
 
@@ -1081,9 +1088,9 @@ Servicio Nacional de Aprendizaje. (2026). *Guía para elaborar manuales de softw
 
 ## 15. Anexos
 
-### Anexo A. Lista de Figuras Pendientes de Captura
+### Anexo A. Origen de las Capturas
 
-Antes de la entrega, el equipo debe verificar que cada uno de los 32 marcadores de este manual se haya reemplazado por una captura real y nítida de la versión final, ordenada según el flujo de uso. Las capturas no deben contener correos, números de documento, teléfonos, placas, cuentas bancarias ni contraseñas reales; se deben usar cuentas de prueba.
+Las figuras de este manual se tomaron el 16 de octubre de 2026 sobre la versión de la rama *develop*, con el sistema completo corriendo en Docker y la web en *http://localhost:4200*. Se usaron cuentas, vehículos, reservas y pagos de prueba creados solo para las capturas, por lo que no aparecen correos, documentos, teléfonos, placas ni cuentas bancarias reales. Si una pantalla cambia en una versión futura, la captura correspondiente se debe tomar de nuevo con el mismo nombre de archivo de la carpeta *capturas*.
 
 ### Anexo B. Lista de Verificación para la Entrega
 
@@ -1097,7 +1104,7 @@ Antes de la entrega, el equipo debe verificar que cada uno de los 32 marcadores 
 | Incluye tabla de contenido con páginas actualizadas | Sí / No |
 | Explica el objetivo y el alcance | Sí / No |
 | El contenido coincide con el software de la versión final | Sí / No |
-| Todas las figuras se reemplazaron por capturas reales | Sí / No |
+| Todas las figuras son capturas reales de la versión final | Sí / No |
 | Los pasos son claros y ordenados | Sí / No |
 | No contiene información sensible ni credenciales reales | Sí / No |
 | Ortografía y formato APA revisados | Sí / No |
