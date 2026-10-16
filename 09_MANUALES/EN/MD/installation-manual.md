@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 9, 2026
+October 16, 2026
 
-Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 3.1
+Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.0
 
 ## Version Control
 
@@ -31,6 +31,7 @@ Table 1 records the change history of this document. Each time the installation 
 | 2.0 | 2026-10-05 | Creation of the installation manual (in Spanish) from the project documentation, within version 2.0 of the manual set. | Development team |
 | 3.0 | 2026-10-07 | Translation into English, APA Style (7th ed.) formatting, and verification against the infrastructure repository and the code of the services. The placeholders were replaced with the real values: repositories, Compose services, ports, database name, environment variables, migrations per service, payment-service in .NET 8, health endpoints, and demonstration accounts. Corrected: migration strategy (one changelog per service applied at startup, not a single master changelog), absence of account lockout, and gateway behavior (it does not validate tokens). | Development team |
 | 3.1 | 2026-10-09 | Update against the code of October 9, 2026, and creation of the Spanish version (Manual_instalacion_LavadoVehicular_3145556_ES.md). Corrected: the operations repository is called *lavarapido-operation-service* and must be cloned with that name; real addresses of the four repositories that were pending; payment-service now runs in Docker with the *app* profile and the gateway container receives ROUTE_PAYMENT_URL; CORS origins include Expo web (8081); new changelogs (security 023, 026, and 030; booking 021, 022, and 024; notification 025, 027, 028, and 029; payment 017 to 020); 49 tables; 22 notification types; payment-service publishes events with MESSAGING_ENABLED; SPRING_PROFILES_ACTIVE added. | Development team |
+| 4.0 | 2026-10-16 | Review against the code of October 16, 2026. The figures changed from placeholders to real screenshots of the installation. Updated: 57 tables in the nine schemas (checked with the query in section 11.5), account lockout after failed attempts, the payment-service health endpoint that now checks the database, a reference to the Deployment Document for the Azure server and the APK, and Annex B items that were resolved. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -100,7 +101,7 @@ Table 1 records the change history of this document. Each time the installation 
 - [18. Glossary](#18-glossary)
 - [References](#references)
 - [19. Annexes](#19-annexes)
-  - [Annex A. List of Figures Pending Capture](#annex-a-list-of-figures-pending-capture)
+  - [Annex A. Source of the Screenshots](#annex-a-source-of-the-screenshots)
   - [Annex B. Information to Confirm Before Delivery](#annex-b-information-to-confirm-before-delivery)
   - [Annex C. Summary of Installation Commands](#annex-c-summary-of-installation-commands)
   - [Annex D. Security Checklist Before Sharing the Environment](#annex-d-security-checklist-before-sharing-the-environment)
@@ -110,19 +111,19 @@ Table 1 records the change history of this document. Each time the installation 
 
 ## 4. Introduction
 
-The Vehicle Washing Management System (Vehicle Washing), internally called *LavaRapido*, is made up of a gateway (API Gateway), six backend microservices (five in Java 21 with Spring Boot 4 and one in C# with .NET 8), a Microsoft SQL Server 2022 database, a RabbitMQ message broker, a development mail server (Mailpit), and two clients: an Angular 21 web application and an Android application in React Native with Expo. The only environment that the project declares within its scope is the local one, run with Docker; there are no staging or production environments.
+The Vehicle Washing Management System (Vehicle Washing), internally called *LavaRapido*, is made up of a gateway (API Gateway), six backend microservices (five in Java 21 with Spring Boot 4 and one in C# with .NET 8), a Microsoft SQL Server 2022 database, a RabbitMQ message broker, a development mail server (Mailpit), and two clients: an Angular 21 web application and an Android application in React Native with Expo. This manual covers the local installation with Docker, which is the one the team uses to develop and test. The public server on Azure, which is turned on when it is needed to present the system, is set up with the scripts in the *deploy* folder of *lavarapido-infra* and is explained in the Deployment Document.
 
 This manual explains how to prepare a machine, obtain the code, configure the environment variables, create the database, start each component in the correct order, and check that the system works. It is addressed to infrastructure and DevOps staff, or to anyone who must start the system on a local machine or a development server. It starts from the premise that an installation must be repeatable, automatable, and verifiable (Humble & Farley, 2010), and that the configuration that changes between environments must reside in the environment and not in the code (Wiggins, 2017).
 
 ### 4.1 Sources of This Document
 
-The procedures were verified against the infrastructure repository (*lavarapido-infra*: *docker-compose.yml*, *.env.example*, and the team guide), the source code of the eleven repositories (*develop* branch as of October 9, 2026), and the project documentation updated on October 9, 2026 (Vehicle Washing Development Team, 2026a, 2026b). The values that depend on each installation (passwords, keys, and addresses) are written between angle brackets, such as `<SA_PASSWORD>`; no placeholder must be copied literally into a terminal. The implementation of a release in its target environment (entry criteria, acceptance, training, and rollback) is described in the Implementation Procedure.
+The procedures were verified against the infrastructure repository (*lavarapido-infra*: *docker-compose.yml*, *.env.example*, and the team guide), the source code of the eleven repositories (*develop* branch as of October 16, 2026), and the project documentation updated on that same date (Vehicle Washing Development Team, 2026a, 2026b). The values that depend on each installation (passwords, keys, and addresses) are written between angle brackets, such as `<SA_PASSWORD>`; no placeholder must be copied literally into a terminal. The implementation of a release in its target environment (entry criteria, acceptance, training, and rollback) is described in the Implementation Procedure.
 
 ### 4.2 Scope
 
 **It covers:** local installation with Docker of SQL Server, RabbitMQ, and Mailpit; the creation of the *LavaRapido* database and its migrations; the start of the six services and the gateway, in containers or from a terminal; the web and mobile applications; the first access, the test accounts, the verification, and the solution of common errors.
 
-**It does not cover:** deployment to staging or production, the continuous integration pipeline (Jenkins is planned but not configured), the publication of the mobile application in app stores, or the functional use of the system, which is explained in the User Manual and the Administrator Manual.
+**It does not cover:** setting up the public server on Azure (Deployment Document), the continuous integration pipeline (Jenkins is planned but not configured), building and publishing the APK of the mobile application (Deployment Document), or the functional use of the system, which is explained in the User Manual and the Administrator Manual.
 
 ## 5. Objective
 
@@ -243,7 +244,7 @@ On Windows, *docker info* must show the Linux engine (WSL 2) and not the Windows
 
 *Verification of Tool Versions*
 
-> **Screenshot to insert.** **Screen:** terminal of the installation machine (PowerShell or Bash). **Content:** output of the commands of section 7.1 with the versions of Git, Docker, Docker Compose, Java 21, .NET 8, Node.js, and npm.
+![Verification of Tool Versions](capturas/installation-01-verification-of-tool-versions.png)
 
 ## 8. Obtaining the Project
 
@@ -267,7 +268,7 @@ The project is distributed in one repository per component. All the backend repo
 | LavadoVehicular-Movil | Android application (React Native with Expo). | https://github.com/merari0322/LavadoVehicular-Movil |
 | vehicle-w-docs | Project documentation, ADRs, and OpenAPI contracts. | https://github.com/code-sena/vehicle-w-docs |
 
-*Note.* The addresses were taken from the Git remotes of the copies available to the team on October 9, 2026.
+*Note.* The addresses were taken from the Git remotes of the team copies on October 16, 2026.
 
 ### 8.1 Cloning the Repositories
 
@@ -313,7 +314,7 @@ Project/
 
 *Repositories Cloned in the Working Folder*
 
-> **Screenshot to insert.** **Screen:** file explorer or terminal in the *Backend* folder. **Content:** the eight backend repositories side by side and, inside *lavarapido-infra*, the files *docker-compose.yml* and *.env.example*.
+![Repositories Cloned in the Working Folder](capturas/installation-02-repositories-cloned-in-the-working-folder.png)
 
 ## 9. Installing Dependencies
 
@@ -366,7 +367,7 @@ npm ci
 
 *Successful Installation of Dependencies*
 
-> **Screenshot to insert.** **Screen:** terminal. **Content:** final output of *./mvnw test* with BUILD SUCCESS and of *npm ci* in the web application without errors.
+![Successful Installation of Dependencies](capturas/installation-03-successful-installation-of-dependencies.png)
 
 ## 10. Configuring Environment Variables
 
@@ -456,13 +457,13 @@ INTERNAL_API_KEY=********
 
 *Configured .env File With Hidden Secrets*
 
-> **Screenshot to insert.** **Screen:** text editor, file *lavarapido-infra/.env*. **Content:** the variables filled in, with the passwords, the JWT secret, and the internal key covered.
+![Configured .env File With Hidden Secrets](capturas/installation-04-configured-env-file-with-hidden-secrets.png)
 
 *Note.* Do not capture real values of secrets.
 
 ## 11. Database Creation and Import
 
-The system uses a single SQL Server 2022 database called *LavaRapido*, divided into nine schemas: *security*, *audit*, *customer*, *catalog*, *booking*, *execution*, *promotion*, *payment*, and *notification* (49 tables). Each service owns its schemas and migrates only them with Liquibase, with its own control tables `DATABASECHANGELOG_<SERVICE>` (Vehicle Washing Development Team, 2026a).
+The system uses a single SQL Server 2022 database called *LavaRapido*, divided into nine schemas: *security*, *audit*, *customer*, *catalog*, *booking*, *execution*, *promotion*, *payment*, and *notification* (57 tables). Each service owns its schemas and migrates only them with Liquibase, with its own control tables `DATABASECHANGELOG_<SERVICE>` (Vehicle Washing Development Team, 2026a).
 
 ### 11.1 Starting SQL Server and Creating the Database
 
@@ -485,11 +486,11 @@ Wait until *lavarapido-sqlserver* and *lavarapido-rabbitmq* show the status *hea
 
 *Infrastructure Containers Running*
 
-> **Screenshot to insert.** **Screen:** terminal in *lavarapido-infra*. **Content:** output of *docker compose ps* with *lavarapido-sqlserver* and *lavarapido-rabbitmq* healthy, *lavarapido-mailpit* running, and the *db-init* and *payment-migrate* containers finished.
+![Infrastructure Containers Running](capturas/installation-05-infrastructure-containers-running.png)
 
 ### 11.2 Migrations of Each Service
 
-The Java services apply their migrations automatically when they start (*spring.liquibase*), and then Hibernate only validates that the entities match the tables. Therefore, the tables of the schemas *security*, *audit*, *customer*, *catalog*, *booking*, *execution*, and *notification* are created the first time each service starts (section 12). Table 8 shows the changelogs of the version of October 9, 2026.
+The Java services apply their migrations automatically when they start (*spring.liquibase*), and then Hibernate only validates that the entities match the tables. Therefore, the tables of the schemas *security*, *audit*, *customer*, *catalog*, *booking*, *execution*, and *notification* are created the first time each service starts (section 12). Table 8 shows the changelogs of the version of October 16, 2026.
 
 **Table 8**
 
@@ -497,11 +498,11 @@ The Java services apply their migrations automatically when they start (*spring.
 
 | Service | Changelogs | Control table |
 |---|---|---|
-| security-service | 001 schemas, 002 security and audit core, 003 user preference, 020 theme palettes, 023 custom role (created and dropped again by 026), 026 role permissions (permission catalog and default assignments), 030 notification switches of the user preference; seed 101 roles. | DATABASECHANGELOG_SECURITY |
+| security-service | 001 schemas, 002 security and audit core, 003 user preference, 020 theme palettes, 023 custom role (created and dropped again by 026), 026 role permissions (permission catalog and default assignments), 030 notification switches of the user preference, 034 lockout after failed attempts, 035 person address, 036 account creation date, 039 acceptance of the legal documents; seed 101 roles. | DATABASECHANGELOG_SECURITY |
 | customer-service | 004 customer schema, 014 customer user id, 015 vehicle model; seed 102 vehicle types. | DATABASECHANGELOG_CUSTOMER |
-| booking-service | 005 catalog and booking schemas, 018 changes of ADR-010, 021 schedule history, 022 loyalty points of the catalog, 024 removal of the bay operator; seeds 103 catalog, 104 statuses and reasons, 109 establishment, schedule, and four bays. | DATABASECHANGELOG_BOOKING |
-| operations-service | 007 execution schema; seed 105 execution statuses. | DATABASECHANGELOG_OPERATIONS |
-| notification-service | 010 notification schema, 016 device tokens, 017 processed events, 019 booking reminders, 025 promotion redeemed type, 027 staff notifications and booking tracking, 028 payment refunded type, 029 loyalty and inspection types; seed 108 notification types. | DATABASECHANGELOG_NOTIFICATION |
+| booking-service | 005 catalog and booking schemas, 018 changes of ADR-010, 021 schedule history, 022 loyalty points of the catalog, 024 removal of the bay operator, 032 business data of the establishment; seeds 103 catalog, 104 statuses and reasons, 109 establishment, schedule, and four bays. | DATABASECHANGELOG_BOOKING |
+| operations-service | 007 execution schema, 033 inspection reports with phases, findings, and photos, 037 operator profile; seed 105 execution statuses. | DATABASECHANGELOG_OPERATIONS |
+| notification-service | 010 notification schema, 016 device tokens, 017 processed events, 019 booking reminders, 025 promotion redeemed type, 027 staff notifications and booking tracking, 028 payment refunded type, 029 loyalty and inspection types, 031 unassigned booking alert, 038 new app version notice type; seed 108 notification types. | DATABASECHANGELOG_NOTIFICATION |
 | payment-service | db/changelog/changes/001 to 020 (own numbering; 017 package fields, 018 required points, 019 catalog verification, 020 points reversal and sequence), run by the *payment-migrate* container. | DATABASECHANGELOG_PAYMENT |
 
 *Note.* Source: migration strategy of the project documentation and the changelogs of the repositories.
@@ -541,7 +542,7 @@ docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -
 ```
 
 ```sql
--- 1) Tables per schema (49 in total when all the services have started)
+-- 1) Tables per schema (57 in total when all the services have started)
 SELECT s.name AS schema_name, COUNT(*) AS tables
 FROM sys.tables t JOIN sys.schemas s ON s.schema_id = t.schema_id
 WHERE s.name IN ('security','audit','customer','catalog','booking',
@@ -631,7 +632,7 @@ The *--build* option rebuilds the images from the current code; omit it to reuse
 
 *Environment Containers Running*
 
-> **Screenshot to insert.** **Screen:** terminal in *lavarapido-infra*. **Content:** output of *docker compose ps* with sqlserver, rabbitmq, mailpit, the five Java services, payment-service, and api-gateway running, with their ports.
+![Environment Containers Running](capturas/installation-06-environment-containers-running.png)
 
 ### 12.3 Option B: Java Services From a Terminal or the IDE
 
@@ -687,7 +688,7 @@ The development server publishes the application at *http://localhost:4200* and 
 
 *Web Application Running*
 
-> **Screenshot to insert.** **Screen:** browser at *http://localhost:4200*. **Content:** the welcome screen with the top bar, the language selector, and the Login and Register buttons, with the address bar visible.
+![Web Application Running](capturas/installation-07-web-application-running.png)
 
 ### 13.2 Mobile Application (React Native With Expo)
 
@@ -709,7 +710,7 @@ npx eas-cli build --profile development --platform android
 
 *Expo Development Server*
 
-> **Screenshot to insert.** **Screen:** terminal in *LavadoVehicular-Movil*. **Content:** output of *npx expo start* with the QR code, the Metro address, and the keyboard options.
+![Expo Development Server](capturas/installation-08-expo-development-server.png)
 
 ### 13.3 Static Mockups (Optional)
 
@@ -763,7 +764,7 @@ When security-service starts with the *dev* profile (the default one in local), 
 | Phone | Colombian mobile number of 10 digits starting with 3. |
 | Password | 8 to 72 characters, with at least one uppercase letter, one number, and one special character, without spaces. |
 | Session | The token lasts one hour; after that, the person logs in again. |
-| Failed attempts | The current version does not lock the account (TD-003). |
+| Failed attempts | Five failed attempts within 15 minutes lock the account for 15 minutes; resetting the password unlocks it. |
 
 *Note.* Source: validations of the registration form and the password policy of security-service.
 
@@ -790,7 +791,7 @@ The verification is done in layers: infrastructure, database, messaging, service
 | No. | Check | Expected result |
 |---|---|---|
 | 1 | Containers | sqlserver and rabbitmq *healthy*; mailpit and the services running. |
-| 2 | Database | The 49 tables in the nine schemas (section 11.5). |
+| 2 | Database | The 57 tables in the nine schemas (section 11.5). |
 | 3 | Initial data | The results of Table 9. |
 | 4 | RabbitMQ | Exchange *carwash.events* and the queues of customer and notification (with messaging active). |
 | 5 | Mailpit | Web interface available. |
@@ -834,13 +835,13 @@ done
 curl -i http://localhost:8080/api/v1/bookings/me
 ```
 
-Each health endpoint must answer *{"status":"UP"}*. The last command calls a protected route without a token through the gateway: it must return **401**. The gateway does not validate tokens (ADR-006): it forwards the request and the service rejects it. The health endpoint of payment-service always answers UP, even if the database is down (TD-017), so its database must be checked with a real request.
+Each health endpoint must answer *{"status":"UP"}*. The last command calls a protected route without a token through the gateway: it must return **401**. The gateway does not validate tokens (ADR-006): it forwards the request and the service rejects it. Every service, including payment-service, checks the database in its health endpoint: if SQL Server does not answer, it replies *DOWN* with code 503.
 
 **Figure 9**
 
 *Response of the Health Endpoints*
 
-> **Screenshot to insert.** **Screen:** terminal. **Content:** output of the loop of section 16.3 with UP in the seven ports and the 401 response of the protected route.
+![Response of the Health Endpoints](capturas/installation-09-response-of-the-health-endpoints.png)
 
 ### 16.4 Minimum Functional Flow
 
@@ -867,7 +868,7 @@ ORDER BY s.started_at DESC;
 
 *Session Records*
 
-> **Screenshot to insert.** **Screen:** SQL client or sqlcmd. **Content:** result of the query of section 16.5 with the logins of the tests, using test accounts.
+![Session Records](capturas/installation-10-session-records.png)
 
 ## 17. Common Errors and Solutions
 
@@ -949,9 +950,9 @@ Wiggins, A. (2017). *The twelve-factor app: III. Config*. https://12factor.net/c
 
 ## 19. Annexes
 
-### Annex A. List of Figures Pending Capture
+### Annex A. Source of the Screenshots
 
-Before delivery, the team must replace each of the 10 placeholders with a real and sharp screenshot ordered according to the installation flow (Servicio Nacional de Aprendizaje [SENA], 2026). Screenshots must not contain real passwords, secrets, accounts, or personal data.
+The figures in this manual were taken on October 16, 2026, on a Windows 11 computer with Docker Desktop, following the steps of the manual. The terminal screenshots show the real output of the commands, and the browser screenshot shows the web application running at *http://localhost:4200*. They contain no real passwords, secrets, or personal data: the values of the *.env* file are never shown.
 
 ### Annex B. Information to Confirm Before Delivery
 
@@ -962,9 +963,7 @@ Before delivery, the team must replace each of the 10 placeholders with a real a
 | Topic | What is missing | Section |
 |---|---|---|
 | One database login per service | The services use sa. | 11.4 |
-| Health of payment-service | It does not check the database (TD-017). | 16.3 |
 | Continuous integration | Jenkins is planned but not configured (TD-006). | 4.2 |
-| Outdated documents | The README of lavarapido-infra still marks operations-service and payment-service as planned, and section 6 of the team guide lists as mock data screens that are already connected. | 4.1 |
 
 *Note.* Prepared by the authors from the verification of the repositories and the technical backlog.
 
@@ -1024,7 +1023,7 @@ curl -s http://localhost:8080/actuator/health
 | Objective and scope explained | Yes / No |
 | The commands match the real infrastructure repository | Yes / No |
 | The repository folders keep their original names (including lavarapido-operation-service) | Yes / No |
-| All figures replaced by real screenshots | Yes / No |
+| All figures are real screenshots of the installation | Yes / No |
 | Steps verified on a clean installation | Yes / No |
 | No credentials, keys, or sensitive data | Yes / No |
 | Exported to PDF with the name Manual_instalacion_LavadoVehicular_3145556.pdf | Yes / No |
