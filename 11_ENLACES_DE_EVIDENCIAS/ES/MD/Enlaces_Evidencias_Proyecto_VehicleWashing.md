@@ -71,7 +71,7 @@ Rama de trabajo: **`develop`** en todos los repositorios de código. No hay rele
 | Pagos y fidelización | .NET Core | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | `694e1df` | 39 commits | Público |
 | Notificaciones | Spring Boot | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | `23747c3` | 34 commits | Público |
 | Infraestructura (Docker, base de datos, pruebas E2E) | Docker, SQL Server, RabbitMQ | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | `95ce9ad` | 54 commits | Público |
-| Documentación técnica (SDD) | Markdown, OpenAPI | [vehicle-w-docs](https://github.com/code-sena/vehicle-w-docs/tree/docs) (rama `docs`) | `f73c5ac` | 299 commits | Pendiente de permisos |
+| Documentación técnica (SDD) | Markdown, OpenAPI | [vehicle-w-docs](https://github.com/code-sena/vehicle-w-docs/tree/docs) (rama `docs`) | `71f4a3f` | 303 commits | Pendiente de permisos |
 | Evidencias documentales | Markdown | [lavarapido-docs](https://github.com/BrayanCABRERA123/lavarapido-docs) (rama `main`) | último commit de `main` | — | Público |
 
 **Base de datos:** SQL Server 2022 compartido, con un esquema por servicio (ADR-003, ADR-009). Cada servicio Spring Boot gestiona sus migraciones con Liquibase. Las migraciones del servicio de pagos están en [`lavarapido-payment-service/db`](https://github.com/merari0322/lavarapido-payment-service/tree/develop/db).
