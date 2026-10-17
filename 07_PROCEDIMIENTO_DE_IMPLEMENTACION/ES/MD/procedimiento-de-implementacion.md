@@ -230,7 +230,7 @@ La implementación **no comienza** hasta que se cumplan todos los criterios de l
 | N.° | Criterio | Evidencia |
 |---|---|---|
 | E1 | El código de la versión está integrado en *develop* (o en *main*) de los once repositorios, sin trabajo sin confirmar. | *git status* limpio y *git log* con el último commit de cada repositorio. |
-| E2 | Las pruebas automáticas pasan: *./mvnw -B verify* en los servicios Java y en el gateway, *dotnet test* en payment-service, *ng test* en la web y la suite de punta a punta de *lavarapido-infra/e2e* contra los contenedores. | Resúmenes sin fallos (el 16 de octubre de 2026: 638 pruebas unitarias y 19 de punta a punta). |
+| E2 | Las pruebas automáticas pasan: *./mvnw -B verify* en los servicios Java y en el gateway, *dotnet test* en payment-service, *ng test* en la web y la suite de punta a punta de *lavarapido-infra/e2e* contra los contenedores. | Resúmenes sin fallos (el 16 de octubre de 2026: 640 pruebas unitarias y 19 de punta a punta). |
 | E3 | La aplicación web compila en modo producción (*npx ng build*). | Carpeta *dist/* generada sin errores. |
 | E4 | La versión está etiquetada en cada repositorio (por ejemplo, *v1.0.0*) (sección 13). | *git tag* en cada repositorio. |
 | E5 | Los manuales de instalación, administrador y usuario corresponden a la versión (versión 4.0 o posterior). | Control de versiones de los manuales. |

@@ -26,7 +26,7 @@ Version 7.0, October 16, 2026
 | V4 | 2026-10-08 | Development team | Restructured according to IEEE 830 and ISO/IEC/IEEE 29148, in APA 7 format. Status checked against the code as of October 8, 2026. New requirements RF-027 to RF-035 and use cases CU26 to CU29, business rules, flows and life cycles, data requirements, classified constraints, verifiable acceptance criteria, traceability matrix and APA references. |
 | V5 | 2026-10-09 | Development team | Verification with the system running (six services, gateway and web), and a fix to a gateway route and to a styling error in promotions. Use case and state diagrams in Mermaid, web screenshots in every module and an updated count of automated tests. |
 | V6 | 2026-10-15 | Development team | Status checked against the code as of October 15, 2026. Account lockout (RF-004b), automatic assignment (RF-008), operator choice by the customer (RF-010), payment history filters (RF-015) and operator availability (RF-022) are now implemented. New requirements RF-036 to RF-038 (inspection report, business data and operator profile) and use case CU30. Service start window, alert for bookings without an operator, notifications in each account's language, profile address, 57 tables, 601 automated tests and measurements for RNF-001 and RNF-008. |
-| V7 | 2026-10-16 | Development team | Complete review with the system running in Docker. The date and time the customer accepts the Terms and the Data Processing Policy are stored on the server (RR-01); HTTPS active on the public server; reason why a time is rejected (closed day, outside opening hours, time passed, or no free bay); 638 automated tests and 19 end-to-end tests passed. |
+| V7 | 2026-10-16 | Development team | Complete review with the system running in Docker. The date and time the customer accepts the Terms and the Data Processing Policy are stored on the server (RR-01); HTTPS active on the public server; reason why a time is rejected (closed day, outside opening hours, time passed, or no free bay); 640 automated tests and 19 end-to-end tests passed. |
 
 ---
 
@@ -1427,7 +1427,7 @@ Of the 41 functional requirements, 40 are implemented and 1 is partially impleme
 
 | Component | Command | Tests | Count date |
 |---|---|---|---|
-| Web application (Angular) | `npx ng test --watch=false` | 41 | October 16, 2026 |
+| Web application (Angular) | `npx ng test --watch=false` | 43 | October 16, 2026 |
 | api-gateway | `./mvnw test` | 34 | October 16, 2026 |
 | security-service | `./mvnw test` | 147 | October 16, 2026 |
 | customer-service | `./mvnw test` | 69 | October 16, 2026 |
@@ -1435,7 +1435,7 @@ Of the 41 functional requirements, 40 are implemented and 1 is partially impleme
 | operations-service | `./mvnw test` | 54 | October 16, 2026 |
 | notification-service | `./mvnw test` | 112 | October 16, 2026 |
 | payment-service | `dotnet test` | 141 | October 16, 2026 |
-| **Total** | | **638** | |
+| **Total** | | **640** | |
 
 *Note.* All tests passed. payment-service also has 7 integration tests that are skipped because they need SQL Server. In addition, `lavarapido-infra/e2e` has 19 end-to-end tests that run with the system up and passed on October 16, 2026: the booking flow with operator choice and automatic assignment, the complete flow of the three roles (booking, payment, approval with points, service, and rating), the inspection report with photos and public link, and the access rules per role. The folder also includes the RNF-001 measurement and the check of the web screens at 360 px (RNF-008). During the manual review of October 9, a missing API Gateway route (`/api/v1/loyalty/**`) and a style that misaligned the promotion badges were fixed.
 

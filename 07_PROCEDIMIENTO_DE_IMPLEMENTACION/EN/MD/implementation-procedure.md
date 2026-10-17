@@ -230,7 +230,7 @@ The implementation **does not start** until all the criteria of Table 5 are met.
 | No. | Criterion | Evidence |
 |---|---|---|
 | E1 | The code of the release is merged into *develop* (or *main*) of the eleven repositories, with no uncommitted work. | Clean *git status* and *git log* with the last commit of each repository. |
-| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, and the end-to-end suite of *lavarapido-infra/e2e* against the containers. | Summaries without failures (on October 16, 2026: 638 unit tests and 19 end-to-end tests). |
+| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, and the end-to-end suite of *lavarapido-infra/e2e* against the containers. | Summaries without failures (on October 16, 2026: 640 unit tests and 19 end-to-end tests). |
 | E3 | The web application builds in production mode (*npx ng build*). | Folder *dist/* generated without errors. |
 | E4 | The release is tagged in each repository (for example, *v1.0.0*) (section 13). | *git tag* in each repository. |
 | E5 | The installation, administrator, and user manuals correspond to the release (version 4.0 or later). | Version control of the manuals. |

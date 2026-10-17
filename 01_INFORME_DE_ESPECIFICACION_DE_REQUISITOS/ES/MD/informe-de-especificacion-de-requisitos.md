@@ -26,7 +26,7 @@ Versión 7.0, 16 de octubre de 2026
 | V4 | 08/10/2026 | Equipo de desarrollo | Reestructuración según IEEE 830 e ISO/IEC/IEEE 29148 y formato APA 7. Estado verificado contra el código al 8 de octubre de 2026. Nuevos requisitos RF-027 a RF-035 y casos de uso CU26 a CU29, reglas de negocio, flujos y ciclos de vida, requisitos de datos, restricciones clasificadas, criterios de aceptación verificables, matriz de trazabilidad y referencias en formato APA. |
 | V5 | 09/10/2026 | Equipo de desarrollo | Verificación con el sistema en ejecución (seis servicios, gateway y web) y corrección de una ruta del gateway y de un error de estilos en las promociones. Diagramas de casos de uso y de estados en Mermaid, capturas de la web en cada módulo y conteo actualizado de pruebas automatizadas. |
 | V6 | 15/10/2026 | Equipo de desarrollo | Estado verificado contra el código al 15 de octubre de 2026. Quedan implementados el bloqueo de cuenta (RF-004b), la asignación automática (RF-008), la elección de operario por el cliente (RF-010), los filtros del historial de pagos (RF-015) y la disponibilidad de operarios (RF-022). Nuevos requisitos RF-036 a RF-038 (informe de inspección, datos del negocio y ficha del operario) y caso de uso CU30. Ventana de inicio del servicio, alerta de reserva sin operario, notificaciones en el idioma de la cuenta, dirección del perfil, 57 tablas, 601 pruebas automatizadas y mediciones de RNF-001 y RNF-008. |
-| V7 | 16/10/2026 | Equipo de desarrollo | Revisión completa con el sistema corriendo en Docker. La fecha y la hora en que el cliente acepta los Términos y la Política de Tratamiento de Datos quedan guardadas en el servidor (RR-01); HTTPS activo en el servidor público; motivo del rechazo de una hora (día cerrado, fuera del horario, hora pasada o sin bahía libre); 638 pruebas automatizadas y 19 pruebas de punta a punta aprobadas. |
+| V7 | 16/10/2026 | Equipo de desarrollo | Revisión completa con el sistema corriendo en Docker. La fecha y la hora en que el cliente acepta los Términos y la Política de Tratamiento de Datos quedan guardadas en el servidor (RR-01); HTTPS activo en el servidor público; motivo del rechazo de una hora (día cerrado, fuera del horario, hora pasada o sin bahía libre); 640 pruebas automatizadas y 19 pruebas de punta a punta aprobadas. |
 
 ---
 
@@ -1427,7 +1427,7 @@ De los 41 requisitos funcionales, 40 están implementados y 1 parcialmente (RF-0
 
 | Componente | Comando | Pruebas | Fecha del conteo |
 |---|---|---|---|
-| Aplicación web (Angular) | `npx ng test --watch=false` | 41 | 16 de octubre de 2026 |
+| Aplicación web (Angular) | `npx ng test --watch=false` | 43 | 16 de octubre de 2026 |
 | api-gateway | `./mvnw test` | 34 | 16 de octubre de 2026 |
 | security-service | `./mvnw test` | 147 | 16 de octubre de 2026 |
 | customer-service | `./mvnw test` | 69 | 16 de octubre de 2026 |
@@ -1435,7 +1435,7 @@ De los 41 requisitos funcionales, 40 están implementados y 1 parcialmente (RF-0
 | operations-service | `./mvnw test` | 54 | 16 de octubre de 2026 |
 | notification-service | `./mvnw test` | 112 | 16 de octubre de 2026 |
 | payment-service | `dotnet test` | 141 | 16 de octubre de 2026 |
-| **Total** | | **638** | |
+| **Total** | | **640** | |
 
 *Nota.* Todas las pruebas pasaron. payment-service tiene además 7 pruebas de integración que se omiten porque necesitan SQL Server. Además, `lavarapido-infra/e2e` tiene 19 pruebas de punta a punta que se ejecutan con el sistema levantado y que pasaron el 16 de octubre de 2026: el flujo de reserva con elección de operario y asignación automática, el flujo completo de los tres roles (reserva, pago, aprobación con puntos, servicio y calificación), el informe de inspección con fotos y enlace público, y las reglas de acceso por rol. La carpeta incluye también la medición de RNF-001 y la revisión de las pantallas web a 360 px (RNF-008). En la revisión manual del 9 de octubre se corrigieron una ruta que faltaba en el API Gateway (`/api/v1/loyalty/**`) y un estilo que desalineaba las insignias de las promociones.
 
