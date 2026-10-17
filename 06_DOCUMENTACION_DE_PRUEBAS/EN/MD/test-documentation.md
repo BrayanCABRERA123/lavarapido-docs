@@ -15,7 +15,7 @@
 | Apprentices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 16, 2026 |
+| Date | October 17, 2026 |
 
 This document gathers the test plan, the inventory of automated tests in the repositories, their actual results when run on October 16, 2026 (including the end-to-end tests against the complete system), and the functional test cases, run on October 9, 2026, traced to the SRS v7 requirements (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`). Its structure follows the ISO/IEC/IEEE 29119-3 standard for test documentation (International Organization for Standardization [ISO], 2021). No result in this document is assumed.
 
@@ -135,6 +135,24 @@ On October 16, 2026, `node --test "e2e/*.test.js"` was run from `lavarapido-infr
 | `full-flow.test.js` | 6 (1 + 5 subtests) | Booking → reported payment → approval with points → service start and finish → rating, checking each notice | 6 passed |
 | `inspection-flow.test.js` | 1 | Inspection report with findings and photos, publication, notice to the customer, and public link | 1 passed |
 | **Total** | **19** | | **19 passed** |
+
+### 3.2 Responsive Design and Inspection Report in the Mobile App
+
+On October 17, 2026, Playwright (headless Edge) was used to check that no screen scrolls sideways or clips content (RNF-008), with the backend in Docker and the web in `ng serve`. The mobile app was measured in its web version (`npx expo start --web`), because it shares the same screen code. On each screen the content width was compared with the window width, and elements crossing the right edge outside a container with its own scrolling were searched for. Before the fixes made that same day there were screens with cut buttons, overlapping titles, and filters outside their card (Table 9, defect 8); Table 5b shows the final result.
+
+**Table 5b**
+
+*Responsive Design and Mobile Inspection Report Check (October 17, 2026)*
+
+| Test | Scope | Result |
+| --- | --- | --- |
+| Web at 360 px | 30 screens: public, customer, operator, and administrator | None scrolls sideways or clips content |
+| Web at 768 px | The same 30 screens | None scrolls sideways or clips content |
+| Mobile app at 360 px | 26 screens of the three roles, opened from the bottom menu and the More menu | None scrolls sideways or clips content |
+| Inspection report in the app | Temporary confirmed 200-minute booking: booking detail → Inspection → Start report → Start phase → Add finding → Finish phase → Publish and share link | Full flow without errors; at the end the report, the booking, and the temporary service were deleted |
+| Build and tests | `npx ng build`, `npx ng test --watch=false` (web), and `npx tsc --noEmit` (app) | No errors; 43 of 43 web tests passed |
+
+*Note.* Taking or picking photos with the phone camera and gallery cannot be automated in this test; it is still pending on an Android device.
 
 ## 4. Functional Test Cases
 
@@ -263,6 +281,12 @@ Of the 41 requirements in SRS v7, 30 have a functional case and 39 a related aut
 | 4 | The brand name is inconsistent: "AquaWash" (mobile), "Car Wash" and "Lavado Vehicular" (web), "Express Car Wash" (establishment) | Web and mobile screenshots | Low |
 | 5 | The landing page advertises a "mobile wash service" and "wherever you are", but SRS v4 defines a single-location car wash | Landing screenshot; SRS v4, section 1 | Low |
 | 6 | If there are two accounts of the same method (two Nequi), the payment screen shows both selected at once | Customer Payments screenshot | Low |
+| 7 | When logging out, the web and the app showed "Your session expired", because a 401 that arrived after the token was deleted was taken as an expired session | `auth-interceptor.ts` (web) and `AuthServiceContext.tsx` (mobile) | Medium |
+| 8 | On a phone (360 px) there were buttons off the screen in the landing bar, overlapping titles, the ☰ button over the titles, Assigned services badges off the screen, Management filters outside their card, and Settings switches over their text | Responsive design check of October 17, 2026 (Table 5b) | Medium |
+| 9 | In the mobile app, the date and search inputs were squashed when placed in a column (History and Ratings) | `shared/components/screen/FilterInputs.tsx` | Low |
+| 10 | The customer's next service progress showed 10% or 25% although the wash had not started | `features/client/pages/dashboard/dashboard.ts` (web) and `modules/client/models/client.ts` (mobile) | Low |
+
+> *Note.* Defects 7 to 10 were fixed between October 16 and 17, 2026, on the *develop* branch of the web and the app; 8 and 9 were measured again with no overflow (Table 5b).
 
 > *Note.* Code review of October 16, 2026: the six defects are fixed. The dashboard greets with the session name and the payment review shows the reviewer (1); the Client column shows the customer name (2); the customer home shows the assigned operator on the web and on mobile (3); the brand is LavaRápido on the web and on mobile (4); the home page describes the service at the car wash (5); and the payment screen selects by account and shows the holder when two accounts share a method (6, `payment.spec.ts`).
 

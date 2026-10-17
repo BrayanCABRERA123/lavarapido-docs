@@ -8,7 +8,7 @@ Software Analysis and Development Technologist program (ADSO), group (ficha) 314
 
 Instructor: Karol Daniela Correa
 
-Version 2.0, October 15, 2026
+Version 2.1, October 17, 2026
 
 ---
 
@@ -21,7 +21,7 @@ This document shows how LavaRápido behaves when someone uses it: what happens, 
 3. **Activity diagrams** of the business processes.
 4. **State diagrams** of the entities that change status (booking, payment, service execution, promotion and inspection report).
 
-The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end.
+On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end.
 
 The full specification of each requirement and use case (actors, precondition, main flow, alternative flows and postcondition) is in the *Software Requirements Specification*, sections 5 and 7.3; here they are cited by their identifier (RF-XXX, CUXX).
 
@@ -203,10 +203,10 @@ sequenceDiagram
     participant N as notification-service
     participant M as SMTP
 
-    C->>W: Fills in the registration form
-    W->>GW: POST /api/v1/auth/register
+    C->>W: Fills in the form and checks the Terms and the Data Processing Policy
+    W->>GW: POST /api/v1/auth/register (acceptsTerms, acceptsDataPolicy)
     GW->>S: routes
-    S->>S: Validates (password policy, unique email and ID number), saves person + account (CLIENT)
+    S->>S: Validates (password policy, unique email and ID number), saves person + account (CLIENT) and the acceptance date of each legal document
     S-->>W: 201 Created
     S-)MQ: UserRegistered (security.user_registered), after commit
     par customer profile
@@ -223,7 +223,7 @@ sequenceDiagram
     S-->>W: 200 JWT (HS256, 1 h, roles claim)
 ```
 
-*Source:* `security-service` (`AccountRegistrationService`, `AuthenticationService`), event `security.user_registered`.
+*Source:* `security-service` (`AccountRegistrationService`, `AuthenticationService`, migration `039-security-app-user-legal-consent.sql`), event `security.user_registered`. The web and the mobile app do not send the form until both boxes are checked; the server stores the dates only when both arrive accepted.
 
 ### 2.2 Booking a wash (RF-005, RF-006, RF-010)
 
@@ -528,7 +528,7 @@ sequenceDiagram
     autonumber
     actor A as Administrator
     actor C as Customer
-    participant W as Web (through the gateway)
+    participant W as Web or mobile app (through the gateway)
     participant OP as operations-service
     participant B as booking-service
     participant DB as SQL Server (execution)
@@ -556,7 +556,7 @@ sequenceDiagram
     OP-->>W: published report with a masked license plate
 ```
 
-*Source:* `operations-service` (`InspectionReport`, migration `033-execution-inspection-report.sql`), `notification-service` (shared report notice).
+*Source:* `operations-service` (`InspectionReport`, migration `033-execution-inspection-report.sql`), `notification-service` (shared report notice), web (`features/admin/pages/inspection`), and mobile app (`AdminInspectionScreen`, `InspectionService`). In the app the photos are taken with the camera or picked from the gallery and shrunk on the phone before the `POST /findings`; the **Publish and share link** button opens the phone share menu.
 
 ---
 

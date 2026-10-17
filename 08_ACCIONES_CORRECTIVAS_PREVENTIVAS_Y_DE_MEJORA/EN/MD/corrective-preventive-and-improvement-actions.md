@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 16, 2026
+October 17, 2026
 
-Document Type: Register of Corrective, Preventive, and Improvement Actions (Development Team and Instructor) · Version 2.0
+Document Type: Register of Corrective, Preventive, and Improvement Actions (Development Team and Instructor) · Version 2.1
 
 ## Version Control
 
@@ -30,6 +30,7 @@ Table 1 records the change history of this document. The action register (sectio
 |---|---|---|---|
 | 1.0 | 2026-10-09 | Creation of the document (in Spanish and English). The management procedure is defined, and 23 closed corrective actions, 13 open corrective actions, 14 preventive actions, and 13 improvement actions are recorded, verified against the code of the eleven repositories (*develop* branch as of October 9, 2026), the Git history, the risk register, and the technical backlog of the project. | Development team |
 | 2.0 | 2026-10-16 | Review against the code of October 16, 2026. Eleven open corrective actions were closed (ACO-01 to ACO-03 and ACO-05 to ACO-12, now AC-24 to AC-34) and five improvement actions (AM-01, AM-04, AM-08, AM-10, and AM-11); five nonconformities found in the complete review of the system were recorded and closed (AC-35 to AC-39); the preventive actions, indicators, lessons learned, and traceability were updated. | Development team |
+| 2.1 | 2026-10-17 | Review against the code of October 17, 2026. Corrective actions AC-40 to AC-43 were closed (expired session notice when logging out, screens overflowing on phones, squashed filter inputs in the app, and service progress before it started), preventive action AP-15 was added (responsive design check before merging), and improvements AM-07 (inspection report in the mobile app) and AM-08 (frequently asked questions on the home page) were closed. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -85,7 +86,7 @@ During its construction, its reviews with the instructor, and the writing of its
 
 ### 4.2 Sources of This Document
 
-The actions were verified against the code of the eleven repositories (*develop* branch as of October 16, 2026) and their Git history, and against the risk register, the technical backlog, the incident management, the testing strategy, and the architecture decision records (ADRs) of the project (Vehicle Washing Development Team, 2026a). The findings of the review of the manuals of October 7, 9, and 16, 2026, and of the complete review of the system of October 16 (Annex B of the Technical Manual and the annexes of the other manuals) are also included.
+The actions were verified against the code of the eleven repositories (*develop* branch as of October 17, 2026) and their Git history, and against the risk register, the technical backlog, the incident management, the testing strategy, and the architecture decision records (ADRs) of the project (Vehicle Washing Development Team, 2026a). The findings of the review of the manuals of October 7, 9, and 16, 2026, and of the complete review of the system of October 16 (Annex B of the Technical Manual and the annexes of the other manuals) are also included.
 
 ## 5. Objective
 
@@ -255,6 +256,10 @@ Table 6 records the nonconformities already corrected, with their root cause and
 | AC-37 | The "Delete account" option said it erased the account and all the data, but it only deactivates it. | P2 | Text inherited from the mockup, contrary to what the server does. | The option is called "Deactivate my account" and explains that the history is kept, on the web and mobile and in the four languages. | Web and mobile profile; User Manual 4.0. | Law 1581 of 2012 | 2026-10-16 |
 | AC-38 | The manuals and project documents became outdated with respect to the code of October 16 (lockout, automatic assignment, inspection, 57 tables), and the figures were placeholders. | P3 | Changes integrated without updating the documentation in the same pull request (R-010). | Manuals 4.0 with real screenshots, Implementation Procedure 2.0, this document 2.0, and the project's technical documentation reviewed against the code. | Version control of each document (2026-10-16). | R-010 | 2026-10-16 |
 | AC-39 | With two accounts of the same method (for example, two Nequi), the web payment screen marked both at once and always showed the QR of the first one. | P3 | The chosen option was stored by method type and not by account. | The selection is stored by account and, if two accounts share a method, each option shows its holder. | *payment.spec.ts* (two Nequi accounts); 43 web tests passed. | Test Documentation, defect 6 | 2026-10-16 |
+| AC-40 | When logging out, the web and the app showed "Your session expired". | P2 | A 401 that arrived after the token was deleted was taken as an expired session. | A 401 only ends the session with a notice while a session is still open (*auth-interceptor* on the web and *AuthServiceContext* in the app). | The notice no longer appears when logging out; it does when the token really expires. | Usage report | 2026-10-16 |
+| AC-41 | On a phone (360 px) there were buttons off the screen, overlapping titles, the ☰ button over the titles, and filters outside their card. | P2 | Styles designed for desktop, without phone rules, and a fixed 20 px line height inherited from the Material theme. | Phone rules in the landing, authentication, customer dashboard, assigned services, management, and settings; global room for the ☰ button and a relative line height for titles. | 60 web screens (360 and 768 px) and 26 app screens with no overflow (tests, Table 5b). | Responsive design check | 2026-10-17 |
+| AC-42 | In the app, the date and search inputs were squashed when placed in a column. | P3 | The box used *flex: 1*, which starts from a height of 0 in a column. | It grows only in width and keeps a minimum height of 46 px (*FilterInputs.tsx*). | History and Ratings show the full inputs. | Responsive design check | 2026-10-17 |
+| AC-43 | The next service progress showed 10% or 25% although the wash had not started. | P3 | The progress table gave a percentage to the Scheduled and Confirmed statuses. | Scheduled and Confirmed stay at 0% on the web and in the app. | The dashboard shows 0% until the operator starts the service. | Usage report | 2026-10-16 |
 
 *Note.* Prepared by the authors from the Git history of the repositories, the risk register, and the ADRs of the project (Vehicle Washing Development Team, 2026a).
 
@@ -295,6 +300,7 @@ Preventive actions address the causes of risks that have not yet materialized or
 | AP-12 | Components with known vulnerabilities. | Quarterly review with *./mvnw versions:display-dependency-updates*, *dotnet list package --vulnerable*, and *npm audit*. | Backend and frontend leaders | Medium | In progress (permanent) | OWASP A06 |
 | AP-13 | Confusion caused by the own numbering of the payment changelogs, which repeats the global numbers. | Document the rule in the migration strategy and use the *pay-* prefix in the identifiers. | Backend leader | Low | Closed (documented) | TD-019 |
 | AP-14 | Features built that contradict decisions already recorded (cause of AC-11 and AC-12). | Review the current ADRs and the navigation map before starting a feature, and consult the team when there is a contradiction. | Whole team | Medium | In progress (permanent) | Lesson of ADR-015 |
+| AP-15 | Interface changes that break the phone layout without anyone noticing (cause of AC-41). | Measure the screens at 360 and 768 px with Playwright before merging interface changes, starting from the *e2e/width-360.js* script, and review the screenshots. | Frontend and backend leads | Medium | In progress (permanent) | Lesson from AC-41 |
 
 *Note.* Prepared by the authors from the risk register, the technical backlog, and the security policy of the project.
 
@@ -312,6 +318,8 @@ Preventive actions address the causes of risks that have not yet materialized or
 | AM-04 | Complete the mobile application and build a version with EAS for push notifications. | Immediate notices on the phone. | Frontend leader | Medium | Closed (2026-10-16): APK built with EAS and published at */app/* on the server, with push notices of new versions | ADR-011 |
 | AM-05 | RS256 signing and refresh tokens. | Lower impact of a secret leak and longer sessions without logging in again. | Backend leader | Low | Open | ADR-006 |
 | AM-06 | Store receipts, QR codes, and photos outside the database. | Lighter database and faster backups. | Backend leader | Low | Open | Recommended evolution |
+| AM-07 | Manage the inspection report from the mobile app. | The administrator records the vehicle condition next to the vehicle, with camera photos shrunk on the phone. | Backend lead | Medium | Closed (2026-10-17): *AdminInspection* screen in the app | Team request |
+| AM-08 | Frequently asked questions on the home page. | Visitors solve the most common doubts (booking, payment, cancellation, points) without writing to the car wash. | Backend lead | Low | Closed (2026-10-17) | Landing review |
 | AM-07 | Separate the display fields and the real discount fields in *promotion.promotion*. | Prevents the displayed package and the applied discount from contradicting each other. | Backend leader | Low | Open | ADR-015 |
 | AM-08 | Publish the built web application behind the gateway with HTTPS. | Production-ready environment, without a development server. | Frontend leader | Medium | Closed (2026-10-16): web container with nginx behind Caddy and HTTPS on the public server (Deployment Document) | Implementation Procedure, R-I08 |
 | AM-09 | Coverage (JaCoCo) and static analysis (SonarQube) tools. | Objective code quality metrics. | Project leader | Low | Open | Testing strategy |
@@ -328,9 +336,9 @@ Preventive actions address the causes of risks that have not yet materialized or
 
 *Action Management Indicators*
 
-| Indicator | Formula | Target | Value as of 2026-10-16 |
+| Indicator | Formula | Target | Value as of 2026-10-17 |
 |---|---|---|---|
-| Closed corrective actions | Closed corrective actions / recorded corrective actions × 100 | ≥ 70% per delivery | 39 / 41 = 95% |
+| Closed corrective actions | Closed corrective actions / recorded corrective actions × 100 | ≥ 70% per delivery | 43 / 45 = 96% |
 | Open P0 and P1 corrective actions | Number of ACO with severity P0 or P1 | 0 before an implementation | 0 |
 | On-time closure | Actions closed within the time of their severity / closed actions × 100 | ≥ 90% | To be measured from version 1.0 |
 | Recurrence | Closed corrective actions whose problem reappears / closed corrective actions × 100 | 0% | 0% |

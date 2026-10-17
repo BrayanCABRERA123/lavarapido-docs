@@ -8,7 +8,7 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 1.1, 15 de octubre de 2026
+Versión 1.2, 17 de octubre de 2026
 
 ---
 
@@ -113,7 +113,7 @@ La base de datos es una sola instancia de SQL Server, pero cada servicio es due�
 | Backend (payment-service) | .NET 8 (ASP.NET Core, EF Core) | Fue una decisión aparte, documentada en el ADR-013 (ver sección 3). |
 | API Gateway | Spring Cloud Gateway | Un solo punto de entrada en el puerto 8080 simplifica el CORS, oculta las rutas internas y permite cambiar un servicio por dentro sin que la web ni la app lo noten. |
 | Frontend web | Angular 21 | Obliga a una estructura modular y a tipado estático, lo que ayuda a mantener ordenada la lógica de tres roles con permisos distintos en una sola aplicación. |
-| Frontend móvil | React Native 0.86 + Expo SDK 57 | Comparte lenguaje y modelo de componentes con la web (ambos en TypeScript), así que el equipo trabaja con un solo paradigma y las dos aplicaciones consumen la misma API sin duplicar lógica de negocio. |
+| Frontend móvil | React Native 0.86 + Expo SDK 57 (con expo-image-picker y expo-image-manipulator para las fotos de la inspección) | Comparte lenguaje y modelo de componentes con la web (ambos en TypeScript), así que el equipo trabaja con un solo paradigma y las dos aplicaciones consumen la misma API sin duplicar lógica de negocio. |
 | Base de datos | SQL Server 2022 | El dominio es muy relacional (cliente → vehículo → reserva → operario → pago) y necesita integridad referencial real: una reserva con dos pagos aprobados, o un comprobante reusado en dos reservas, no es aceptable. En una base de documentos eso habría que resolverlo a mano en la aplicación. |
 | Mensajería | RabbitMQ 4 | Avisarle a un operario que le asignaron un servicio, o al cliente que su pago fue revisado, no debe demorar la respuesta de la reserva ni del pago. Con una cola de mensajes la operación principal responde de inmediato y, si falla el envío del aviso, el resto del sistema sigue funcionando. |
 | Migraciones de base de datos | Liquibase | Cada cambio de esquema queda versionado y se puede reproducir en cualquier máquina; evita el clásico "en mi base sí existe esa columna". |
@@ -182,6 +182,10 @@ Cada decisión importante quedó registrada como ADR (Architecture Decision Reco
 |---|---|---|---|
 | Pruebas (staging), S6 a S28 | AWS Lightsail Linux: 2 vCPU, 8 GB de RAM, 160 GB SSD | Ubuntu Server 24.04 LTS, Docker Engine y Docker Compose, Jenkins para la integración continua y los mismos contenedores de producción | Lo usan solo el equipo, el QA y el lavadero en la aceptación; los servicios corren con menos memoria asignada y Jenkins compila un repositorio a la vez (supuesto) |
 | Producción, desde S18 | AWS Lightsail Linux: 4 vCPU, 16 GB de RAM, 320 GB SSD | Ubuntu Server 24.04 LTS, Docker Engine y Docker Compose, Nginx con HTTPS (Let's Encrypt), SQL Server 2022 Express, RabbitMQ 4, los seis servicios, el gateway y la app web compilada | Los seis servicios, el gateway, SQL Server y RabbitMQ usan entre 8 y 10 GB de RAM con carga normal (supuesto); 16 GB dejan margen para picos y para crecer |
+
+*Nota.* Ambientes previstos en la propuesta; los costos de la sección 8.2 se calcularon con estas especificaciones.
+
+**Seguimiento al 17 de octubre de 2026.** Para la demostración académica, el sistema se desplegó en una máquina virtual de Microsoft Azure (suscripción *Azure for Students*, tamaño B2as_v2: 2 vCPU, 7,7 GB de RAM y 64 GB de disco SSD, Ubuntu 24.04 LTS), con los once contenedores, Caddy como entrada HTTPS y la aplicación Android servida en */app*. Con todos los contenedores activos usa unos 3,3 GB de RAM, por lo que el tamaño de producción de la Tabla 5 sigue siendo holgado. El procedimiento completo está en el Documento de Despliegue (carpeta 07).
 
 ### 4.4 Usuario final
 

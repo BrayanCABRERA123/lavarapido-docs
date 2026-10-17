@@ -15,7 +15,7 @@
 | Aprendices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano |
 | Instructora | Karol Daniela Correa |
 | Centro de formación | Industria |
-| Fecha | 16 de octubre de 2026 |
+| Fecha | 17 de octubre de 2026 |
 
 Este documento reúne el plan de pruebas, el inventario de pruebas automatizadas que existen en los repositorios, sus resultados reales al ejecutarlas el 16 de octubre de 2026 (incluidas las pruebas de punta a punta contra el sistema completo) y los casos de prueba funcionales, ejecutados el 9 de octubre de 2026, trazados a los requisitos del SRS v7 (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`). La estructura sigue la norma ISO/IEC/IEEE 29119-3 de documentación de pruebas (International Organization for Standardization [ISO], 2021). Ningún resultado de este documento es supuesto.
 
@@ -135,6 +135,24 @@ El 16 de octubre de 2026 se ejecutó `node --test "e2e/*.test.js"` desde `lavara
 | `full-flow.test.js` | 6 (1 + 5 subpruebas) | Reserva → pago reportado → aprobación con puntos → inicio y fin del servicio → calificación, revisando cada aviso | 6 aprobadas |
 | `inspection-flow.test.js` | 1 | Informe de inspección con hallazgos y fotos, publicación, aviso al cliente y enlace público | 1 aprobada |
 | **Total** | **19** | | **19 aprobadas** |
+
+### 3.2 Diseño adaptable e informe de inspección en la app móvil
+
+El 17 de octubre de 2026 se revisó con Playwright (navegador Edge sin ventana) que ninguna pantalla se salga de lado ni recorte contenido (RNF-008), con el backend en Docker y la web en `ng serve`. La app móvil se midió en su versión web (`npx expo start --web`), porque comparte el mismo código de pantallas. En cada pantalla se comparó el ancho del contenido con el de la ventana y se buscaron elementos que pasaran el borde derecho fuera de un contenedor con desplazamiento propio. Antes de las correcciones del mismo día había pantallas con botones cortados, títulos encimados y filtros fuera de su tarjeta (Tabla 9, defecto 8); la Tabla 5b muestra el resultado final.
+
+**Tabla 5b**
+
+*Verificación de diseño adaptable y del informe de inspección móvil (17 de octubre de 2026)*
+
+| Prueba | Alcance | Resultado |
+| --- | --- | --- |
+| Web a 360 px | 30 pantallas: públicas, cliente, operario y administrador | Ninguna se sale de lado ni recorta contenido |
+| Web a 768 px | Las mismas 30 pantallas | Ninguna se sale de lado ni recorta contenido |
+| App móvil a 360 px | 26 pantallas de los tres roles, abiertas desde el menú inferior y el menú Más | Ninguna se sale de lado ni recorta contenido |
+| Informe de inspección en la app | Reserva temporal de 200 minutos confirmada: detalle de la reserva → Inspección → Iniciar reporte → Iniciar fase → Agregar hallazgo → Terminar fase → Publicar y compartir enlace | Recorrido completo sin errores; al final se borraron el informe, la reserva y el servicio temporal |
+| Compilación y pruebas | `npx ng build`, `npx ng test --watch=false` (web) y `npx tsc --noEmit` (app) | Sin errores; 43 de 43 pruebas web aprobadas |
+
+*Nota.* Tomar o elegir fotos con la cámara y la galería del celular no se puede automatizar en esta prueba; queda pendiente probarlo en un dispositivo Android.
 
 ## 4. Casos de prueba funcionales
 
@@ -263,6 +281,12 @@ De los 41 requisitos del SRS v7, 30 tienen caso funcional y 39 una prueba automa
 | 4 | El nombre de la marca no es uniforme: "AquaWash" (móvil), "Car Wash" y "Lavado Vehicular" (web), "Express Car Wash" (establecimiento) | Capturas de la web y del móvil | Baja |
 | 5 | La landing anuncia "Servicio móvil de lavado" y "donde estés", pero el SRS v4 define un lavadero de un único local | Captura de la landing; SRS v4, sección 1 | Baja |
 | 6 | Si hay dos cuentas del mismo método (dos Nequi), la pantalla de pagos las muestra marcadas a la vez | Captura de Pagos del cliente | Baja |
+| 7 | Al cerrar sesión, la web y la app mostraban "Tu sesión expiró", porque una respuesta 401 que llegaba después de borrar el token se tomaba como sesión vencida | `auth-interceptor.ts` (web) y `AuthServiceContext.tsx` (móvil) | Media |
+| 8 | En el celular (360 px) había botones fuera de la pantalla en la barra de la landing, títulos encimados, el botón ☰ sobre los títulos, etiquetas de Servicios asignados fuera de la pantalla, filtros de Gestión fuera de su tarjeta e interruptores de Configuración sobre su texto | Revisión de diseño adaptable del 17 de octubre de 2026 (Tabla 5b) | Media |
+| 9 | En la app móvil, los campos de fecha y búsqueda se aplastaban cuando iban en columna (Historial y Calificaciones) | `shared/components/screen/FilterInputs.tsx` | Baja |
+| 10 | El avance del próximo servicio del cliente mostraba 10 % o 25 % aunque el lavado no había empezado | `features/client/pages/dashboard/dashboard.ts` (web) y `modules/client/models/client.ts` (móvil) | Baja |
+
+> *Nota.* Los defectos 7 a 10 se corrigieron entre el 16 y el 17 de octubre de 2026 en la rama *develop* de la web y de la app; el 8 y el 9 se volvieron a medir sin desbordes (Tabla 5b).
 
 > *Nota.* Revisión del código del 16 de octubre de 2026: los seis defectos están corregidos. El panel saluda con el nombre de la sesión y la revisión de pagos muestra a quien revisa (1); la columna Cliente muestra el nombre del cliente (2); el inicio del cliente muestra el operario asignado en la web y en el móvil (3); la marca es LavaRápido en la web y en el móvil (4); la página de inicio describe el servicio en el lavadero (5); y la pantalla de pagos selecciona por cuenta y muestra el titular cuando dos cuentas comparten medio (6, `payment.spec.ts`).
 

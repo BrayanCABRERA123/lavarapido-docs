@@ -15,8 +15,8 @@
 | Aprendices | Brayan Estiven Patiño Cabrera (líder de proyecto), Juan Camilo Guilombo Osorio (líder de frontend), Merari Urbano (líder de backend) |
 | Instructora | Karol Daniela Correa |
 | Centro de formación | Industria |
-| Fecha | 15 de octubre de 2026 |
-| Versión | 1.1 |
+| Fecha | 17 de octubre de 2026 |
+| Versión | 1.2 |
 
 
 
@@ -50,7 +50,7 @@ Fuera del alcance: requisitos (ver SRS v7, `lavarapido-docs/01_INFORME_DE_ESPECI
 
 ## 2. Interfaces gráficas
 
-La web tiene 34 pantallas enrutadas y la app móvil 30 pantallas; ambas separan las áreas por rol y solo dejan entrar a cada usuario a la suya. En la web lo hace `authGuard` con `data.roles` (`Web/src/app/app.routes.ts:19-49`). En el móvil, `RootNavigator` registra únicamente las pantallas del rol con sesión (`LavadoVehicular-Movil/src/core/navigation/RootNavigator.tsx:63-110`).
+La web tiene 35 pantallas enrutadas y la app móvil 31 pantallas; ambas separan las áreas por rol y solo dejan entrar a cada usuario a la suya. En la web lo hace `authGuard` con `data.roles` (`Web/src/app/app.routes.ts:19-49`). En el móvil, `RootNavigator` registra únicamente las pantallas del rol con sesión (`LavadoVehicular-Movil/src/core/navigation/RootNavigator.tsx:63-110`).
 
 ### 2.1 Inventario de pantallas de la aplicación web
 
@@ -60,11 +60,12 @@ La web tiene 34 pantallas enrutadas y la app móvil 30 pantallas; ambas separan 
 
 | Ruta | Pantalla | Rol | Propósito | Servicios / endpoints que consume |
 | --- | --- | --- | --- | --- |
-| `/` | Landing | Público | Presentación del lavadero, servicios y contacto | `GET /establishment` (correo y teléfono del negocio) |
+| `/` | Landing | Público | Presentación del lavadero, servicios, descarga de la app, contacto y preguntas frecuentes | `GET /establishment` (correo y teléfono del negocio) |
 | `/auth` | Inicio de sesión | Público | Autenticar con correo y contraseña | `POST /auth/login` |
 | `/auth/register` | Registro | Público | Crear cuenta de cliente | `POST /auth/register` |
 | `/auth/forgot-password` | Recuperar contraseña (3 pasos) | Público | Correo → código → nueva contraseña | `POST /auth/password/forgot`, `/verify`, `/reset` |
 | `/report/:token` | Reporte de inspección | Público | Ver el reporte compartido por el admin | `GET /public/inspections/{token}` y sus fotos |
+| `**` | Página no encontrada | Público | Avisar que la dirección no existe y volver al inicio | Ninguno |
 | `/client` | Inicio del cliente | CLIENT | Resumen, próxima reserva con su operario y puntos | `GET /bookings/me`, `/vehicles`, `/loyalty/balance`, `/operators/my-bookings` |
 | `/client/reserve` | Reservar | CLIENT | Elegir vehículo, servicio, fecha, hora y, si quiere, operario | `GET /catalog/services`, `/bookings/availability`, `/operators/available`; `POST /bookings` |
 | `/client/payment` | Pagos | CLIENT | Pagar una reserva y subir comprobante | `GET /payment-accounts`, `/payments/me/bookings`; `POST /payments`; `/loyalty/*` |
@@ -97,7 +98,7 @@ La web tiene 34 pantallas enrutadas y la app móvil 30 pantallas; ambas separan 
 
 ### 2.2 Inventario de pantallas de la aplicación móvil
 
-El móvil replica las áreas de la web con pantallas propias de React Native. No incluye landing, inspección ni reporte público.
+El móvil replica las áreas de la web con pantallas propias de React Native. No incluye landing ni reporte público; el informe de inspección del administrador sí está desde el 17 de octubre de 2026 (`AdminInspection`, que se abre desde el detalle de la reserva).
 
 **Tabla 4**
 
@@ -108,7 +109,7 @@ El móvil replica las áreas de la web con pantallas propias de React Native. No
 | Sin sesión | `LoginScreen`, `RegisterScreen`, `ForgotPasswordScreen` | `/auth/*` |
 | CLIENT | `ClientHome`, `ClientReserve`, `ClientPayment`, `ClientHistory`, `ClientVehicles`, `ClientNotifications`, `ClientProfile`, `ClientSettings` | `/client/*` |
 | OPERATOR | `OperatorHome`, `OperatorAssigned`, `OperatorSchedule`, `OperatorHistory`, `OperatorRatings`, `OperatorNotifications`, `OperatorProfile`, `OperatorSettings` | `/operator/*` |
-| ADMIN | `AdminDashboard`, `AdminReservations`, `AdminPayments`, `AdminManagement`, `AdminSchedule`, `AdminOperators`, `AdminOperatorCalendar`, `AdminReports`, `AdminNotifications`, `AdminProfile`, `AdminSettings` | `/admin/*` |
+| ADMIN | `AdminDashboard`, `AdminReservations`, `AdminPayments`, `AdminManagement`, `AdminSchedule`, `AdminOperators`, `AdminOperatorCalendar`, `AdminReports`, `AdminNotifications`, `AdminProfile`, `AdminSettings`, `AdminInspection` | `/admin/*` (`AdminInspection` = `/admin/reservations/:id/inspection`) |
 
 > *Nota.* Si un usuario tiene varios roles, el móvil entra al de más privilegio: ADMIN, luego OPERATOR, luego CLIENT (`RootNavigator.tsx:42-46`). La sesión se guarda en el llavero del sistema con `expo-secure-store` (`src/core/storage/sessionStorage.ts:15-20`).
 
@@ -142,7 +143,7 @@ flowchart LR
   D2 -.->|enlace compartido| P["Reporte público /report/:token"]
 ```
 
-El diagrama muestra la navegación web; el móvil sigue el mismo recorrido por rol, sin landing ni inspección.
+El diagrama muestra la navegación web; el móvil sigue el mismo recorrido por rol, sin landing ni reporte público (la inspección se abre desde el detalle de la reserva).
 
 ### 2.4 Capturas de pantalla
 
@@ -215,6 +216,14 @@ Las capturas se tomaron el 9 de octubre de 2026 con el sistema completo en ejecu
 ![Gestión de usuarios, roles, servicios y promociones — administrador (web)](capturas/08-admin-gestion.png)
 
 > *Nota.* Capturas propias tomadas con Chrome sin interfaz (headless). Las de la app móvil corresponden a su versión web; en Android la interfaz es la misma, renderizada con componentes nativos.
+
+### 2.5 Diseño adaptable
+
+Las dos aplicaciones se usan desde 360 píxeles de ancho (RNF-008), el teléfono Android más angosto que soporta el proyecto, sin desplazamiento lateral.
+
+- **Web.** Los puntos de quiebre están en `src/styles/_breakpoints.scss` y se aplican con los mixins `mobile` (hasta 768 px) y `tablet` (hasta 1024 px) de `_mixins.scss`. Desde 768 px el menú lateral se abre con el botón ☰, y el contenido de las páginas con menú deja 72 px arriba para ese botón (regla global en `styles.scss`). Los títulos usan un interlineado relativo de 1,25, porque el tema de Material fija 20 px en el `body` y un título más grande se montaba sobre sí mismo al partirse en dos líneas. Las tablas anchas se desplazan dentro de su tarjeta; la de servicios asignados del operario se muestra como tarjetas desde 600 px. En el celular, el panel del cliente pone las estadísticas y los accesos de a dos por fila, las pantallas de autenticación usan todo el ancho y la barra de la landing deja solo el idioma e **Iniciar sesión** desde 420 px.
+- **Móvil.** Las pantallas se arman con Flexbox: las tarjetas de estadística van de a dos por fila (`StatGrid`), las filas de botones se envuelven y los campos de filtro crecen a lo ancho sin perder su alto de 46 px.
+- **Verificación.** El 17 de octubre de 2026 se midieron con Playwright 60 pantallas de la web (30 a 360 px y 30 a 768 px) y 26 de la app móvil a 360 px, en su versión web: ninguna se sale de lado ni recorta contenido. La prueba del equipo `e2e/width-360.js` (lavarapido-infra) cubre la misma regla para la web.
 
 ## 3. Modelo arquitectónico
 
