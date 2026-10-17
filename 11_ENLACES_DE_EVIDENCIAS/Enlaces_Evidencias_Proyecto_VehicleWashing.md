@@ -9,7 +9,7 @@
 | Proyecto formativo | [Completar: nombre oficial del proyecto formativo] |
 | Equipo de trabajo | Equipo de Desarrollo Vehicle Washing ([Completar: confirmar nombre oficial del equipo]) |
 | Integrantes | Juan Camilo Guilombo Osorio, Brayan Estiven Patiño Cabrera, Merari Urbano Quintero |
-| Instructores | José de Jesús Motta Vargas, Karol Daniela Correa |
+| Instructora | Karol Daniela Correa |
 | Fecha de entrega | [Completar] |
 | Fecha de actualización de este documento | 16 de octubre de 2026 |
 
@@ -40,7 +40,7 @@ Estructura de `lavarapido-docs`: cada evidencia tiene una carpeta numerada (`01_
 
 | # | Evidencia | Contenido mínimo verificable | Enlace directo | Estado de acceso | Observaciones |
 |---|---|---|---|---|---|
-| 1 | Informe de especificación de requisitos | RF y RNF, historias de usuario, criterios de aceptación, trazabilidad | [SRS v6.0 (ES)](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS/ES/MD/informe-de-especificacion-de-requisitos.md) · [Requisitos funcionales (SRS §5)](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS/ES/MD/informe-de-especificacion-de-requisitos.md#5-requisitos-funcionales) · [Requisitos no funcionales (SRS §6)](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS/ES/MD/informe-de-especificacion-de-requisitos.md#6-requisitos-no-funcionales) · [Historias de usuario por requisito (SRS §10)](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS/ES/MD/informe-de-especificacion-de-requisitos.md#10-matriz-de-trazabilidad) · Fuente en `vehicle-w-docs`: [Requisitos funcionales](https://github.com/code-sena/vehicle-w-docs/blob/docs/04-requirements/functional.md) · [Requisitos no funcionales](https://github.com/code-sena/vehicle-w-docs/blob/docs/04-requirements/non-functional.md) · [Historias de usuario](https://github.com/code-sena/vehicle-w-docs/blob/docs/04-requirements/user-stories.md) | Público / Pendiente de permisos (`vehicle-w-docs`) | El SRS sigue IEEE 830 e ISO/IEC/IEEE 29148 y recoge RF-001 a RF-035 y CU1 a CU29. Versión en inglés: `01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS/EN/`. |
+| 1 | Informe de especificación de requisitos | RF y RNF, historias de usuario, criterios de aceptación, trazabilidad | [SRS v7.0 (ES)](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS/ES/MD/informe-de-especificacion-de-requisitos.md) · [Requisitos funcionales (SRS §5)](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS/ES/MD/informe-de-especificacion-de-requisitos.md#5-requisitos-funcionales) · [Requisitos no funcionales (SRS §6)](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS/ES/MD/informe-de-especificacion-de-requisitos.md#6-requisitos-no-funcionales) · [Historias de usuario por requisito (SRS §10)](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS/ES/MD/informe-de-especificacion-de-requisitos.md#10-matriz-de-trazabilidad) · Fuente en `vehicle-w-docs`: [Requisitos funcionales](https://github.com/code-sena/vehicle-w-docs/blob/docs/04-requirements/functional.md) · [Requisitos no funcionales](https://github.com/code-sena/vehicle-w-docs/blob/docs/04-requirements/non-functional.md) · [Historias de usuario](https://github.com/code-sena/vehicle-w-docs/blob/docs/04-requirements/user-stories.md) | Público / Pendiente de permisos (`vehicle-w-docs`) | El SRS sigue IEEE 830 e ISO/IEC/IEEE 29148 y recoge RF-001 a RF-035 y CU1 a CU29. Versión en inglés: `01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS/EN/`. |
 | 2 | Análisis del software | Vistas dinámicas, procesos, casos de uso, diagramas de secuencia y estados | [Análisis de vistas dinámicas (ES)](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/02_DOCUMENTACION_DE_ANALISIS_DEL_SOFTWARE/ES/MD/documentacion-de-analisis-del-software.md) · [Diagramas de secuencia, actividades y estados](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/02_DOCUMENTACION_DE_ANALISIS_DEL_SOFTWARE/ES/MD/documentacion-de-analisis-del-software.md#2-diagramas-de-secuencia) · Fuente en `vehicle-w-docs`: [Diagramas UML (fuentes)](https://github.com/code-sena/vehicle-w-docs/tree/docs/08-uml/diagrams/source) | Público / Pendiente de permisos (`vehicle-w-docs`) | Las capturas están en `02_DOCUMENTACION_DE_ANALISIS_DEL_SOFTWARE/ES/MD/capturas/`. Los diagramas incluyen secuencias de reserva, pago, registro, recordatorio y asignación, y estados de reserva y pago. |
 | 3 | Propuesta técnica del software | Alternativa seleccionada, tecnologías, justificación, alcance y restricciones | [Propuesta técnica (ES)](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/03_PROPUESTA_TECNICA_DEL_SOFTWARE/ES/MD/propuesta-tecnica-del-software.md) · [Decisiones de diseño (SRS §3.6)](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS/ES/MD/informe-de-especificacion-de-requisitos.md#36-decisiones-de-diseño) · [Alternativas consideradas](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/03_PROPUESTA_TECNICA_DEL_SOFTWARE/ES/MD/propuesta-tecnica-del-software.md#3-alternativas-consideradas) · Fuente en `vehicle-w-docs`: [Decisiones de arquitectura (ADR-001 a ADR-015)](https://github.com/code-sena/vehicle-w-docs/tree/docs/05-architecture/decisions/records) | Público / Pendiente de permisos (`vehicle-w-docs`) | Los ADR justifican la arquitectura de microservicios, la base de datos, el API Gateway, JWT y el uso de .NET para el servicio de pagos. |
 | 4 | Diseño del software | Interfaces gráficas, arquitectura, patrones, modelo de datos y diagramas | [Diseño del software (ES)](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/04_DOCUMENTACION_DE_DISENO_DEL_SOFTWARE/ES/MD/documentacion-de-diseno-del-software.md) · [Modelo arquitectónico](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/04_DOCUMENTACION_DE_DISENO_DEL_SOFTWARE/ES/MD/documentacion-de-diseno-del-software.md#3-modelo-arquitectónico) · [Modelo de datos](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/04_DOCUMENTACION_DE_DISENO_DEL_SOFTWARE/ES/MD/documentacion-de-diseno-del-software.md#5-modelo-de-datos) · [API y rutas del sistema (manual técnico §13)](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/09_MANUALES/ES/MD/manual-tecnico.md#13-api-o-rutas-del-sistema) · Fuente en `vehicle-w-docs`: [Arquitectura](https://github.com/code-sena/vehicle-w-docs/tree/docs/05-architecture) · [Modelo de datos](https://github.com/code-sena/vehicle-w-docs/tree/docs/06-data) · [Contratos OpenAPI](https://github.com/code-sena/vehicle-w-docs/tree/docs/07-api/contracts/openapi) | Público / Pendiente de permisos (`vehicle-w-docs`) | Patrón de arquitectura hexagonal (ADR-007). Las capturas están en `04_DOCUMENTACION_DE_DISENO_DEL_SOFTWARE/ES/MD/capturas/`. |
@@ -96,7 +96,7 @@ Rama de trabajo: **`develop`** en todos los repositorios de código. No hay rele
 | Cliente | Registro, vehículos, reservas, pagos por QR o transferencia, historial, calificaciones, notificaciones | Web y móvil |
 | Operario | Servicios asignados, horario, ejecución, historial, calificaciones recibidas | Web y móvil |
 
-### 3.2 Endpoints de salud (verificados el 15/10/2026 en el entorno local)
+### 3.2 Endpoints de salud (verificados el 16/10/2026 en el entorno local)
 
 | Servicio | Puerto | Endpoint | Resultado |
 |---|---|---|---|
@@ -105,12 +105,12 @@ Rama de trabajo: **`develop`** en todos los repositorios de código. No hay rele
 | customer-service | 3002 | `/actuator/health` | `UP` |
 | booking-service | 3003 | `/actuator/health` | `UP` |
 | operations-service | 3004 | `/actuator/health` | `UP` |
-| payment-service | 3005 | `/health` | `UP` |
+| payment-service | 3005 | `/health` | `ok` (consulta SQL Server; responde 503 si la base no contesta) |
 | notification-service | 3006 | `/actuator/health` | `UP` |
 
 ### 3.3 Documentación interactiva de la API (Swagger/OpenAPI)
 
-- **Servicios Spring Boot (puertos 3001–3004 y 3006):** `http://localhost:<puerto>/swagger-ui/index.html` respondió `200` el 15/10/2026.
+- **Servicios Spring Boot (puertos 3001–3004 y 3006):** `http://localhost:<puerto>/swagger-ui/index.html` respondió `200` el 16/10/2026.
 - **payment-service (.NET Core):** Swagger solo se activa en el entorno `Development`. Bajo Docker no está expuesto (`404`). Para verlo, ejecutar el servicio con `ASPNETCORE_ENVIRONMENT=Development`.
 - **Contratos versionados:** [`07-api/contracts/openapi`](https://github.com/code-sena/vehicle-w-docs/tree/docs/07-api/contracts/openapi) en `vehicle-w-docs` (privado). Versión pública: [API y rutas del sistema](https://github.com/BrayanCABRERA123/lavarapido-docs/blob/main/09_MANUALES/ES/MD/manual-tecnico.md#13-api-o-rutas-del-sistema), en el manual técnico.
 
@@ -118,10 +118,10 @@ Rama de trabajo: **`develop`** en todos los repositorios de código. No hay rele
 
 | Prueba | Procedimiento | Resultado |
 |---|---|---|
-| Autenticación | `POST http://localhost:8080/api/v1/auth/login` con un usuario de prueba y comprobar que devuelve un JWT | [Completar] |
-| Lectura | Con el JWT, consultar el catálogo de servicios o las reservas del cliente | [Completar] |
-| Escritura | Crear una reserva y comprobar que aparece en el historial y que llega la notificación a Mailpit (`http://localhost:8025`) | [Completar] |
-| Flujo E2E automatizado | `lavarapido-infra/e2e/booking-flow.test.js` | [Completar] |
+| Autenticación | `POST http://localhost:8080/api/v1/auth/login` con un usuario de prueba y comprobar que devuelve un JWT | 200 con `accessToken` (16/10/2026, cuenta de prueba del perfil *dev*) |
+| Lectura | Con el JWT, consultar el catálogo de servicios o las reservas del cliente | `GET /api/v1/catalog/services` y `GET /api/v1/bookings/me` respondieron 200 (16/10/2026) |
+| Escritura | Crear una reserva y comprobar que aparece en el historial y que llega la notificación | Cubierta por `full-flow.test.js`: reserva creada, asignada sola al operario elegido, pago aprobado, servicio iniciado y terminado, calificación y cada aviso en la bandeja del cliente (16/10/2026) |
+| Flujo E2E automatizado | `node --test "e2e/*.test.js"` en `lavarapido-infra` (con `E2E_OPERATOR_ID=2` en la base local) | 19 de 19 pruebas aprobadas en 7,3 s (16/10/2026) |
 
 ### 3.5 Capturas de evidencia
 
@@ -130,7 +130,7 @@ Rama de trabajo: **`develop`** en todos los repositorios de código. No hay rele
 | Pantallas web (login, admin, cliente, operario) | 28 capturas de la interfaz | [Carpeta `assets` del SRS](https://github.com/BrayanCABRERA123/lavarapido-docs/tree/main/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS/ES/MD/capturas) |
 | Vistas dinámicas y modales | 41 capturas | [Carpeta `assets` del análisis](https://github.com/BrayanCABRERA123/lavarapido-docs/tree/main/02_DOCUMENTACION_DE_ANALISIS_DEL_SOFTWARE/ES/MD/capturas) |
 | Diseño (landing, login, reservar, pagos) | Capturas del diseño final | [Carpeta `capturas`](https://github.com/BrayanCABRERA123/lavarapido-docs/tree/main/04_DOCUMENTACION_DE_DISENO_DEL_SOFTWARE/ES/MD/capturas) |
-| Ejecución E2E | Capturas generadas por las pruebas E2E | [Agregar enlace](URL): la carpeta `e2e/shots` existe solo en local (no está versionada) |
+| Capturas reales de los manuales | 56 capturas por idioma del sistema funcionando (16/10/2026): pantallas de los tres roles, terminal de instalación y diagrama del modelo de datos | [Carpeta `capturas` de los manuales](https://github.com/BrayanCABRERA123/lavarapido-docs/tree/main/09_MANUALES/ES/MD/capturas) |
 | Contenedores, logs, health checks y migraciones en producción | Portainer, logs de arranque, `/actuator/health`, consola limpia y changesets de Liquibase (16/10/2026) | [Carpeta `capturas` del despliegue](https://github.com/BrayanCABRERA123/lavarapido-docs/tree/main/07_PROCEDIMIENTO_DE_IMPLEMENTACION/ES/MD/capturas) |
 
 ---
@@ -156,8 +156,8 @@ Rama de trabajo: **`develop`** en todos los repositorios de código. No hay rele
 | Completitud | Las 12 evidencias tienen un enlace directo y verificable | Las 12 evidencias tienen enlace. La evidencia 11 enlaza la aplicación desplegada en Azure desde el 16/10/2026. |
 | Accesibilidad | Todos los enlaces abren para el instructor sin solicitar permisos | Parcial: los enlaces de `lavarapido-docs` y de los repositorios de código son públicos (comprobado sin iniciar sesión); los de `vehicle-w-docs` requieren dar permiso de lectura al instructor. |
 | Trazabilidad | Requisitos → HU → módulos → pruebas → versiones relacionados | Existe una matriz en la §10 del SRS, otra en la §5 del documento de pruebas y la matriz fuente en `vehicle-w-docs`. Faltan release tags. |
-| Coherencia | La documentación coincide con el código y con la aplicación en ejecución | Entorno local verificado el 15/10/2026 (todos los servicios `UP`). `main` está atrasada frente a `develop`. |
-| Seguridad | Sin secretos ni datos personales expuestos | [Completar después de revisar los repositorios públicos] |
+| Coherencia | La documentación coincide con el código y con la aplicación en ejecución | Entorno local verificado el 16/10/2026: todos los servicios `UP`, 639 pruebas automatizadas y 19 pruebas de punta a punta aprobadas, y los manuales 4.0 revisados contra el código. `main` está atrasada frente a `develop`. |
+| Seguridad | Sin secretos ni datos personales expuestos | Revisado el 16/10/2026: ningún repositorio tiene archivos `.env` en su historial y los archivos versionados solo traen valores de ejemplo (`.env.example`). Las capturas usan datos de prueba. |
 | Presentación | Documento navegable, tablas legibles y PDF con enlaces activos | [Completar después de exportar el PDF] |
 
 ---
