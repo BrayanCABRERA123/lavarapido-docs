@@ -71,7 +71,7 @@ Working branch: **`develop`** in every code repository. There are no release tag
 | Payments and loyalty | .NET Core | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | `694e1df` | 39 commits | Public |
 | Notifications | Spring Boot | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | `23747c3` | 34 commits | Public |
 | Infrastructure (Docker, database, E2E tests) | Docker, SQL Server, RabbitMQ | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | `95ce9ad` | 54 commits | Public |
-| Technical documentation (SDD) | Markdown, OpenAPI | [vehicle-w-docs](https://github.com/code-sena/vehicle-w-docs/tree/docs) (`docs` branch) | `f73c5ac` | 299 commits | Pending permissions |
+| Technical documentation (SDD) | Markdown, OpenAPI | [vehicle-w-docs](https://github.com/code-sena/vehicle-w-docs/tree/docs) (`docs` branch) | `71f4a3f` | 303 commits | Pending permissions |
 | Documentary evidence | Markdown | [lavarapido-docs](https://github.com/BrayanCABRERA123/lavarapido-docs) (`main` branch) | last commit of `main` | — | Public |
 
 **Database:** shared SQL Server 2022, with one schema per service (ADR-003, ADR-009). Each Spring Boot service manages its migrations with Liquibase. The payment service migrations are in [`lavarapido-payment-service/db`](https://github.com/merari0322/lavarapido-payment-service/tree/develop/db).
