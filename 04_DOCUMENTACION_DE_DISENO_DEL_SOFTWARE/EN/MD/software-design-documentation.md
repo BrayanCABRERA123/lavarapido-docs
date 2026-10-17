@@ -41,12 +41,12 @@ This document describes the design as built: user interfaces, architectural mode
 | notification-service | Spring Boot 4.0.8, Spring Mail, Java 21 | 3006 | `Backend/lavarapido-notification-service` |
 | Database | SQL Server 2022 (one database, one schema per service) | 1433 | `Backend/lavarapido-infra/docker-compose.yml` |
 | Messaging | RabbitMQ 4 (exchange `carwash.events`) | 5672 | `Backend/lavarapido-infra/docker-compose.yml` |
-| Web application | Angular 21.2.7, Angular Material, ngx-translate, Chart.js | 4200 | `Web` |
+| Web application | Angular 21.2.25, Angular Material, ngx-translate, Chart.js | 4200 | `Web` |
 | Mobile application | React Native 0.86.3, Expo ~57, React Navigation 7, i18next | 8081 (Expo) | `LavadoVehicular-Movil` |
 
 > *Note.* Versions taken from `pom.xml`, `Directory.Build.props`, and `package.json`. Official documentation: Spring (n.d.), Microsoft (n.d.-a, n.d.-b), RabbitMQ (n.d.), Liquibase (n.d.), Angular (n.d.), React Native (n.d.), and Expo (n.d.).
 
-Out of scope: requirements (see SRS v6, `lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`), dynamic diagrams (analysis deliverable), and costs.
+Out of scope: requirements (see SRS v7, `lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`), dynamic diagrams (analysis deliverable), and costs.
 
 ## 2. User Interfaces
 

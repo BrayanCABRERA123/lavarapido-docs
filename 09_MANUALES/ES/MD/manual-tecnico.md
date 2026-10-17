@@ -226,7 +226,7 @@ Es un sistema distribuido cliente-servidor con un backend de microservicios (Fig
 | Mensajería | RabbitMQ | 4 con complemento de administración; exchange de tipo topic *carwash.events* |
 | Correo | Spring Mail con Mailpit (desarrollo) o Gmail | SMTP |
 | Notificaciones push | Expo Push API | Requiere una versión EAS en el móvil |
-| Frontend web | Angular, Angular Material y CDK, ngx-translate, Chart.js, jsPDF, xlsx, RxJS | 21.2.7, 21.2.7, 17, 4.5, 4.2, 0.18, 7.8; TypeScript 5.9 |
+| Frontend web | Angular, Angular Material y CDK, ngx-translate, Chart.js, jsPDF, xlsx, RxJS | 21.2.25, 21.2.14, 17, 4.5, 4.2, 0.20, 7.8; TypeScript 5.9 |
 | Frontend móvil | React Native, Expo, React, React Navigation, i18next | 0.86.3, SDK 57, 19.2, 7, 26; TypeScript 6.0 |
 | Contenedores | Docker y Docker Compose | Docker 24 o posterior; Compose v2 |
 | Pruebas | JUnit 5 y Spring Boot Test (Java), xUnit (.NET), Vitest (web) | Mediante el Maven Wrapper, *dotnet test* y *ng test* |
