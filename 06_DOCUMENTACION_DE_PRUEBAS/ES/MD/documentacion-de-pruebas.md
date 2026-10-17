@@ -15,9 +15,9 @@
 | Aprendices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano |
 | Instructora | Karol Daniela Correa |
 | Centro de formación | Industria |
-| Fecha | 15 de octubre de 2026 |
+| Fecha | 16 de octubre de 2026 |
 
-Este documento reúne el plan de pruebas, el inventario de pruebas automatizadas que existen en los repositorios, sus resultados reales al ejecutarlas el 15 de octubre de 2026 y los casos de prueba funcionales, ejecutados el 9 de octubre de 2026, trazados a los requisitos del SRS v6 (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`). La estructura sigue la norma ISO/IEC/IEEE 29119-3 de documentación de pruebas (International Organization for Standardization [ISO], 2021). Ningún resultado de este documento es supuesto.
+Este documento reúne el plan de pruebas, el inventario de pruebas automatizadas que existen en los repositorios, sus resultados reales al ejecutarlas el 16 de octubre de 2026 (incluidas las pruebas de punta a punta contra el sistema completo) y los casos de prueba funcionales, ejecutados el 9 de octubre de 2026, trazados a los requisitos del SRS v7 (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`). La estructura sigue la norma ISO/IEC/IEEE 29119-3 de documentación de pruebas (International Organization for Standardization [ISO], 2021). Ningún resultado de este documento es supuesto.
 
 ## 1. Plan de pruebas
 
@@ -40,7 +40,7 @@ Se prueban la aplicación web, la aplicación móvil y los siete servicios de ba
 | Integración de persistencia | Mapeo EF Core contra SQL Server real | xUnit + `DatabaseFixture` | `PaymentService.Infrastructure.IntegrationTests` (requiere base de datos) |
 | Unitarias de interfaz web | Componentes, guards y servicios de Angular | Vitest 4 + jsdom (`@angular/build:unit-test`) | `Web/src/**/*.spec.ts` |
 | Funcionales / aceptación | Recorridos completos por rol contra el sistema desplegado | Manual, con Postman o Swagger UI para la API y navegador / Expo Go para la interfaz | Casos CP-01 a CP-33 (sección 4) |
-| Entre servicios y RNF | Flujo de reserva por el gateway con elección de operario, asignación automática y avisos; percentil 95 del tiempo de respuesta (RNF-001); pantallas web a 360 px (RNF-008) | Node 22 (`node:test` y `fetch`) y Playwright Core con Edge sin ventana | `lavarapido-infra/e2e` |
+| Entre servicios (punta a punta) y RNF | Reserva con elección de operario y asignación automática, flujo completo de los tres roles, informe de inspección, reglas de acceso por rol; percentil 95 del tiempo de respuesta (RNF-001); pantallas web a 360 px (RNF-008) | Node 24 (`node:test` y `fetch`) y Playwright Core con Edge sin ventana | `lavarapido-infra/e2e` |
 
 > *Nota.* Herramientas documentadas en JUnit (s.f.), xUnit.net (s.f.) y Vitest (s.f.).
 
@@ -52,11 +52,11 @@ Se prueban la aplicación web, la aplicación móvil y los siete servicios de ba
 
 | Elemento | Versión |
 | --- | --- |
-| Sistema operativo | Windows 11 Home Single Language 10.0.26300 (15 de octubre); 10.0.26200 (9 de octubre) |
+| Sistema operativo | Windows 11 Home Single Language 10.0.26300 (15 y 16 de octubre); 10.0.26200 (9 de octubre) |
 | Node.js / npm | 24.14.0 / 11.9.0 |
 | JDK | Java 25 (los proyectos compilan para Java 21) con el Maven Wrapper de cada servicio |
 | .NET SDK | 9.0.306; el proyecto apunta a `net8.0` y las pruebas se corrieron con `DOTNET_ROLL_FORWARD=Major` |
-| Base de datos y mensajería | Las pruebas automatizadas no las necesitan. Los casos funcionales del 9 de octubre usaron SQL Server 2022, RabbitMQ 4 y Mailpit en Docker 28.4 (Docker Desktop) |
+| Base de datos y mensajería | Las pruebas unitarias no las necesitan. Las pruebas de punta a punta del 16 de octubre y los casos funcionales del 9 de octubre usaron SQL Server 2022, RabbitMQ 4 y Mailpit en Docker 28.4 (Docker Desktop) |
 | Servicios | Para los casos funcionales, los 7 servicios en el equipo (JAR de Spring Boot y `dotnet run`); el correo se redirigió a Mailpit para no enviar correos reales |
 
 ### 1.4 Criterios
@@ -68,7 +68,7 @@ Se prueban la aplicación web, la aplicación móvil y los siete servicios de ba
 
 ## 2. Inventario de pruebas automatizadas
 
-Los repositorios tienen 504 métodos de prueba: 468 en el backend y 36 en la web. La app móvil no tiene pruebas automatizadas.
+Los repositorios tienen 542 métodos de prueba: 499 en el backend y 43 en la web. La app móvil no tiene pruebas automatizadas.
 
 **Tabla 4**
 
@@ -77,40 +77,40 @@ Los repositorios tienen 504 métodos de prueba: 468 en el backend y 36 en la web
 | Artefacto | Archivos | Métodos | Qué cubren |
 | --- | --- | --- | --- |
 | api-gateway | 1 | 8 | Ruteo de cada prefijo `/api/v1/**` a su servicio y que `/internal/**` no salga por el gateway (`GatewayRoutesTest`) |
-| security-service | 15 | 119 | Registro, login con bloqueo por intentos fallidos, recuperación de contraseña, perfil y dirección, administración de usuarios, roles y permisos, preferencias, objetos valor, política de contraseñas, emisión de JWT y seguridad HTTP por rol (`ApiSecurityWebTest`) |
+| security-service | 17 | 131 | Registro, login con bloqueo por intentos fallidos, recuperación de contraseña, perfil y dirección, administración de usuarios, roles y permisos, preferencias, objetos valor, política de contraseñas, emisión de JWT y seguridad HTTP por rol (`ApiSecurityWebTest`) |
 | customer-service | 6 | 50 | Cuenta del cliente, placas, CRUD de vehículos, listener de `security.user_registered` y API web |
-| booking-service | 6 | 38 | Ciclo de vida de la reserva, disponibilidad, catálogo, datos del negocio (`EstablishmentTest`), operario preferido en el evento y API web |
-| operations-service | 10 | 49 | Asignación manual y automática, operarios libres, ventana de inicio, ejecución, calificación, métricas del operario, resumen del equipo, ficha del operario, informe de inspección y API web |
-| notification-service | 10 | 94 | Casos de uso de notificaciones, fábrica de mensajes por evento, avisos en el idioma de la cuenta, recordatorios, alertas de reservas sin operario, tokens de dispositivo y controlador admin |
+| booking-service | 6 | 40 | Ciclo de vida de la reserva, disponibilidad, catálogo, datos del negocio (`EstablishmentTest`), operario preferido en el evento y API web |
+| operations-service | 11 | 54 | Asignación manual y automática, operarios libres, ventana de inicio, ejecución, calificación, métricas del operario, resumen del equipo, ficha del operario, informe de inspección y API web |
+| notification-service | 12 | 106 | Casos de uso de notificaciones, fábrica de mensajes por evento, avisos en el idioma de la cuenta, recordatorios, alertas de reservas sin operario, tokens de dispositivo y controlador admin |
 | payment-service (.NET) | 9 | 110 | Pago y comprobante, referencia reutilizada, historial con filtros, promociones, puntos de fidelización, política de pagos, servicios de comandos y consultas, y 7 pruebas de persistencia contra SQL Server |
-| Web (Angular) | 35 | 36 | Creación de componentes, guards y servicios (pruebas de humo `should create`) |
+| Web (Angular) | 37 | 43 | Creación de componentes, guards y servicios (pruebas de humo `should create`), mensajes de error de la API y selección de la cuenta de pago |
 | Móvil | 0 | 0 | Sin pruebas automatizadas |
 
 > *Nota.* Los archivos de apoyo (`Fakes.java`, `InMemory*.java`, `InMemoryPorts.cs`, `DatabaseFixture.cs`) no se cuentan como pruebas. Las 7 pruebas de persistencia de payment se omiten solas si no está definida la variable de conexión a SQL Server (`DatabaseFixture.cs:20-21`).
 
-Las pruebas del backend son de dominio y de aplicación con dobles en memoria, más pruebas de controladores con MockMvc. Las de la web solo comprueban que cada componente se crea; no validan reglas de negocio de la interfaz.
+Las pruebas del backend son de dominio y de aplicación con dobles en memoria, más pruebas de controladores con MockMvc. La mayoría de las de la web comprueban que cada componente se crea; `api-error.spec.ts` y `payment.spec.ts` prueban reglas reales (los mensajes de error de la API y la selección de la cuenta de pago).
 
 ## 3. Resultados de ejecución
 
-El 15 de octubre de 2026 se ejecutaron las ocho suites automatizadas: 601 pruebas, todas aprobadas. Las 7 de persistencia de payment se omitieron porque no se definió la base de pruebas; el 9 de octubre se habían ejecutado contra una base aislada (`LavaRapidoPaymentIT`) creada con los mismos changelogs y pasaron.
+El 16 de octubre de 2026 se ejecutaron las ocho suites automatizadas: 639 pruebas, todas aprobadas. Las 7 de persistencia de payment se omitieron porque no se definió la base de pruebas; el 9 de octubre se habían ejecutado contra una base aislada (`LavaRapidoPaymentIT`) creada con los mismos changelogs y pasaron.
 
 **Tabla 5**
 
-*Resultados reales por artefacto (15 de octubre de 2026)*
+*Resultados reales por artefacto (16 de octubre de 2026)*
 
 | Artefacto | Comando | Ejecutadas | Aprobadas | Fallidas | Omitidas | Duración |
 | --- | --- | --- | --- | --- | --- | --- |
-| Web (Angular) | `npx ng test --watch=false` | 36 | 36 | 0 | 0 | 23,5 s |
-| api-gateway | `./mvnw test` | 34 | 34 | 0 | 0 | 10,9 s |
-| security-service | `./mvnw test` | 135 | 135 | 0 | 0 | 18,0 s |
-| customer-service | `./mvnw test` | 68 | 68 | 0 | 0 | 8,0 s |
-| booking-service | `./mvnw test` | 38 | 38 | 0 | 0 | 8,6 s |
-| operations-service | `./mvnw test` | 49 | 49 | 0 | 0 | 9,7 s |
-| notification-service | `./mvnw test` | 100 | 100 | 0 | 0 | 0,5 s |
+| Web (Angular) | `npx ng test --watch=false` | 43 | 43 | 0 | 0 | 6,7 s |
+| api-gateway | `./mvnw test` | 34 | 34 | 0 | 0 | 9,9 s |
+| security-service | `./mvnw test` | 147 | 147 | 0 | 0 | 13,5 s |
+| customer-service | `./mvnw test` | 68 | 68 | 0 | 0 | 8,3 s |
+| booking-service | `./mvnw test` | 40 | 40 | 0 | 0 | 10,0 s |
+| operations-service | `./mvnw test` | 54 | 54 | 0 | 0 | 10,9 s |
+| notification-service | `./mvnw test` | 112 | 112 | 0 | 0 | 0,6 s |
 | payment-service: dominio | `dotnet test PaymentService.sln` | 113 | 113 | 0 | 0 | 0,1 s |
 | payment-service: aplicación | (mismo comando) | 28 | 28 | 0 | 0 | 0,1 s |
 | payment-service: integración | (mismo comando, sin `PAYMENT_INTEGRATION_DB`) | 0 | 0 | 0 | 7 | — |
-| **Total** | | **601** | **601** | **0** | **7** | |
+| **Total** | | **639** | **639** | **0** | **7** | |
 
 > *Nota.* Fuentes: salida de Vitest, archivos `target/surefire-reports/*.xml` de cada servicio Java y salida de `dotnet test`. Las duraciones de Maven suman el tiempo de las clases de prueba, sin contar la compilación. Hay más pruebas ejecutadas que métodos en la Tabla 4 porque las pruebas parametrizadas (`@ParameterizedTest`, `[Theory]`) corren una vez por cada dato.
 
@@ -119,6 +119,22 @@ Observaciones de la ejecución:
 - La línea `ERROR ... Could not send the password recovery email: SMTP down` del log de security-service la provoca a propósito `EmailResetCodeNotifierTest`, que simula un SMTP caído. No es una falla.
 - Vitest muestra un aviso de compilación: `src/test-providers.ts` no está en el `tsconfig`. No afecta los resultados.
 - La ejecución usó JDK 25 y .NET SDK 9 sobre proyectos para Java 21 y .NET 8; para la entrega conviene repetirla con las versiones exactas del proyecto.
+
+### 3.1 Pruebas de punta a punta
+
+El 16 de octubre de 2026 se ejecutó `node --test "e2e/*.test.js"` desde `lavarapido-infra`, con los contenedores del perfil *app* en marcha y `E2E_OPERATOR_ID=2` (el operario de prueba de la base local). Pasaron las 19 pruebas en 7,3 s. Cada prueba borra lo que crea y deja los puntos del cliente como estaban.
+
+**Tabla 5a**
+
+*Pruebas de punta a punta (16 de octubre de 2026)*
+
+| Archivo | Pruebas | Qué recorre | Resultado |
+| --- | --- | --- | --- |
+| `access-rules.test.js` | 7 | Permisos por rol y rutas internas, dirección del perfil, filtros del historial de pagos, datos tributarios solo para el administrador, ficha del operario, hora fuera del horario (`reason: OUTSIDE_HOURS`) y token de una cuenta inexistente | 7 aprobadas |
+| `booking-flow.test.js` | 5 (1 + 4 subpruebas) | Reserva eligiendo operario, asignación automática por RabbitMQ, avisos al cliente, resumen del día y rutas internas fuera del gateway | 5 aprobadas |
+| `full-flow.test.js` | 6 (1 + 5 subpruebas) | Reserva → pago reportado → aprobación con puntos → inicio y fin del servicio → calificación, revisando cada aviso | 6 aprobadas |
+| `inspection-flow.test.js` | 1 | Informe de inspección con hallazgos y fotos, publicación, aviso al cliente y enlace público | 1 aprobada |
+| **Total** | **19** | | **19 aprobadas** |
 
 ## 4. Casos de prueba funcionales
 
@@ -168,13 +184,13 @@ Los 33 casos cubren los requisitos que estaban implementados o parciales en el S
 
 ## 5. Matriz de trazabilidad
 
-De los 41 requisitos del SRS v6, 30 tienen caso funcional y 39 una prueba automatizada relacionada; RF-032 y RF-034 solo tienen caso funcional.
+De los 41 requisitos del SRS v7, 30 tienen caso funcional y 39 una prueba automatizada relacionada; RF-032 y RF-034 solo tienen caso funcional.
 
 **Tabla 7**
 
 *RF → estado → endpoint / pantalla → caso de prueba*
 
-| RF | Estado (SRS v6) | Endpoint (prefijo `/api/v1`) | Pantalla web | Caso funcional | Prueba automatizada relacionada |
+| RF | Estado (SRS v7) | Endpoint (prefijo `/api/v1`) | Pantalla web | Caso funcional | Prueba automatizada relacionada |
 | --- | --- | --- | --- | --- | --- |
 | RF-001 | Implementado | `POST /auth/register` | `/auth/register` | CP-01, CP-02 | `AccountRegistrationServiceTest`, `UserRegisteredListenerTest` |
 | RF-002 | Implementado | `POST /auth/login` | `/auth` | CP-03, CP-04 | `AuthenticationServiceTest`, `JwtTokenIssuerTest`, `ApiSecurityWebTest` |
@@ -229,11 +245,11 @@ De los 41 requisitos del SRS v6, 30 tienen caso funcional y 39 una prueba automa
 | # | Brecha | Recomendación |
 | --- | --- | --- |
 | 1 | La app móvil no tiene pruebas automatizadas | Agregar Jest con `jest-expo` al menos para validadores (`shared/validators`) y servicios (`core/services`) |
-| 2 | Las 36 pruebas de la web solo verifican que el componente se crea | Probar reglas reales: `authGuard` por rol, `authInterceptor` ante 401, formulario de reserva |
+| 2 | La mayoría de las 43 pruebas de la web solo verifican que el componente se crea | Probar más reglas reales: `authGuard` por rol, `authInterceptor` ante 401, formulario de reserva |
 | 3 | Las 7 pruebas de persistencia de payment necesitan una base migrada y se omiten sin ella | Documentar en el README cómo crear la base de pruebas y definir `PAYMENT_INTEGRATION_DB` |
 | 4 | De RF-023 (reportes) solo se prueban las métricas del operario y el resumen del equipo; la exportación PDF/Excel no tiene prueba | Agregar un caso funcional de reportes y exportación PDF/Excel |
 | 5 | RF-032 (bahías) y RF-034 (cuentas de pago) no tienen pruebas automatizadas propias: `ScheduleService` y `PaymentAccountService` no tienen clase de prueba | Agregar pruebas unitarias de esos dos servicios |
-| 6 | Los requisitos implementados después del 9 de octubre (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037 y RF-038) tienen pruebas automatizadas pero no caso funcional propio | Agregar sus casos CP y ejecutarlos contra el sistema completo |
+| 6 | Los requisitos implementados después del 9 de octubre (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037 y RF-038) tienen pruebas automatizadas pero no caso funcional propio; RF-008, RF-010, RF-015, RF-036 y RF-037 ya se recorren en las pruebas de punta a punta | Agregar sus casos CP y ejecutarlos contra el sistema completo |
 
 **Tabla 9**
 
@@ -248,7 +264,7 @@ De los 41 requisitos del SRS v6, 30 tienen caso funcional y 39 una prueba automa
 | 5 | La landing anuncia "Servicio móvil de lavado" y "donde estés", pero el SRS v4 define un lavadero de un único local | Captura de la landing; SRS v4, sección 1 | Baja |
 | 6 | Si hay dos cuentas del mismo método (dos Nequi), la pantalla de pagos las muestra marcadas a la vez | Captura de Pagos del cliente | Baja |
 
-> *Nota.* Revisión del código del 15 de octubre de 2026: el defecto 3 está corregido (el inicio del cliente muestra el nombre del operario asignado, en la web y en el móvil). Los defectos 1, 2, 4 y 5 siguen en el código; el 6 no se volvió a revisar.
+> *Nota.* Revisión del código del 16 de octubre de 2026: los seis defectos están corregidos. El panel saluda con el nombre de la sesión y la revisión de pagos muestra a quien revisa (1); la columna Cliente muestra el nombre del cliente (2); el inicio del cliente muestra el operario asignado en la web y en el móvil (3); la marca es LavaRápido en la web y en el móvil (4); la página de inicio describe el servicio en el lavadero (5); y la pantalla de pagos selecciona por cuenta y muestra el titular cuando dos cuentas comparten medio (6, `payment.spec.ts`).
 
 ## Referencias
 
