@@ -10,7 +10,7 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 6.0, 15 de octubre de 2026
+Versión 7.0, 16 de octubre de 2026
 
 ---
 
@@ -26,12 +26,13 @@ Versión 6.0, 15 de octubre de 2026
 | V4 | 08/10/2026 | Equipo de desarrollo | Reestructuración según IEEE 830 e ISO/IEC/IEEE 29148 y formato APA 7. Estado verificado contra el código al 8 de octubre de 2026. Nuevos requisitos RF-027 a RF-035 y casos de uso CU26 a CU29, reglas de negocio, flujos y ciclos de vida, requisitos de datos, restricciones clasificadas, criterios de aceptación verificables, matriz de trazabilidad y referencias en formato APA. |
 | V5 | 09/10/2026 | Equipo de desarrollo | Verificación con el sistema en ejecución (seis servicios, gateway y web) y corrección de una ruta del gateway y de un error de estilos en las promociones. Diagramas de casos de uso y de estados en Mermaid, capturas de la web en cada módulo y conteo actualizado de pruebas automatizadas. |
 | V6 | 15/10/2026 | Equipo de desarrollo | Estado verificado contra el código al 15 de octubre de 2026. Quedan implementados el bloqueo de cuenta (RF-004b), la asignación automática (RF-008), la elección de operario por el cliente (RF-010), los filtros del historial de pagos (RF-015) y la disponibilidad de operarios (RF-022). Nuevos requisitos RF-036 a RF-038 (informe de inspección, datos del negocio y ficha del operario) y caso de uso CU30. Ventana de inicio del servicio, alerta de reserva sin operario, notificaciones en el idioma de la cuenta, dirección del perfil, 57 tablas, 601 pruebas automatizadas y mediciones de RNF-001 y RNF-008. |
+| V7 | 16/10/2026 | Equipo de desarrollo | Revisión completa con el sistema corriendo en Docker. La fecha y la hora en que el cliente acepta los Términos y la Política de Tratamiento de Datos quedan guardadas en el servidor (RR-01); HTTPS activo en el servidor público; motivo del rechazo de una hora (día cerrado, fuera del horario, hora pasada o sin bahía libre); 638 pruebas automatizadas y 19 pruebas de punta a punta aprobadas. |
 
 ---
 
 ## Resumen
 
-Este documento especifica los requisitos de LavaRápido, una plataforma web y móvil que organiza la operación de un lavadero de vehículos de un único local: registro de clientes y vehículos, reserva de turnos con validación de horario y bahías, asignación automática o manual de operarios, ejecución y calificación del servicio, informe de inspección del vehículo, pago por QR o transferencia con revisión del comprobante, promociones, puntos de fidelización y notificaciones. La especificación sigue la estructura de IEEE 830 (IEEE, 1998) y de ISO/IEC/IEEE 29148 (ISO/IEC/IEEE, 2018), y se basa en la documentación técnica del proyecto (repositorio `vehicle-w-docs`) y en el código de sus siete componentes de servidor, revisado el 15 de octubre de 2026. Define 41 requisitos funcionales con criterios de aceptación verificables, 12 requisitos no funcionales con su métrica de verificación, 30 casos de uso, las reglas de negocio, los ciclos de vida de la reserva, del pago y de la ejecución, los requisitos de datos y las restricciones técnicas, de datos, de operación y regulatorias. Al 15 de octubre de 2026, 40 requisitos funcionales están implementados y 1 parcialmente.
+Este documento especifica los requisitos de LavaRápido, una plataforma web y móvil que organiza la operación de un lavadero de vehículos de un único local: registro de clientes y vehículos, reserva de turnos con validación de horario y bahías, asignación automática o manual de operarios, ejecución y calificación del servicio, informe de inspección del vehículo, pago por QR o transferencia con revisión del comprobante, promociones, puntos de fidelización y notificaciones. La especificación sigue la estructura de IEEE 830 (IEEE, 1998) y de ISO/IEC/IEEE 29148 (ISO/IEC/IEEE, 2018), y se basa en la documentación técnica del proyecto (repositorio `vehicle-w-docs`) y en el código de sus siete componentes de servidor, revisado el 16 de octubre de 2026. Define 41 requisitos funcionales con criterios de aceptación verificables, 12 requisitos no funcionales con su métrica de verificación, 30 casos de uso, las reglas de negocio, los ciclos de vida de la reserva, del pago y de la ejecución, los requisitos de datos y las restricciones técnicas, de datos, de operación y regulatorias. Al 16 de octubre de 2026, 40 requisitos funcionales están implementados y 1 parcialmente.
 
 **Palabras clave:** especificación de requisitos, lavadero de vehículos, reservas, microservicios, casos de uso.
 
@@ -357,7 +358,7 @@ El sistema tiene tres roles fijos y un actor no humano (véase la Tabla 8). Ning
 | RO-03 | De operación | La verificación de pagos es manual: depende de que el administrador revise los comprobantes. |
 | RO-04 | De operación | La asignación depende de que los turnos y las ausencias de los operarios estén actualizados. |
 | RO-05 | De operación | Los eventos por RabbitMQ requieren activar la mensajería (bandera `MESSAGING_ENABLED` o `app.messaging.enabled`); por defecto está desactivada. La asignación automática necesita además la llave interna (`INTERNAL_API_KEY`) y se puede apagar con `AUTO_ASSIGN_ENABLED=false`. |
-| RR-01 | Regulatoria | Los datos personales se tratan según la Ley 1581 de 2012 (Congreso de la República de Colombia, 2012); el cliente acepta la política al registrarse. |
+| RR-01 | Regulatoria | Los datos personales se tratan según la Ley 1581 de 2012 (Congreso de la República de Colombia, 2012); el cliente acepta la política al registrarse y el servidor guarda la fecha y la hora de la aceptación. |
 | RR-02 | Regulatoria | El sistema no captura, transmite ni almacena datos de tarjetas de pago. |
 | RP-01 | De proyecto | Equipo de tres aprendices a tiempo parcial; sin presupuesto asignado (costo estimado en condiciones reales: COP 212.925.240, según la *Propuesta técnica y económica*); entrega en la fecha académica. |
 
@@ -442,7 +443,7 @@ El sistema no controla dispositivos de hardware. Los usuarios requieren un compu
 
 Cada requisito tiene un identificador único que se conserva entre versiones. Cada requisito se redacta como una capacidad verificable y se acompaña de criterios de aceptación medibles (Wiegers y Beatty, 2013).
 
-La prioridad sigue la técnica MoSCoW: Esencial (debe tener), Deseable (debería tener) y Opcional (podría tener). El estado de cada requisito se verificó contra el código y las pruebas automatizadas el 15 de octubre de 2026: Implementado (construido y probado), Parcial (construido en parte; se indica qué falta) y Pendiente (no construido).
+La prioridad sigue la técnica MoSCoW: Esencial (debe tener), Deseable (debería tener) y Opcional (podría tener). El estado de cada requisito se verificó contra el código y las pruebas automatizadas el 16 de octubre de 2026: Implementado (construido y probado), Parcial (construido en parte; se indica qué falta) y Pendiente (no construido).
 
 ### 5.2 Autenticación y Cuentas
 
@@ -656,7 +657,7 @@ Los requisitos no funcionales se clasifican según las características de calid
 | RNF-001 | Eficiencia de desempeño | El percentil 95 del tiempo de respuesta de los endpoints de reserva y de autenticación es menor de 2 segundos, y la consulta de disponibilidad responde en menos de 2 segundos con el conjunto de datos de prueba. | Script `lavarapido-infra/e2e/performance.js`: 30 peticiones por endpoint a través del gateway en el ambiente local | **Implementado.** Medido el 14 de octubre de 2026: el percentil 95 más alto fue de 686 ms (`/payments/me`). |
 | RNF-002 | Disponibilidad | Todos los servicios responden UP en su endpoint de salud (`/actuator/health` o `/health`) durante cada sesión de revisión académica. | Verificación antes de cada sesión | **Implementado.** Verificado en vivo el 9 de octubre de 2026: los 6 servicios y el gateway respondieron `200 OK`. |
 | RNF-003 | Integridad y concurrencia | Ante solicitudes simultáneas, solo una reserva ocupa una bahía en una franja; no se asigna un operario ocupado; una reserva no tiene dos pagos aprobados (índice único filtrado) y un código de referencia no se repite. | Pruebas de integración | Parcial: reglas implementadas; pruebas de integración pendientes |
-| RNF-004 | Seguridad | Endpoints privados con JWT (401 sin token o con token vencido); vigencia del token de 1 hora; contraseñas con BCrypt de 8 a 72 caracteres, con al menos una mayúscula, un número y un carácter especial, sin espacios; acceso por rol (403 entre roles) y por dueño del recurso; bloqueo tras 5 intentos fallidos; secretos solo en variables de entorno; HTTPS fuera de desarrollo. | Pruebas web por rol, pruebas de política de contraseñas y de bloqueo, prueba de que el gateway no expone `/internal`, revisión de código | **Implementado** en el ambiente local; HTTPS se configura al desplegar fuera de desarrollo. |
+| RNF-004 | Seguridad | Endpoints privados con JWT (401 sin token o con token vencido); vigencia del token de 1 hora; contraseñas con BCrypt de 8 a 72 caracteres, con al menos una mayúscula, un número y un carácter especial, sin espacios; acceso por rol (403 entre roles) y por dueño del recurso; bloqueo tras 5 intentos fallidos; secretos solo en variables de entorno; HTTPS fuera de desarrollo. | Pruebas web por rol, pruebas de política de contraseñas y de bloqueo, prueba de que el gateway no expone `/internal`, revisión de código | **Implementado**; en el servidor público Caddy sirve todo por HTTPS. |
 | RNF-005 | Mantenibilidad: observabilidad | Cada servicio escribe en la salida estándar las peticiones y errores con el identificador de correlación `X-Correlation-Id`. | Revisión de bitácoras con `docker logs` | Parcial |
 | RNF-006 | Mantenibilidad | Todo cambio entra por Pull Request con al menos una aprobación, usa Conventional Commits y versiona los cambios de esquema con Liquibase; frontend y backend se comunican solo por la API. | Historial de GitHub y revisión de código | Parcial |
 | RNF-007 | Portabilidad | Un integrante nuevo levanta toda la solución en contenedores Docker siguiendo la guía de instalación local, en cualquier sistema operativo del equipo. | Instalación desde cero en más de un equipo | Parcial |
@@ -1419,24 +1420,24 @@ La Tabla 55 relaciona cada requisito funcional con su historia de usuario, sus c
 
 ### 11.1 Resumen del Avance
 
-De los 41 requisitos funcionales, 40 están implementados y 1 parcialmente (RF-023, reportes consolidados). Los siete componentes de servidor están construidos; el 9 de octubre de 2026 se levantaron los seis servicios y el gateway, y cada uno respondió `200 OK` en su endpoint de salud. La web y la aplicación Android están conectadas a los seis servicios a través del gateway. La Tabla 56 resume las pruebas automatizadas de los servicios y de la web, ejecutadas el 15 de octubre de 2026.
+De los 41 requisitos funcionales, 40 están implementados y 1 parcialmente (RF-023, reportes consolidados). Los siete componentes de servidor están construidos; el 9 de octubre de 2026 se levantaron los seis servicios y el gateway, y cada uno respondió `200 OK` en su endpoint de salud. La web y la aplicación Android están conectadas a los seis servicios a través del gateway. La Tabla 56 resume las pruebas automatizadas de los servicios y de la web, ejecutadas el 16 de octubre de 2026.
 
 **Tabla 56**
 *Pruebas Automatizadas por Componente*
 
 | Componente | Comando | Pruebas | Fecha del conteo |
 |---|---|---|---|
-| Aplicación web (Angular) | `npx ng test --watch=false` | 36 | 15 de octubre de 2026 |
-| api-gateway | `./mvnw test` | 34 | 15 de octubre de 2026 |
-| security-service | `./mvnw test` | 135 | 15 de octubre de 2026 |
-| customer-service | `./mvnw test` | 68 | 15 de octubre de 2026 |
-| booking-service | `./mvnw test` | 38 | 15 de octubre de 2026 |
-| operations-service | `./mvnw test` | 49 | 15 de octubre de 2026 |
-| notification-service | `./mvnw test` | 100 | 15 de octubre de 2026 |
-| payment-service | `dotnet test` | 141 | 15 de octubre de 2026 |
-| **Total** | | **601** | |
+| Aplicación web (Angular) | `npx ng test --watch=false` | 41 | 16 de octubre de 2026 |
+| api-gateway | `./mvnw test` | 34 | 16 de octubre de 2026 |
+| security-service | `./mvnw test` | 147 | 16 de octubre de 2026 |
+| customer-service | `./mvnw test` | 69 | 16 de octubre de 2026 |
+| booking-service | `./mvnw test` | 40 | 16 de octubre de 2026 |
+| operations-service | `./mvnw test` | 54 | 16 de octubre de 2026 |
+| notification-service | `./mvnw test` | 112 | 16 de octubre de 2026 |
+| payment-service | `dotnet test` | 141 | 16 de octubre de 2026 |
+| **Total** | | **638** | |
 
-*Nota.* Todas las pruebas pasaron. payment-service tiene además 7 pruebas de integración que se omiten porque necesitan SQL Server. Además, `lavarapido-infra/e2e` tiene tres scripts que se ejecutan con el sistema levantado: el flujo entre servicios (el cliente ve los operarios libres, reserva eligiendo uno, operations-service lo asigna por RabbitMQ, notification-service avisa y el panel del administrador cuenta la reserva), la medición de RNF-001 y la revisión de las pantallas web a 360 px (RNF-008). En la revisión manual del 9 de octubre se corrigieron una ruta que faltaba en el API Gateway (`/api/v1/loyalty/**`) y un estilo que desalineaba las insignias de las promociones.
+*Nota.* Todas las pruebas pasaron. payment-service tiene además 7 pruebas de integración que se omiten porque necesitan SQL Server. Además, `lavarapido-infra/e2e` tiene 19 pruebas de punta a punta que se ejecutan con el sistema levantado y que pasaron el 16 de octubre de 2026: el flujo de reserva con elección de operario y asignación automática, el flujo completo de los tres roles (reserva, pago, aprobación con puntos, servicio y calificación), el informe de inspección con fotos y enlace público, y las reglas de acceso por rol. La carpeta incluye también la medición de RNF-001 y la revisión de las pantallas web a 360 px (RNF-008). En la revisión manual del 9 de octubre se corrigieron una ruta que faltaba en el API Gateway (`/api/v1/loyalty/**`) y un estilo que desalineaba las insignias de las promociones.
 
 ### 11.2 Pendientes para la Entrega
 
@@ -1444,7 +1445,6 @@ De los 41 requisitos funcionales, 40 están implementados y 1 parcialmente (RF-0
 - Crear las historias de usuario de RF-027 a RF-038.
 - Escribir pruebas de integración contra SQL Server para las reglas de concurrencia (RNF-003).
 - Probar la aplicación en un dispositivo con Android 8 (RNF-008) y hacer una prueba de usabilidad con usuarios (RNF-009).
-- Guardar en el servidor la aceptación de la política de datos personales (RR-01).
 - Montar la integración continua con Jenkins.
 
 ### 11.3 Decisiones Abiertas
