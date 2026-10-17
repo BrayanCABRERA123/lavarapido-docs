@@ -335,7 +335,7 @@ Las acciones preventivas atacan las causas de riesgos que todavía no se han mat
 | Cierre en plazo | Acciones cerradas dentro del plazo de su severidad / acciones cerradas × 100 | ≥ 90 % | Por medir desde la versión 1.0 |
 | Reincidencia | Correctivas cerradas cuyo problema reaparece / correctivas cerradas × 100 | 0 % | 0 % |
 | Defectos escapados | Defectos encontrados en aceptación u operación / defectos totales del periodo × 100 | Tendencia a la baja | Por medir desde la primera implementación |
-| Pruebas automatizadas | Pruebas ejecutadas y aprobadas en todos los repositorios | Creciente | 640 unitarias y de integración (web 43, gateway 34, servicios Java 422 y payment-service 141) y 19 de punta a punta |
+| Pruebas automatizadas | Pruebas ejecutadas y aprobadas en todos los repositorios | Creciente | 639 unitarias y de integración (web 43, gateway 34, servicios Java 421 y payment-service 141) y 19 de punta a punta |
 
 *Nota.* Elaborado por los autores. El conteo de pruebas corresponde a la ejecución del 16 de octubre de 2026; en la versión 1.0 se contaban anotaciones (unas 400).
 

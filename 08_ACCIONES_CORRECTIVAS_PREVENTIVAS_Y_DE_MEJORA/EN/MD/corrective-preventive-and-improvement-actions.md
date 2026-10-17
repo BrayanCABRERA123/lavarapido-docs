@@ -335,7 +335,7 @@ Preventive actions address the causes of risks that have not yet materialized or
 | On-time closure | Actions closed within the time of their severity / closed actions × 100 | ≥ 90% | To be measured from version 1.0 |
 | Recurrence | Closed corrective actions whose problem reappears / closed corrective actions × 100 | 0% | 0% |
 | Escaped defects | Defects found in acceptance or operation / total defects of the period × 100 | Downward trend | To be measured from the first implementation |
-| Automated tests | Tests run and passed in every repository | Increasing | 640 unit and integration tests (web 43, gateway 34, Java services 422, and payment-service 141) and 19 end-to-end tests |
+| Automated tests | Tests run and passed in every repository | Increasing | 639 unit and integration tests (web 43, gateway 34, Java services 421, and payment-service 141) and 19 end-to-end tests |
 
 *Note.* Prepared by the authors. The test count corresponds to the run of October 16, 2026; version 1.0 counted annotations (about 400).
 
