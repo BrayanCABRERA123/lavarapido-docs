@@ -70,6 +70,7 @@
 |---|---|---|---|
 | 1.0 | 2026-10-16 | Brayan Cabrera | Versión inicial: despliegue en Azure |
 | 1.1 | 2026-10-16 | Brayan Cabrera | Portainer CE instalado, evidencias reales (5.4) y corrección de esquemas y tablas de Liquibase |
+| 1.2 | 2026-10-16 | Juan Camilo Guilombo | Conteo de tablas corregido (57) y creación del primer administrador con las variables de entorno |
 
 ### 1.3 Resumen de Cambios (Release Notes)
 
@@ -180,7 +181,7 @@
 | Artefacto | Detalle |
 |---|---|
 | Motor | **Microsoft SQL Server 2022, edición Express** (contenedor `lavarapido-sqlserver`) |
-| Base de datos | `LavaRapido`: 9 esquemas y 59 tablas — `security` (11), `customer` (3), `booking` (10), `catalog` (3), `execution` (11), `notification` (6), `payment` (7), `promotion` (5), `audit` (1) |
+| Base de datos | `LavaRapido`: 9 esquemas y 57 tablas — `security` (11), `customer` (3), `booking` (10), `catalog` (3), `execution` (11), `notification` (6), `payment` (7), `promotion` (5), `audit` (1) |
 | Migraciones | **Liquibase**: los servicios Java las aplican al arrancar; payment-service las aplica con el contenedor `payment-migrate`. Cada servicio lleva su historial en `dbo.DATABASECHANGELOG_<SERVICIO>` |
 | Volúmenes persistentes | `sqlserver-data` (base), `rabbitmq-data` (colas), `caddy-data` (certificados) |
 
@@ -320,7 +321,7 @@ La configuración del stack (`docker-compose.yml`, `docker-compose.prod.yml`, `d
 - Los secretos viven **solo** en `~/lavarapido/lavarapido-infra/.env.production` (permisos `600`), que está en `.gitignore`.
 - La plantilla sin valores es `.env.production.example`.
 - **Generación de llaves:** las llaves se generaron **en el servidor** con `openssl rand -base64 48` y nunca se copiaron ni se mostraron.
-- **Primer administrador:** su contraseña la escribió el responsable directamente en el servidor (`set-admin-password.sh`).
+- **Primer administrador:** el responsable escribió `ADMIN_EMAIL` y `ADMIN_PASSWORD` directamente en `.env.production` del servidor; security-service creó la cuenta al arrancar porque no existía ningún administrador (`AdministratorBootstrapRunner`). La contraseña no está en ningún repositorio.
 
 #### 3.3.1 Parámetros de conexión a base de datos
 

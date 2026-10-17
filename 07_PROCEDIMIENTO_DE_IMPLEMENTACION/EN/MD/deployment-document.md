@@ -70,6 +70,7 @@
 |---|---|---|---|
 | 1.0 | 2026-10-16 | Brayan Cabrera | Initial version: deployment on Azure |
 | 1.1 | 2026-10-16 | Brayan Cabrera | Portainer CE installed, real evidence (5.4) and correction of Liquibase schemas and tables |
+| 1.2 | 2026-10-16 | Juan Camilo Guilombo | Table count corrected (57) and first administrator created with the environment variables |
 
 ### 1.3 Change Summary (Release Notes)
 
@@ -180,7 +181,7 @@
 | Artifact | Detail |
 |---|---|
 | Engine | **Microsoft SQL Server 2022, Express edition** (container `lavarapido-sqlserver`) |
-| Database | `LavaRapido`: 9 schemas and 59 tables — `security` (11), `customer` (3), `booking` (10), `catalog` (3), `execution` (11), `notification` (6), `payment` (7), `promotion` (5), `audit` (1) |
+| Database | `LavaRapido`: 9 schemas and 57 tables — `security` (11), `customer` (3), `booking` (10), `catalog` (3), `execution` (11), `notification` (6), `payment` (7), `promotion` (5), `audit` (1) |
 | Migrations | **Liquibase**: the Java services apply them on startup; payment-service applies them with the `payment-migrate` container. Each service keeps its history in `dbo.DATABASECHANGELOG_<SERVICE>` |
 | Persistent volumes | `sqlserver-data` (database), `rabbitmq-data` (queues), `caddy-data` (certificates) |
 
@@ -320,7 +321,7 @@ The stack configuration (`docker-compose.yml`, `docker-compose.prod.yml`, `deplo
 - Secrets live **only** in `~/lavarapido/lavarapido-infra/.env.production` (permissions `600`), which is in `.gitignore`.
 - The template without values is `.env.production.example`.
 - **Key generation:** the keys were generated **on the server** with `openssl rand -base64 48` and were never copied or displayed.
-- **First administrator:** the owner typed its password directly on the server (`set-admin-password.sh`).
+- **First administrator:** the owner wrote `ADMIN_EMAIL` and `ADMIN_PASSWORD` directly in `.env.production` on the server; security-service created the account at startup because there was no administrator yet (`AdministratorBootstrapRunner`). The password is not in any repository.
 
 #### 3.3.1 Database connection parameters
 
