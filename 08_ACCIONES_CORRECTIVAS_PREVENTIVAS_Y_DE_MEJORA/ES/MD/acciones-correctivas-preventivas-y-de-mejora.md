@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-16 de octubre de 2026
+17 de octubre de 2026
 
-Tipo de documento: Registro de acciones correctivas, preventivas y de mejoramiento (equipo de desarrollo e instructora) · Versión 2.0
+Tipo de documento: Registro de acciones correctivas, preventivas y de mejoramiento (equipo de desarrollo e instructora) · Versión 2.1
 
 ## Control de Versiones
 
@@ -30,6 +30,7 @@ La Tabla 1 registra el historial de cambios de este documento. El registro de ac
 |---|---|---|---|
 | 1.0 | 2026-10-09 | Creación del documento (en español y en inglés). Se define el procedimiento de gestión y se registran 23 acciones correctivas cerradas, 13 acciones correctivas abiertas, 14 acciones preventivas y 13 acciones de mejoramiento, verificadas contra el código de los once repositorios (rama *develop* al 9 de octubre de 2026), el historial de Git, el registro de riesgos y el backlog técnico del proyecto. | Equipo de desarrollo |
 | 2.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026. Se cerraron once acciones correctivas abiertas (ACO-01 a ACO-03 y ACO-05 a ACO-12, ahora AC-24 a AC-34) y cinco de mejoramiento (AM-01, AM-04, AM-08, AM-10 y AM-11); se registraron y cerraron cinco no conformidades encontradas en la revisión completa del sistema (AC-35 a AC-39); se actualizaron las acciones preventivas, los indicadores, las lecciones aprendidas y la trazabilidad. | Equipo de desarrollo |
+| 2.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se cerraron las correctivas AC-40 a AC-43 (aviso de sesión expirada al cerrar sesión, pantallas que se salían en el celular, campos de filtro aplastados en la app y avance del servicio antes de empezar), se agregó la preventiva AP-15 (revisión de diseño adaptable antes de fusionar) y se cerraron las mejoras AM-07 (informe de inspección en la app móvil) y AM-08 (preguntas frecuentes en la página de inicio). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -85,7 +86,7 @@ Durante su construcción, sus revisiones con la instructora y la elaboración de
 
 ### 4.2 Fuentes de Este Documento
 
-Las acciones se verificaron contra el código de los once repositorios (rama *develop* al 16 de octubre de 2026) y su historial de Git, y contra el registro de riesgos, el backlog técnico, la gestión de incidentes, la estrategia de pruebas y los registros de decisiones de arquitectura (ADR) del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a). También se incluyen los hallazgos de la revisión de los manuales del 7, del 9 y del 16 de octubre de 2026 y de la revisión completa del sistema del 16 de octubre (anexo B del Manual Técnico y anexos de los demás manuales).
+Las acciones se verificaron contra el código de los once repositorios (rama *develop* al 17 de octubre de 2026) y su historial de Git, y contra el registro de riesgos, el backlog técnico, la gestión de incidentes, la estrategia de pruebas y los registros de decisiones de arquitectura (ADR) del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a). También se incluyen los hallazgos de la revisión de los manuales del 7, del 9 y del 16 de octubre de 2026 y de la revisión completa del sistema del 16 de octubre (anexo B del Manual Técnico y anexos de los demás manuales).
 
 ## 5. Objetivo
 
@@ -255,6 +256,10 @@ La Tabla 6 registra las no conformidades ya corregidas, con su causa raíz y la 
 | AC-37 | La opción "Eliminar cuenta" decía que borraba la cuenta y todos los datos, pero solo la desactiva. | P2 | Texto heredado de la maqueta, contrario a lo que hace el servidor. | La opción se llama "Desactivar mi cuenta" y explica que el historial se conserva, en la web y el móvil y en los cuatro idiomas. | Perfil de la web y del móvil; Manual de Usuario 4.0. | Ley 1581 de 2012 | 2026-10-16 |
 | AC-38 | Los manuales y documentos del proyecto quedaron desactualizados respecto del código del 16 de octubre (bloqueo, asignación automática, inspección, 57 tablas) y las figuras eran marcadores. | P3 | Cambios integrados sin actualizar la documentación en el mismo pull request (R-010). | Manuales 4.0 con capturas reales, Procedimiento de Implementación 2.0, este documento 2.0 y la documentación técnica del proyecto revisada contra el código. | Control de versiones de cada documento (2026-10-16). | R-010 | 2026-10-16 |
 | AC-39 | Con dos cuentas del mismo medio (por ejemplo, dos Nequi), la pantalla de pagos de la web las marcaba a la vez y siempre mostraba el QR de la primera. | P3 | La opción elegida se guardaba por tipo de medio y no por cuenta. | La selección se guarda por cuenta y, si dos cuentas comparten medio, cada opción muestra su titular. | *payment.spec.ts* (dos cuentas Nequi); 43 pruebas web aprobadas. | Documentación de Pruebas, defecto 6 | 2026-10-16 |
+| AC-40 | Al cerrar sesión, la web y la app mostraban "Tu sesión expiró". | P2 | Una respuesta 401 que llegaba después de borrar el token se tomaba como sesión vencida. | El 401 solo cierra la sesión con aviso si todavía hay una sesión abierta (*auth-interceptor* en la web y *AuthServiceContext* en la app). | Al cerrar sesión ya no aparece el aviso; cuando el token vence de verdad, sí. | Reporte de uso | 2026-10-16 |
+| AC-41 | En el celular (360 px) había botones fuera de la pantalla, títulos encimados, el botón ☰ sobre los títulos y filtros fuera de su tarjeta. | P2 | Estilos pensados para escritorio, sin reglas para celular, e interlineado fijo de 20 px heredado del tema de Material. | Reglas de celular en la landing, autenticación, panel del cliente, servicios asignados, gestión y configuración; espacio global para el botón ☰ e interlineado relativo en los títulos. | 60 pantallas web (360 y 768 px) y 26 de la app sin desbordes (pruebas, Tabla 5b). | Revisión de diseño adaptable | 2026-10-17 |
+| AC-42 | En la app, los campos de fecha y búsqueda se aplastaban cuando iban en columna. | P3 | La caja usaba *flex: 1*, que parte de alto 0 en una columna. | Crece solo a lo ancho y conserva un alto mínimo de 46 px (*FilterInputs.tsx*). | Historial y Calificaciones muestran los campos completos. | Revisión de diseño adaptable | 2026-10-17 |
+| AC-43 | El avance del próximo servicio mostraba 10 % o 25 % sin que el lavado hubiera empezado. | P3 | La tabla de avance daba un porcentaje a los estados Programada y Confirmada. | Programada y Confirmada quedan en 0 % en la web y en la app. | El panel muestra 0 % hasta que el operario inicia el servicio. | Reporte de uso | 2026-10-16 |
 
 *Nota.* Elaborado por los autores a partir del historial de Git de los repositorios, el registro de riesgos y los ADR del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a).
 
@@ -295,6 +300,7 @@ Las acciones preventivas atacan las causas de riesgos que todavía no se han mat
 | AP-12 | Componentes con vulnerabilidades conocidas. | Revisión trimestral con *./mvnw versions:display-dependency-updates*, *dotnet list package --vulnerable* y *npm audit*. | Líderes de backend y frontend | Media | En ejecución (permanente) | OWASP A06 |
 | AP-13 | Confusión por la numeración propia de los changelogs de pagos, que repite los números globales. | Documentar la regla en la estrategia de migraciones y usar el prefijo *pay-* en los identificadores. | Líder de backend | Baja | Cerrada (documentada) | TD-019 |
 | AP-14 | Funciones construidas que contradicen decisiones ya registradas (causa de AC-11 y AC-12). | Revisar los ADR vigentes y el mapa de navegación antes de iniciar una función, y consultar al equipo ante una contradicción. | Todo el equipo | Media | En ejecución (permanente) | Lección de ADR-015 |
+| AP-15 | Cambios de interfaz que rompen el diseño en el celular sin que nadie lo note (causa de AC-41). | Medir las pantallas a 360 y 768 px con Playwright antes de fusionar cambios de interfaz, a partir del script *e2e/width-360.js*, y revisar las capturas. | Líderes de frontend y backend | Media | En ejecución (permanente) | Lección de AC-41 |
 
 *Nota.* Elaborado por los autores a partir del registro de riesgos, el backlog técnico y la política de seguridad del proyecto.
 
@@ -312,6 +318,8 @@ Las acciones preventivas atacan las causas de riesgos que todavía no se han mat
 | AM-04 | Completar la aplicación móvil y construir una versión con EAS para las notificaciones push. | Avisos inmediatos en el teléfono. | Líder de frontend | Media | Cerrada (2026-10-16): APK compilado con EAS y publicado en */app/* del servidor, con avisos push de versión nueva | ADR-011 |
 | AM-05 | Firma RS256 y tokens de actualización (*refresh tokens*). | Menor impacto de una fuga del secreto y sesiones más largas sin volver a iniciar sesión. | Líder de backend | Baja | Abierta | ADR-006 |
 | AM-06 | Almacenar comprobantes, códigos QR y fotos fuera de la base de datos. | Base de datos más liviana y respaldos más rápidos. | Líder de backend | Baja | Abierta | Evolución recomendada |
+| AM-07 | Gestionar el informe de inspección desde la aplicación móvil. | El administrador registra el estado del vehículo junto al vehículo, con fotos de la cámara que se reducen en el celular. | Líder de backend | Media | Cerrada (2026-10-17): pantalla *AdminInspection* en la app | Solicitud del equipo |
+| AM-08 | Preguntas frecuentes en la página de inicio. | El visitante resuelve las dudas más comunes (reserva, pago, cancelación, puntos) sin escribir al lavadero. | Líder de backend | Baja | Cerrada (2026-10-17) | Revisión de la landing |
 | AM-07 | Separar en *promotion.promotion* los campos de presentación y los de descuento real. | Evita que el paquete mostrado y el descuento aplicado se contradigan. | Líder de backend | Baja | Abierta | ADR-015 |
 | AM-08 | Publicar la web compilada detrás del gateway con HTTPS. | Entorno apto para producción, sin servidor de desarrollo. | Líder de frontend | Media | Cerrada (2026-10-16): contenedor web con nginx detrás de Caddy y HTTPS en el servidor público (Documento de Despliegue) | Procedimiento de Implementación, R-I08 |
 | AM-09 | Herramientas de cobertura (JaCoCo) y análisis estático (SonarQube). | Métricas objetivas de calidad del código. | Líder de proyecto | Baja | Abierta | Estrategia de pruebas |
@@ -328,9 +336,9 @@ Las acciones preventivas atacan las causas de riesgos que todavía no se han mat
 
 *Indicadores de la Gestión de Acciones*
 
-| Indicador | Fórmula | Meta | Valor al 2026-10-16 |
+| Indicador | Fórmula | Meta | Valor al 2026-10-17 |
 |---|---|---|---|
-| Acciones correctivas cerradas | Correctivas cerradas / correctivas registradas × 100 | ≥ 70 % por entrega | 39 / 41 = 95 % |
+| Acciones correctivas cerradas | Correctivas cerradas / correctivas registradas × 100 | ≥ 70 % por entrega | 43 / 45 = 96 % |
 | Correctivas P0 y P1 abiertas | Número de ACO con severidad P0 o P1 | 0 antes de una implementación | 0 |
 | Cierre en plazo | Acciones cerradas dentro del plazo de su severidad / acciones cerradas × 100 | ≥ 90 % | Por medir desde la versión 1.0 |
 | Reincidencia | Correctivas cerradas cuyo problema reaparece / correctivas cerradas × 100 | 0 % | 0 % |

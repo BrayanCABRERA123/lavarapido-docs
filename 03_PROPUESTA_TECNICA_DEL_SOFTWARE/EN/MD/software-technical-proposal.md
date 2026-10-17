@@ -8,7 +8,7 @@ Software Analysis and Development Technologist program (ADSO), group (ficha) 314
 
 Instructor: Karol Daniela Correa
 
-Version 1.1, October 15, 2026
+Version 1.2, October 17, 2026
 
 ---
 
@@ -113,7 +113,7 @@ The database is a single SQL Server instance, but each service owns its schemas 
 | Backend (payment-service) | .NET 8 (ASP.NET Core, EF Core) | A separate decision, documented in ADR-013 (see section 3). |
 | API Gateway | Spring Cloud Gateway | A single entry point on port 8080 simplifies CORS, hides the internal routes and lets us change a service internally without the web or the app noticing. |
 | Web frontend | Angular 21 | It enforces a modular structure and static typing, which helps keep the logic of three roles with different permissions organized in a single application. |
-| Mobile frontend | React Native 0.86 + Expo SDK 57 | It shares the language and the component model with the web (both in TypeScript), so the team works with a single paradigm and both applications use the same API without duplicating business logic. |
+| Mobile frontend | React Native 0.86 + Expo SDK 57 (with expo-image-picker and expo-image-manipulator for the inspection photos) | It shares the language and the component model with the web (both in TypeScript), so the team works with a single paradigm and both applications use the same API without duplicating business logic. |
 | Database | SQL Server 2022 | The domain is highly relational (customer → vehicle → booking → operator → payment) and needs real referential integrity: a booking with two approved payments, or a receipt reused in two bookings, is not acceptable. In a document database this would have to be solved by hand in the application. |
 | Messaging | RabbitMQ 4 | Telling an operator that a service was assigned to them, or telling the customer that their payment was reviewed, should not delay the booking or payment response. With a message queue, the main operation responds right away and, if sending the notice fails, the rest of the system keeps working. |
 | Database migrations | Liquibase | Each schema change is versioned and can be reproduced on any machine; it avoids the classic "that column exists in my database". |
@@ -182,6 +182,10 @@ Every important decision was recorded as an ADR (Architecture Decision Record) i
 |---|---|---|---|
 | Testing (staging), W6 to W28 | AWS Lightsail Linux: 2 vCPU, 8 GB of RAM, 160 GB SSD | Ubuntu Server 24.04 LTS, Docker Engine and Docker Compose, Jenkins for continuous integration and the same containers as production | Only the team, QA and the car wash (during acceptance) use it; the services run with less memory assigned and Jenkins builds one repository at a time (assumption) |
 | Production, from W18 | AWS Lightsail Linux: 4 vCPU, 16 GB of RAM, 320 GB SSD | Ubuntu Server 24.04 LTS, Docker Engine and Docker Compose, Nginx with HTTPS (Let's Encrypt), SQL Server 2022 Express, RabbitMQ 4, the six services, the gateway and the compiled web app | The six services, the gateway, SQL Server and RabbitMQ use between 8 and 10 GB of RAM under normal load (assumption); 16 GB leaves room for peaks and growth |
+
+*Note.* Environments planned in the proposal; the costs of section 8.2 were calculated with these specifications.
+
+**Follow-up as of October 17, 2026.** For the academic demonstration, the system was deployed on a Microsoft Azure virtual machine (*Azure for Students* subscription, B2as_v2 size: 2 vCPU, 7.7 GB of RAM, and a 64 GB SSD, Ubuntu 24.04 LTS), with the eleven containers, Caddy as the HTTPS entry point, and the Android app served under */app*. With every container running it uses about 3.3 GB of RAM, so the production size of Table 5 is still comfortable. The full procedure is in the Deployment Document (folder 07).
 
 ### 4.4 End user
 

@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 16, 2026
+October 17, 2026
 
-Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.0
+Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.1
 
 ## Version Control
 
@@ -30,6 +30,7 @@ Table 1 records the change history of this document. Each time the implementatio
 |---|---|---|---|
 | 1.0 | 2026-10-09 | Creation of the procedure (in Spanish and English) from the code of the eleven repositories (*develop* branch as of October 9, 2026), *lavarapido-infra/docker-compose.yml*, and the project documentation on deployment, environments, operations, and quality. | Development team |
 | 2.0 | 2026-10-16 | Review against the code of October 16, 2026, and the public server already set up. Updated: public server on Azure with Caddy, HTTPS, and the web served with nginx, APK distribution, first administrator through environment variables, 57 tables, operations-service queue, payment-service health, web and end-to-end tests in the entry criteria, automatic assignment in the smoke tests, business data in the initial load, and implementation risks. | Development team |
+| 2.1 | 2026-10-17 | Review against the code of October 17, 2026. Stated that the mobile app needs a new APK because of the native modules of the inspection report (section 11.7, Phase 6). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -96,7 +97,7 @@ In the context of the ADSO program, "software implementation" means **putting a 
 
 ### 4.2 Sources of This Document
 
-The procedure was verified against the code of the eleven repositories of the project (*develop* branch as of October 16, 2026), especially *lavarapido-infra/docker-compose.yml*, *docker-compose.prod.yml*, *.env.example*, and the *deploy* folder, and against the deployment, environments, continuous integration, operation, quality, and project control documentation (Vehicle Washing Development Team, 2026a, 2026b). The detailed installation, administration, and use procedures are not repeated here: they are referenced in the Installation Manual, the Administrator Manual, and the User Manual, version 4.0, and in the Deployment Document of this same folder, which records how the public server was set up.
+The procedure was verified against the code of the eleven repositories of the project (*develop* branch as of October 17, 2026), especially *lavarapido-infra/docker-compose.yml*, *docker-compose.prod.yml*, *.env.example*, and the *deploy* folder, and against the deployment, environments, continuous integration, operation, quality, and project control documentation (Vehicle Washing Development Team, 2026a, 2026b). The detailed installation, administration, and use procedures are not repeated here: they are referenced in the Installation Manual, the Administrator Manual, and the User Manual, version 4.0, and in the Deployment Document of this same folder, which records how the public server was set up.
 
 ## 5. Objective
 
@@ -406,7 +407,7 @@ npx ng serve --host 0.0.0.0    # reachable from other machines on the local netw
 
 On the public server the web does not use *ng serve*: the *web* container builds the *dist/* folder and serves it with nginx (with security headers) behind Caddy and with HTTPS; *deploy/update-server.sh* rebuilds it after each push (Deployment Document).
 
-2. **Mobile application.** The APK is built with EAS with *EXPO_PUBLIC_API_URL* pointing to the server domain and is published with *npm run publish:apk*, which leaves it at */app/LavaRapidoVehicular.apk* and notifies the people who have the application by push. For tests in the local network, *npx expo start* can be used with the IPv4 address of the machine.
+2. **Mobile application.** The APK is built with EAS with *EXPO_PUBLIC_API_URL* pointing to the server domain and is published with *npm run publish:apk*, which leaves it at */app/LavaRapidoVehicular.apk* and notifies the people who have the application by push. For tests in the local network, *npx expo start* can be used with the IPv4 address of the machine. The version of October 17, 2026, adds the native modules *expo-image-picker* and *expo-image-manipulator* (inspection report photos), so it requires building and publishing a new APK; an over-the-air update (*npm run publish:update*) is not enough, because it only changes the screen code.
 
 **Evidence:** screenshot of the welcome screen served from the server, with the address bar visible.
 

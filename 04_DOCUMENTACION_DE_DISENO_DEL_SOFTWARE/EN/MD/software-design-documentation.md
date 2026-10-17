@@ -15,8 +15,8 @@
 | Apprentices | Brayan Estiven Patiño Cabrera (project lead), Juan Camilo Guilombo Osorio (frontend lead), Merari Urbano (backend lead) |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 15, 2026 |
-| Version | 1.1 |
+| Date | October 17, 2026 |
+| Version | 1.2 |
 
 > *Note.* Cover data was taken from the project's Technical Manual v2.0. All design content was derived from the source code in the `Sistema Lavado Vehicular` repository (Backend, Web, and LavadoVehicular-Movil) and must be validated with the instructor.
 
@@ -50,7 +50,7 @@ Out of scope: requirements (see SRS v7, `lavarapido-docs/01_INFORME_DE_ESPECIFIC
 
 ## 2. User Interfaces
 
-The web client has 34 routed screens and the mobile app has 30; both split the areas by role and only let each user into their own. On the web this is done by `authGuard` with `data.roles` (`Web/src/app/app.routes.ts:19-49`). On mobile, `RootNavigator` registers only the screens of the logged-in role (`LavadoVehicular-Movil/src/core/navigation/RootNavigator.tsx:63-110`).
+The web client has 35 routed screens and the mobile app has 31; both split the areas by role and only let each user into their own. On the web this is done by `authGuard` with `data.roles` (`Web/src/app/app.routes.ts:19-49`). On mobile, `RootNavigator` registers only the screens of the logged-in role (`LavadoVehicular-Movil/src/core/navigation/RootNavigator.tsx:63-110`).
 
 ### 2.1 Web Application Screen Inventory
 
@@ -60,11 +60,12 @@ The web client has 34 routed screens and the mobile app has 30; both split the a
 
 | Route | Screen | Role | Purpose | Services / endpoints consumed |
 | --- | --- | --- | --- | --- |
-| `/` | Landing | Public | Presents the car wash, its services, and contact info | `GET /establishment` (business email and phone) |
+| `/` | Landing | Public | Presents the car wash, its services, the app download, contact info, and frequently asked questions | `GET /establishment` (business email and phone) |
 | `/auth` | Login | Public | Authenticate with email and password | `POST /auth/login` |
 | `/auth/register` | Sign-up | Public | Create a customer account | `POST /auth/register` |
 | `/auth/forgot-password` | Password recovery (3 steps) | Public | Email → code → new password | `POST /auth/password/forgot`, `/verify`, `/reset` |
 | `/report/:token` | Inspection report | Public | View the report shared by the admin | `GET /public/inspections/{token}` and its photos |
+| `**` | Page not found | Public | Tell that the address does not exist and go back home | None |
 | `/client` | Customer home | CLIENT | Summary, next booking with its operator, and points | `GET /bookings/me`, `/vehicles`, `/loyalty/balance`, `/operators/my-bookings` |
 | `/client/reserve` | Book | CLIENT | Choose vehicle, service, date, and time | `GET /catalog/services`, `/bookings/availability`, `/operators/available`; `POST /bookings` |
 | `/client/payment` | Payments | CLIENT | Pay for a booking and upload a receipt | `GET /payment-accounts`, `/payments/me/bookings`; `POST /payments`; `/loyalty/*` |
@@ -97,7 +98,7 @@ The web client has 34 routed screens and the mobile app has 30; both split the a
 
 ### 2.2 Mobile Application Screen Inventory
 
-The mobile app mirrors the web areas with its own React Native screens. It has no landing page, inspection, or public report.
+The mobile app mirrors the web areas with its own React Native screens. It has no landing page or public report; the administrator's inspection report is available since October 17, 2026 (`AdminInspection`, opened from the booking detail).
 
 **Table 4**
 
@@ -108,7 +109,7 @@ The mobile app mirrors the web areas with its own React Native screens. It has n
 | Logged out | `LoginScreen`, `RegisterScreen`, `ForgotPasswordScreen` | `/auth/*` |
 | CLIENT | `ClientHome`, `ClientReserve`, `ClientPayment`, `ClientHistory`, `ClientVehicles`, `ClientNotifications`, `ClientProfile`, `ClientSettings` | `/client/*` |
 | OPERATOR | `OperatorHome`, `OperatorAssigned`, `OperatorSchedule`, `OperatorHistory`, `OperatorRatings`, `OperatorNotifications`, `OperatorProfile`, `OperatorSettings` | `/operator/*` |
-| ADMIN | `AdminDashboard`, `AdminReservations`, `AdminPayments`, `AdminManagement`, `AdminSchedule`, `AdminOperators`, `AdminOperatorCalendar`, `AdminReports`, `AdminNotifications`, `AdminProfile`, `AdminSettings` | `/admin/*` |
+| ADMIN | `AdminDashboard`, `AdminReservations`, `AdminPayments`, `AdminManagement`, `AdminSchedule`, `AdminOperators`, `AdminOperatorCalendar`, `AdminReports`, `AdminNotifications`, `AdminProfile`, `AdminSettings`, `AdminInspection` | `/admin/*` (`AdminInspection` = `/admin/reservations/:id/inspection`) |
 
 > *Note.* If a user has several roles, the mobile app opens the most privileged one: ADMIN, then OPERATOR, then CLIENT (`RootNavigator.tsx:42-46`). The session is stored in the system keychain with `expo-secure-store` (`src/core/storage/sessionStorage.ts:15-20`).
 
@@ -142,7 +143,7 @@ flowchart LR
   D2 -.->|shared link| P["Public report /report/:token"]
 ```
 
-The diagram shows web navigation; the mobile app follows the same path per role, without the landing page or inspection.
+The diagram shows web navigation; the mobile app follows the same path per role, without the landing page or the public report (the inspection opens from the booking detail).
 
 ### 2.4 Screenshots
 
@@ -215,6 +216,14 @@ Screenshots were taken on October 9, 2026, with the full system running: the web
 ![User, role, service, and promotion management — administrator (web)](capturas/08-admin-gestion.png)
 
 > *Note.* Original screenshots taken with headless Chrome. The mobile app screenshots come from its web build; on Android the UI is the same, rendered with native components.
+
+### 2.5 Responsive Design
+
+Both applications are used from a width of 360 pixels (RNF-008), the narrowest Android phone the project supports, without horizontal scrolling.
+
+- **Web.** The breakpoints are in `src/styles/_breakpoints.scss` and are applied with the `mobile` (up to 768 px) and `tablet` (up to 1024 px) mixins of `_mixins.scss`. From 768 px the side menu opens with the ☰ button, and the content of pages with a menu leaves 72 px at the top for that button (global rule in `styles.scss`). Headings use a relative line height of 1.25, because the Material theme sets 20 px on the `body` and a larger heading overlapped itself when it wrapped into two lines. Wide tables scroll inside their card; the operator's assigned services table is shown as cards from 600 px. On a phone, the customer dashboard places the stats and quick access two per row, the authentication screens use the full width, and the landing bar keeps only the language and **Login** from 420 px.
+- **Mobile.** Screens are built with Flexbox: stat cards go two per row (`StatGrid`), button rows wrap, and filter inputs grow in width without losing their 46 px height.
+- **Verification.** On October 17, 2026, 60 web screens (30 at 360 px and 30 at 768 px) and 26 mobile app screens at 360 px, in their web version, were measured with Playwright: none scrolls sideways or clips content. The team test `e2e/width-360.js` (lavarapido-infra) covers the same rule for the web.
 
 ## 3. Architectural Model
 

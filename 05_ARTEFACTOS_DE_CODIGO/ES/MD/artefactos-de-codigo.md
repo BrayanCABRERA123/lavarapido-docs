@@ -15,7 +15,7 @@
 | Aprendices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano |
 | Instructora | Karol Daniela Correa |
 | Centro de formación | Industria |
-| Fecha | 15 de octubre de 2026 |
+| Fecha | 17 de octubre de 2026 |
 
 El código del sistema está en 10 repositorios de GitHub: la aplicación web, la aplicación móvil y 8 del backend. Este documento inventaría los dos clientes y explica cómo compilarlos y ejecutarlos; el backend se describe solo en lo necesario para que los clientes funcionen. No se reproduce el código fuente.
 
@@ -27,16 +27,16 @@ El código del sistema está en 10 repositorios de GitHub: la aplicación web, l
 
 | Artefacto | Repositorio | Tecnología | Commits | Último commit |
 | --- | --- | --- | --- | --- |
-| Aplicación web | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 395 | 2026-10-16 |
-| Aplicación móvil | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 173 | 2026-10-16 |
-| Infraestructura | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 57 | 2026-10-16 |
-| API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 10 | 2026-10-14 |
-| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 48 | 2026-10-16 |
-| customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 16 | 2026-10-16 |
-| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 44 | 2026-10-16 |
-| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 34 | 2026-10-16 |
-| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 38 | 2026-10-16 |
-| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 33 | 2026-10-16 |
+| Aplicación web | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 409 | 2026-10-17 |
+| Aplicación móvil | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 181 | 2026-10-17 |
+| Infraestructura | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 59 | 2026-10-17 |
+| API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 12 | 2026-10-17 |
+| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 50 | 2026-10-17 |
+| customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 18 | 2026-10-17 |
+| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 46 | 2026-10-17 |
+| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 36 | 2026-10-17 |
+| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 40 | 2026-10-17 |
+| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 35 | 2026-10-17 |
 
 **Tabla 3**
 
@@ -44,10 +44,10 @@ El código del sistema está en 10 repositorios de GitHub: la aplicación web, l
 
 | Artefacto | Archivos fuente (`.ts`, `.tsx`, `.html`, `.scss`) | Líneas | Pantallas |
 | --- | --- | --- | --- |
-| Web (`Web/src`) | 410 | 45 220 | 34 rutas |
-| Móvil (`LavadoVehicular-Movil/src`) | 260 | 31 612 | 30 pantallas |
+| Web (`Web/src`) | 433 | 46 308 | 35 rutas |
+| Móvil (`LavadoVehicular-Movil/src`) | 291 | 34 318 | 31 pantallas |
 
-> *Nota.* Conteo con `find` y `wc -l`; incluye pruebas y comentarios.
+> *Nota.* Conteo del 17 de octubre de 2026 con `git ls-files` y `wc -l` sobre `src`; incluye pruebas y comentarios.
 
 ## 2. Aplicación web
 
@@ -63,14 +63,15 @@ La web es una SPA de Angular 21 (Angular, s.f.) con componentes standalone, carg
 | --- | --- |
 | `core/constants` | `API_BASE_URL = '/api/v1'` (`core/constants/api.ts:4`) |
 | `core/guards` | `authGuard` (sesión y rol) y `guestGuard` (oculta login a quien ya tiene sesión) |
-| `core/interceptors` | `authInterceptor`: agrega el JWT y cierra la sesión ante un 401 |
+| `core/interceptors` | `authInterceptor`: agrega el JWT y cierra la sesión ante un 401 mientras la sesión sigue abierta (ignora un 401 tardío después de cerrar sesión) |
 | `core/services` | 16 servicios HTTP y de estado: `auth`, `booking-api`, `vehicles`, `operations-api`, `payments-api`, `promotions-api`, `loyalty-api`, `notifications`, `preferences`, `role-permissions-api`, `user-admin`, `user-session`, `inspection-api`, `inspection-photos`, `local-storage`, `api` |
 | `core/models`, `core/utils` | Interfaces de los DTO y utilidades (por ejemplo traducción de errores de la API) |
-| `features/landing` | Página pública: navbar, hero, servicios, características, contacto, pie |
+| `features/landing` | Página pública: navbar, hero, quiénes somos, características, servicios, descarga, contacto, preguntas frecuentes y pie |
 | `features/auth` | Login, registro y recuperación de contraseña en tres pasos |
 | `features/client` | 8 páginas del cliente + `viewmodels/client.viewmodel.ts` (layout) |
 | `features/operator` | 8 páginas del operario |
 | `features/admin` | 13 páginas del administrador + 5 stores (`reservations`, `payments`, `operators`, `schedule`, `business`) |
+| `features/not-found` | Página de dirección no encontrada (ruta `**`) |
 | `features/public-report` | Reporte de inspección de solo lectura (`/report/:token`) |
 | `shared/components`, `shared/dialogs`, `shared/pipes` | 12 componentes reutilizables y 20 diálogos (confirmar, asignar operario, calificar, revisar pago, exportar…) |
 | `assets/i18n` | `es.json`, `en.json`, `fr.json`, `pt.json` |
@@ -120,7 +121,7 @@ La app móvil está hecha con Expo 57 sobre React Native 0.86 (Expo, s.f.; React
 | `app/config` | i18next con `es`, `en`, `fr`, `pt` (`app/config/locales`) |
 | `app/providers` | `AppProviders` y sincronización de preferencias de la cuenta |
 | `app/theme` | Contexto de tema, colores y tipografía |
-| `core/api` | `config.ts` (URL del gateway), `httpClient.ts` (fetch con JWT y tiempo límite de 15 s), `apiError.ts` |
+| `core/api` | `config.ts` (URL del gateway y `WEB_URL` para los enlaces públicos), `httpClient.ts` (fetch con JWT, JSON o *multipart* y tiempo límite de 15 s o el que pida cada llamada), `apiError.ts` |
 | `core/navigation` | `RootNavigator` (pantallas por rol) y tipos de rutas |
 | `core/services` | `auth`, `booking`, `vehicles`, `operations`, `payments`, `notifications`, `users` |
 | `core/storage` | Sesión en `expo-secure-store` (en web, AsyncStorage) |
@@ -135,12 +136,14 @@ La app móvil está hecha con Expo 57 sobre React Native 0.86 (Expo, s.f.; React
 
 | Librería | Versión | Uso |
 | --- | --- | --- |
-| `expo` | ~57.0.19 | Plataforma de compilación y ejecución |
+| `expo` | ~57.0.30 | Plataforma de compilación y ejecución |
 | `react`, `react-native` | 19.2.3, 0.86.3 | Interfaz |
 | `@react-navigation/native`, `native-stack` | ^7.3.13, ^7.18.5 | Navegación |
 | `expo-secure-store`, `@react-native-async-storage/async-storage` | ~57.0.4, 2.2.0 | Guardar la sesión |
 | `i18next`, `react-i18next` | ^26.4.1, ^17.0.13 | Traducciones |
 | `expo-print`, `expo-sharing`, `expo-file-system`, `expo-document-picker` | ~57.0.x | Exportar reportes y adjuntar comprobantes |
+| `expo-image-picker`, `expo-image-manipulator` | ~57.0.20, ~57.0.21 | Tomar o elegir las fotos del informe de inspección y reducirlas antes de subirlas |
+| `expo-notifications`, `expo-updates` | ~57.0.23, ~57.0.26 | Notificaciones push y actualizaciones por internet (OTA) |
 | `react-native-svg`, `react-native-reanimated` | 15.15.4, 4.5.1 | Gráficas y animaciones |
 
 ### 3.3 Configuración
@@ -164,7 +167,7 @@ npm run web              # versión web en http://localhost:8081
 npx expo start --clear   # reiniciar limpiando caché tras cambiar .env.local
 ```
 
-El repositorio no tiene `eas.json` ni scripts de compilación de APK; la app se ejecuta con Expo Go.
+Para desarrollo la app se ejecuta con Expo Go. El APK se compila con EAS (`eas.json`, perfiles `preview` y `production`), y los scripts `npm run publish:apk` y `npm run publish:update` publican un APK nuevo en el servidor o una actualización por internet (ver el Documento de Despliegue, carpeta 07).
 
 ## 4. Backend del que dependen los clientes
 
@@ -199,7 +202,7 @@ Para correr un servicio Java desde la consola se usa su Maven Wrapper (`./mvnw s
 | --- | --- |
 | API Gateway | `http://localhost:8080/actuator/health` |
 | Servicios Java | `http://localhost:300X/actuator/health` (X = 1, 2, 3, 4, 6) y Swagger en `/swagger-ui.html` |
-| payment-service | `http://localhost:3005/actuator/health`; Swagger en `/swagger` solo en entorno Development (`Program.cs:50-55`) |
+| payment-service | `http://localhost:3005/actuator/health` y `/health` (los dos revisan SQL Server y responden 503 si no contesta); Swagger en `/swagger` solo en entorno Development (`Program.cs:50-55`) |
 | RabbitMQ | Panel en `http://localhost:15672` |
 | Mailpit | Bandeja en `http://localhost:8025` |
 

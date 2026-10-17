@@ -8,7 +8,7 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 2.0, 15 de octubre de 2026
+Versión 2.1, 17 de octubre de 2026
 
 ---
 
@@ -21,7 +21,7 @@ Este documento muestra cómo se comporta LavaRápido cuando alguien lo usa: qué
 3. **Diagramas de actividades** de los procesos de negocio.
 4. **Diagramas de estados** de las entidades que cambian de estado (reserva, pago, ejecución del servicio, promoción e informe de inspección).
 
-Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol.
+El 17 de octubre de 2026 se agregaron el consentimiento de los documentos legales en el registro (sección 2.1) y el informe de inspección desde la aplicación móvil (sección 2.9). Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol.
 
 La especificación completa de cada requisito y caso de uso (actores, precondición, flujo normal, flujos alternos y postcondición) está en el *Informe de especificación de requisitos*, secciones 5 y 7.3; aquí se citan por su identificador (RF-XXX, CUXX).
 
@@ -203,10 +203,10 @@ sequenceDiagram
     participant N as notification-service
     participant M as SMTP
 
-    C->>W: Llena el formulario de registro
-    W->>GW: POST /api/v1/auth/register
+    C->>W: Llena el formulario y marca los Términos y la Política de Tratamiento de Datos
+    W->>GW: POST /api/v1/auth/register (acceptsTerms, acceptsDataPolicy)
     GW->>S: enruta
-    S->>S: Valida (política de contraseña, correo/documento únicos), guarda persona + cuenta (CLIENT)
+    S->>S: Valida (política de contraseña, correo/documento únicos), guarda persona + cuenta (CLIENT) y la fecha de aceptación de cada documento legal
     S-->>W: 201 Created
     S-)MQ: UserRegistered (security.user_registered), tras el commit
     par perfil de cliente
@@ -223,7 +223,7 @@ sequenceDiagram
     S-->>W: 200 JWT (HS256, 1 h, claim roles)
 ```
 
-*Fuente:* `security-service` (`AccountRegistrationService`, `AuthenticationService`), evento `security.user_registered`.
+*Fuente:* `security-service` (`AccountRegistrationService`, `AuthenticationService`, migración `039-security-app-user-legal-consent.sql`), evento `security.user_registered`. La web y la app móvil no envían el formulario hasta que ambas casillas están marcadas; el servidor guarda las fechas solo si las dos llegan aceptadas.
 
 ### 2.2 Reservar un lavado (RF-005, RF-006, RF-010)
 
@@ -528,7 +528,7 @@ sequenceDiagram
     autonumber
     actor A as Administrador
     actor C as Cliente
-    participant W as Web (vía gateway)
+    participant W as Web o app móvil (vía gateway)
     participant OP as operations-service
     participant B as booking-service
     participant DB as SQL Server (execution)
@@ -556,7 +556,7 @@ sequenceDiagram
     OP-->>W: informe publicado con la placa enmascarada
 ```
 
-*Fuente:* `operations-service` (`InspectionReport`, migración `033-execution-inspection-report.sql`), `notification-service` (aviso del informe compartido).
+*Fuente:* `operations-service` (`InspectionReport`, migración `033-execution-inspection-report.sql`), `notification-service` (aviso del informe compartido), web (`features/admin/pages/inspection`) y app móvil (`AdminInspectionScreen`, `InspectionService`). En la app las fotos se toman con la cámara o se eligen de la galería y se reducen en el celular antes del `POST /findings`; el botón **Publicar y compartir enlace** abre el menú de compartir del teléfono.
 
 ---
 

@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-16 de octubre de 2026
+17 de octubre de 2026
 
-Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.0
+Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.1
 
 ## Control de Versiones
 
@@ -30,6 +30,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 |---|---|---|---|
 | 1.0 | 2026-10-09 | Creación del procedimiento (en español y en inglés) a partir del código de los once repositorios (rama *develop* al 9 de octubre de 2026), de *lavarapido-infra/docker-compose.yml* y de la documentación de despliegue, entornos, operación y calidad del proyecto. | Equipo de desarrollo |
 | 2.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026 y el servidor público ya montado. Se actualizaron: servidor público en Azure con Caddy, HTTPS y la web servida con nginx, distribución del APK, primer administrador por variables de entorno, 57 tablas, cola de operations-service, salud de payment-service, pruebas web y de punta a punta en los criterios de entrada, asignación automática en las pruebas de humo, datos del negocio en la carga inicial y riesgos de la implementación. | Equipo de desarrollo |
+| 2.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se indicó que la aplicación móvil necesita un APK nuevo por los módulos nativos del informe de inspección (sección 11.7, Fase 6). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -96,7 +97,7 @@ En el contexto del programa ADSO, "implementación del software" designa la **pu
 
 ### 4.2 Fuentes de Este Documento
 
-El procedimiento se verificó contra el código de los once repositorios del proyecto (rama *develop* al 16 de octubre de 2026), en especial *lavarapido-infra/docker-compose.yml*, *docker-compose.prod.yml*, *.env.example* y la carpeta *deploy*, y contra la documentación de despliegue, entornos, integración continua, operación, calidad y control del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a, 2026b). Los procedimientos detallados de instalación, administración y uso no se repiten aquí: se remite al Manual de Instalación, al Manual de Administrador y al Manual de Usuario, versión 4.0, y al Documento de Despliegue de esta misma carpeta, que registra cómo se montó el servidor público.
+El procedimiento se verificó contra el código de los once repositorios del proyecto (rama *develop* al 17 de octubre de 2026), en especial *lavarapido-infra/docker-compose.yml*, *docker-compose.prod.yml*, *.env.example* y la carpeta *deploy*, y contra la documentación de despliegue, entornos, integración continua, operación, calidad y control del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a, 2026b). Los procedimientos detallados de instalación, administración y uso no se repiten aquí: se remite al Manual de Instalación, al Manual de Administrador y al Manual de Usuario, versión 4.0, y al Documento de Despliegue de esta misma carpeta, que registra cómo se montó el servidor público.
 
 ## 5. Objetivo
 
@@ -406,7 +407,7 @@ npx ng serve --host 0.0.0.0    # accesible desde otros equipos de la red local
 
 En el servidor público la web no usa *ng serve*: el contenedor *web* compila la carpeta *dist/* y la sirve con nginx (con encabezados de seguridad) detrás de Caddy y con HTTPS; *deploy/update-server.sh* lo reconstruye después de cada push (Documento de Despliegue).
 
-2. **Aplicación móvil.** El APK se compila con EAS con *EXPO_PUBLIC_API_URL* apuntando al dominio del servidor y se publica con *npm run publish:apk*, que lo deja en */app/LavaRapidoVehicular.apk* y avisa por push a quienes tienen la aplicación. Para pruebas en la red local se puede usar *npx expo start* con la dirección IPv4 del equipo.
+2. **Aplicación móvil.** El APK se compila con EAS con *EXPO_PUBLIC_API_URL* apuntando al dominio del servidor y se publica con *npm run publish:apk*, que lo deja en */app/LavaRapidoVehicular.apk* y avisa por push a quienes tienen la aplicación. Para pruebas en la red local se puede usar *npx expo start* con la dirección IPv4 del equipo. La versión del 17 de octubre de 2026 agrega los módulos nativos *expo-image-picker* y *expo-image-manipulator* (fotos del informe de inspección), por lo que exige compilar y publicar un APK nuevo; una actualización por internet (*npm run publish:update*) no basta, porque solo cambia el código de las pantallas.
 
 **Evidencia:** captura de la pantalla de bienvenida servida desde el servidor, con la barra de direcciones visible.
 

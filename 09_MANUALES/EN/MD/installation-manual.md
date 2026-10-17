@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 16, 2026
+October 17, 2026
 
-Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.0
+Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.1
 
 ## Version Control
 
@@ -32,6 +32,7 @@ Table 1 records the change history of this document. Each time the installation 
 | 3.0 | 2026-10-07 | Translation into English, APA Style (7th ed.) formatting, and verification against the infrastructure repository and the code of the services. The placeholders were replaced with the real values: repositories, Compose services, ports, database name, environment variables, migrations per service, payment-service in .NET 8, health endpoints, and demonstration accounts. Corrected: migration strategy (one changelog per service applied at startup, not a single master changelog), absence of account lockout, and gateway behavior (it does not validate tokens). | Development team |
 | 3.1 | 2026-10-09 | Update against the code of October 9, 2026, and creation of the Spanish version (Manual_instalacion_LavadoVehicular_3145556_ES.md). Corrected: the operations repository is called *lavarapido-operation-service* and must be cloned with that name; real addresses of the four repositories that were pending; payment-service now runs in Docker with the *app* profile and the gateway container receives ROUTE_PAYMENT_URL; CORS origins include Expo web (8081); new changelogs (security 023, 026, and 030; booking 021, 022, and 024; notification 025, 027, 028, and 029; payment 017 to 020); 49 tables; 22 notification types; payment-service publishes events with MESSAGING_ENABLED; SPRING_PROFILES_ACTIVE added. | Development team |
 | 4.0 | 2026-10-16 | Review against the code of October 16, 2026. The figures changed from placeholders to real screenshots of the installation. Updated: 57 tables in the nine schemas (checked with the query in section 11.5), account lockout after failed attempts, the payment-service health endpoint that now checks the database, a reference to the Deployment Document for the Azure server and the APK, and Annex B items that were resolved. | Development team |
+| 4.1 | 2026-10-17 | Review against the code of October 17, 2026. Added the optional *EXPO_PUBLIC_WEB_URL* variable of the mobile app (section 10.5) and the native dependencies *expo-image-picker* and *expo-image-manipulator*, which require *npm install* and a new APK (section 13.2). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -117,7 +118,7 @@ This manual explains how to prepare a machine, obtain the code, configure the en
 
 ### 4.1 Sources of This Document
 
-The procedures were verified against the infrastructure repository (*lavarapido-infra*: *docker-compose.yml*, *.env.example*, and the team guide), the source code of the eleven repositories (*develop* branch as of October 16, 2026), and the project documentation updated on that same date (Vehicle Washing Development Team, 2026a, 2026b). The values that depend on each installation (passwords, keys, and addresses) are written between angle brackets, such as `<SA_PASSWORD>`; no placeholder must be copied literally into a terminal. The implementation of a release in its target environment (entry criteria, acceptance, training, and rollback) is described in the Implementation Procedure.
+The procedures were verified against the infrastructure repository (*lavarapido-infra*: *docker-compose.yml*, *.env.example*, and the team guide), the source code of the eleven repositories (*develop* branch as of October 17, 2026), and the project documentation updated on that same date (Vehicle Washing Development Team, 2026a, 2026b). The values that depend on each installation (passwords, keys, and addresses) are written between angle brackets, such as `<SA_PASSWORD>`; no placeholder must be copied literally into a terminal. The implementation of a release in its target environment (entry criteria, acceptance, training, and rollback) is described in the Implementation Procedure.
 
 ### 4.2 Scope
 
@@ -451,7 +452,7 @@ INTERNAL_API_KEY=********
 ### 10.5 Configuring the Client Applications
 
 - **Web application.** It calls the relative address */api/v1*. In development, *proxy.conf.json* forwards every request that starts with */api* to the gateway (*http://localhost:8080*), so no file has to be edited.
-- **Mobile application.** Copy *.env.example* to *.env.local* and set *EXPO_PUBLIC_API_URL*. In the Android emulator use *http://10.0.2.2:8080/api/v1* (the default value); on a physical phone, the IPv4 address of the computer on the same Wi-Fi network (for example, *http://192.168.1.10:8080/api/v1*); and for the web version of Expo, *http://localhost:8080/api/v1*. After changing it, restart Expo with *npx expo start --clear*.
+- **Mobile application.** Copy *.env.example* to *.env.local* and set *EXPO_PUBLIC_API_URL*. In the Android emulator use *http://10.0.2.2:8080/api/v1* (the default value); on a physical phone, the IPv4 address of the computer on the same Wi-Fi network (for example, *http://192.168.1.10:8080/api/v1*); and for the web version of Expo, *http://localhost:8080/api/v1*. After changing it, restart Expo with *npx expo start --clear*. The optional *EXPO_PUBLIC_WEB_URL* variable sets the web address the app uses to build the public link of the inspection report; when it is not set, the same host as the gateway with port 4200 is used.
 
 **Figure 4**
 
@@ -698,6 +699,8 @@ npx expo start                # or: npm start
 ```
 
 The command opens the Metro development server (port 8081) and shows a QR code. For a quick test, open the application in an Android emulator (key *a*) or on a phone with Expo Go on the same Wi-Fi network. Remember to configure *EXPO_PUBLIC_API_URL* (section 10.5).
+
+**New native dependencies.** Since October 17, 2026, the app uses *expo-image-picker* (camera and gallery) and *expo-image-manipulator* (shrinking the photos) for the inspection report. After *git pull*, run *npm install* in *Frontend/LavadoVehicular-Movil*. Expo Go already includes these modules, but an APK built before that date does not: a new version must be built and published with EAS, as explained in the Deployment Document (section 4.3.3, "Publishing the mobile app"). The camera and photo permissions are declared in the *expo-image-picker* plugin inside *app.json*.
 
 **Push notifications.** Expo Go does not receive remote push notifications. To test them, build a development version with EAS and set *PUSH_ENABLED=true* in the backend:
 
