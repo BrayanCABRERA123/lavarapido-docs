@@ -32,7 +32,7 @@ Table 1 records the change history of this document. Each time the development t
 | 2.0 | 2026-10-05 | Cover data completed (ficha, instructor, and training center) and the system name adjusted to Vehicle Washing. | Development team |
 | 3.0 | 2026-10-07 | Translation into English, formatting according to the APA Style (7th ed.), restructuring according to the SENA guide, and verification against the source code of the web application. Corrected: screen routes, registration fields (ID number, first and last names, acceptance of the legal documents), password rules, absence of account lockout, booking flow (no operator choice, no rescheduling from the web), payment flow (no promotion code, reference rules), history filters, notifications by email, and operator statuses. | Development team |
 | 3.1 | 2026-10-09 | Update against the code of October 9, 2026, and creation of the Spanish version (Manual_usuario_LavadoVehicular_3145556_ES.md). Added: loyalty points per service and in the booking summary, loyalty progress and unlocked coupons in the dashboard, coupon redemption when paying, list of missing data under the confirm button, payment status in the history and Pay now only when the booking can be paid, email notices of approved, rejected, and refunded payments, points earned, unlocked coupons, and inspection reports, notification switches saved in the account, staff notices for the operator, and new messages. Removed: WhatsApp from the help center. | Development team |
-| 4.0 | 2026-10-16 | Review against the code of October 16, 2026. The figures changed from placeholders to real screenshots of the running system with test data. Added: optional operator choice when booking and automatic assignment of a free one, account lockout for 15 minutes after five failed attempts, messages that explain why a time cannot be booked, starting the service from 15 minutes before the booked time, and downloading the Android application from the web. Removed: the Report progress button, which no longer exists on the operator screen. | Development team |
+| 4.0 | 2026-10-16 | Review against the code of October 16, 2026. The figures changed from placeholders to real screenshots of the running system with test data. Added: optional operator choice when booking and automatic assignment of a free one, account lockout for 15 minutes after five failed attempts, messages that explain why a time cannot be booked, starting the service from 15 minutes before the booked time, downloading the Android application from the web, the profile address saved in the account, and the Deactivate my account option, formerly called Delete account. Removed: the Report progress button, which no longer exists on the operator screen. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -688,11 +688,11 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 2. To modify the data, click **Edit profile**, change the fields, and click **Save**; the message "Profile updated!" appears.
 3. To change the email, which is the login username, type the new one and confirm with the current password in the window "Confirm the email change"; from then on the new email is used to log in.
 4. To change the password, go to **Password** and click **Change**. Type the **Current password**, the **New password**, and **Confirm new password**, and click **Save**.
-5. To stop using the account, go to **Account**, click **Delete account**, read the message, and confirm with the password.
+5. To stop using the account, go to **Account**, click **Deactivate my account**, read the message, and confirm with the password.
 
 **Expected result:** The data is updated. If the password was changed, the new one is used at the next login.
 
-**Notes or restrictions:** If the current password is wrong, the change is rejected ("The current password is incorrect"); the new password must be different from the current one. Although the option is called **Delete account**, the account is deactivated, not erased: the person can no longer log in and the sessions are closed, but the history of bookings and payments is kept. To reactivate it, the person must contact the administrator. The **Address** field is not yet saved by the server.
+**Notes or restrictions:** If the current password is wrong, the change is rejected ("The current password is incorrect"); the new password must be different from the current one. The account is deactivated, not erased: the person can no longer log in and the sessions are closed, but the history of bookings and payments is kept. To reactivate it, the person must contact the administrator. The **Address** is saved in the account, so it appears the same on any device.
 
 **Figure 23**
 
@@ -1040,9 +1040,9 @@ When the booking is Completed, open History, click "Rate Service", choose from o
 
 Yes. In Settings you can choose Spanish, English, French, or Portuguese and one of four color themes.
 
-##### Can I delete my account?
+##### Can I delete or deactivate my account?
 
-The Delete account option deactivates the account: you will not be able to log in, but your history is kept. To reactivate it, contact the administrator.
+The **Deactivate my account** option deactivates the account, without erasing it: you will not be able to log in, but your history is kept. To reactivate it, contact the administrator.
 
 ##### I am an operator and cannot start a service. Why?
 
