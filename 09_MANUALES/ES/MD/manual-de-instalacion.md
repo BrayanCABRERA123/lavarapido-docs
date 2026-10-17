@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-16 de octubre de 2026
+17 de octubre de 2026
 
-Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.0
+Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.1
 
 ## Control de Versiones
 
@@ -32,6 +32,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 3.0 | 2026-10-07 | Traducción al inglés, formato APA (7.ª ed.) y verificación contra el repositorio de infraestructura y el código de los servicios. Se reemplazaron los marcadores por los valores reales: repositorios, servicios de Compose, puertos, nombre de la base de datos, variables de entorno, migraciones por servicio, payment-service en .NET 8, endpoints de salud y cuentas de demostración. Se corrigieron: la estrategia de migraciones (un changelog por servicio aplicado al arrancar), la ausencia de bloqueo de cuenta y el comportamiento del gateway (no valida tokens). | Equipo de desarrollo |
 | 3.1 | 2026-10-09 | Actualización contra el código del 9 de octubre de 2026 y creación de esta versión en español (la versión en inglés es Manual_instalacion_LavadoVehicular_3145556_EN.md). Se corrigieron: el repositorio de operaciones se llama *lavarapido-operation-service* y se debe clonar con ese nombre; direcciones reales de los cuatro repositorios que estaban pendientes; payment-service ahora corre en Docker con el perfil *app* y el contenedor del gateway recibe ROUTE_PAYMENT_URL; los orígenes CORS incluyen Expo web (8081); nuevos changelogs (security 023, 026 y 030; booking 021, 022 y 024; notification 025, 027, 028 y 029; payment 017 a 020); 49 tablas; 22 tipos de notificación; payment-service publica eventos con MESSAGING_ENABLED; se agregó SPRING_PROFILES_ACTIVE. | Equipo de desarrollo |
 | 4.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026. Las figuras pasaron de marcadores a capturas reales de la instalación. Se actualizaron: 57 tablas en los nueve esquemas (comprobado con la consulta de la sección 11.5), bloqueo de la cuenta por intentos fallidos, endpoint de salud de payment-service que ahora comprueba la base de datos, referencia al Documento de Despliegue para el servidor de Azure y el APK, y temas del Anexo B que quedaron resueltos. | Equipo de desarrollo |
+| 4.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se agregaron la variable opcional *EXPO_PUBLIC_WEB_URL* de la aplicación móvil (sección 10.5) y las dependencias nativas *expo-image-picker* y *expo-image-manipulator*, que exigen *npm install* y un APK nuevo (sección 13.2). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -117,7 +118,7 @@ Este manual explica cómo preparar un equipo, obtener el código, configurar las
 
 ### 4.1 Fuentes de Este Documento
 
-Los procedimientos se verificaron contra el repositorio de infraestructura (*lavarapido-infra*: *docker-compose.yml*, *.env.example* y la guía del equipo), el código fuente de los once repositorios (rama *develop* al 16 de octubre de 2026) y la documentación del proyecto actualizada a esa misma fecha (Equipo de Desarrollo Vehicle Washing, 2026a, 2026b). Los valores que dependen de cada instalación (contraseñas, llaves y direcciones) se escriben entre ángulos, como `<CONTRASEÑA_SA>`; ningún marcador se debe copiar literalmente en una terminal. La puesta en operación de una versión en su entorno de destino (criterios de entrada, aceptación, capacitación y reversión) se describe en el Procedimiento de Implementación.
+Los procedimientos se verificaron contra el repositorio de infraestructura (*lavarapido-infra*: *docker-compose.yml*, *.env.example* y la guía del equipo), el código fuente de los once repositorios (rama *develop* al 17 de octubre de 2026) y la documentación del proyecto actualizada a esa misma fecha (Equipo de Desarrollo Vehicle Washing, 2026a, 2026b). Los valores que dependen de cada instalación (contraseñas, llaves y direcciones) se escriben entre ángulos, como `<CONTRASEÑA_SA>`; ningún marcador se debe copiar literalmente en una terminal. La puesta en operación de una versión en su entorno de destino (criterios de entrada, aceptación, capacitación y reversión) se describe en el Procedimiento de Implementación.
 
 ### 4.2 Alcance
 
@@ -451,7 +452,7 @@ INTERNAL_API_KEY=********
 ### 10.5 Configuración de las Aplicaciones Cliente
 
 - **Aplicación web.** Llama a la dirección relativa */api/v1*. En desarrollo, *proxy.conf.json* reenvía toda solicitud que empiece por */api* al gateway (*http://localhost:8080*), por lo que no hay que editar ningún archivo.
-- **Aplicación móvil.** Copiar *.env.example* a *.env.local* y fijar *EXPO_PUBLIC_API_URL*. En el emulador de Android usar *http://10.0.2.2:8080/api/v1* (el valor por defecto); en un teléfono físico, la dirección IPv4 del computador en la misma red Wi-Fi (por ejemplo, *http://192.168.1.10:8080/api/v1*); y para la versión web de Expo, *http://localhost:8080/api/v1*. Después de cambiarla, reiniciar Expo con *npx expo start --clear*.
+- **Aplicación móvil.** Copiar *.env.example* a *.env.local* y fijar *EXPO_PUBLIC_API_URL*. En el emulador de Android usar *http://10.0.2.2:8080/api/v1* (el valor por defecto); en un teléfono físico, la dirección IPv4 del computador en la misma red Wi-Fi (por ejemplo, *http://192.168.1.10:8080/api/v1*); y para la versión web de Expo, *http://localhost:8080/api/v1*. Después de cambiarla, reiniciar Expo con *npx expo start --clear*. La variable opcional *EXPO_PUBLIC_WEB_URL* fija la dirección de la web con la que la aplicación arma el enlace público del informe de inspección; si no se define, se usa el mismo equipo del gateway con el puerto 4200.
 
 **Figura 4**
 
@@ -698,6 +699,8 @@ npx expo start                # o: npm start
 ```
 
 El comando abre el servidor de desarrollo Metro (puerto 8081) y muestra un código QR. Para una prueba rápida, abrir la aplicación en un emulador de Android (tecla *a*) o en un teléfono con Expo Go en la misma red Wi-Fi. Recordar configurar *EXPO_PUBLIC_API_URL* (sección 10.5).
+
+**Dependencias nativas nuevas.** Desde el 17 de octubre de 2026 la aplicación usa *expo-image-picker* (cámara y galería) y *expo-image-manipulator* (reducción de las fotos) para el informe de inspección. Después de hacer *git pull*, ejecutar *npm install* en *Frontend/LavadoVehicular-Movil*. Expo Go ya incluye estos módulos, pero un APK compilado antes de esa fecha no los tiene: hay que compilar y publicar una versión nueva con EAS, como explica el Documento de Despliegue (sección 4.3.3, «Publicación de la app móvil»). Los permisos de cámara y fotos se declaran en el *plugin* de *expo-image-picker* dentro de *app.json*.
 
 **Notificaciones push.** Expo Go no recibe notificaciones push remotas. Para probarlas, construir una versión de desarrollo con EAS y fijar *PUSH_ENABLED=true* en el backend:
 

@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-16 de octubre de 2026
+17 de octubre de 2026
 
-Tipo de manual: Manual de usuario (roles Cliente y Operario) · Versión 4.0
+Tipo de manual: Manual de usuario (roles Cliente y Operario) · Versión 4.1
 
 ## Control de Versiones
 
@@ -33,6 +33,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 3.0 | 2026-10-07 | Traducción al inglés, formato según las normas APA (7.ª ed.), reestructuración según la guía del SENA y verificación contra el código fuente de la aplicación web. Se corrigieron: rutas de las pantallas, campos del registro (número de documento, nombres, apellidos y aceptación de los documentos legales), reglas de la contraseña, ausencia de bloqueo de cuenta, flujo de reserva (sin elección de operario ni reprogramación desde la web), flujo de pago (reglas de la referencia), filtros del historial, notificaciones por correo y estados del operario. | Equipo de desarrollo |
 | 3.1 | 2026-10-09 | Actualización contra el código del 9 de octubre de 2026 y creación de esta versión en español (la versión en inglés es Manual_usuario_LavadoVehicular_3145556_EN.md). Se agregaron: puntos de fidelización por servicio y en el resumen de la reserva, progreso de fidelidad y cupones desbloqueados en el panel, canje de cupones al pagar, lista de datos faltantes bajo el botón de confirmar, estado del pago en el historial y botón Pagar ahora solo cuando la reserva se puede pagar, avisos por correo de pagos aprobados, rechazados y reembolsados, de puntos ganados, de cupones desbloqueados y de informes de inspección, interruptores de notificaciones guardados en la cuenta, avisos al operario y nuevos mensajes. Se retiró WhatsApp del centro de ayuda. | Equipo de desarrollo |
 | 4.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026. Las figuras pasaron de marcadores a capturas reales del sistema funcionando con datos de prueba. Se agregaron: elección opcional del operario al reservar y asignación automática de uno libre, bloqueo de la cuenta por 15 minutos después de cinco intentos fallidos, mensajes que explican por qué una hora no se puede reservar, inicio del servicio desde 15 minutos antes de la hora reservada, descarga de la aplicación Android desde la web, dirección del perfil guardada en la cuenta y la opción Desactivar mi cuenta, que antes se llamaba Eliminar cuenta. Se retiró el botón Reportar progreso, que ya no existe en la pantalla del operario. | Equipo de desarrollo |
+| 4.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se actualizó la pantalla de bienvenida (sección "Quiénes somos" sin cifras, nueva sección de preguntas frecuentes, pie de página sin redes sociales ni enlaces de contacto) y se describió cómo se adapta a celulares y tabletas. Se aclaró que el avance del próximo servicio queda en 0 % hasta que empieza el lavado y que el saludo del panel nombra al lavadero como Lavado Vehicular. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -87,7 +88,7 @@ El documento sigue la estructura de la guía para elaborar manuales de software 
 
 ### 4.1 Fuentes y Convenciones de Este Manual
 
-Las pantallas, rutas, botones y mensajes descritos corresponden a la rama *develop* de la aplicación web al 16 de octubre de 2026. En la interfaz el sistema aparece con su nombre comercial, **LavaRápido**. Los nombres de botones, menús y mensajes se escriben en **negrita** o entre comillas tal como aparecen cuando el idioma de la interfaz es el español; la interfaz también está disponible en inglés, francés y portugués. Una ruta como */client/vehicles* es la parte de la dirección web que sigue al dominio del sistema (por ejemplo, *http://localhost:4200/client/vehicles* en el entorno local).
+Las pantallas, rutas, botones y mensajes descritos corresponden a la rama *develop* de la aplicación web al 17 de octubre de 2026. En la interfaz el sistema aparece con su nombre comercial, **LavaRápido**. Los nombres de botones, menús y mensajes se escriben en **negrita** o entre comillas tal como aparecen cuando el idioma de la interfaz es el español; la interfaz también está disponible en inglés, francés y portugués. Una ruta como */client/vehicles* es la parte de la dirección web que sigue al dominio del sistema (por ejemplo, *http://localhost:4200/client/vehicles* en el entorno local).
 
 ## 5. Objetivo
 
@@ -165,7 +166,9 @@ El sistema reconoce tres roles fijos. Cada persona ve solo las opciones de su ro
 
 ### 7.3 Presentación del Sistema
 
-**Pantalla de bienvenida.** Al abrir la dirección web del sistema aparece la pantalla de bienvenida. En la parte superior hay una barra de navegación con los enlaces **Inicio**, **Nosotros** y **Servicios**, un selector de idioma y los botones **Iniciar Sesión** y **Registrarse**. El bloque central muestra los botones **Comenzar ahora** y **Ya tengo cuenta**; más abajo aparecen la sección "¿Por qué elegirnos?", los servicios de lavado con su descripción y duración, y los datos de contacto.
+**Pantalla de bienvenida.** Al abrir la dirección web del sistema aparece la pantalla de bienvenida. En la parte superior hay una barra de navegación con los enlaces **Inicio**, **Nosotros** y **Servicios**, un selector de idioma y los botones **Iniciar Sesión** y **Registrarse**. El bloque central muestra los botones **Comenzar ahora** y **Ya tengo cuenta**; más abajo aparecen, en este orden, la sección "Quiénes somos", "¿Por qué elegirnos?", los servicios de lavado con su descripción y duración, la descarga de la aplicación móvil, los datos de contacto del lavadero y la sección **Preguntas frecuentes**, que responde en un acordeón (una pregunta abierta a la vez) cómo reservar, los métodos de pago, la cancelación, la elección del operario, los puntos, los recordatorios y la aplicación para celular. El pie de página tiene los enlaces **Sobre nosotros**, los tres servicios, **Centro de ayuda**, **Preguntas frecuentes** (que lleva a esa sección), **Términos de servicio** y **Política de privacidad**.
+
+**Uso en celulares y tabletas.** Todas las pantallas se adaptan al ancho del dispositivo desde 360 píxeles, sin desplazamiento lateral. En el celular, la barra superior muestra solo el selector de idioma e **Iniciar sesión** (el registro sigue disponible con **Comenzar ahora**), los botones de la portada ocupan todo el ancho y, con la sesión iniciada, el menú lateral se abre con el botón ☰ de la esquina superior izquierda.
 
 **Figura 1**
 
@@ -391,7 +394,7 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 
 1. Iniciar sesión con una cuenta de cliente; el sistema abre el panel automáticamente.
 2. Revisar las tarjetas de resumen: **Reservas activas**, **Mis vehículos** y **Lavados realizados**.
-3. Consultar el bloque **Tu próximo servicio**, que muestra el servicio, el vehículo, la fecha, la hora, el **Operario asignado** y el avance del servicio. Hacer clic en **Ver detalle** para ver toda la información.
+3. Consultar el bloque **Tu próximo servicio**, que muestra el servicio, el vehículo, la fecha, la hora, el **Operario asignado** y el avance del servicio. El avance queda en 0 % mientras la reserva está programada o confirmada, porque el lavado aún no ha empezado; sube cuando el operario inicia el servicio y llega a 100 % al finalizar. Hacer clic en **Ver detalle** para ver toda la información.
 4. Usar los **Accesos rápidos** (Agendar lavado, Pagar servicio, Mis vehículos y Notificaciones) para ir directamente a cada módulo.
 5. Revisar el bloque **Tus beneficios y promociones**: la barra **Progreso de fidelidad** muestra los puntos acumulados ("N de M puntos") y, para cada promoción, indica "¡Ya la desbloqueaste! Cánjala al pagar." o cuántos puntos faltan para desbloquearla ("Te faltan N puntos para desbloquearla").
 

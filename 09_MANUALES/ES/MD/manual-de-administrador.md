@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-16 de octubre de 2026
+17 de octubre de 2026
 
-Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.0
+Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.1
 
 ## Control de Versiones
 
@@ -32,6 +32,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 3.0 | 2026-10-07 | Traducción al inglés, formato APA (7.ª ed.) y verificación contra el código fuente. El módulo de administración de la aplicación web se documenta pantalla por pantalla (se describía como inexistente). Se corrigieron: estado de implementación de cada función, creación de cuentas desde el panel, ausencia de bloqueo de cuenta, asignación manual de operarios, revisión de pagos y pagos manuales, funciones guardadas solo en el navegador, nombres reales de contenedores y base de datos, y estado de la auditoría. | Equipo de desarrollo |
 | 3.1 | 2026-10-09 | Actualización contra el código del 9 de octubre de 2026 (ADR-011, secciones 9 a 12, y ADR-015) y creación de esta versión en español (la versión en inglés es Manual_administrador_LavadoVehicular_3145556_EN.md). Se actualizaron: tabla de estado de implementación; matriz de permisos de los tres roles fijos guardada en el servidor (informativa, no aplicada); puntos de fidelización por servicio; promociones como cupones porcentuales desbloqueables con puntos; reembolsos desde la interfaz con reversión de puntos; comparación del monto declarado; validación de referencias reutilizadas; avisos al cliente de los resultados de pago; avisos al personal para los administradores; informe de inspección notificado al cliente en lugar de WhatsApp; payment-service en Docker; nuevos tipos de notificación y revisiones de colas de mensajes muertos. | Equipo de desarrollo |
 | 4.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026. Las figuras pasaron de marcadores a capturas reales. Se actualizaron: bloqueo de la cuenta por intentos fallidos, asignación automática de operarios con la elección opcional del cliente, datos del negocio e informes de inspección guardados en el servidor, consentimiento de los documentos legales guardado al registrarse, creación automática del primer administrador con ADMIN_EMAIL y ADMIN_PASSWORD, textos del reembolso traducidos, nuevas trazas de la Tabla 15, riesgos de la Tabla 16 y temas del Anexo B que quedaron resueltos. | Equipo de desarrollo |
+| 4.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se agregó el informe de inspección desde la aplicación móvil (sección 12.5): se abre desde el detalle de la reserva, toma las fotos con la cámara o la galería, las reduce en el celular antes de subirlas y comparte el enlace con el menú del teléfono. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -130,7 +131,7 @@ Este manual está dirigido a los administradores del negocio y a los administrad
 
 ### 4.1 Fuentes y Estado de la Documentación
 
-El manual se verificó contra el código fuente de la aplicación web y de los servicios (Equipo de Desarrollo Vehicle Washing, 2026b, 2026c, 2026d) y contra la documentación del proyecto actualizada al 16 de octubre de 2026 (Equipo de Desarrollo Vehicle Washing, 2026a). La aplicación web incluye un módulo de administración completo bajo la ruta */admin*, restringido al rol ADMIN. Los nombres de las pantallas, botones y mensajes se escriben tal como aparecen cuando el idioma de la interfaz es el español.
+El manual se verificó contra el código fuente de la aplicación web y de los servicios (Equipo de Desarrollo Vehicle Washing, 2026b, 2026c, 2026d) y contra la documentación del proyecto actualizada al 17 de octubre de 2026 (Equipo de Desarrollo Vehicle Washing, 2026a). La aplicación web incluye un módulo de administración completo bajo la ruta */admin*, restringido al rol ADMIN. Los nombres de las pantallas, botones y mensajes se escriben tal como aparecen cuando el idioma de la interfaz es el español.
 
 Casi todas las pantallas del módulo guardan sus datos en el servidor. Las excepciones son los reportes, que se calculan en el navegador a partir de las reservas y los pagos, y la matriz de permisos, que se guarda en el servidor pero todavía no cambia lo que puede hacer cada rol. La sección 6.3 indica el estado de cada función para que el administrador sepa qué datos son oficiales. Cuando la documentación no define un valor (por ejemplo, una política de retención o un objetivo de recuperación), el manual lo presenta como **recomendación** y lo lista en el Anexo B para que el equipo lo apruebe, como exige la guía para elaborar manuales (Servicio Nacional de Aprendizaje [SENA], 2026).
 
@@ -606,7 +607,16 @@ Para los servicios largos (180 minutos o más), el administrador puede registrar
 4. Hacer clic en **Publicar y copiar enlace**; **Ver como cliente** muestra la versión pública (ruta */report/{token}*).
 5. Hacer clic en **Notificar al cliente**. El sistema envía al cliente una notificación y un correo (tipo *INSPECTION_REPORT*) con el resumen de la inspección: fases terminadas, número de hallazgos, hallazgos mayores y áreas afectadas, junto con el enlace al informe. El mensaje "Cliente notificado" confirma el envío.
 
-**Dónde se guarda:** el informe, sus fases, los hallazgos y las fotos se guardan en operations-service (tablas *execution.inspection_report*, *execution.inspection_phase*, *execution.inspection_finding* y *execution.inspection_photo*). Las fotos se comprimen en el navegador antes de enviarse. El enlace público (ruta */report/{token}*) solo funciona después de publicar el informe y abre desde cualquier dispositivo sin iniciar sesión, por eso el aviso al cliente lo incluye.
+**Desde la aplicación móvil.** El informe también se gestiona desde el celular, con las mismas fases y las mismas reglas del servidor:
+
+1. En **Reservas**, tocar el ícono del ojo de la reserva y, en el detalle, tocar **Inspección**. El botón solo aparece en servicios de 180 minutos o más que estén confirmados, en curso o completados.
+2. Tocar **Iniciar reporte** y, en cada fase, **Iniciar fase**, **Agregar hallazgo** y **Terminar fase** (o **Reabrir** para corregir una fase terminada).
+3. En **Nuevo hallazgo**, escribir o elegir la parte del vehículo entre las sugerencias, elegir el tipo y escribir la nota. Adjuntar hasta cinco fotos con **Tomar foto** (cámara) o **Galería**. La aplicación reduce cada foto a 1600 píxeles en su lado mayor, en formato JPEG, antes de subirla, porque el servidor acepta como máximo 2 MB por foto.
+4. Tocar **Publicar y compartir enlace**. El informe queda publicado y, desde ese momento, **Compartir enlace** abre el menú de compartir del teléfono (WhatsApp, correo o copiar). **Notificar al cliente** envía el mismo aviso que la web y **Ver como cliente** abre el enlace público en el navegador.
+
+La primera vez, el celular pide permiso para usar la cámara y las fotos; si el permiso se niega, la pantalla indica que debe activarse en los ajustes del teléfono. Las fotos ya guardadas se ven en miniatura y se amplían al tocarlas.
+
+**Dónde se guarda:** el informe, sus fases, los hallazgos y las fotos se guardan en operations-service (tablas *execution.inspection_report*, *execution.inspection_phase*, *execution.inspection_finding* y *execution.inspection_photo*). Las fotos se reducen antes de enviarse: en el navegador cuando se usa la web y en el celular cuando se usa la aplicación móvil. El enlace público (ruta */report/{token}*) solo funciona después de publicar el informe y abre desde cualquier dispositivo sin iniciar sesión, por eso el aviso al cliente lo incluye.
 
 ### 12.6 Revisión y Aprobación de Pagos
 

@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 16, 2026
+October 17, 2026
 
-Manual Type: User Manual (Customer and Operator Roles) · Version 4.0
+Manual Type: User Manual (Customer and Operator Roles) · Version 4.1
 
 ## Version Control
 
@@ -33,6 +33,7 @@ Table 1 records the change history of this document. Each time the development t
 | 3.0 | 2026-10-07 | Translation into English, formatting according to the APA Style (7th ed.), restructuring according to the SENA guide, and verification against the source code of the web application. Corrected: screen routes, registration fields (ID number, first and last names, acceptance of the legal documents), password rules, absence of account lockout, booking flow (no operator choice, no rescheduling from the web), payment flow (no promotion code, reference rules), history filters, notifications by email, and operator statuses. | Development team |
 | 3.1 | 2026-10-09 | Update against the code of October 9, 2026, and creation of the Spanish version (Manual_usuario_LavadoVehicular_3145556_ES.md). Added: loyalty points per service and in the booking summary, loyalty progress and unlocked coupons in the dashboard, coupon redemption when paying, list of missing data under the confirm button, payment status in the history and Pay now only when the booking can be paid, email notices of approved, rejected, and refunded payments, points earned, unlocked coupons, and inspection reports, notification switches saved in the account, staff notices for the operator, and new messages. Removed: WhatsApp from the help center. | Development team |
 | 4.0 | 2026-10-16 | Review against the code of October 16, 2026. The figures changed from placeholders to real screenshots of the running system with test data. Added: optional operator choice when booking and automatic assignment of a free one, account lockout for 15 minutes after five failed attempts, messages that explain why a time cannot be booked, starting the service from 15 minutes before the booked time, downloading the Android application from the web, the profile address saved in the account, and the Deactivate my account option, formerly called Delete account. Removed: the Report progress button, which no longer exists on the operator screen. | Development team |
+| 4.1 | 2026-10-17 | Review against the code of October 17, 2026. Updated the welcome screen ("About us" section without figures, new frequently asked questions section, footer without social networks or contact links) and described how it adapts to phones and tablets. Clarified that the progress of the next service stays at 0% until the wash starts and that the dashboard greeting names the car wash Lavado Vehicular. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -87,7 +88,7 @@ The document follows the structure of the guide for writing software manuals of 
 
 ### 4.1 Sources and Conventions of This Manual
 
-The screens, routes, buttons, and messages described here correspond to the *develop* branch of the web application as of October 16, 2026. In the interface the system appears under its trade name, **LavaRápido**. The names of buttons, menus, and messages are written in **bold** or between quotation marks exactly as they appear when the interface language is English; the interface is also available in Spanish, French, and Portuguese. A route such as */client/vehicles* is the part of the web address that follows the domain of the system (for example, *http://localhost:4200/client/vehicles* in the local environment).
+The screens, routes, buttons, and messages described here correspond to the *develop* branch of the web application as of October 17, 2026. In the interface the system appears under its trade name, **LavaRápido**. The names of buttons, menus, and messages are written in **bold** or between quotation marks exactly as they appear when the interface language is English; the interface is also available in Spanish, French, and Portuguese. A route such as */client/vehicles* is the part of the web address that follows the domain of the system (for example, *http://localhost:4200/client/vehicles* in the local environment).
 
 ## 5. Objective
 
@@ -165,7 +166,9 @@ The system recognizes three fixed roles. Each person sees only the options of th
 
 ### 7.3 System Overview
 
-**Welcome screen.** When the web address of the system is opened, the welcome screen appears. At the top there is a navigation bar with the links **Home**, **About**, and **Services**, a language selector, and the **Login** and **Register** buttons. The central block shows the **Get started** and **I already have an account** buttons; further down appear the "Why choose us?" section, the washing services with their description and duration, and the contact details.
+**Welcome screen.** When the web address of the system is opened, the welcome screen appears. At the top there is a navigation bar with the links **Home**, **About**, and **Services**, a language selector, and the **Login** and **Register** buttons. The central block shows the **Get started** and **I already have an account** buttons; further down appear, in this order, the "About us" section, "Why choose us?", the washing services with their description and duration, the mobile app download, the contact details of the car wash, and the **Frequently asked questions** section, which answers in an accordion (one question open at a time) how to book, the payment methods, cancellation, choosing the operator, points, reminders, and the mobile app. The footer has the links **About us**, the three services, **Help center**, **Frequently asked questions** (which goes to that section), **Terms of service**, and **Privacy policy**.
+
+**Use on phones and tablets.** Every screen adapts to the width of the device from 360 pixels, without horizontal scrolling. On a phone, the top bar shows only the language selector and **Login** (registration is still available with **Get started**), the buttons of the front block take the full width, and, once logged in, the side menu opens with the ☰ button in the upper left corner.
 
 **Figure 1**
 
@@ -391,7 +394,7 @@ Each module is documented with the same format: name, description, role that can
 
 1. Log in with a customer account; the system opens the dashboard automatically.
 2. Review the summary cards: **Active bookings**, **My vehicles**, and **Washes completed**.
-3. Check the **Your next service** block, which shows the service, the vehicle, the date, the time, the **Assigned operator**, and the progress of the service. Click **View detail** to see all the information.
+3. Check the **Your next service** block, which shows the service, the vehicle, the date, the time, the **Assigned operator**, and the progress of the service. The progress stays at 0% while the booking is scheduled or confirmed, because the wash has not started yet; it rises when the operator starts the service and reaches 100% when it finishes. Click **View detail** to see all the information.
 4. Use the **Quick access** links (Book a wash, Pay service, My vehicles, and Notifications) to go directly to each module.
 5. Review the **Your benefits and promotions** block: the **Loyalty progress** bar shows the points accumulated ("N of M points") and, for each promotion, either "Unlocked! Redeem it when you pay." or how many points are still missing to unlock it.
 

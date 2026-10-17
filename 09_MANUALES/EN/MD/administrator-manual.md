@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 16, 2026
+October 17, 2026
 
-Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.0
+Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.1
 
 ## Version Control
 
@@ -32,6 +32,7 @@ Table 1 records the change history of this document. Each time an administrative
 | 3.0 | 2026-10-07 | Translation into English, APA Style (7th ed.) formatting, and verification against the source code. The administration module of the web application is now documented screen by screen (it was described as nonexistent). Corrected: implementation status of each function, creation of accounts from the panel, absence of account lockout, manual operator assignment, payment review and manual payments, functions saved only in the browser (business data, roles, and promotions), real names of containers and database, and the state of the audit trail. | Development team |
 | 3.1 | 2026-10-09 | Update against the code of October 9, 2026 (ADR-011 sections 9 to 12 and ADR-015), and creation of the Spanish version (Manual_administrador_LavadoVehicular_3145556_ES.md). Updated: implementation status table; permission matrix of the three fixed roles saved on the server (informative, not enforced); loyalty points per service; promotions as real percentage coupons unlocked with points; refunds from the interface with reversal of points; comparison of the declared amount; validation of reused references; customer notices of payment results; staff notifications for administrators; inspection report notified to the customer instead of WhatsApp; payment-service in Docker; new notification types and dead-letter checks. | Development team |
 | 4.0 | 2026-10-16 | Review against the code of October 16, 2026. The figures changed from placeholders to real screenshots. Updated: account lockout after failed attempts, automatic operator assignment with the optional choice of the customer, business data and inspection reports saved on the server, consent to the legal documents stored at registration, automatic creation of the first administrator with ADMIN_EMAIL and ADMIN_PASSWORD, translated refund texts, new traces in Table 15, risks in Table 16, and Annex B items that were resolved. | Development team |
+| 4.1 | 2026-10-17 | Review against the code of October 17, 2026. Added the inspection report from the mobile app (section 12.5): it opens from the booking detail, takes the photos with the camera or the gallery, shrinks them on the phone before uploading them, and shares the link with the phone menu. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -130,7 +131,7 @@ This manual is addressed to business administrators and information technology (
 
 ### 4.1 Sources and State of the Documentation
 
-The manual was verified against the source code of the web application and of the services (Vehicle Washing Development Team, 2026b, 2026c, 2026d) and against the project documentation updated on October 16, 2026 (Vehicle Washing Development Team, 2026a). The web application includes a complete administration module under the route */admin*, restricted to the ADMIN role. The names of the screens, buttons, and messages are written exactly as they appear when the interface language is English.
+The manual was verified against the source code of the web application and of the services (Vehicle Washing Development Team, 2026b, 2026c, 2026d) and against the project documentation updated on October 17, 2026 (Vehicle Washing Development Team, 2026a). The web application includes a complete administration module under the route */admin*, restricted to the ADMIN role. The names of the screens, buttons, and messages are written exactly as they appear when the interface language is English.
 
 Almost every screen of the module saves its data on the server. The exceptions are the reports, which are calculated in the browser from the bookings and payments, and the permission matrix, which is saved on the server but does not yet change what each role can do. Section 6.3 states the status of each function so that the administrator knows which data are official. When the documentation does not define a value (for example, a retention policy or a recovery objective), the manual presents it as a **recommendation** and lists it in Annex B so that the team approves it, as the guide for writing manuals requires (Servicio Nacional de Aprendizaje [SENA], 2026).
 
@@ -606,7 +607,16 @@ For long services (180 minutes or more), the administrator can record the condit
 4. Click **Publish and copy link**; **View as customer** shows the public version (route */report/{token}*).
 5. Click **Notify customer**. The system sends the customer a notification and an email (type *INSPECTION_REPORT*) with the summary of the inspection: phases finished, number of findings, major findings, and affected areas, together with the link to the report. The message "Customer notified" confirms the sending.
 
-**Where it is saved:** the report, its phases, the findings, and the photos are saved in operations-service (tables *execution.inspection_report*, *execution.inspection_phase*, *execution.inspection_finding*, and *execution.inspection_photo*). The photos are compressed in the browser before they are sent. The public link (route */report/{token}*) only works after the report is published and opens from any device without logging in, which is why the notice to the customer includes it.
+**From the mobile app.** The report can also be managed from the phone, with the same phases and the same server rules:
+
+1. In **Bookings**, tap the eye icon of the booking and, in the detail, tap **Inspection**. The button only appears for services of 180 minutes or more that are confirmed, in progress, or completed.
+2. Tap **Start report** and, in each phase, **Start phase**, **Add finding**, and **Finish phase** (or **Reopen** to correct a finished phase).
+3. In **New finding**, type or choose the vehicle part from the suggestions, choose the type, and write the note. Attach up to five photos with **Take photo** (camera) or **Gallery**. The app shrinks each photo to 1600 pixels on its longer side, in JPEG format, before uploading it, because the server accepts at most 2 MB per photo.
+4. Tap **Publish and share link**. The report is published and, from then on, **Share link** opens the phone share menu (WhatsApp, email, or copy). **Notify customer** sends the same notice as the web, and **View as customer** opens the public link in the browser.
+
+The first time, the phone asks for permission to use the camera and the photos; if the permission is denied, the screen says it must be enabled in the phone settings. Saved photos are shown as thumbnails and are enlarged when tapped.
+
+**Where it is saved:** the report, its phases, the findings, and the photos are saved in operations-service (tables *execution.inspection_report*, *execution.inspection_phase*, *execution.inspection_finding*, and *execution.inspection_photo*). The photos are shrunk before they are sent: in the browser when the web is used and on the phone when the mobile app is used. The public link (route */report/{token}*) only works after the report is published and opens from any device without logging in, which is why the notice to the customer includes it.
 
 ### 12.6 Payment Review and Approval
 

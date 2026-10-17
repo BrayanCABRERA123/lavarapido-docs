@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 16, 2026
+October 17, 2026
 
-Manual Type: Technical Manual (Developers and Software Architects) · Version 4.0
+Manual Type: Technical Manual (Developers and Software Architects) · Version 4.1
 
 ## Version Control
 
@@ -33,6 +33,7 @@ Table 1 records the change history of this document. Each modification must add 
 | 3.0 | 2026-10-07 | Translation into English, APA Style (7th ed.) formatting, and verification against the source code. Corrected: payment-service is .NET 8 (ADR-013); Spring Boot 4 instead of 3; SQL Server 2022; real ports; one Liquibase changelog per service (the single master changelog of version 2.0 was wrong); 47 tables; the gateway does not validate tokens; there is no account lockout; manual operator assignment (ADR-014); English execution codes; real request of the booking endpoint; complete endpoint and event catalog; real project structure; audit trail not populated. Two real diagrams were added. | Development team |
 | 3.1 | 2026-10-09 | Update against the code of the eleven repositories as of October 9, 2026 (ADR-011 sections 9 to 12 and ADR-015), and creation of the Spanish version (Manual_tecnico_LavadoVehicular_3145556_ES.md). Updated: 49 tables (booking.schedule_history and notification.booking_tracking); loyalty points per service and points ledger with reversal; promotions as percentage coupons; permission matrix of the fixed roles; notification switches of the user; payment-service events, tests, structure, and container; staff notifications; new endpoints, gateway routes, and error codes; real name of the operations repository; technical debt TD-002, TD-014, TD-015, TD-016, and TD-018 resolved. | Development team |
 | 4.0 | 2026-10-16 | Review of the eleven repositories with the system running. Updated: 57 tables with the entity-relationship diagram generated from the database, dictionary of the new tables (account lockout, address, consent, operator profile, and inspection), automatic assignment and operator choice, lockout after failed attempts, inspection reports on the server, business data, health and correlation of payment-service, new endpoints and events, real test results (639 unit and 19 end-to-end), technical debt, and resolved discrepancies. | Development team |
+| 4.1 | 2026-10-17 | Review against the code of October 17, 2026. Documented the inspection report of the mobile app (section 10.5), the mobile HTTP client with multipart forms and the *EXPO_PUBLIC_WEB_URL* variable (section 12.7), the *expo-image-picker* and *expo-image-manipulator* dependencies (Table 3), and the rule that ignores a late 401 after logging out. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -227,7 +228,7 @@ It is a distributed client-server system with a microservices backend (Figure 1 
 | Email | Spring Mail with Mailpit (development) or Gmail | SMTP |
 | Push notifications | Expo Push API | Requires an EAS build on mobile |
 | Web frontend | Angular, Angular Material and CDK, ngx-translate, Chart.js, jsPDF, xlsx, RxJS | 21.2.25, 21.2.14, 17, 4.5, 4.2, 0.20, 7.8; TypeScript 5.9 |
-| Mobile frontend | React Native, Expo, React, React Navigation, i18next | 0.86.3, SDK 57, 19.2, 7, 26; TypeScript 6.0 |
+| Mobile frontend | React Native, Expo, React, React Navigation, i18next; expo-image-picker and expo-image-manipulator (inspection photos) | 0.86.3, SDK 57, 19.2, 7, 26; 57.0; TypeScript 6.0 |
 | Containers | Docker and Docker Compose | Docker 24 or later; Compose v2 |
 | Testing | JUnit 5 and Spring Boot Test (Java), xUnit (.NET), Vitest (web) | Through the Maven Wrapper, *dotnet test*, and *ng test* |
 | Version control | Git and GitHub | Branches *main*, *develop*, and *feature/\** |
@@ -493,6 +494,8 @@ The application is zoneless and uses signals; each area has a lazy module protec
 ### 10.5 Structure of the Mobile Application
 
 The mobile application is organized in *src/modules* by role (*auth*, *client*, *operator*, and *admin*, each with its *screens*), *src/shared* (components and shared screens of notifications, profile, and settings), and *src/app/config/locales* (es, en, fr, and pt). All the calls go to the gateway through *EXPO_PUBLIC_API_URL*.
+
+The administrator's inspection report (RF-036) follows the same organization as the rest of the module: *core/services/operations/InspectionService.ts* calls the same endpoints as the web (*/admin/inspections/...*); *modules/admin/viewmodels/useInspection.ts* keeps the state returned by the server; *modules/admin/services/inspectionPhotos.ts* takes or picks the photos with *expo-image-picker* and shrinks them with *expo-image-manipulator* (1600 px on the longer side, JPEG), because the server accepts at most 2 MB per photo; *modules/admin/components/inspection* holds the card of each phase, the finding form, and the enlarged photo; and *modules/admin/screens/AdminInspectionScreen.tsx* is the screen, opened from the booking detail (navigation route *AdminInspection*). The texts of this module are in *modules/admin/constants/inspectionTexts.ts*, in the four languages.
 
 ## 11. Database
 
@@ -812,7 +815,7 @@ Each service owns the Liquibase changelog of its schemas and applies it at start
 
 ### 12.7 Web and Mobile Clients
 
-The web application consumes the gateway through the services of *core/services*; *auth-interceptor* adds the token and redirects to */auth?expired* when the server answers 401, and *api-error* translates the error codes. Every screen reads and saves through the API: the business data use *BusinessStore* over booking-service, and the inspection reports use *inspection-api* over operations-service (the photos are compressed in the browser before being sent). Only the reports are calculated in the browser from the bookings and payments. Roles and permissions, promotions, loyalty, preferences, and notification switches are read and saved through the API (*role-permissions-api*, *promotions-api*, *loyalty-api*, and *preferences*). The mobile application covers the three roles with equivalent screens and stores the session with *expo-secure-store*.
+The web application consumes the gateway through the services of *core/services*; *auth-interceptor* adds the token and redirects to */auth?expired* when the server answers 401 while the session is still open (a 401 that arrives after logging out is ignored, so "Your session expired" is not shown to someone who left on their own), and *api-error* translates the error codes. Every screen reads and saves through the API: the business data use *BusinessStore* over booking-service, and the inspection reports use *inspection-api* over operations-service (the photos are compressed in the browser before being sent). Only the reports are calculated in the browser from the bookings and payments. Roles and permissions, promotions, loyalty, preferences, and notification switches are read and saved through the API (*role-permissions-api*, *promotions-api*, *loyalty-api*, and *preferences*). The mobile application covers the three roles with equivalent screens and stores the session with *expo-secure-store*. Its HTTP client (*core/api/httpClient.ts*) sends JSON or *multipart* forms (the inspection photos), accepts its own timeout per request (60 seconds to upload photos), and applies the same rule as the web to a 401. *core/api/config.ts* exposes *WEB_URL*, the address of the web used to build the public link of the report; it is taken from *EXPO_PUBLIC_WEB_URL* or, when it is not set, from the same host as the gateway with port 4200.
 
 ### 12.8 Life Cycles
 
