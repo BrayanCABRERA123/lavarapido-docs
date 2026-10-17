@@ -23,20 +23,20 @@ El código del sistema está en 10 repositorios de GitHub: la aplicación web, l
 
 **Tabla 2**
 
-*Repositorios del sistema (rama `develop`, corte 15 de octubre de 2026)*
+*Repositorios del sistema (rama `develop`, corte 16 de octubre de 2026)*
 
 | Artefacto | Repositorio | Tecnología | Commits | Último commit |
 | --- | --- | --- | --- | --- |
-| Aplicación web | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.7, TypeScript 5.9 | 324 | 2026-10-15 |
-| Aplicación móvil | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 125 | 2026-10-15 |
-| Infraestructura | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 27 | 2026-10-14 |
+| Aplicación web | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 395 | 2026-10-16 |
+| Aplicación móvil | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 173 | 2026-10-16 |
+| Infraestructura | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 57 | 2026-10-16 |
 | API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 10 | 2026-10-14 |
-| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 38 | 2026-10-15 |
-| customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 14 | 2026-10-05 |
-| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 40 | 2026-10-15 |
-| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 25 | 2026-10-15 |
-| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 33 | 2026-10-14 |
-| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 24 | 2026-10-14 |
+| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 48 | 2026-10-16 |
+| customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 16 | 2026-10-16 |
+| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 44 | 2026-10-16 |
+| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 34 | 2026-10-16 |
+| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 38 | 2026-10-16 |
+| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 33 | 2026-10-16 |
 
 **Tabla 3**
 
@@ -83,11 +83,11 @@ La web es una SPA de Angular 21 (Angular, s.f.) con componentes standalone, carg
 
 | Librería | Versión | Uso |
 | --- | --- | --- |
-| `@angular/*` (core, router, forms, material, cdk) | 21.2.7 | Framework y componentes de interfaz |
+| `@angular/*` (core, router, forms, material, cdk) | 21.2.25 (Material y CDK 21.2.14) | Framework y componentes de interfaz |
 | `@ngx-translate/core`, `http-loader` | ^17.0.0 | Traducciones |
 | `chart.js` | ^4.5.1 | Gráficas del dashboard y reportes |
 | `jspdf`, `jspdf-autotable` | ^4.2.1, ^5.0.8 | Exportar reportes a PDF |
-| `xlsx`, `file-saver` | ^0.18.5, ^2.0.5 | Exportar a Excel y descargar archivos |
+| `xlsx`, `file-saver` | 0.20.3 (CDN de SheetJS), ^2.0.5 | Exportar a Excel y descargar archivos |
 | `iconify-icon` | ^3.0.2 | Íconos |
 | `vitest`, `jsdom` (desarrollo) | ^4.1.7, ^28.0.0 | Pruebas unitarias con `@angular/build:unit-test` |
 
@@ -105,7 +105,7 @@ npm test             # pruebas unitarias (Vitest)
 
 El proxy está en `Web/proxy.conf.json` y se activa en `angular.json` (`proxyConfig`). El build de producción tiene presupuestos de tamaño: falla si el bundle inicial pasa de 1 MB o si el estilo de un componente pasa de 16 kB (`angular.json`, `budgets`). En producción, `dist/web/browser` se sirve con cualquier servidor estático que redirija `/api` al gateway.
 
-Según el SRS v6 (RNF-008), la web debe funcionar en las versiones vigentes de Chrome, Firefox y Edge y ser usable desde 360 px de ancho.
+Según el SRS v7 (RNF-008), la web debe funcionar en las versiones vigentes de Chrome, Firefox y Edge y ser usable desde 360 px de ancho.
 
 ## 3. Aplicación móvil
 

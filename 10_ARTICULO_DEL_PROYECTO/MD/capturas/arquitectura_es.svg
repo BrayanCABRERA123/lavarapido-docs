@@ -82,14 +82,14 @@
   <!-- Infrastructure -->
   <rect fill="#ffffff" stroke="#000000" stroke-width="1.2" x="10" y="332" width="250" height="70" rx="4"/>
   <text text-anchor="middle" font-weight="bold" x="135" y="352">SQL Server 2022</text>
-  <text text-anchor="middle" font-size="10" x="135" y="368">base de datos LavaRapido · 9 esquemas · 49 tablas</text>
+  <text text-anchor="middle" font-size="10" x="135" y="368">base de datos LavaRapido · 9 esquemas · 57 tablas</text>
   <text text-anchor="middle" font-size="10" x="135" y="383">un servicio dueño por esquema (ADR-003)</text>
 
   <rect fill="#ffffff" stroke="#000000" stroke-width="1.2" x="275" y="332" width="250" height="70" rx="4"/>
   <text text-anchor="middle" font-weight="bold" x="400" y="352">RabbitMQ 4</text>
   <text text-anchor="middle" font-size="10" x="400" y="368">exchange tipo topic carwash.events</text>
   <text text-anchor="middle" font-size="10" x="400" y="383">publican: security, booking, operations, payment</text>
-  <text text-anchor="middle" font-size="10" x="400" y="396">consumen: customer, notification</text>
+  <text text-anchor="middle" font-size="10" x="400" y="396">consumen: customer, operations, notification</text>
 
   <rect fill="#f2f2f2" stroke="#000000" stroke-width="1.2" stroke-dasharray="5 3" x="540" y="332" width="150" height="70" rx="4"/>
   <text text-anchor="middle" font-weight="bold" x="615" y="352">Servicios externos</text>

@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 9, 2026
+October 16, 2026
 
-Document Type: Register of Corrective, Preventive, and Improvement Actions (Development Team and Instructor) · Version 1.0
+Document Type: Register of Corrective, Preventive, and Improvement Actions (Development Team and Instructor) · Version 2.0
 
 ## Version Control
 
@@ -29,6 +29,7 @@ Table 1 records the change history of this document. The action register (sectio
 | Version | Date | Description of the change | Responsible |
 |---|---|---|---|
 | 1.0 | 2026-10-09 | Creation of the document (in Spanish and English). The management procedure is defined, and 23 closed corrective actions, 13 open corrective actions, 14 preventive actions, and 13 improvement actions are recorded, verified against the code of the eleven repositories (*develop* branch as of October 9, 2026), the Git history, the risk register, and the technical backlog of the project. | Development team |
+| 2.0 | 2026-10-16 | Review against the code of October 16, 2026. Eleven open corrective actions were closed (ACO-01 to ACO-03 and ACO-05 to ACO-12, now AC-24 to AC-34) and five improvement actions (AM-01, AM-04, AM-08, AM-10, and AM-11); five nonconformities found in the complete review of the system were recorded and closed (AC-35 to AC-39); the preventive actions, indicators, lessons learned, and traceability were updated. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -84,7 +85,7 @@ During its construction, its reviews with the instructor, and the writing of its
 
 ### 4.2 Sources of This Document
 
-The actions were verified against the code of the eleven repositories (*develop* branch as of October 9, 2026) and their Git history, and against the risk register, the technical backlog, the incident management, the testing strategy, and the architecture decision records (ADRs) of the project (Vehicle Washing Development Team, 2026a). The findings of the review of the manuals of October 7 and 9, 2026 (Annex B of the Technical Manual and the annexes of the other manuals) are also included.
+The actions were verified against the code of the eleven repositories (*develop* branch as of October 16, 2026) and their Git history, and against the risk register, the technical backlog, the incident management, the testing strategy, and the architecture decision records (ADRs) of the project (Vehicle Washing Development Team, 2026a). The findings of the review of the manuals of October 7, 9, and 16, 2026, and of the complete review of the system of October 16 (Annex B of the Technical Manual and the annexes of the other manuals) are also included.
 
 ## 5. Objective
 
@@ -238,6 +239,22 @@ Table 6 records the nonconformities already corrected, with their root cause and
 | AC-21 | The app opened in the browser with Expo (port 8081) was rejected by CORS. | P2 | Origin 8081 was not in the default values. | The default *CORS_ALLOWED_ORIGINS* includes *http://localhost:8081* in every service. | *lavarapido-infra* and gateway commits. | — | 2026-10-09 |
 | AC-22 | The old operator tasks route showed an empty page. | P3 | Route without a component after a reorganization. | Redirect to "Assigned services" and removal of the empty page. | Web commit of 2026-10-09. | — | 2026-10-09 |
 | AC-23 | Manuals v3.0 became outdated by the changes of October 8 and 9 (points, coupons, refunds, roles, preferences, payments in Docker), existed only in English, and the Installation Manual said to clone the operations repository with a name that breaks the build. | P3 | The documentation was not updated in the same pull requests (risk R-010). | Manuals updated to version 3.1 in Spanish and English, and creation of the Implementation Procedure and of this document. | Version control of each manual (2026-10-09). | R-010 | 2026-10-09 |
+| AC-24 | The web test suite did not compile (formerly ACO-01). | P2 | Six scaffolding *.spec.ts* files pointed to classes that no longer existed. | The test files were fixed and tests for the API error messages were added. | *npx ng test --watch=false*: 43 tests in 37 files passed (2026-10-16). | TD-001 | 2026-10-16 |
+| AC-25 | There was no login attempt limit (formerly ACO-02). | P1 | RF-004b had not been implemented. | *LoginLockout*: five failed attempts within 15 minutes lock the account for 15 minutes (423 ACCOUNT_LOCKED); a successful login or a password reset clears it. | Changelog 034, *AuthenticationServiceTest* and *ApiSecurityWebTest*; message shown on the web and mobile. | TD-003, RF-004b | 2026-10-16 |
+| AC-26 | The acceptance of the Terms and of the Data Processing Policy was not stored on the server (formerly ACO-03). | P1 | The consent table was left pending in ADR-010. | *security.app_user* stores the date and time each document was accepted (*terms_accepted_at*, *data_policy_accepted_at*); web and mobile registration sends *acceptsTerms* and *acceptsDataPolicy*. | Changelog 039, 147 security-service tests passed, checkboxes in both clients. | Law 1581 of 2012 | 2026-10-16 |
+| AC-27 | The payment-service health answered *UP* with the database down, and the service did not handle *X-Correlation-Id* (formerly ACO-05). | P2 | The endpoint returned a fixed value. | */health* and */actuator/health* query SQL Server with a 3-second limit; *CorrelationIdMiddleware* takes or creates the identifier and forwards it to booking-service. | With the database stopped the service answers 503 DOWN; 141 payment-service tests passed. | TD-017 | 2026-10-16 |
+| AC-28 | The refund texts were fixed in Spanish (formerly ACO-06). | P3 | They were left in a temporary constants file. | Texts moved to the language files in Spanish, English, French, and Portuguese; *payment-texts.ts* was deleted. | Administrator payments screen in the four languages. | Administrator Manual | 2026-10-16 |
+| AC-29 | The operator's "Report progress" button said it notified the customer but sent nothing (formerly ACO-07). | P3 | The function was left with only the visual confirmation. | The button was removed on the web and mobile; the customer receives the real start and finish notices. | Assigned services screen without the button. | User Manual | 2026-10-16 |
+| AC-30 | The landing page announced a service "wherever you are", and the operator history could show payment methods the system does not support (formerly ACO-08). | P3 | Mockup texts. | The home page describes the service at the car wash with the real establishment data; the operator history no longer shows card or PSE. | Home page in the four languages. | Technical Manual, Annex B | 2026-10-16 |
+| AC-31 | An unknown address showed an empty page (formerly ACO-09). | P3 | The wildcard route was missing. | 404 page (*features/not-found*, route *\*\**) with a link to the home page. | A nonexistent address shows the 404 page. | TD-009 | 2026-10-16 |
+| AC-32 | The inspection report and its photos were kept only in the browser (formerly ACO-10). | P2 | There was no aggregate in the backend. | *InspectionReport* aggregate in operations-service with phases, findings, and photos (changelog 033); the public link opens on any device and the notice to the customer includes it. | Test *inspection-flow.test.js* of *lavarapido-infra/e2e* passed. | RF-036 | 2026-10-16 |
+| AC-33 | The business data of Settings were kept only in the browser (formerly ACO-11). | P3 | The extension of *booking.establishment* waited for the definition of its fields. | Changelog 032 and *GET/PUT /api/v1/admin/establishment*; the home page and the help center read those data. | Changes are visible from another account and on the public page. | TD-013, RF-037 | 2026-10-16 |
+| AC-34 | The *lavarapido-infra* README and the team guide described services and screens that already existed as pending (formerly ACO-12). | P3 | Documents not updated when the services were integrated. | Both documents updated. | Commits of 2026-10-16 in *lavarapido-infra*. | R-010 | 2026-10-16 |
+| AC-35 | Two simultaneous requests could try to create the same operator, and one failed with error 500. | P2 | The operator creation read and then inserted without handling the race between requests. | The insert runs in its own transaction and, if the row already exists, it is read again instead of failing. | *OperatorPersistenceAdapterTest*; 54 operations-service tests passed. | Review of 2026-10-16 | 2026-10-16 |
+| AC-36 | When a time outside the schedule or already past was requested, the system answered "That time was just taken". | P3 | The 409 response did not distinguish the reason. | The response carries *reason* (CLOSED_DAY, OUTSIDE_HOURS, TIME_PASSED, or NO_FREE_BAY), and the web and mobile show a message for each case. | Test *access-rules.test.js* (*reason: OUTSIDE_HOURS*) and *api-error.spec.ts*. | Review of 2026-10-16 | 2026-10-16 |
+| AC-37 | The "Delete account" option said it erased the account and all the data, but it only deactivates it. | P2 | Text inherited from the mockup, contrary to what the server does. | The option is called "Deactivate my account" and explains that the history is kept, on the web and mobile and in the four languages. | Web and mobile profile; User Manual 4.0. | Law 1581 of 2012 | 2026-10-16 |
+| AC-38 | The manuals and project documents became outdated with respect to the code of October 16 (lockout, automatic assignment, inspection, 57 tables), and the figures were placeholders. | P3 | Changes integrated without updating the documentation in the same pull request (R-010). | Manuals 4.0 with real screenshots, Implementation Procedure 2.0, this document 2.0, and the project's technical documentation reviewed against the code. | Version control of each document (2026-10-16). | R-010 | 2026-10-16 |
+| AC-39 | With two accounts of the same method (for example, two Nequi), the web payment screen marked both at once and always showed the QR of the first one. | P3 | The chosen option was stored by method type and not by account. | The selection is stored by account and, if two accounts share a method, each option shows its holder. | *payment.spec.ts* (two Nequi accounts); 43 web tests passed. | Test Documentation, defect 6 | 2026-10-16 |
 
 *Note.* Prepared by the authors from the Git history of the repositories, the risk register, and the ADRs of the project (Vehicle Washing Development Team, 2026a).
 
@@ -249,21 +266,10 @@ Table 6 records the nonconformities already corrected, with their root cause and
 
 | ID | Nonconformity | Sev. | Root cause | Proposed action | Responsible | Priority | Closure criterion |
 |---|---|---|---|---|---|---|---|
-| ACO-01 | The web test suite does not compile. | P2 | Six scaffold *.spec.ts* files point to classes that no longer exist (*features/\*/viewmodels/\*.spec.ts*, *settings-panel.spec.ts*, *stepper.spec.ts*). | Fix or delete those files and add tests for the booking form and the stores. | Frontend leader | High | *npx ng test --watch=false* passes. (TD-001) |
-| ACO-02 | There is no login attempt limit. | P1 | Requirement RF-004b was not implemented in security-service. | Temporary lockout or progressive delay after five failed attempts, with a security test. | Backend leader | High | Test that proves the lockout and updated manuals. (TD-003) |
-| ACO-03 | The acceptance of the Terms and of the Personal Data Processing Policy is not stored on the server. | P1 | The table *security.user_consent* was left pending (ADR-010). | Record the version of the accepted document, the date, and the account, as the evidence required by Law 1581 of 2012 (Congreso de la República de Colombia, 2012). | Backend leader | High | Consent queryable per account. |
 | ACO-04 | The table *audit.audit_log* exists but nothing writes to it. | P2 | The triggers were not created and *SESSION_CONTEXT(N'user_id')* is not set. | Audit triggers on the sensitive tables and session context in each service, or remove the table from the design through an ADR. | Backend leader | Medium | Changes of prices, payment accounts, and roles visible in the audit trail. |
-| ACO-05 | The payment-service health endpoint answers *UP* with the database down, and the service has no *X-Correlation-Id* filter. | P2 | The endpoint returns a fixed value. | EF Core health check against SQL Server and correlation filter. | Backend leader | Medium | */actuator/health* answers *DOWN* without the database. (TD-017) |
-| ACO-06 | The refund texts (*Reembolsar*, confirmation, and result) are hard-coded in Spanish and do not change with the language. | P3 | They were placed temporarily in *core/constants/payment-texts.ts* to avoid editing the language files. | Move the texts to *ADMIN_PAYMENTS* and *PAYMENT_REVIEW_MODAL* in the four languages and delete the temporary file. | Frontend leader | Medium | Texts translated into English, French, and Portuguese. |
-| ACO-07 | The operator's "Report progress" button shows "The client will receive the update", but sends nothing. | P3 | The feature was left with only the visual confirmation. | Send a real notification to the customer or remove the button and the message. | Frontend leader | Medium | Notification received or button removed. |
-| ACO-08 | The welcome page announces a washing service "wherever you are", and the operator history shows payment methods (card, PSE) that the system does not support. | P3 | Mockup texts that were not adjusted to the real scope. | Adjust the texts to the on-site service and the real payment methods. | Frontend leader | Low | Texts reviewed in the four languages. |
-| ACO-09 | There is no wildcard route: an unknown address shows an empty page. | P3 | The *\*\** route is missing in *app.routes.ts*. | 404 page with a link to the home of each role. | Frontend leader | Low | A nonexistent address shows the 404 page. (TD-009) |
-| ACO-10 | The inspection report and its photos are stored only in the browser; the public link does not open on another device. | P2 | RF-027 does not yet have a backend aggregate. | Persist the report in a service (or in booking-service) with image storage. | Backend leader | Medium | The customer opens the link from their phone. |
-| ACO-11 | The business data of Settings is stored only in the administrator's browser. | P3 | The extension of *booking.establishment* waits for the definition of its fields (TD-013). | Establishment API for the billing and help data. | Backend leader | Low | Changes are visible from another account. |
-| ACO-12 | The README of *lavarapido-infra* and section 6 of the team guide describe as pending services and screens that already exist. | P3 | Documents not updated when operations-service and payment-service were integrated. | Update both documents. | Project leader | Low | Documents consistent with the code. |
 | ACO-13 | Entities edited by administrators do not use optimistic locking: in concurrent edits, the last write wins. | P3 | The *row_version* column exists but is not mapped with *@Version*. | Map *@Version* in booking, customer, and security and answer 409 on conflict. | Backend leader | Low | Test of two updates with the same version. (TD-008) |
 
-*Note.* Prepared by the authors from the technical backlog, Annex B of the Technical Manual, and the verification of the code as of October 9, 2026.
+*Note.* Prepared by the authors from the technical backlog, Annex B of the Technical Manual, and the verification of the code as of October 16, 2026. Actions ACO-01 to ACO-03 and ACO-05 to ACO-12 were closed and moved to Table 6 (AC-24 to AC-34).
 
 ## 11. Register of Preventive Actions
 
@@ -281,11 +287,11 @@ Preventive actions address the causes of risks that have not yet materialized or
 | AP-04 | Data loss before a demonstration or in operation. | Automated daily backup with verification and a monthly restoration test (Administrator Manual, section 14). | IT administrator | High | Open | R-008 |
 | AP-05 | The documentation drifts from the code again. | Pull request checklist that requires updating the affected models, OpenAPI contracts, ADRs, and manuals; review of the manuals before each implementation. | Author of each pull request | Medium | In progress (permanent) | R-010 |
 | AP-06 | Implementing with *MESSAGING_ENABLED=false*, without *INTERNAL_API_KEY*, or with the *dev* profile. | Checklist of Annex A of the Implementation Procedure. | IT administrator | Medium | Closed (included in the procedure) | R-I02, R-I03 |
-| AP-07 | Persistence defects (locks and triggers) seen only by hand. | Persistence tests with Testcontainers and a real SQL Server in booking-service. | Backend leader | Low | Open | TD-010 |
+| AP-07 | Persistence defects (locks and triggers) seen only by hand. | Persistence tests with Testcontainers and a real SQL Server in booking-service. | Backend leader | Low | In progress (the end-to-end suite covers part of the risk) | TD-010 |
 | AP-08 | All services use the *sa* account. | One login per service with permissions only on its schemas and a separate account for the migrations. | Backend leader | Medium | Open | Security policy |
-| AP-09 | A user action cannot be followed across services. | Propagate *X-Correlation-Id* in all REST clients and messages and generate it in the gateway. | Backend leader | Low | Open | TD-007 |
+| AP-09 | A user action cannot be followed across services. | Propagate *X-Correlation-Id* in all REST clients and messages and generate it in the gateway. | Backend leader | Low | In progress (booking, operations, and payment already forward the header) | TD-007 |
 | AP-10 | Lack of metrics to check the response time (RNF-001). | *micrometer-registry-prometheus* in the Java services and equivalent metrics in .NET. | Backend leader | Low | Open | TD-012 |
-| AP-11 | Brute-force attacks or API abuse if the system is exposed. | Request rate limit in the gateway, in addition to ACO-02. | Backend leader | Medium | Open | Security policy |
+| AP-11 | Brute-force attacks or API abuse if the system is exposed. | Request rate limit in the gateway or in Caddy (TD-022); account lockout is already active (AC-25). | Backend leader | Medium | Open | Security policy |
 | AP-12 | Components with known vulnerabilities. | Quarterly review with *./mvnw versions:display-dependency-updates*, *dotnet list package --vulnerable*, and *npm audit*. | Backend and frontend leaders | Medium | In progress (permanent) | OWASP A06 |
 | AP-13 | Confusion caused by the own numbering of the payment changelogs, which repeats the global numbers. | Document the rule in the migration strategy and use the *pay-* prefix in the identifiers. | Backend leader | Low | Closed (documented) | TD-019 |
 | AP-14 | Features built that contradict decisions already recorded (cause of AC-11 and AC-12). | Review the current ADRs and the navigation map before starting a feature, and consult the team when there is a contradiction. | Whole team | Medium | In progress (permanent) | Lesson of ADR-015 |
@@ -300,17 +306,17 @@ Preventive actions address the causes of risks that have not yet materialized or
 
 | ID | Improvement opportunity | Expected benefit | Responsible | Priority | Status | Origin |
 |---|---|---|---|---|---|---|
-| AM-01 | Automatic operator assignment when a booking is confirmed, reusing *AssignmentPolicy*. | The administrator stops assigning every booking by hand (RF-008). | Backend leader | Medium | Open | TD-020, ADR-014 |
+| AM-01 | Automatic operator assignment when a booking is confirmed, reusing *AssignmentPolicy*. | The administrator stops assigning every booking by hand (RF-008). | Backend leader | Medium | Closed (2026-10-16): *BookingConfirmedListener* and *AutoAssignmentPolicy*, with the optional choice of the customer; test *booking-flow.test.js* | TD-020, ADR-014 |
 | AM-02 | Apply the permission matrix of *security.role_permission* to the real authorization of each endpoint. | Granular access control configurable from the panel. | Backend leader | Low | Open (requires an ADR) | ADR-015 |
 | AM-03 | Rescheduling of bookings by the customer from the web and the app (the API already offers *PUT /api/v1/bookings/{id}*). | The customer does not have to cancel and book again. | Frontend leader | Medium | Open | User Manual |
-| AM-04 | Complete the mobile application and build a version with EAS for push notifications. | Immediate notices on the phone. | Frontend leader | Medium | In progress | ADR-011 |
+| AM-04 | Complete the mobile application and build a version with EAS for push notifications. | Immediate notices on the phone. | Frontend leader | Medium | Closed (2026-10-16): APK built with EAS and published at */app/* on the server, with push notices of new versions | ADR-011 |
 | AM-05 | RS256 signing and refresh tokens. | Lower impact of a secret leak and longer sessions without logging in again. | Backend leader | Low | Open | ADR-006 |
 | AM-06 | Store receipts, QR codes, and photos outside the database. | Lighter database and faster backups. | Backend leader | Low | Open | Recommended evolution |
 | AM-07 | Separate the display fields and the real discount fields in *promotion.promotion*. | Prevents the displayed package and the applied discount from contradicting each other. | Backend leader | Low | Open | ADR-015 |
-| AM-08 | Publish the built web application behind the gateway with HTTPS. | Production-ready environment, without a development server. | Frontend leader | Medium | Open | Implementation Procedure, R-I08 |
+| AM-08 | Publish the built web application behind the gateway with HTTPS. | Production-ready environment, without a development server. | Frontend leader | Medium | Closed (2026-10-16): web container with nginx behind Caddy and HTTPS on the public server (Deployment Document) | Implementation Procedure, R-I08 |
 | AM-09 | Coverage (JaCoCo) and static analysis (SonarQube) tools. | Objective code quality metrics. | Project leader | Low | Open | Testing strategy |
-| AM-10 | Automated end-to-end test across services (registration → booking → notification → payment). | Early detection of integration failures. | Backend leader | Medium | Open | Testing strategy |
-| AM-11 | Replace the figure placeholders of the manuals with real screenshots of the final version. | Complete manuals according to the SENA guide. | Frontend leader | High | Open | Annex A of each manual |
+| AM-10 | Automated end-to-end test across services (registration → booking → notification → payment). | Early detection of integration failures. | Backend leader | Medium | Closed (2026-10-16): *lavarapido-infra/e2e*, 19 tests passed against the containers | Testing strategy |
+| AM-11 | Replace the figure placeholders of the manuals with real screenshots of the final version. | Complete manuals according to the SENA guide. | Frontend leader | High | Closed (2026-10-16): manuals 4.0 with real screenshots of the system | Annex A of each manual |
 | AM-12 | Use the execution statuses *PAUSED* and *WITH_ISSUE* in the operator interface. | Record pauses and issues of the service. | Frontend leader | Low | Open | Data model |
 | AM-13 | Expose in the panel the sending of general announcements (*SYSTEM_MESSAGE*) to groups of users. | Direct communication with customers and operators without using the API. | Frontend leader | Low | Open | Administrator Manual |
 
@@ -322,18 +328,18 @@ Preventive actions address the causes of risks that have not yet materialized or
 
 *Action Management Indicators*
 
-| Indicator | Formula | Target | Value as of 2026-10-09 |
+| Indicator | Formula | Target | Value as of 2026-10-16 |
 |---|---|---|---|
-| Closed corrective actions | Closed corrective actions / recorded corrective actions × 100 | ≥ 70% per delivery | 23 / 36 = 64% |
-| Open P0 and P1 corrective actions | Number of ACO with severity P0 or P1 | 0 before an implementation | 2 (ACO-02 and ACO-03) |
+| Closed corrective actions | Closed corrective actions / recorded corrective actions × 100 | ≥ 70% per delivery | 39 / 41 = 95% |
+| Open P0 and P1 corrective actions | Number of ACO with severity P0 or P1 | 0 before an implementation | 0 |
 | On-time closure | Actions closed within the time of their severity / closed actions × 100 | ≥ 90% | To be measured from version 1.0 |
 | Recurrence | Closed corrective actions whose problem reappears / closed corrective actions × 100 | 0% | 0% |
 | Escaped defects | Defects found in acceptance or operation / total defects of the period × 100 | Downward trend | To be measured from the first implementation |
-| Automated tests | Backend test methods (*@Test*, *@ParameterizedTest*, *[Fact]*, *[Theory]*) | Increasing | Approximately 400 (301 in Java and 98 in .NET) |
+| Automated tests | Tests run and passed in every repository | Increasing | 639 unit and integration tests (web 43, gateway 34, Java services 421, and payment-service 141) and 19 end-to-end tests |
 
-*Note.* Prepared by the authors. The test count corresponds to the annotations found in the repositories on October 9, 2026; parameterized tests may run more cases.
+*Note.* Prepared by the authors. The test count corresponds to the run of October 16, 2026; version 1.0 counted annotations (about 400).
 
-The project leader reviews the indicators at each retrospective and before each implementation. Two open P1 corrective actions (ACO-02 and ACO-03) **prevent meeting entry criterion E6** of the Implementation Procedure for an environment with real users; for an academic evaluation implementation, the project leader may accept them as a documented risk.
+The project leader reviews the indicators at each retrospective and before each implementation. With AC-25 and AC-26 closed there are no open P0 or P1 corrective actions left, so entry criterion E6 of the Implementation Procedure is met. The two open corrective actions (ACO-04 and ACO-13) are P2 and P3 and have a recorded action.
 
 ## 14. Lessons Learned
 
@@ -353,6 +359,8 @@ The project leader reviews the indicators at each retrospective and before each 
 | L-08 | Administrative endpoints also need strict input validation and allowlists. | AC-18, AC-19 |
 | L-09 | Documentation is updated in the same pull request as the code; otherwise, it becomes outdated within days. | AC-23, AP-05 |
 | L-10 | An accounting ledger needs reversal movements and concurrency control from day one. | AC-09 |
+| L-11 | A "create if it does not exist" operation must handle the race between two simultaneous requests. | AC-35 |
+| L-12 | Each interface option must say exactly what it does with the person's data: deactivating is not deleting. | AC-37 |
 
 *Note.* Prepared by the authors from the register of closed risks and the actions of this document.
 
@@ -443,14 +451,16 @@ Vehicle Washing Development Team. (2026a). *Vehicle washing management system: P
 
 | Project risk | Technical debt | Actions |
 |---|---|---|
-| R-002 Partial payment-service | TD-014, TD-015, TD-016, TD-017, TD-018 | AC-04 to AC-10, ACO-05 |
-| R-003 Regressions without a safety net | TD-001, TD-006, TD-010 | ACO-01, AP-01, AP-07, AM-10 |
+| R-002 Partial payment-service (closed as C-005) | TD-014, TD-015, TD-016, TD-017, TD-018 | AC-04 to AC-10, AC-27 |
+| R-003 Regressions without a safety net | TD-001, TD-006, TD-010 | AC-24, AP-01, AP-07, AM-10 |
 | R-004 Secret leakage | — | AP-03 |
 | R-005 Lost event | TD-011 | AP-02 |
-| R-007 Known requirement gaps | TD-002, TD-003, TD-009 | AC-16, AC-17, ACO-02, ACO-09 |
+| R-007 Known requirement gaps (closed as C-006) | TD-002, TD-003, TD-009 | AC-16, AC-17, AC-25, AC-31 |
 | R-008 Data loss | — | AP-04 |
-| R-010 Documentation drift | — | AC-23, ACO-12, AP-05 |
-| R-001 operations-service integration | TD-020 | AM-01 |
-| Law 1581 of 2012 | — | ACO-03 |
+| R-010 Documentation drift | — | AC-23, AC-34, AC-38, AP-05 |
+| R-011 Public server off | — | Implementation Procedure, R-I04 |
+| API abuse | TD-022 | AP-11 |
+| R-001 operations-service integration (closed as C-004) | TD-020 | AM-01 |
+| Law 1581 of 2012 | — | AC-26, AC-37 |
 
 *Note.* Prepared by the authors from the risk register and the technical backlog of the project.

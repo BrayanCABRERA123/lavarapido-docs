@@ -10,7 +10,7 @@ Software Analysis and Development Technologist program (ADSO), group (ficha) 314
 
 Instructor: Karol Daniela Correa
 
-Version 6.0, October 15, 2026
+Version 7.0, October 16, 2026
 
 ---
 
@@ -26,12 +26,13 @@ Version 6.0, October 15, 2026
 | V4 | 2026-10-08 | Development team | Restructured according to IEEE 830 and ISO/IEC/IEEE 29148, in APA 7 format. Status checked against the code as of October 8, 2026. New requirements RF-027 to RF-035 and use cases CU26 to CU29, business rules, flows and life cycles, data requirements, classified constraints, verifiable acceptance criteria, traceability matrix and APA references. |
 | V5 | 2026-10-09 | Development team | Verification with the system running (six services, gateway and web), and a fix to a gateway route and to a styling error in promotions. Use case and state diagrams in Mermaid, web screenshots in every module and an updated count of automated tests. |
 | V6 | 2026-10-15 | Development team | Status checked against the code as of October 15, 2026. Account lockout (RF-004b), automatic assignment (RF-008), operator choice by the customer (RF-010), payment history filters (RF-015) and operator availability (RF-022) are now implemented. New requirements RF-036 to RF-038 (inspection report, business data and operator profile) and use case CU30. Service start window, alert for bookings without an operator, notifications in each account's language, profile address, 57 tables, 601 automated tests and measurements for RNF-001 and RNF-008. |
+| V7 | 2026-10-16 | Development team | Complete review with the system running in Docker. The date and time the customer accepts the Terms and the Data Processing Policy are stored on the server (RR-01); HTTPS active on the public server; reason why a time is rejected (closed day, outside opening hours, time passed, or no free bay); 639 automated tests and 19 end-to-end tests passed. |
 
 ---
 
 ## Abstract
 
-This document specifies the requirements of LavaRápido, a web and mobile platform that organizes the operation of a single-site car wash: customer and vehicle registration, booking of time slots with opening-hours and bay validation, automatic or manual operator assignment, service execution and rating, vehicle inspection report, payment by QR code or bank transfer with receipt review, promotions, loyalty points and notifications. The specification follows the structure of IEEE 830 (IEEE, 1998) and ISO/IEC/IEEE 29148 (ISO/IEC/IEEE, 2018), and is based on the project's technical documentation (`vehicle-w-docs` repository) and on the code of its seven server components, reviewed on October 15, 2026. It defines 41 functional requirements with verifiable acceptance criteria, 12 non-functional requirements with their verification metric, 30 use cases, the business rules, the life cycles of the booking, the payment and the service execution, the data requirements, and the technical, data, operational and regulatory constraints. As of October 15, 2026, 40 functional requirements are implemented and 1 is partially implemented.
+This document specifies the requirements of LavaRápido, a web and mobile platform that organizes the operation of a single-site car wash: customer and vehicle registration, booking of time slots with opening-hours and bay validation, automatic or manual operator assignment, service execution and rating, vehicle inspection report, payment by QR code or bank transfer with receipt review, promotions, loyalty points and notifications. The specification follows the structure of IEEE 830 (IEEE, 1998) and ISO/IEC/IEEE 29148 (ISO/IEC/IEEE, 2018), and is based on the project's technical documentation (`vehicle-w-docs` repository) and on the code of its seven server components, reviewed on October 16, 2026. It defines 41 functional requirements with verifiable acceptance criteria, 12 non-functional requirements with their verification metric, 30 use cases, the business rules, the life cycles of the booking, the payment and the service execution, the data requirements, and the technical, data, operational and regulatory constraints. As of October 16, 2026, 40 functional requirements are implemented and 1 is partially implemented.
 
 **Keywords:** requirements specification, car wash, bookings, microservices, use cases.
 
@@ -357,7 +358,7 @@ The system has three fixed roles and one non-human actor (see Table 8). No role 
 | RO-03 | Operational | Payment verification is manual: it depends on the administrator reviewing the receipts. |
 | RO-04 | Operational | Assignment depends on the operators' shifts and absences being up to date. |
 | RO-05 | Operational | RabbitMQ events require messaging to be enabled (`MESSAGING_ENABLED` or `app.messaging.enabled` flag); it is disabled by default. Automatic assignment also needs the internal key (`INTERNAL_API_KEY`) and can be turned off with `AUTO_ASSIGN_ENABLED=false`. |
-| RR-01 | Regulatory | Personal data is handled according to Law 1581 of 2012 (Congreso de la República de Colombia, 2012); the customer accepts the policy when registering. |
+| RR-01 | Regulatory | Personal data is handled according to Law 1581 of 2012 (Congreso de la República de Colombia, 2012); the customer accepts the policy when registering, and the server stores the date and time of the acceptance. |
 | RR-02 | Regulatory | The system does not capture, transmit or store payment card data. |
 | RP-01 | Project | Team of three part-time apprentices; no assigned budget (estimated cost under real conditions: COP 212,925,240, according to the *Technical and Economic Proposal*); delivery on the academic date. |
 
@@ -442,7 +443,7 @@ The system does not control any hardware devices. Users need a computer with a b
 
 Each requirement has a unique identifier that is kept across versions. Each requirement is written as a verifiable capability and comes with measurable acceptance criteria (Wiegers & Beatty, 2013).
 
-Priority follows the MoSCoW technique: Essential (must have), Desirable (should have) and Optional (could have). The status of each requirement was verified against the code and the automated tests on October 15, 2026: Implemented (built and tested), Partial (partly built; what is missing is stated) and Pending (not built).
+Priority follows the MoSCoW technique: Essential (must have), Desirable (should have) and Optional (could have). The status of each requirement was verified against the code and the automated tests on October 16, 2026: Implemented (built and tested), Partial (partly built; what is missing is stated) and Pending (not built).
 
 ### 5.2 Authentication and Accounts
 
@@ -656,7 +657,7 @@ Non-functional requirements are classified according to the product quality char
 | RNF-001 | Performance efficiency | The 95th percentile of the response time of the booking and authentication endpoints is under 2 seconds, and the availability query responds in under 2 seconds with the test data set. | Script `lavarapido-infra/e2e/performance.js`: 30 requests per endpoint through the gateway in the local environment | **Implemented.** Measured on October 14, 2026: the highest 95th percentile was 686 ms (`/payments/me`). |
 | RNF-002 | Availability | All services answer UP on their health endpoint (`/actuator/health` or `/health`) during every academic review session. | Check before each session | **Implemented.** Verified live on October 9, 2026: the 6 services and the gateway answered `200 OK`. |
 | RNF-003 | Integrity and concurrency | Under simultaneous requests, only one booking takes a bay in a slot; a busy operator is not assigned; a booking does not have two approved payments (filtered unique index) and a reference code is not repeated. | Integration tests | Partial: rules implemented; integration tests pending |
-| RNF-004 | Security | Private endpoints with JWT (401 without a token or with an expired token); token validity of 1 hour; BCrypt passwords of 8 to 72 characters, with at least one uppercase letter, one number and one special character, and no spaces; access by role (403 between roles) and by resource owner; lockout after 5 failed attempts; secrets only in environment variables; HTTPS outside development. | Web tests by role, password policy and lockout tests, a test that the gateway does not expose `/internal`, code review | **Implemented** in the local environment; HTTPS is set up when deploying outside development. |
+| RNF-004 | Security | Private endpoints with JWT (401 without a token or with an expired token); token validity of 1 hour; BCrypt passwords of 8 to 72 characters, with at least one uppercase letter, one number and one special character, and no spaces; access by role (403 between roles) and by resource owner; lockout after 5 failed attempts; secrets only in environment variables; HTTPS outside development. | Web tests by role, password policy and lockout tests, a test that the gateway does not expose `/internal`, code review | **Implemented**; on the public server Caddy serves everything over HTTPS. |
 | RNF-005 | Maintainability: observability | Each service writes requests and errors to standard output with the `X-Correlation-Id` correlation identifier. | Log review with `docker logs` | Partial |
 | RNF-006 | Maintainability | Every change goes through a Pull Request with at least one approval, uses Conventional Commits and versions schema changes with Liquibase; frontend and backend communicate only through the API. | GitHub history and code review | Partial |
 | RNF-007 | Portability | A new team member brings up the whole solution in Docker containers by following the local installation guide, on any of the team's operating systems. | Installation from scratch on more than one computer | Partial |
@@ -1419,24 +1420,24 @@ Table 55 links each functional requirement to its user story, its use cases, the
 
 ### 11.1 Progress Summary
 
-Of the 41 functional requirements, 40 are implemented and 1 is partially implemented (RF-023, consolidated reports). The seven server components are built; on October 9, 2026 the six services and the gateway were started, and each one answered `200 OK` on its health endpoint. The web and the Android app are connected to the six services through the gateway. Table 56 summarizes the automated tests of the services and the web, run on October 15, 2026.
+Of the 41 functional requirements, 40 are implemented and 1 is partially implemented (RF-023, consolidated reports). The seven server components are built; on October 9, 2026 the six services and the gateway were started, and each one answered `200 OK` on its health endpoint. The web and the Android app are connected to the six services through the gateway. Table 56 summarizes the automated tests of the services and the web, run on October 16, 2026.
 
 **Table 56**
 *Automated Tests by Component*
 
 | Component | Command | Tests | Count date |
 |---|---|---|---|
-| Web application (Angular) | `npx ng test --watch=false` | 36 | October 15, 2026 |
-| api-gateway | `./mvnw test` | 34 | October 15, 2026 |
-| security-service | `./mvnw test` | 135 | October 15, 2026 |
-| customer-service | `./mvnw test` | 68 | October 15, 2026 |
-| booking-service | `./mvnw test` | 38 | October 15, 2026 |
-| operations-service | `./mvnw test` | 49 | October 15, 2026 |
-| notification-service | `./mvnw test` | 100 | October 15, 2026 |
-| payment-service | `dotnet test` | 141 | October 15, 2026 |
-| **Total** | | **601** | |
+| Web application (Angular) | `npx ng test --watch=false` | 43 | October 16, 2026 |
+| api-gateway | `./mvnw test` | 34 | October 16, 2026 |
+| security-service | `./mvnw test` | 147 | October 16, 2026 |
+| customer-service | `./mvnw test` | 68 | October 16, 2026 |
+| booking-service | `./mvnw test` | 40 | October 16, 2026 |
+| operations-service | `./mvnw test` | 54 | October 16, 2026 |
+| notification-service | `./mvnw test` | 112 | October 16, 2026 |
+| payment-service | `dotnet test` | 141 | October 16, 2026 |
+| **Total** | | **639** | |
 
-*Note.* All tests passed. payment-service also has 7 integration tests that are skipped because they need SQL Server. In addition, `lavarapido-infra/e2e` has three scripts that run with the system up: the cross-service flow (the customer sees the free operators, books choosing one, operations-service assigns them through RabbitMQ, notification-service notifies and the administrator dashboard counts the booking), the RNF-001 measurement and the check of the web screens at 360 px (RNF-008). During the manual review of October 9, a missing API Gateway route (`/api/v1/loyalty/**`) and a style that misaligned the promotion badges were fixed.
+*Note.* All tests passed. payment-service also has 7 integration tests that are skipped because they need SQL Server. In addition, `lavarapido-infra/e2e` has 19 end-to-end tests that run with the system up and passed on October 16, 2026: the booking flow with operator choice and automatic assignment, the complete flow of the three roles (booking, payment, approval with points, service, and rating), the inspection report with photos and public link, and the access rules per role. The folder also includes the RNF-001 measurement and the check of the web screens at 360 px (RNF-008). During the manual review of October 9, a missing API Gateway route (`/api/v1/loyalty/**`) and a style that misaligned the promotion badges were fixed.
 
 ### 11.2 Pending Items for Delivery
 
@@ -1444,7 +1445,6 @@ Of the 41 functional requirements, 40 are implemented and 1 is partially impleme
 - Write the user stories for RF-027 to RF-038.
 - Write integration tests against SQL Server for the concurrency rules (RNF-003).
 - Test the app on an Android 8 device (RNF-008) and run a usability test with users (RNF-009).
-- Store the acceptance of the personal data policy on the server (RR-01).
 - Set up continuous integration with Jenkins.
 
 ### 11.3 Open Decisions

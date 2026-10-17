@@ -15,7 +15,7 @@
 | Apprentices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 15, 2026 |
+| Date | October 16, 2026 |
 
 The system's code lives in 10 GitHub repositories: the web application, the mobile application, and 8 backend repositories. This document inventories the two clients and explains how to build and run them; the backend is described only as far as the clients need it. Source code is not reproduced.
 
@@ -27,16 +27,16 @@ The system's code lives in 10 GitHub repositories: the web application, the mobi
 
 | Artifact | Repository | Technology | Commits | Last commit |
 | --- | --- | --- | --- | --- |
-| Web application | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.7, TypeScript 5.9 | 324 | 2026-10-15 |
-| Mobile application | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 125 | 2026-10-15 |
-| Infrastructure | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 27 | 2026-10-14 |
+| Web application | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 395 | 2026-10-16 |
+| Mobile application | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 173 | 2026-10-16 |
+| Infrastructure | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 57 | 2026-10-16 |
 | API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 10 | 2026-10-14 |
-| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 38 | 2026-10-15 |
-| customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 14 | 2026-10-05 |
-| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 40 | 2026-10-15 |
-| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 25 | 2026-10-15 |
-| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 33 | 2026-10-14 |
-| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 24 | 2026-10-14 |
+| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 48 | 2026-10-16 |
+| customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 16 | 2026-10-16 |
+| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 44 | 2026-10-16 |
+| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 34 | 2026-10-16 |
+| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 38 | 2026-10-16 |
+| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 33 | 2026-10-16 |
 
 **Table 3**
 
@@ -83,11 +83,11 @@ The web client is an Angular 21 SPA (Angular, n.d.) with standalone components, 
 
 | Library | Version | Purpose |
 | --- | --- | --- |
-| `@angular/*` (core, router, forms, material, cdk) | 21.2.7 | Framework and UI components |
+| `@angular/*` (core, router, forms, material, cdk) | 21.2.25 (Material and CDK 21.2.14) | Framework and UI components |
 | `@ngx-translate/core`, `http-loader` | ^17.0.0 | Translations |
 | `chart.js` | ^4.5.1 | Dashboard and report charts |
 | `jspdf`, `jspdf-autotable` | ^4.2.1, ^5.0.8 | Export reports to PDF |
-| `xlsx`, `file-saver` | ^0.18.5, ^2.0.5 | Export to Excel and download files |
+| `xlsx`, `file-saver` | 0.20.3 (SheetJS CDN), ^2.0.5 | Export to Excel and download files |
 | `iconify-icon` | ^3.0.2 | Icons |
 | `vitest`, `jsdom` (development) | ^4.1.7, ^28.0.0 | Unit tests with `@angular/build:unit-test` |
 
@@ -105,7 +105,7 @@ npm test             # unit tests (Vitest)
 
 The proxy lives in `Web/proxy.conf.json` and is enabled in `angular.json` (`proxyConfig`). The production build has size budgets: it fails if the initial bundle exceeds 1 MB or a component style exceeds 16 kB (`angular.json`, `budgets`). In production, `dist/web/browser` can be served by any static server that forwards `/api` to the gateway.
 
-According to SRS v6 (RNF-008), the web client must work on current versions of Chrome, Firefox, and Edge and be usable from 360 px wide.
+According to SRS v7 (RNF-008), the web client must work on current versions of Chrome, Firefox, and Edge and be usable from 360 px wide.
 
 ## 3. Mobile Application
 

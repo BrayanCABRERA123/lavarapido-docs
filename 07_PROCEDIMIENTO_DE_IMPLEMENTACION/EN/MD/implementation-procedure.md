@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 9, 2026
+October 16, 2026
 
-Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 1.0
+Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.0
 
 ## Version Control
 
@@ -29,6 +29,7 @@ Table 1 records the change history of this document. Each time the implementatio
 | Version | Date | Description of the change | Responsible |
 |---|---|---|---|
 | 1.0 | 2026-10-09 | Creation of the procedure (in Spanish and English) from the code of the eleven repositories (*develop* branch as of October 9, 2026), *lavarapido-infra/docker-compose.yml*, and the project documentation on deployment, environments, operations, and quality. | Development team |
+| 2.0 | 2026-10-16 | Review against the code of October 16, 2026, and the public server already set up. Updated: public server on Azure with Caddy, HTTPS, and the web served with nginx, APK distribution, first administrator through environment variables, 57 tables, operations-service queue, payment-service health, web and end-to-end tests in the entry criteria, automatic assignment in the smoke tests, business data in the initial load, and implementation risks. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -95,7 +96,7 @@ In the context of the ADSO program, "software implementation" means **putting a 
 
 ### 4.2 Sources of This Document
 
-The procedure was verified against the code of the eleven repositories of the project (*develop* branch as of October 9, 2026), especially *lavarapido-infra/docker-compose.yml* and *.env.example*, and against the project documentation on deployment, environments, continuous integration, operations, quality, and project control (Vehicle Washing Development Team, 2026a, 2026b). The detailed installation, administration, and usage procedures are not repeated here: the reader is referred to the Installation Manual, the Administrator Manual, and the User Manual, version 3.1, which belong to the same document set.
+The procedure was verified against the code of the eleven repositories of the project (*develop* branch as of October 16, 2026), especially *lavarapido-infra/docker-compose.yml*, *docker-compose.prod.yml*, *.env.example*, and the *deploy* folder, and against the deployment, environments, continuous integration, operation, quality, and project control documentation (Vehicle Washing Development Team, 2026a, 2026b). The detailed installation, administration, and use procedures are not repeated here: they are referenced in the Installation Manual, the Administrator Manual, and the User Manual, version 4.0, and in the Deployment Document of this same folder, which records how the public server was set up.
 
 ## 5. Objective
 
@@ -115,15 +116,15 @@ To establish an orderly, verifiable, and reversible procedure for putting a rele
 
 ### 6.1 What This Procedure Covers
 
-- The implementation of a tagged release of the backend (six services and the gateway), the database, the messaging, and the web application on a server or machine with Docker, which is the only environment that the project documentation declares within its scope (Vehicle Washing Development Team, 2026a).
+- The implementation of a tagged release of the backend (six services and gateway), the database, the messaging, and the web application on a machine with Docker in the local network or on the public server (an Azure virtual machine with Docker, Caddy, and HTTPS that the team turns on when it is needed).
 - The initial implementation (first go-live at the car wash or on the evaluation machine) and later implementations of new releases.
 - The load of the master data of the business (opening hours, bays, services, prices, points, payment accounts, operators, and promotions).
 - The smoke tests, the acceptance tests, the training, the go-live, the post-implementation support, and the rollback.
 
 ### 6.2 What This Procedure Does Not Cover
 
-- A cloud or high-availability production environment: the documentation declares it outside the academic scope. Section 14 lists what would be missing to reach it.
-- The publication of the mobile application in app stores; the Android application is still under development and is implemented only as a development build (section 11.7).
+- A high-availability production environment (several replicas, database managed by the provider): the documentation declares it outside the academic scope. Section 14 lists what would be missing to reach it. The step-by-step setup of the public server is in the Deployment Document.
+- The publication of the mobile application in app stores; the Android application is distributed as an APK from the public server (button and QR code on the home page).
 - Continuous integration: Jenkins is planned but not configured (technical debt TD-006), so the release is built with the commands of section 11.3.
 - The migration of historical data: the business has no previous system; the paper schedule is not digitized (section 8.1).
 
@@ -193,7 +194,7 @@ A full parallel implementation (operating on paper and in the system at the same
 
 ## 9. Target Environment and Components
 
-The target environment is a server or machine with Docker (Windows 10 or 11 with WSL 2, Ubuntu 22.04 or later, or macOS) that runs all the components of Table 4 with *docker compose --profile app*. The hardware, software, and port requirements are those of sections 6 and 7 of the Installation Manual (minimum 4 cores, 8 GB of RAM with 5 GB for Docker, and 20 GB of free disk; recommended 16 GB of RAM and an SSD).
+The target environment is a machine or server with Docker (Windows 10 or 11 with WSL 2, Ubuntu 22.04 or later, or macOS) that runs all the components of Table 4 with *docker compose --profile app*. The hardware and software requirements and the ports are those of sections 6 and 7 of the Installation Manual (minimum 4 cores, 8 GB of RAM with 5 GB for Docker, and 20 GB of free disk; recommended 16 GB of RAM and SSD). On the public server *docker-compose.prod.yml* is added: the web is served compiled from a container with nginx, Caddy publishes only ports 80 and 443 with HTTPS, and no internal service is exposed.
 
 **Table 4**
 
@@ -213,10 +214,10 @@ The target environment is a server or machine with Docker (Windows 10 or 11 with
 | payment-service (.NET 8) | Repository *lavarapido-payment-service* (Dockerfile) | 3005 | Phase 5 |
 | notification-service | Repository *lavarapido-notification-service* | 3006 | Phase 5 |
 | api-gateway | Repository *lavarapido-api-gateway* | 8080 | Phase 5 |
-| Web application | Repository *Front-end-proyecto-web* | 4200 | Phase 6 |
-| Mobile application (development build) | Repository *LavadoVehicular-Movil* | 8081 (Metro) | Phase 6, optional |
+| Web application | Repository *Front-end-proyecto-web* | 4200 in the local network; container with nginx behind Caddy on the public server | Phase 6 |
+| Mobile application | Repository *LavadoVehicular-Movil* | APK built with EAS and published at */app/* on the server; 8081 (Metro) in development | Phase 6 |
 
-*Note.* Prepared by the authors from *docker-compose.yml* (October 9, 2026). Since October 8, 2026, payment-service has a Dockerfile and a service in the Compose file, and the gateway container receives *ROUTE_PAYMENT_URL*; the TD-014 limitations described in version 3.0 of the manuals are resolved.
+*Note.* Prepared by the authors from *docker-compose.yml* and *docker-compose.prod.yml* (October 16, 2026).
 
 ## 10. Entry Criteria
 
@@ -229,10 +230,10 @@ The implementation **does not start** until all the criteria of Table 5 are met.
 | No. | Criterion | Evidence |
 |---|---|---|
 | E1 | The code of the release is merged into *develop* (or *main*) of the eleven repositories, with no uncommitted work. | Clean *git status* and *git log* with the last commit of each repository. |
-| E2 | The automated backend tests pass: *./mvnw -B verify* in the Java services and the gateway, and *dotnet test* in payment-service. | Output with BUILD SUCCESS and an xUnit summary without failures. |
+| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, and the end-to-end suite of *lavarapido-infra/e2e* against the containers. | Summaries without failures (on October 16, 2026: 639 unit tests and 19 end-to-end tests). |
 | E3 | The web application builds in production mode (*npx ng build*). | Folder *dist/* generated without errors. |
 | E4 | The release is tagged in each repository (for example, *v1.0.0*) (section 13). | *git tag* in each repository. |
-| E5 | The installation, administrator, and user manuals correspond to the release (version 3.1 or later). | Version control of the manuals. |
+| E5 | The installation, administrator, and user manuals correspond to the release (version 4.0 or later). | Version control of the manuals. |
 | E6 | Open incidents of severity P0 and P1 are resolved; P2 and P3 incidents are recorded with their action in the corrective, preventive, and improvement actions document. | Updated action register. |
 | E7 | The target environment meets the hardware, software, and port requirements. | Checklist of Annex A. |
 | E8 | The production secrets are generated and stored outside the repository (*DB_PASSWORD*, *JWT_SECRET*, *INTERNAL_API_KEY*, *RABBITMQ_PASSWORD*, and the mail app password). | Verbal confirmation of the IT administrator; never a copy of the value. |
@@ -301,8 +302,9 @@ git check-ignore -v .env      # must show the .gitignore rule
 | MESSAGING_ENABLED | *true* | With *false* (the default value), no notifications, point notices, or event-driven profiles are generated. |
 | RABBITMQ_USERNAME, RABBITMQ_PASSWORD | New user and password (not *guest*). | The RabbitMQ console must not keep default credentials. |
 | MAIL_ENABLED, MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM, MAIL_DOCKER_HOST | *true*, *smtp.gmail.com*, *587*, business account, app password, and *smtp.gmail.com* for Docker. | Mailpit only catches emails; real operation uses a real SMTP server. |
-| CORS_ALLOWED_ORIGINS | Real origin of the web application (for example, *http://carwash-server:4200*). | Browsers reject other origins. |
-| PUSH_ENABLED | *false* until there is a build of the mobile application made with EAS. | Expo Go does not receive remote push notifications. |
+| CORS_ALLOWED_ORIGINS | Real origin of the web application (for example, *https://<domain>* on the public server or *http://lavadero-server:4200* in the local network). | Browsers reject other origins. |
+| ADMIN_EMAIL, ADMIN_PASSWORD | Email and password of the first administrator (only the first time). | security-service creates the account at startup if there is still no administrator. |
+| PUSH_ENABLED | *true* when the installed mobile application is the APK built with EAS. | Expo Go does not receive remote push notifications. |
 | BOOKING_ZONE | *America/Bogota* | Time zone of the car wash; the system stores UTC. |
 
 *Note.* Prepared by the authors from *.env.example* and *docker-compose.yml*. Secret values are written only in the *.env* file; never in a message, a shared document, or a repository.
@@ -315,7 +317,7 @@ git check-ignore -v .env      # must show the .gitignore rule
 
 1. Run the tests of each Java service and of the gateway (*./mvnw -B verify*; on Windows, *.\mvnw.cmd -B verify*).
 2. Run the tests of payment-service (*dotnet test* from *lavarapido-payment-service*).
-3. Build the web application (*npm ci* and *npx ng build*). The web test suite (*ng test*) does not compile while the six outdated *.spec.ts* files exist (TD-001); until they are fixed, its result does not block the implementation and is recorded as an exception approved by the project leader.
+3. Run the web tests (*npx ng test --watch=false*) and build it (*npm ci* and *npx ng build*).
 4. Validate the Compose file and build the images:
 
 ```bash
@@ -384,9 +386,9 @@ for port in 3001 3002 3003 3004 3005 3006 8080; do
 done
 ```
 
-4. Check that the database has 49 tables in the nine schemas (Installation Manual, section 11.5) and that the RabbitMQ topology exists (exchange *carwash.events*, queues *customer-service.events* and *notification-service.events* with their *.dlq*).
+4. Check that the database has 57 tables in the nine schemas (Installation Manual, section 11.5) and that the RabbitMQ topology exists (exchange *carwash.events* and the queues *customer-service.events*, *notification-service.events*, and *operations-service.events* with their *.dlq*).
 
-**Criterion to continue:** the seven responses are *UP* and the number of tables is the expected one. The health endpoint of payment-service answers *UP* even if the database is down (TD-017); its real connection is confirmed in phase 8 with a query of payment accounts.
+**Criterion to continue:** the seven responses are *UP* and the number of tables is the expected one. Every service, including payment-service, checks the database in its health endpoint and answers *DOWN* (503) if it is not available.
 
 **Evidence:** output of the health loop and of the table count.
 
@@ -394,7 +396,7 @@ done
 
 **Responsible:** frontend leader. **Estimated duration:** 15 minutes.
 
-1. **Web application.** In the current scope, it is published with the Angular server, which forwards */api* to the gateway through *proxy.conf.json*:
+1. **Web application.** In the local network, it is published with the Angular server, which forwards */api* to the gateway through *proxy.conf.json*:
 
 ```bash
 cd Frontend/Front-end-proyecto-web
@@ -402,9 +404,9 @@ npm ci
 npx ng serve --host 0.0.0.0    # reachable from other machines on the local network
 ```
 
-For a production environment, the *dist/* folder generated in phase 2 must be published on a web server behind the gateway and with HTTPS (section 14, risk R-I08).
+On the public server the web does not use *ng serve*: the *web* container builds the *dist/* folder and serves it with nginx (with security headers) behind Caddy and with HTTPS; *deploy/update-server.sh* rebuilds it after each push (Deployment Document).
 
-2. **Mobile application (optional).** Set *EXPO_PUBLIC_API_URL* to the IPv4 address of the server (for example, *http://192.168.1.10:8080/api/v1*) and start Expo (*npx expo start*). Push notifications require a build made with EAS and *PUSH_ENABLED=true*.
+2. **Mobile application.** The APK is built with EAS with *EXPO_PUBLIC_API_URL* pointing to the server domain and is published with *npm run publish:apk*, which leaves it at */app/LavaRapidoVehicular.apk* and notifies the people who have the application by push. For tests in the local network, *npx expo start* can be used with the IPv4 address of the machine.
 
 **Evidence:** screenshot of the welcome screen served from the server, with the address bar visible.
 
@@ -420,7 +422,7 @@ Because the *dev* profile is disabled, there are no demonstration accounts. The 
 
 | Step | Data | Where it is loaded | Reference |
 |---|---|---|---|
-| 1 | First administrator account | Public registration and assignment of the ADMIN role in *security.user_role* | Administrator Manual, section 8.4 |
+| 1 | First administrator account | Variables *ADMIN_EMAIL* and *ADMIN_PASSWORD* of the environment file; security-service creates it at startup | Administrator Manual, section 8.4 |
 | 2 | Weekly hours, break, and holidays of the year | Hours & Bays > Business hours | Administrator Manual, section 11.2 |
 | 3 | Washing bays and their status | Hours & Bays > Wash bays | Administrator Manual, section 11.3 |
 | 4 | Services, prices, and duration by vehicle type, and loyalty points | Management > Services | Administrator Manual, section 12.2 |
@@ -429,8 +431,9 @@ Because the *dev* profile is disabled, there are no demonstration accounts. The 
 | 7 | Weekly shift of each operator | Operators > Edit availability | Administrator Manual, section 12.1 |
 | 8 | Promotions (discount coupons unlocked with points) | Management > Promotions | Administrator Manual, section 12.8 |
 | 9 | Verification of the payment accounts | Scan each QR code from a test customer account and confirm the holder | Administrator Manual, section 11.4 |
+| 10 | Business data (legal name, tax ID, address, phones, and channels) | Settings > Business data | Administrator Manual, section 11.1 |
 
-*Note.* The business data of Settings > Business data is saved only in the browser (TD-013); the data of the premises that customers see (address, phone, and email) comes from the table *booking.establishment*, loaded by seed 109, and is corrected with SQL if it does not belong to the car wash. Prepared by the authors.
+*Note.* The business data are saved in booking-service and are the data customers see on the home page and in the help center. Prepared by the authors.
 
 **Evidence:** screenshot of each configured screen and list of the accounts created (without passwords).
 
@@ -451,10 +454,10 @@ The smoke tests confirm that the release works end to end before handing it over
 | H3 | Password recovery. | Six-digit code received by email. |
 | H4 | Registration of a vehicle and a booking at a free time. | Booking confirmed with a bay and the points shown in the summary. |
 | H5 | Query of the payment accounts from the payment screen. | The active accounts are listed with their QR code (confirms the connection of payment-service to the database). |
-| H6 | Assignment of an operator by the administrator. | Notification to the operator. |
+| H6 | Booking without choosing an operator and booking choosing a free one. | The system assigns an operator in both cases (the chosen one in the second); notice to the operator. |
 | H7 | Start and finish of the service by the operator. | Booking COMPLETED; notifications to the customer. |
 | H8 | Payment report with a test receipt and approval by the administrator. | Payment approved; payment confirmed email and points credited. |
-| H9 | Dead-letter queues. | *notification-service.events.dlq* and *customer-service.events.dlq* at zero. |
+| H9 | Dead-letter queues. | *notification-service.events.dlq*, *customer-service.events.dlq*, and *operations-service.events.dlq* at zero. |
 
 *Note.* Prepared by the authors from the checklist before a review session of the project (Vehicle Washing Development Team, 2026a).
 
@@ -581,17 +584,17 @@ docker compose stop api-gateway security-service customer-service booking-servic
 | R-I01 | The operations repository is cloned as *lavarapido-operations-service* and the Compose build fails. | Medium | High | Clone with the original name *lavarapido-operation-service* (phase 1). |
 | R-I02 | *MESSAGING_ENABLED=false* or an empty *INTERNAL_API_KEY* remain, and notifications and emails do not arrive. | Medium | Medium | Values of Table 6 and tests H2, H7, and H8. |
 | R-I03 | The release is implemented with the *dev* profile, leaving demonstration accounts and Swagger exposed. | Medium | High | *SPRING_PROFILES_ACTIVE=prod*; Annex A. |
-| R-I04 | The health endpoint of payment-service says *UP* with the database down (TD-017). | Low | Medium | Test H5 with a real query. |
-| R-I05 | There is no login attempt limit (TD-003). | Medium | High | Do not expose the system to the internet; long and unique passwords for administrators. |
+| R-I04 | The public server is off when it is needed (it is turned on on demand). | Medium | Medium | Tell the DevOps owner in advance and run *deploy/update-server.sh* after the last push. |
+| R-I05 | There is no request rate limit in the gateway or in Caddy (TD-022); account lockout only protects each account separately. | Medium | Medium | Long and unique passwords for the administrators; review the Caddy logs. |
 | R-I06 | A wrongly loaded QR code or payment account sends the money to a third party. | Low | High | Step 9 of Table 7. |
 | R-I07 | Data loss caused by *docker compose down -v* or a damaged volume. | Low | High | Pre-implementation backup (phase 3) and daily backup. |
-| R-I08 | The web application is served with *ng serve* and without HTTPS outside the local network. | Medium | High | Keep the system on the local network; for production, serve *dist/* behind the gateway with TLS 1.2 or later. |
-| R-I09 | The web test suite does not compile (TD-001) and a client regression goes undetected. | Medium | Medium | Complete manual smoke and acceptance tests; fix TD-001. |
+| R-I08 | In the local network the web is served with *ng serve* and without HTTPS. | Medium | Medium | Use it only inside the car wash network; outside it, use the public server with HTTPS. |
+| R-I09 | There is still no continuous integration (TD-006), and a regression can go unnoticed. | Medium | Medium | Run the unit tests, the end-to-end suite, and the smoke tests before each deployment. |
 | R-I10 | The role permissions editable in the panel are mistaken for real access control (ADR-015). | Low | Medium | Explain it in the training; real authorization comes from the role in the token. |
 
 *Note.* Prepared by the authors from the risk register, the technical backlog, and the verification of the code (Vehicle Washing Development Team, 2026a).
 
-To take the system to a real production environment, the following would also be missing: continuous integration per repository, hosted SQL Server and RabbitMQ with the secrets in the provider's secret store, the web application built and served behind the gateway, HTTPS, one database login per service instead of *sa*, and an Outbox for events if losing an event during a broker outage is not acceptable (Vehicle Washing Development Team, 2026a).
+To take the system to a real production environment, in addition to the above, the following would be missing: continuous integration per repository, SQL Server and RabbitMQ hosted with the secrets in a provider vault, one database login per service instead of *sa*, a request rate limit, and an Outbox for the events if losing an event during a broker outage is not accepted (Vehicle Washing Development Team, 2026a).
 
 ## 15. Communication Plan
 
@@ -744,7 +747,9 @@ Wiggins, A. (2017). *The twelve-factor app: III. Config*. https://12factor.net/c
 ```bash
 # Phase 2: building and verification
 ./mvnw -B verify                                   # each Java service and the gateway
-dotnet test                                        # lavarapido-payment-service
+dotnet test                                       # lavarapido-payment-service
+npx ng test --watch=false                         # Front-end-proyecto-web
+node --test "e2e/*.test.js"                      # from lavarapido-infra, with the containers up
 npm ci && npx ng build                             # Front-end-proyecto-web
 docker compose config --quiet && docker compose --profile app build
 

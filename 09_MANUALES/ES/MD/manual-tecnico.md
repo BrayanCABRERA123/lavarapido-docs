@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-9 de octubre de 2026
+16 de octubre de 2026
 
-Tipo de manual: Manual técnico (desarrolladores y arquitectos de software) · Versión 3.1
+Tipo de manual: Manual técnico (desarrolladores y arquitectos de software) · Versión 4.0
 
 ## Control de Versiones
 
@@ -32,6 +32,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada modificació
 | 2.0 | 2026-10-05 | Datos de portada completados, nombre del sistema ajustado a Vehicle Washing y cambio en la descripción de la estrategia de migraciones. | Equipo de desarrollo |
 | 3.0 | 2026-10-07 | Traducción al inglés, formato APA (7.ª ed.) y verificación contra el código fuente. Se corrigieron: payment-service es .NET 8 (ADR-013); Spring Boot 4 en lugar de 3; SQL Server 2022; puertos reales; un changelog de Liquibase por servicio; número de tablas; el gateway no valida tokens; no hay bloqueo de cuenta; asignación manual de operarios (ADR-014); códigos de ejecución en inglés; solicitud real del endpoint de reservas; catálogo completo de endpoints y eventos; estructura real del proyecto; auditoría no poblada. Se agregaron dos diagramas reales. | Equipo de desarrollo |
 | 3.1 | 2026-10-09 | Actualización contra el código de los once repositorios al 9 de octubre de 2026 (ADR-011, secciones 9 a 12, y ADR-015) y creación de esta versión en español (la versión en inglés es Manual_tecnico_LavadoVehicular_3145556_EN.md). Se actualizaron: 49 tablas (booking.schedule_history y notification.booking_tracking); puntos de fidelización por servicio y libro de puntos con reversión; promociones como cupones porcentuales; matriz de permisos de los roles fijos; interruptores de notificación del usuario; eventos, pruebas, estructura y contenedor de payment-service; avisos al personal; nuevos endpoints, rutas del gateway y códigos de error; nombre real del repositorio de operaciones; deuda técnica TD-002, TD-014, TD-015, TD-016 y TD-018 resuelta. | Equipo de desarrollo |
+| 4.0 | 2026-10-16 | Revisión de los once repositorios con el sistema corriendo. Se actualizaron: 57 tablas con el diagrama entidad-relación generado desde la base de datos, diccionario de las tablas nuevas (bloqueo de cuenta, dirección, consentimiento, perfil del operario e inspección), asignación automática y elección del operario, bloqueo por intentos fallidos, informes de inspección en el servidor, datos del negocio, salud y correlación de payment-service, nuevos endpoints y eventos, resultados reales de las pruebas (639 unitarias y 19 de punta a punta), deuda técnica y discrepancias resueltas. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -110,7 +111,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada modificació
 - [17. Glosario](#17-glosario)
 - [Referencias](#referencias)
 - [18. Anexos](#18-anexos)
-  - [Anexo A. Lista de Figuras Pendientes de Captura](#anexo-a-lista-de-figuras-pendientes-de-captura)
+  - [Anexo A. Origen de las Figuras](#anexo-a-origen-de-las-figuras)
   - [Anexo B. Discrepancias Detectadas](#anexo-b-discrepancias-detectadas)
   - [Anexo C. Lista de Verificación para la Entrega](#anexo-c-lista-de-verificación-para-la-entrega)
 
@@ -126,7 +127,7 @@ La arquitectura se apoya en conceptos ampliamente documentados: los microservici
 
 ### 4.1 Fuentes y Convenciones de Este Documento
 
-La versión 3.0 se verificó contra el código fuente de security-service, customer-service, payment-service, lavarapido-infra, la aplicación web y la aplicación móvil (rama *develop*, 5 de octubre de 2026), y contra la documentación de los demás servicios (Equipo de Desarrollo Vehicle Washing, 2026a, 2026b, 2026c, 2026d, 2026e, 2026f). La versión 3.1 revisó los once repositorios, incluidos booking-service, operations-service, notification-service y el gateway (rama *develop*, 9 de octubre de 2026), para los cambios hechos después del 7 de octubre de 2026. El Anexo B lista las discrepancias encontradas entre el código, la documentación y las versiones anteriores de los manuales, como exige la guía para elaborar manuales (Servicio Nacional de Aprendizaje [SENA], 2026). Los identificadores (esquemas, tablas, columnas, endpoints, eventos y clases) se escriben exactamente como en el código.
+La versión 3.0 se verificó contra el código fuente de security-service, customer-service, payment-service, lavarapido-infra, la aplicación web y la aplicación móvil (rama *develop*, 5 de octubre de 2026), y contra la documentación de los demás servicios (Equipo de Desarrollo Vehicle Washing, 2026a, 2026b, 2026c, 2026d, 2026e, 2026f). La versión 3.1 revisó los once repositorios (rama *develop*, 9 de octubre de 2026). La versión 4.0 volvió a revisar los once repositorios con el sistema completo corriendo en Docker (rama *develop*, 16 de octubre de 2026): las cifras de tablas, changelogs y pruebas salen de consultas a la base de datos y de la ejecución de las pruebas, no de documentos anteriores. El Anexo B lista las discrepancias encontradas entre el código, la documentación y las versiones anteriores de los manuales, como exige la guía para elaborar manuales (Servicio Nacional de Aprendizaje [SENA], 2026). Los identificadores (esquemas, tablas, columnas, endpoints, eventos y clases) se escriben exactamente como en el código.
 
 ## 5. Objetivo
 
@@ -185,7 +186,7 @@ Es un sistema distribuido cliente-servidor con un backend de microservicios (Fig
 | Componente | Tecnología | Puerto | Responsabilidad |
 |---|---|---|---|
 | Aplicación web | Angular 21 | 4200 | Interfaz de los tres roles (cliente, operario y administrador). |
-| Aplicación móvil | React Native 0.86 con Expo SDK 57 | 8081 (Metro) | Interfaz de los tres roles; notificaciones push (en desarrollo). |
+| Aplicación móvil | React Native 0.86 con Expo SDK 57 | 8081 (Metro) | Interfaz de los tres roles; notificaciones push y aviso de versión nueva (APK compilado con EAS). |
 | api-gateway | Spring Cloud Gateway 2025.1 (webmvc) | 8080 | Punto de entrada único; enruta */api/v1/\** por ruta; CORS. |
 | security-service | Java 21, Spring Boot 4 | 3001 | Personas, cuentas, roles y permisos, sesiones, recuperación de la contraseña, perfil y preferencias. |
 | customer-service | Java 21, Spring Boot 4 | 3002 | Perfil del cliente, tipos de vehículo y vehículos. |
@@ -193,7 +194,7 @@ Es un sistema distribuido cliente-servidor con un backend de microservicios (Fig
 | operations-service | Java 21, Spring Boot 4 | 3004 | Operarios, turnos, ausencias, asignación, ejecución y calificaciones. |
 | payment-service | C#, .NET 8, ASP.NET Core, EF Core | 3005 | Cuentas de pago con QR, pagos con comprobante, revisión, reembolsos, pagos manuales, promociones (cupones) y libro de puntos de fidelización. |
 | notification-service | Java 21, Spring Boot 4 | 3006 | Bandeja, push, correo, recordatorios de reservas y avisos al personal. |
-| SQL Server | SQL Server 2022 (contenedor) | 1433 | Base de datos *LavaRapido*, nueve esquemas, 49 tablas. |
+| SQL Server | SQL Server 2022 (contenedor) | 1433 | Base de datos *LavaRapido*, nueve esquemas, 57 tablas. |
 | RabbitMQ | RabbitMQ 4 con administración | 5672 y 15672 | Eventos de dominio (exchange *carwash.events*). |
 | Mailpit o SMTP | Mailpit (desarrollo) o Gmail | 1025 y 8025 | Correos. |
 
@@ -225,13 +226,13 @@ Es un sistema distribuido cliente-servidor con un backend de microservicios (Fig
 | Mensajería | RabbitMQ | 4 con complemento de administración; exchange de tipo topic *carwash.events* |
 | Correo | Spring Mail con Mailpit (desarrollo) o Gmail | SMTP |
 | Notificaciones push | Expo Push API | Requiere una versión EAS en el móvil |
-| Frontend web | Angular, Angular Material y CDK, ngx-translate, Chart.js, jsPDF, xlsx, RxJS | 21.2.7, 21.2.7, 17, 4.5, 4.2, 0.18, 7.8; TypeScript 5.9 |
+| Frontend web | Angular, Angular Material y CDK, ngx-translate, Chart.js, jsPDF, xlsx, RxJS | 21.2.25, 21.2.14, 17, 4.5, 4.2, 0.20, 7.8; TypeScript 5.9 |
 | Frontend móvil | React Native, Expo, React, React Navigation, i18next | 0.86.3, SDK 57, 19.2, 7, 26; TypeScript 6.0 |
 | Contenedores | Docker y Docker Compose | Docker 24 o posterior; Compose v2 |
 | Pruebas | JUnit 5 y Spring Boot Test (Java), xUnit (.NET), Vitest (web) | Mediante el Maven Wrapper, *dotnet test* y *ng test* |
 | Control de versiones | Git y GitHub | Ramas *main*, *develop* y *feature/\** |
 | Integración continua | Jenkins | Planeada, no configurada (TD-006) |
-| Diagramas y contratos | Mermaid (C4), DBML, OpenAPI 3 | Carpetas 08-uml y 07-api de la documentación |
+| Diagramas y contratos | Mermaid (C4 y diagramas UML), OpenAPI 3 | Carpetas 08-uml y 07-api de la documentación |
 
 *Nota.* Versiones tomadas de *pom.xml*, *Directory.Build.props*, los archivos *.csproj* y *package.json* de cada repositorio.
 
@@ -247,14 +248,14 @@ El backend adopta una arquitectura de microservicios con propiedad lógica de lo
 
 | Servicio | Esquemas | Tablas | Profundidad del dominio |
 |---|---|---|---|
-| security-service | security, audit | 10 | Media: autenticación, roles, permisos, reglas de contraseña y preferencias. |
+| security-service | security, audit | 12 | Media: autenticación, bloqueo por intentos fallidos, roles, permisos, reglas de contraseña, preferencias y consentimiento. |
 | customer-service | customer | 3 | Media: propiedad de clientes y vehículos. |
 | booking-service | catalog, booking | 13 | Alta: disponibilidad, superposición de bahías, ciclo de vida, precios inmutables, puntos por servicio e historial del horario. |
-| operations-service | execution | 5 | Alta: turnos, ausencias, política de asignación, ejecución y calificación. |
+| operations-service | execution | 11 | Alta: turnos, ausencias, asignación manual y automática, ejecución, calificación, perfil del operario e informes de inspección. |
 | payment-service | payment, promotion | 12 | Alta: revisión de pagos, reembolsos, cupones porcentuales y libro de puntos. |
 | notification-service | notification | 6 | Media: bandeja, consumo idempotente, push, correo, recordatorios y seguimiento de reservas para los avisos al personal. |
 
-*Nota.* Total: 49 tablas. Fuente: modelos de datos de cada servicio y estrategia de migraciones (Equipo de Desarrollo Vehicle Washing, 2026a).
+*Nota.* Total: 57 tablas, comprobado con una consulta a *sys.tables* el 16 de octubre de 2026. Fuente: changelogs de cada servicio.
 
 ### 9.2 API Gateway
 
@@ -332,8 +333,8 @@ REST se usa cuando quien llama necesita una respuesta para continuar (ADR-004). 
 |---|---|---|
 | customer-service | security-service GET /api/v1/users/me | Leer el personId para crear un perfil de cliente faltante. |
 | booking-service | customer-service GET /vehicles/{id}, /vehicles, /admin/vehicles | Propiedad y tipo del vehículo (ADR-012). |
-| operations-service | booking-service /admin/bookings, /operator/bookings, PATCH /operator/bookings/{id}/status, /bookings/{id} | Reservas por asignar, con su bahía; pasarlas a IN_PROGRESS o COMPLETED; validar la reserva que se califica (ADR-014). |
-| operations-service | security-service GET /admin/users?role=OPERATOR | Cuentas y nombres de los operarios. |
+| operations-service | booking-service /admin/bookings, /operator/bookings, PATCH /operator/bookings/{id}/status, /bookings/me; /internal/v1/bookings y /internal/v1/bookings/{id} (llave interna) | Reservas por asignar, con su bahía; pasarlas a IN_PROGRESS o COMPLETED; validar la reserva que se califica; leer la reserva cuando llega BookingConfirmed para la asignación automática, sin token de usuario (ADR-014). |
+| operations-service | security-service GET /admin/users?role=OPERATOR; GET /internal/v1/users/{id}/contact (llave interna) | Cuentas y nombres de los operarios; nombre del cliente de cada servicio y estado de la cuenta (una cuenta que no existe responde OPERATOR_NOT_FOUND). |
 | payment-service | booking-service GET /bookings/{id}, /bookings/me, /admin/bookings/{id} | Total, estado, dueño y puntos de fidelización de la reserva; el navegador nunca envía el monto. |
 | notification-service | security-service GET /internal/v1/users/{id}/contact (encabezado X-Internal-Key) | Correo vigente, nombre, estado activo e interruptores de notificación del usuario (ADR-011, secciones 8 y 12). |
 | notification-service | security-service GET /internal/v1/users/admins (encabezado X-Internal-Key) | Administradores activos que reciben los avisos al personal (ADR-011, sección 10). |
@@ -358,7 +359,7 @@ La columna *row_version* existe, pero las entidades todavía no se mapean con *@
 
 #### 9.5.3 Registros, Correlación y Errores
 
-Los servicios escriben sus registros en la salida estándar con el nivel, el nombre del servicio y el identificador de correlación (*CorrelationIdFilter*, clave MDC *correlationId*, encabezado *X-Correlation-Id*). La propagación del encabezado en todos los clientes REST y en los mensajes está pendiente (TD-007), y payment-service todavía no tiene el filtro (TD-017). Las contraseñas, los tokens, los códigos de recuperación y el contenido de los comprobantes nunca se registran.
+Los servicios escriben sus registros en la salida estándar con el nivel, el nombre del servicio y el identificador de correlación (*CorrelationIdFilter* en los servicios Java y *CorrelationIdMiddleware* en payment-service, clave *correlationId*, encabezado *X-Correlation-Id*). El encabezado se reenvía en las llamadas de booking-service a customer-service, de operations-service a booking-service y security-service, y de payment-service a booking-service. Falta reenviarlo en las llamadas de customer-service y notification-service a security-service y en los mensajes de RabbitMQ, y que el gateway lo genere (TD-007). Las contraseñas, los tokens, los códigos de recuperación y el contenido de los comprobantes nunca se registran.
 
 Los errores siguen el RFC 9457, *Problem Details for HTTP APIs* (Nottingham et al., 2023): el cuerpo es *application/problem+json* con un *code* estable que la aplicación web traduce con la clave `API_ERRORS.<code>`. Las respuestas no incluyen trazas de pila ni mensajes internos (*server.error.include-message: never*). La Tabla 8 resume los códigos de estado.
 
@@ -495,17 +496,17 @@ La aplicación móvil se organiza en *src/modules* por rol (*auth*, *client*, *o
 
 ## 11. Base de Datos
 
-El sistema usa una sola base de datos SQL Server 2022 llamada *LavaRapido*, dividida en nueve esquemas que pertenecen a seis servicios, con 49 tablas.
+El sistema usa una sola base de datos SQL Server 2022 llamada *LavaRapido*, dividida en nueve esquemas que pertenecen a seis servicios, con 57 tablas.
 
 ### 11.1 Diagrama Entidad-Relación
 
-El modelo entidad-relación completo y un modelo por servicio existen como archivos DBML en la carpeta *08-uml* de la documentación. Las referencias entre servicios se dibujan como notas, no como relaciones, porque no tienen clave foránea.
+La Figura 2 se generó directamente desde la base de datos *LavaRapido* (catálogo *sys.tables*, *sys.columns* y *sys.foreign_keys*) con todos los servicios arrancados. Muestra cada tabla dentro de su esquema, sus llaves primarias y sus llaves foráneas con la tabla a la que apuntan; las demás columnas se resumen como un número. Las referencias entre servicios (por ejemplo, *execution.operator.user_id* hacia *security.app_user*) no aparecen porque no tienen llave foránea (Tabla 10).
 
 **Figura 2**
 
 *Diagrama Entidad-Relación del Sistema*
 
-> **Imagen por insertar.** **Fuente:** archivos DBML de *08-uml* (modelo completo). **Contenido:** las 49 tablas agrupadas por esquema, con claves primarias, claves foráneas dentro de cada servicio y anotaciones de las referencias entre servicios. Exportarlo desde dbdiagram.io u otra herramienta compatible con DBML.
+![Diagrama entidad-relación del sistema](capturas/data-model.png)
 
 ### 11.2 Tablas Principales
 
@@ -552,12 +553,12 @@ Las claves foráneas solo se permiten dentro del límite de un servicio. Entre s
 
 | Esquema (dueño) | Tablas |
 |---|---|
-| security (security-service) | person, app_user, role, permission, role_permission, user_role, user_session, password_reset_token, user_preference |
+| security (security-service) | person, person_address, app_user, role, permission, role_permission, user_role, user_session, password_reset_token, user_preference, login_lockout |
 | audit (security-service) | audit_log |
 | customer (customer-service) | vehicle_type, customer, customer_vehicle |
 | catalog (booking-service) | service_category, service, service_price |
 | booking (booking-service) | establishment, business_hour, business_hour_exception, bay_status, service_bay, booking_status, cancellation_reason, booking, booking_service, schedule_history |
-| execution (operations-service) | execution_status, operator, operator_availability, operator_absence, service_execution |
+| execution (operations-service) | execution_status, operator, operator_availability, operator_absence, service_execution, operator_profile, operator_skill, inspection_report, inspection_phase, inspection_finding, inspection_photo |
 | promotion (payment-service) | discount_type, promotion, promotion_service, promotion_customer, booking_promotion |
 | payment (payment-service) | payment_method_type, payment_account, payment_status, payment, payment_receipt, loyalty_movement_type, loyalty_transaction |
 | notification (notification-service) | notification_type, notification, device_token, processed_event, booking_reminder, booking_tracking |
@@ -585,6 +586,8 @@ El diccionario lista, para cada tabla, sus columnas, tipos, nulabilidad y restri
 | | password_hash | NVARCHAR(255) | No | Hash BCrypt |
 | | is_active | BIT | No | Por defecto 1 |
 | | last_login | DATETIME2(3) | Sí | — |
+| | terms_accepted_at, data_policy_accepted_at | DATETIME2(3) | Sí | Fecha de aceptación de los Términos y de la Política de datos al registrarse (changelog 039); nulo en cuentas anteriores |
+| | created_at | DATETIME2(3) | No | Fecha de creación de la cuenta (changelog 036) |
 | security.role | role_id, code, name | SMALLINT, NVARCHAR(30), NVARCHAR(60) | No | PK; code único (ADMIN, OPERATOR, CLIENT) |
 | security.permission | permission_id, code, name, resource, action | SMALLINT, NVARCHAR | No | PK; code único; catálogo cargado por el changelog 026 |
 | security.role_permission | role_permission_id, role_id, permission_id | BIGINT, SMALLINT, SMALLINT | No | FK; único (role_id, permission_id); matriz informativa que edita el administrador (ADR-015) |
@@ -603,13 +606,15 @@ El diccionario lista, para cada tabla, sus columnas, tipos, nulabilidad y restri
 | | language | NVARCHAR(5) | No | es, en, fr o pt |
 | | notifications_enabled | BIT | No | Por defecto 1; interruptor de push |
 | | email_reminders_enabled, promotions_enabled | BIT | No | Por defecto 1 (changelog 030); bloque de auditoría |
+| security.person_address | person_id, address | BIGINT, NVARCHAR(200) | No | PK y FK a person; dirección de contacto del perfil (changelog 035) |
+| security.login_lockout | user_id, failed_count, first_failed_at, locked_until | BIGINT, INT, DATETIME2(3) | No/Sí | PK y FK a app_user; intentos fallidos y bloqueo temporal (changelog 034) |
 | audit.audit_log | audit_log_id | BIGINT | No | PK |
 | | entity, entity_id, action | NVARCHAR(60), BIGINT, NVARCHAR(20) | No | — |
 | | previous_data, new_data | NVARCHAR(MAX) | Sí | Texto JSON |
 | | changed_by | BIGINT | Sí | — |
 | | changed_at | DATETIME2(3) | No | Por defecto SYSUTCDATETIME() |
 
-*Nota.* Fuente: changelogs 001, 002, 003, 020, 026 y 030 de security-service. El changelog 023 creó *security.custom_role* y el 026 la eliminó (ADR-015).
+*Nota.* Fuente: changelogs 001, 002, 003, 020, 026, 030, 034, 035, 036 y 039 de security-service. El changelog 023 creó *security.custom_role* y el 026 la eliminó (ADR-015).
 
 **Tabla 13**
 
@@ -645,7 +650,7 @@ El diccionario lista, para cada tabla, sus columnas, tipos, nulabilidad y restri
 | catalog.service_price | service_price_id, service_id, vehicle_type_id | BIGINT, INT, SMALLINT | No | FK a service; un precio vigente por par (ux_service_price_current) |
 | | price, estimated_minutes | DECIMAL(12,2), SMALLINT | No | Inmutables (tr_service_price_immutable) |
 | | valid_from, valid_to | DATE | No/Sí | Bloque de auditoría |
-| booking.establishment | establishment_id, legal_name, trade_name, tax_id, address, phone, email, logo_url, singleton | SMALLINT, NVARCHAR, BIT | No/Sí | Una sola fila (singleton único) |
+| booking.establishment | establishment_id, legal_name, trade_name, tax_id, address, phone, email, logo_url, singleton; datos del negocio (changelog 032): business_type, founded_on, legal_representative, legal_representative_document, website, tax_regime, ciiu_activity, dian_resolution, invoice_prefix, invoice_range, instagram, facebook, support_line, service_hours_note | SMALLINT, NVARCHAR, DATE, BIT | No/Sí | Una sola fila (singleton único); la editan GET y PUT /api/v1/admin/establishment |
 | booking.business_hour | business_hour_id, day_of_week, opens_at, closes_at, break_starts_at, break_ends_at, is_active | SMALLINT, TIME(0), BIT | No/Sí | Una fila por día (1 = lunes) |
 | booking.business_hour_exception | business_hour_exception_id, exception_date, is_closed, opens_at, closes_at, reason | INT, DATE, BIT, TIME(0), NVARCHAR(120) | No/Sí | Fecha única |
 | booking.bay_status | bay_status_id, code, name, accepts_bookings, display_order | SMALLINT, NVARCHAR, BIT | No | ACTIVE, MAINTENANCE, INACTIVE |
@@ -675,8 +680,14 @@ El diccionario lista, para cada tabla, sus columnas, tipos, nulabilidad y restri
 | | started_at, finished_at | DATETIME2(3) | Sí | — |
 | | quality_rating, quality_comment, rated_at | SMALLINT, NVARCHAR(500), DATETIME2(3) | Sí | Calificación de 1 a 5; comentario y fecha solo con calificación |
 | | is_comment_visible | BIT | No | Bloque de auditoría |
+| execution.operator_profile | operator_id, specialty | INT, NVARCHAR(80) | No/Sí | PK y FK a operator; especialidad del operario (changelog 037) |
+| execution.operator_skill | operator_skill_id, operator_id, name, skill_level, display_order | INT, NVARCHAR(60), NVARCHAR(12), SMALLINT | No | FK a operator; nombre único por operario; nivel CERTIFIED, EXPERT o ADVANCED (ck_operator_skill_level) |
+| execution.inspection_report | inspection_report_id, booking_id, booking_code, vehicle, plate, services, booking_date, booking_time, duration_minutes, public_token, is_published, published_at | BIGINT, NVARCHAR, DATE, TIME, INT, BIT, DATETIME2(3) | No/Sí | Un informe por reserva (uq_inspection_report_booking); token público único (changelog 033) |
+| execution.inspection_phase | inspection_phase_id, inspection_report_id, phase, status, started_at, finished_at | BIGINT, NVARCHAR(20), DATETIME2(3) | No/Sí | FK a inspection_report; una fila por fase (uq_inspection_phase); fase y estado validados por restricciones ck |
+| execution.inspection_finding | inspection_finding_id, inspection_report_id, phase, area, severity, note | BIGINT, NVARCHAR | No/Sí | FK a inspection_report; severidad INFO, MINOR o MAJOR (ck_inspfinding_severity) |
+| execution.inspection_photo | inspection_photo_id, inspection_finding_id, content_type, content, size_bytes | BIGINT, NVARCHAR(30), VARBINARY(MAX), INT | No | FK a inspection_finding; JPG o PNG de hasta 2 MB |
 
-*Nota.* Fuente: modelo de datos de operations-service (changelog 007 y semilla 105).
+*Nota.* Fuente: changelogs 007, 033 y 037 y semilla 105 de operations-service.
 
 **Tabla 16**
 
@@ -715,7 +726,7 @@ El diccionario lista, para cada tabla, sus columnas, tipos, nulabilidad y restri
 
 | Tabla | Campo | Tipo | Nulo | Restricción o descripción |
 |---|---|---|---|---|
-| notification.notification_type | notification_type_id, code, name, display_order, is_active | SMALLINT, NVARCHAR | No | 22 tipos (de cliente, de personal, de pago, de fidelización, de inspección y de sistema) |
+| notification.notification_type | notification_type_id, code, name, display_order, is_active | SMALLINT, NVARCHAR | No | 24 tipos (de cliente, de personal, de pago, de fidelización, de inspección, de reserva sin operario, de versión nueva de la app y de sistema) |
 | notification.notification | notification_id, user_id, notification_type_id, title, message, reference_entity, reference_id, is_read, read_at, sent_at | BIGINT, SMALLINT, NVARCHAR(120), NVARCHAR(500), BIT, DATETIME2(3) | No/Sí | FK a notification_type; borrado lógico |
 | notification.device_token | Token push de Expo de cada dispositivo de un usuario | — | — | Changeset 016 |
 | notification.processed_event | eventId de cada evento consumido (idempotencia) | — | — | Changeset 017 |
@@ -755,13 +766,13 @@ Cada servicio es dueño del changelog de Liquibase de sus esquemas y lo aplica a
 
 ### 12.1 security-service
 
-**Función:** identidad y acceso: registro, ingreso con JWT, sesiones, recuperación de la contraseña por código, perfil (nombre, teléfono, correo, contraseña y desactivación), preferencias (tema, idioma y los tres interruptores de notificación, con actualización parcial), administración de cuentas y la matriz informativa de permisos de los tres roles fijos.
+**Función:** identidad y acceso: registro con la aceptación de los documentos legales, ingreso con JWT y bloqueo por intentos fallidos, sesiones, recuperación de la contraseña por código, perfil (nombre, teléfono, dirección, correo, contraseña y desactivación), preferencias (tema, idioma y los tres interruptores de notificación, con actualización parcial), administración de cuentas y la matriz informativa de permisos de los tres roles fijos.
 
-**Archivos principales:** AuthController, UserProfileController, UserAdministrationController, InternalUserController y el controlador de roles y permisos; AuthenticationService, AccountRegistrationService, PasswordRecoveryService, EmailChangeService, AccountDeactivationService, UserAdministrationService, UserPreferenceService; PasswordPolicy; JwtTokenIssuer; EmailResetCodeNotifier; RabbitDomainEventPublisher; DevDataSeeder.
+**Archivos principales:** AuthController, UserProfileController, UserAdministrationController, InternalUserController y el controlador de roles y permisos; AuthenticationService, AccountRegistrationService, PasswordRecoveryService, EmailChangeService, AccountDeactivationService, UserAdministrationService, UserPreferenceService; PasswordPolicy; JwtTokenIssuer; LoginLockout y LoginLockoutPersistenceAdapter; UserAddressController; EmailResetCodeNotifier; RabbitDomainEventPublisher; DevDataSeeder.
 
 **Tablas:** esquemas security y audit.
 
-**Reglas:** contraseñas con BCrypt (costo 12); política de contraseñas de 8 a 72 caracteres con una mayúscula, un dígito y un carácter especial, sin espacios; el código de recuperación tiene 6 dígitos, dura 15 minutos, es de un solo uso y cinco intentos fallidos lo invalidan (contador en memoria); solicitar un código nuevo invalida el anterior; el correo de una cuenta inexistente produce la misma respuesta; el cambio de correo y la desactivación requieren la contraseña actual; un administrador no puede desactivar su propia cuenta; los identificadores de permisos desconocidos se rechazan con 400 UNKNOWN_PERMISSION. **No hay límite de intentos de inicio de sesión** (TD-003).
+**Reglas:** contraseñas con BCrypt (costo 12); política de contraseñas de 8 a 72 caracteres con una mayúscula, un dígito y un carácter especial, sin espacios; el código de recuperación tiene 6 dígitos, dura 15 minutos, es de un solo uso y cinco intentos fallidos lo invalidan (contador en memoria); solicitar un código nuevo invalida el anterior; el correo de una cuenta inexistente produce la misma respuesta; el cambio de correo y la desactivación requieren la contraseña actual; un administrador no puede desactivar su propia cuenta; los identificadores de permisos desconocidos se rechazan con 400 UNKNOWN_PERMISSION; cinco intentos fallidos en 15 minutos bloquean la cuenta durante 15 minutos (*LoginLockout*, 423 ACCOUNT_LOCKED) y un ingreso correcto o el restablecimiento de la contraseña limpian el contador; el registro guarda la fecha de aceptación de los documentos legales cuando llegan *acceptsTerms* y *acceptsDataPolicy*.
 
 **Eventos:** publica UserRegistered (*security.user_registered*), que lleva *createdByAdmin* para que el mensaje de bienvenida explique cómo ingresar; PasswordChanged, EmailChanged y AccountDeactivated los levanta el dominio. **Rutas internas:** contacto de un usuario con sus interruptores y lista de los administradores activos.
 
@@ -779,29 +790,29 @@ Cada servicio es dueño del changelog de Liquibase de sus esquemas y lo aplica a
 
 **Función:** catálogo, precios y puntos por tipo de vehículo, establecimiento, horario semanal con descanso, excepciones, bahías, disponibilidad y reservas.
 
-**Reglas:** la disponibilidad se calcula sobre una rejilla de 30 minutos dentro del horario de atención, fuera del descanso, no en el pasado, hasta 60 días adelante y con al menos una bahía activa libre durante toda la duración; una reserva se crea directamente como CONFIRMED con una bahía; si el turno está ocupado, no se guarda nada y se devuelven hasta cinco horas alternativas del mismo día (409 SLOT_UNAVAILABLE); los clientes pueden reprogramar o cancelar solo antes del inicio; el administrador pasa las reservas por IN_PROGRESS, COMPLETED, NO_SHOW o CANCELLED; cada servicio del catálogo tiene sus *loyalty_points*, cada línea de reserva los copia cuando se construye la reserva y *Booking.totalLoyaltyPoints()* expone el total en *BookingResponse.totalLoyaltyPoints*; los cambios del horario, las excepciones y las bahías se registran en *schedule_history*. **Eventos:** publica BookingConfirmed (creada o reprogramada) y BookingCancelled.
+**Reglas:** la disponibilidad se calcula sobre una rejilla de 30 minutos dentro del horario de atención, fuera del descanso, no en el pasado, hasta 60 días adelante y con al menos una bahía activa libre durante toda la duración; una reserva se crea directamente como CONFIRMED con una bahía; si el turno no se puede reservar, no se guarda nada y la respuesta 409 SLOT_UNAVAILABLE trae hasta cinco horas alternativas del mismo día y el motivo (*reason*: CLOSED_DAY, OUTSIDE_HOURS, TIME_PASSED o NO_FREE_BAY, calculado por *AvailabilityPolicy.whyUnavailable*); la solicitud puede traer *preferredOperatorId*, que viaja en BookingConfirmed para que operations-service lo respete si está libre; los clientes pueden reprogramar o cancelar solo antes del inicio; el administrador pasa las reservas por IN_PROGRESS, COMPLETED, NO_SHOW o CANCELLED; cada servicio del catálogo tiene sus *loyalty_points*, cada línea de reserva los copia cuando se construye la reserva y *Booking.totalLoyaltyPoints()* expone el total en *BookingResponse.totalLoyaltyPoints*; los cambios del horario, las excepciones y las bahías se registran en *schedule_history*; los datos del negocio del establecimiento (identidad, información tributaria y canales) se leen y guardan con *GET* y *PUT /api/v1/admin/establishment*; las rutas */internal/v1/bookings* sirven a operations-service con la llave interna. **Eventos:** publica BookingConfirmed (creada o reprogramada) y BookingCancelled.
 
 ### 12.4 operations-service
 
-**Función:** operarios, turnos semanales, ausencias, asignación manual, ejecución y calificaciones (ADR-014).
+**Función:** operarios, turnos semanales, ausencias, perfil y habilidades del operario, asignación manual y automática, ejecución, calificaciones e informes de inspección (ADR-014).
 
-**Reglas:** las filas de operarios se crean a partir de las cuentas con el rol OPERATOR; *AssignmentPolicy* devuelve el motivo que bloquea a un operario (OPERATOR_INACTIVE, OPERATOR_NOT_ON_SHIFT, OPERATOR_ABSENT, OPERATOR_BUSY); solo se asignan reservas SCHEDULED o CONFIRMED, y se crea una *service_execution* por línea de reserva; iniciar y finalizar mueven la reserva en booking-service; las asignaciones que devuelve *GET /api/v1/admin/assignments* incluyen la bahía de la reserva (ADR-015). **La asignación automática no está construida** (TD-020). **Eventos:** publica OperatorAssigned, ServiceStarted y ServiceCompleted.
+**Reglas:** las filas de operarios se crean a partir de las cuentas con el rol OPERATOR; si dos solicitudes crean el mismo operario a la vez, la segunda vuelve a leer la fila ya creada en lugar de fallar; *AssignmentPolicy* devuelve el motivo que bloquea a un operario (OPERATOR_INACTIVE, OPERATOR_NOT_ON_SHIFT, OPERATOR_ABSENT, OPERATOR_BUSY); solo se asignan reservas SCHEDULED o CONFIRMED, y se crea una *service_execution* por línea de reserva. **Asignación automática (RF-008):** al consumir BookingConfirmed, *AutoAssignmentPolicy* elige al operario que pidió el cliente si sigue libre y, si no, al libre con menos reservas ese día (a igualdad, el de id menor); si nadie está libre, la reserva queda sin operario para el administrador, y una reprogramación conserva al operario que ya tenía. *GET /api/v1/operators/available* lista los operarios libres que el cliente puede elegir al reservar. Un servicio se puede iniciar desde 15 minutos antes de la hora reservada (*StartPolicy*); iniciar y finalizar mueven la reserva en booking-service; las asignaciones que devuelve *GET /api/v1/admin/assignments* incluyen la bahía de la reserva (ADR-015). **Inspección (RF-036):** solo para servicios de 180 minutos o más; fases Recepción, Exterior, Interior, Motor y Entrega; hasta cinco fotos de 2 MB por hallazgo, guardadas en *execution.inspection_photo*; el enlace público usa un token aleatorio y solo funciona después de publicar. **Eventos:** consume *booking.confirmed* y publica OperatorAssigned, ServiceStarted, ServiceCompleted e InspectionShared.
 
 ### 12.5 payment-service
 
 **Función:** cuentas de pago con QR, pagos con comprobante, revisión, reembolsos, pagos manuales, promociones y puntos de fidelización (ADR-008, ADR-013 y ADR-015).
 
-**Reglas:** solo se pueden pagar reservas CONFIRMED, IN_PROGRESS o COMPLETED, y *PaymentPolicy.CanReportPayment* exige además que no haya un pago aprobado ni uno pendiente o en revisión (expuesto como *payable* en *GET /api/v1/payments/me/bookings*); el monto a pagar es el total que devuelve booking-service menos el cupón canjeado (*AmountDueCalculator*); el pago que reporta el cliente pasa directamente a IN_REVIEW con el monto declarado; una referencia de transacción reutilizada se rechaza; el rechazo exige un motivo de hasta 200 caracteres; un pago manual queda aprobado de inmediato; la máquina de estados es PENDING → IN_REVIEW → APPROVED o REJECTED, y APPROVED → REFUNDED. **Fidelización y promociones (ADR-015):** una aprobación acredita los puntos de la reserva como EARNED (idempotente por cliente y reserva); un reembolso los revierte (REVERSED); el saldo es el *balance_after* del último movimiento; un cupón es un descuento porcentual que se desbloquea cuando el saldo alcanza *required_points*, y canjearlo no consume puntos. **Eventos:** publica PaymentConfirmed, PaymentRejected, PaymentRefunded, PromotionRedeemed y LoyaltyPointsEarned después del commit, solo con *MESSAGING_ENABLED=true*. **Pendiente:** filtro de correlación y chequeo de salud de la base de datos (TD-017).
+**Reglas:** solo se pueden pagar reservas CONFIRMED, IN_PROGRESS o COMPLETED, y *PaymentPolicy.CanReportPayment* exige además que no haya un pago aprobado ni uno pendiente o en revisión (expuesto como *payable* en *GET /api/v1/payments/me/bookings*); el monto a pagar es el total que devuelve booking-service menos el cupón canjeado (*AmountDueCalculator*); el pago que reporta el cliente pasa directamente a IN_REVIEW con el monto declarado; una referencia de transacción reutilizada se rechaza; el rechazo exige un motivo de hasta 200 caracteres; un pago manual queda aprobado de inmediato; la máquina de estados es PENDING → IN_REVIEW → APPROVED o REJECTED, y APPROVED → REFUNDED. **Fidelización y promociones (ADR-015):** una aprobación acredita los puntos de la reserva como EARNED (idempotente por cliente y reserva); un reembolso los revierte (REVERSED); el saldo es el *balance_after* del último movimiento; un cupón es un descuento porcentual que se desbloquea cuando el saldo alcanza *required_points*, y canjearlo no consume puntos. **Eventos:** publica PaymentConfirmed, PaymentRejected, PaymentRefunded, PromotionRedeemed y LoyaltyPointsEarned después del commit, solo con *MESSAGING_ENABLED=true*. **Correlación y salud:** *CorrelationIdMiddleware* toma o crea el *X-Correlation-Id* y lo reenvía a booking-service; */health* y */actuator/health* comprueban SQL Server con un límite de 3 segundos.
 
 ### 12.6 notification-service
 
 **Función:** convierte eventos en notificaciones (bandeja, push mediante Expo y correo) y programa los recordatorios de las reservas (ADR-011).
 
-**Reglas:** la notificación siempre se guarda primero, y una falla del push nunca hace fallar la solicitud; el consumo es idempotente por *eventId* (*processed_event*); BookingConfirmed programa recordatorios 24 h y 1 h antes, BookingCancelled los cancela y una reprogramación los mueve; los correos al cliente leen la dirección vigente y los interruptores desde security-service mediante la ruta interna; un aviso se envía por correo solo cuando cambia algo para el cliente (reserva, recordatorio, resultado de pago, cupón e informe de inspección), mientras que el avance del servicio, los puntos ganados y todos los avisos al personal se quedan en la bandeja y en push; la proyección *booking_tracking* alimenta los avisos al personal (reprogramada, cancelada y desasignada para el operario; creada, reprogramada y cancelada para todo administrador activo); el endpoint del administrador acepta solo *SYSTEM_MESSAGE* e *INSPECTION_REPORT*. **Configuración:** MESSAGING_ENABLED, PUSH_ENABLED, MAIL_ENABLED, INTERNAL_API_KEY, REMINDERS_ENABLED, REMINDER_LEADS y REMINDER_CHECK_INTERVAL.
+**Reglas:** la notificación siempre se guarda primero, y una falla del push nunca hace fallar la solicitud; el consumo es idempotente por *eventId* (*processed_event*); BookingConfirmed programa recordatorios 24 h y 1 h antes, BookingCancelled los cancela y una reprogramación los mueve; los correos al cliente leen la dirección vigente y los interruptores desde security-service mediante la ruta interna; un aviso se envía por correo solo cuando cambia algo para el cliente (reserva, recordatorio, resultado de pago, cupón e informe de inspección), mientras que el avance del servicio, los puntos ganados y todos los avisos al personal se quedan en la bandeja y en push; la proyección *booking_tracking* alimenta los avisos al personal (reprogramada, cancelada y desasignada para el operario; creada, reprogramada y cancelada para todo administrador activo); el endpoint del administrador acepta solo *SYSTEM_MESSAGE* e *INSPECTION_REPORT*; InspectionShared genera el aviso al cliente con el enlace público del informe (*/report/{token}*); cada pocos minutos *UnassignedBookingAlertService* avisa a los administradores de las reservas confirmadas que empiezan en menos de 2 horas y siguen sin operario (una vez por reserva); la ruta interna *POST /internal/v1/notifications/app-update*, que llama *deploy/publish-apk.sh*, avisa por push que hay una versión nueva de la aplicación. **Configuración:** MESSAGING_ENABLED, PUSH_ENABLED, MAIL_ENABLED, INTERNAL_API_KEY, REMINDERS_ENABLED, REMINDER_LEADS y REMINDER_CHECK_INTERVAL.
 
 ### 12.7 Clientes Web y Móvil
 
-La aplicación web consume el gateway mediante los servicios de *core/services*; *auth-interceptor* agrega el token y redirige a */auth?expired* cuando el servidor responde 401, y *api-error* traduce los códigos de error. Dos funciones de administración todavía conservan sus datos en el navegador: los datos del negocio (*BusinessStore*, localStorage) y los informes de inspección (*InspectionStore* con localStorage y fotos en IndexedDB). Los roles y permisos, las promociones, la fidelización, las preferencias y los interruptores de notificación se leen y se guardan mediante la API (*role-permissions-api*, *promotions-api*, *loyalty-api* y *preferences*). La aplicación móvil cubre los tres roles con pantallas equivalentes y guarda la sesión con *expo-secure-store*.
+La aplicación web consume el gateway mediante los servicios de *core/services*; *auth-interceptor* agrega el token y redirige a */auth?expired* cuando el servidor responde 401, y *api-error* traduce los códigos de error. Todas las pantallas leen y guardan mediante la API: los datos del negocio usan *BusinessStore* sobre booking-service y los informes de inspección usan *inspection-api* sobre operations-service (las fotos se comprimen en el navegador antes de enviarse). Solo los reportes se calculan en el navegador a partir de las reservas y los pagos. Los roles y permisos, las promociones, la fidelización, las preferencias y los interruptores de notificación se leen y se guardan mediante la API (*role-permissions-api*, *promotions-api*, *loyalty-api* y *preferences*). La aplicación móvil cubre los tres roles con pantallas equivalentes y guarda la sesión con *expo-secure-store*.
 
 ### 12.8 Ciclos de Vida
 
@@ -853,13 +864,14 @@ security-service emite un JWT firmado con HS256 (secreto JWT_SECRET de al menos 
 
 | Método | Ruta | Rol | Descripción |
 |---|---|---|---|
-| POST | /api/v1/auth/register | Público | Registra un cliente (documentNumber, firstName, lastName, email, phone, password). |
-| POST | /api/v1/auth/login | Público | Devuelve accessToken, vencimiento y usuario. |
+| POST | /api/v1/auth/register | Público | Registra un cliente (documentNumber, firstName, lastName, email, phone, password, acceptsTerms, acceptsDataPolicy). |
+| POST | /api/v1/auth/login | Público | Devuelve accessToken, vencimiento y usuario; 423 ACCOUNT_LOCKED después de cinco intentos fallidos. |
 | POST | /api/v1/auth/logout | Token | Cierra la sesión. |
 | POST | /api/v1/auth/password/forgot, /verify, /reset | Público | Recuperación de la contraseña en tres pasos. |
 | GET, PATCH | /api/v1/users/me | Token | Perfil. |
 | PUT | /api/v1/users/me/email, /api/v1/users/me/password | Token | Cambiar el correo o la contraseña (requiere la contraseña actual). |
 | POST | /api/v1/users/me/deactivate | Token | Desactiva la propia cuenta. |
+| GET, PUT | /api/v1/users/me/address | Token | Dirección de contacto del perfil. |
 | GET, PUT | /api/v1/users/me/preferences | Token | Tema, idioma y los interruptores notificationsEnabled (push), emailRemindersEnabled y promotionsEnabled; PUT es parcial. |
 | GET, POST | /api/v1/admin/users | ADMIN | Lista (paginada, por rol) y crea cuentas. |
 | PATCH | /api/v1/admin/users/{userId}/status | ADMIN | Activa o desactiva una cuenta. |
@@ -876,19 +888,26 @@ security-service emite un JWT firmado con HS256 (secreto JWT_SECRET de al menos 
 | GET | /api/v1/bookings/me, /api/v1/bookings/{id}, /api/v1/bookings/cancellation-reasons | CLIENT | Reservas propias y catálogo de motivos. |
 | PUT, POST | /api/v1/bookings/{id}, /api/v1/bookings/{id}/cancel | CLIENT | Reprogramar o cancelar antes del inicio. |
 | GET, POST | /api/v1/admin/bookings (?from=&to=&status=) | ADMIN | Lista y crea reservas para cualquier cliente. |
+| GET | /api/v1/admin/bookings/day-summary?date= | ADMIN | Indicadores del día para el panel. |
 | GET, PUT | /api/v1/admin/bookings/{id} | ADMIN | Detalle y reprogramación. |
 | PATCH | /api/v1/admin/bookings/{id}/status | ADMIN | Cambia el estado (con reasonCode al cancelar). |
 | GET, POST, PUT, DELETE, PATCH | /api/v1/admin/catalog/services[/{id}[/status]] | ADMIN | Servicios, precios y puntos. |
 | PUT | /api/v1/admin/schedule/business-hours | ADMIN | Horario semanal. |
+| GET | /api/v1/admin/schedule/history | ADMIN | Historial de cambios del horario, las excepciones y las bahías. |
+| GET, PUT | /api/v1/admin/establishment | ADMIN | Datos del negocio del establecimiento. |
 | POST, PUT, DELETE | /api/v1/admin/schedule/exceptions[/{id}] | ADMIN | Excepciones. |
 | GET, POST, PUT, DELETE | /api/v1/admin/bays[/{id}] | ADMIN | Bahías. |
 | GET, PATCH | /api/v1/operator/bookings[/{id}[/status]] | OPERATOR, ADMIN | Las usa operations-service. |
 | GET | /api/v1/admin/operators | ADMIN | Operarios. |
+| GET, PUT | /api/v1/admin/operators/profiles, /api/v1/admin/operators/{id}/profile | ADMIN | Especialidad y habilidades de los operarios. |
+| GET | /api/v1/operators/available?date=&time=&minutes= | Token | Operarios libres que el cliente puede elegir al reservar. |
 | PATCH, PUT | /api/v1/admin/operators/{id}/status, /availability | ADMIN | Activar o desactivar; reemplazar el turno semanal. |
 | GET, POST, DELETE | /api/v1/admin/operators/{id}/absences[/{absenceId}] | ADMIN | Ausencias. |
 | GET | /api/v1/admin/assignments (?from=&to=) | ADMIN | Asignaciones con la bahía de cada reserva. |
 | PUT | /api/v1/admin/assignments/{bookingId} | ADMIN | Asigna o cambia el operario (409 con el motivo). |
 | GET | /api/v1/admin/assignments/{bookingId}/candidates | ADMIN | Operarios con su motivo de bloqueo. |
+| GET, POST, PATCH, DELETE | /api/v1/admin/inspections/{bookingId}[/phases/{phase}, /findings[/{findingId}], /publish, /share, /photos/{photoId}] | ADMIN | Informe de inspección: iniciar, fases, hallazgos con fotos (multipart), publicar y avisar al cliente. |
+| GET | /api/v1/public/inspections/{token}[/photos/{photoId}] | Público | Informe publicado y sus fotos, sin iniciar sesión. |
 | GET | /api/v1/operator/services (?from=&to=) | OPERATOR | Servicios propios. |
 | POST | /api/v1/operator/services/{bookingId}/start, /finish | OPERATOR | Inicia o finaliza un servicio. |
 | GET | /api/v1/operator/ratings | OPERATOR | Calificaciones recibidas. |
@@ -909,6 +928,8 @@ security-service emite un JWT firmado con HS256 (secreto JWT_SECRET de al menos 
 | POST | /api/v1/admin/notifications | ADMIN | Notificación manual; solo SYSTEM_MESSAGE o INSPECTION_REPORT (400 NOTIFICATION_TYPE_NOT_ALLOWED). |
 | GET | /internal/v1/users/{userId}/contact | Llave interna | Contacto e interruptores de notificación de un usuario para notification-service. |
 | GET | /internal/v1/users/admins | Llave interna | Identificadores de los administradores activos. |
+| GET | /internal/v1/bookings?from=&to=, /internal/v1/bookings/{id} | Llave interna | Reservas para la asignación automática de operations-service. |
+| POST | /internal/v1/notifications/app-update | Llave interna | Aviso push de una versión nueva de la aplicación móvil. |
 | GET | /actuator/health | Público | Salud de cada servicio y del gateway. |
 
 *Nota.* Elaborado por los autores a partir de los controladores de los servicios y de la documentación de los servicios.
@@ -941,7 +962,7 @@ Content-Type: application/json
 |---|---|
 | El vehículo no existe o pertenece a otro cliente | 404 VEHICLE_NOT_FOUND (la misma respuesta a propósito). |
 | customer-service no responde | 503 CUSTOMER_SERVICE_UNAVAILABLE. |
-| El turno está ocupado | 409 SLOT_UNAVAILABLE con hasta cinco horas alternativas. |
+| La hora no se puede reservar | 409 SLOT_UNAVAILABLE con hasta cinco horas alternativas y el motivo: CLOSED_DAY, OUTSIDE_HOURS, TIME_PASSED o NO_FREE_BAY. |
 | El vehículo ya tiene una reserva a esa hora | 409 VEHICLE_ALREADY_BOOKED. |
 | El servicio no se ofrece para el tipo de vehículo | SERVICE_NOT_AVAILABLE_FOR_VEHICLE. |
 | Fecha no válida (pasada o más allá de 60 días) | INVALID_DATE. |
@@ -971,11 +992,12 @@ La mensajería usa un solo exchange de tipo topic, *carwash.events*. La clave de
 | Evento | Clave de enrutamiento | Publicador | Consumidores | Estado |
 |---|---|---|---|---|
 | UserRegistered | security.user_registered | security-service | customer-service, notification-service | Publicado |
-| BookingConfirmed | booking.confirmed | booking-service | notification-service | Publicado |
+| BookingConfirmed | booking.confirmed | booking-service | notification-service, operations-service (asignación automática) | Publicado |
 | BookingCancelled | booking.cancelled | booking-service | notification-service | Publicado |
 | OperatorAssigned | execution.operator_assigned | operations-service | notification-service | Publicado |
 | ServiceStarted | execution.service_started | operations-service | notification-service | Publicado |
 | ServiceCompleted | execution.service_completed | operations-service | notification-service | Publicado |
+| InspectionShared | execution.inspection_shared | operations-service | notification-service | Publicado (con el token del enlace público) |
 | PaymentConfirmed, PaymentRejected, PaymentRefunded | payment.confirmed, payment.rejected, payment.refunded | payment-service | notification-service | Publicado |
 | PromotionRedeemed | payment.promotion_redeemed | payment-service | notification-service | Publicado |
 | LoyaltyPointsEarned | payment.loyalty_points_earned | payment-service | notification-service | Publicado (con unlockedPromotions) |
@@ -985,7 +1007,7 @@ La mensajería usa un solo exchange de tipo topic, *carwash.events*. La clave de
 
 ### 13.5 Salud y Verificación
 
-Cada servicio y el gateway exponen */actuator/health* (y payment-service también */health*). La salud de payment-service no comprueba la base de datos (TD-017). Las verificaciones de integración recomendadas se describen en el Manual de Instalación, sección 16.
+Cada servicio y el gateway exponen */actuator/health* (y payment-service también */health*). Todos comprueban la base de datos: payment-service espera como máximo 3 segundos a SQL Server y, si no responde, contesta DOWN con el código 503. Las verificaciones de integración recomendadas se describen en el Manual de Instalación, sección 16, y las pruebas de punta a punta de *lavarapido-infra/e2e* recorren los flujos completos contra los contenedores.
 
 ## 14. Seguridad
 
@@ -1004,7 +1026,7 @@ La política de seguridad del proyecto se basa en la defensa en profundidad, el 
 | Vigencia | Una hora (JWT_ACCESS_TOKEN_TTL); sin token de actualización. |
 | Claims | sub, roles, sid, iss, aud, iat, nbf, exp y jti; sin nombre, correo, teléfono ni documento. |
 | Contraseñas | BCrypt con costo 12 (Provos y Mazières, 1999); máximo 72 caracteres, el límite de entrada de BCrypt. |
-| Intentos de inicio de sesión | **Sin límite ni bloqueo** (TD-003); el tiempo de respuesta es el mismo para los correos desconocidos. |
+| Intentos de inicio de sesión | Cinco intentos fallidos en 15 minutos bloquean la cuenta durante 15 minutos (423 ACCOUNT_LOCKED, tabla *security.login_lockout*); un ingreso correcto o el restablecimiento de la contraseña limpian el contador; el tiempo de respuesta es el mismo para los correos desconocidos. |
 | Sesiones | security.user_session registra cada ingreso; el cierre de sesión fija revoked_at. |
 | Revocación | Un token sigue siendo válido hasta que vence (riesgo aceptado de ADR-006). |
 
@@ -1043,7 +1065,7 @@ El sistema tiene tres roles fijos (ADMIN, OPERATOR y CLIENT) y no tiene roles pe
 | A04 Diseño inseguro | Misma respuesta para correos desconocidos; los identificadores no se usan como control de acceso. | Aplicado |
 | A05 Configuración de seguridad incorrecta | Sin trazas de pila en las respuestas; Swagger solo en dev. | Aplicado |
 | A06 Componentes vulnerables | Revisión con versions:display-dependency-updates, dotnet list package --vulnerable y npm audit. | Manual |
-| A07 Fallas de identificación y autenticación | Token de una hora; sin bloqueo ni límite de solicitudes. | **Brecha** (TD-003) |
+| A07 Fallas de identificación y autenticación | Token de una hora; bloqueo temporal por intentos fallidos; sin límite de solicitudes en el gateway. | Parcial |
 | A08 Fallas de integridad del software y de los datos | Versiones fijas; validación de los mensajes; mensajes no válidos a la DLQ. | Aplicado |
 | A09 Fallas de registro y monitoreo de seguridad | Registros sin datos personales y con identificador de correlación; auditoría no poblada. | Parcial |
 | A10 Falsificación de solicitudes del lado del servidor | Los servicios solo llaman a direcciones internas configuradas. | Aplicado |
@@ -1052,13 +1074,13 @@ El sistema tiene tres roles fijos (ADMIN, OPERATOR y CLIENT) y no tiene roles pe
 
 ### 14.6 Protección de Datos Personales
 
-El tratamiento de datos personales debe cumplir la Ley Estatutaria 1581 de 2012 (Congreso de la República de Colombia, 2012). El registro exige la aceptación explícita de los Términos y Condiciones y de la Política de Tratamiento de Datos Personales (dos casillas), pero la aceptación todavía no se guarda en el servidor (tabla *security.user_consent* pendiente, ADR-010; acción ACO-03). No se recogen datos de tarjetas. Los únicos datos personales que viajan por el bus de mensajes son el correo y el nombre en UserRegistered, y su *toString()* los omite para que no lleguen a los registros.
+El tratamiento de datos personales debe cumplir la Ley Estatutaria 1581 de 2012 (Congreso de la República de Colombia, 2012). El registro exige la aceptación explícita de los Términos y Condiciones y de la Política de Tratamiento de Datos Personales (dos casillas en la web y en el móvil). *RegisterRequest* envía *acceptsTerms* y *acceptsDataPolicy*, y security-service guarda la fecha y la hora de cada aceptación en *security.app_user* (columnas *terms_accepted_at* y *data_policy_accepted_at*, changelog 039). No se recogen datos de tarjetas. Los únicos datos personales que viajan por el bus de mensajes son el correo y el nombre en UserRegistered, y su *toString()* los omite para que no lleguen a los registros.
 
 ### 14.7 Riesgos Aceptados
 
 - Imposibilidad de revocar un JWT antes de su vencimiento.
 - Firma simétrica HS256 con un secreto compartido entre servicios.
-- Sin límite de intentos de inicio de sesión ni límite de solicitudes en el gateway (TD-003).
+- Sin límite de solicitudes en el gateway; el bloqueo de cuentas solo frena los intentos sobre una misma cuenta.
 - Posible pérdida de eventos entre el commit y la publicación (sin Outbox, TD-011).
 - Instancia compartida de SQL Server y cuenta *sa* en el entorno local.
 - Permisos por rol editables pero no aplicados (ADR-015).
@@ -1121,12 +1143,12 @@ Las variables de configuración se describen en el Manual de Instalación, secci
 - Una tabla de dominio nueva debe crear su disparador *tr_touch_* en el mismo changeset.
 - Toda consulta nueva debe incluir *deleted_at IS NULL*.
 - Las semillas usan identificadores fijos; nunca volver a sembrar sin *IDENTITY_INSERT* (CANCELLED = 5, APPROVED = 3).
-- Respaldar la base de datos antes de implementar un servicio que agregue changesets.
+- El siguiente changeset de la numeración global es el 040.
 - El siguiente changeset de la numeración global es el 031.
 
 ### 16.5 Pruebas
 
-La estrategia de pruebas propone una pirámide de pruebas unitarias, de integración, de contrato y de punta a punta, con al menos un 80 % de cobertura de líneas y un 90 % en el dominio. El estado actual es: los servicios Java tienen pruebas de dominio, de casos de uso y web que corren sin base de datos (*./mvnw test*); payment-service prueba su dominio, sus casos de uso y su persistencia (tres proyectos de prueba); en total hay unos 400 métodos de prueba en el backend; las pruebas web no compilan por seis archivos *.spec.ts* desactualizados (TD-001); y no hay pruebas de persistencia con un SQL Server real en los servicios Java (TD-010). Las pruebas de concurrencia recomendadas son dos reservas simultáneas para la misma bahía, dos actualizaciones con la misma *row_version*, dos movimientos de puntos simultáneos del mismo cliente y la entrega duplicada del mismo evento.
+La estrategia de pruebas propone una pirámide de pruebas unitarias, de integración, de contrato y de punta a punta, con al menos un 80 % de cobertura de líneas y un 90 % en el dominio. El 16 de octubre de 2026 se ejecutaron todas las pruebas con estos resultados: 639 pruebas unitarias y de integración aprobadas (web 43, gateway 34, security-service 147, customer-service 68, booking-service 40, operations-service 54, notification-service 112 y payment-service 141, con 7 omitidas a propósito) y 19 de 19 pruebas de punta a punta aprobadas contra los contenedores (*lavarapido-infra/e2e*: flujo completo de reserva, pago y servicio, inspección y reglas de acceso). Los servicios Java prueban su dominio, sus casos de uso y su capa web sin base de datos (*./mvnw test*); payment-service tiene tres proyectos de prueba (dominio, aplicación e integración). Todavía no hay pruebas de persistencia con un SQL Server real dentro de los servicios Java (TD-010); las pruebas de punta a punta cubren en parte ese hueco. Las pruebas de concurrencia recomendadas son dos reservas simultáneas para la misma bahía, dos actualizaciones con la misma *row_version*, dos movimientos de puntos simultáneos del mismo cliente y la entrega duplicada del mismo evento.
 
 ### 16.6 Diagnóstico de Problemas Frecuentes
 
@@ -1155,22 +1177,19 @@ La estrategia de pruebas propone una pirámide de pruebas unitarias, de integrac
 
 | Elemento | Descripción | Prioridad |
 |---|---|---|
-| TD-001 | Archivos de pruebas web desactualizados impiden compilar las pruebas web. | Alta |
-| TD-003 | Sin límite de intentos de inicio de sesión. | Media |
 | TD-006 | Canalización de Jenkins por repositorio. | Media |
-| TD-007 | Propagar X-Correlation-Id en todos los clientes REST y los mensajes. | Baja |
+| TD-007 | Reenviar X-Correlation-Id de customer-service y notification-service a security-service y en los mensajes; generarlo en el gateway. | Baja |
 | TD-008 | Bloqueo optimista con @Version. | Baja |
+| TD-010 | Pruebas de persistencia con un SQL Server real (Testcontainers). | Baja |
 | TD-011 | Outbox para los eventos. | Baja |
-| TD-013 | Datos del negocio del establecimiento guardados solo en el navegador. | Baja |
-| TD-017 | payment-service sin filtro de correlación; la salud no comprueba la base de datos. | Baja |
+| TD-012 | Métricas con Micrometer y Prometheus. | Baja |
 | TD-019 | Changelogs de pagos con numeración propia. | Baja |
-| TD-020 | Asignación automática de operarios (RF-008). | Media |
 
-*Nota.* Fuente: *15-project-control/technical-backlog.md* de la documentación (Equipo de Desarrollo Vehicle Washing, 2026a). TD-002, TD-014, TD-015, TD-016 y TD-018 se resolvieron entre el 8 y el 9 de octubre de 2026; su cierre y las acciones pendientes se registran en el documento de acciones correctivas, preventivas y de mejoramiento.
+*Nota.* Fuente: *15-project-control/technical-backlog.md* de la documentación (Equipo de Desarrollo Vehicle Washing, 2026a), revisado contra el código el 16 de octubre de 2026. Entre el 8 y el 16 de octubre de 2026 se resolvieron TD-001, TD-002, TD-003, TD-009, TD-013, TD-014, TD-015, TD-016, TD-017, TD-018, TD-020 y TD-021; su cierre se registra en el documento de acciones correctivas, preventivas y de mejoramiento.
 
 ### 16.8 Evolución Recomendada
 
-Si el proyecto sale del alcance académico, la documentación identifica como evolución natural: firma RS256, tokens de actualización, límites de intentos de inicio de sesión y de solicitudes, Outbox, un inicio de sesión de base de datos por servicio (o una base de datos por servicio), disparadores de auditoría, aplicación real de la matriz de permisos, mTLS entre servicios, observabilidad (métricas y trazabilidad), almacenamiento de imágenes fuera de la base de datos y una pasarela de pagos. Cada cambio requiere un ADR.
+Si el proyecto sale del alcance académico, la documentación identifica como evolución natural: firma RS256, tokens de actualización, límite de solicitudes, Outbox, un inicio de sesión de base de datos por servicio (o una base de datos por servicio), disparadores de auditoría, aplicación real de la matriz de permisos, mTLS entre servicios, observabilidad (métricas y trazabilidad), almacenamiento de imágenes fuera de la base de datos y una pasarela de pagos. Cada cambio requiere un ADR.
 
 ## 17. Glosario
 
@@ -1238,9 +1257,9 @@ Servicio Nacional de Aprendizaje. (2026). *Guía para elaborar manuales de softw
 
 ## 18. Anexos
 
-### Anexo A. Lista de Figuras Pendientes de Captura
+### Anexo A. Origen de las Figuras
 
-Las Figuras 1 y 3 son diagramas reales elaborados a partir del código. Antes de la entrega, el equipo debe exportar el diagrama entidad-relación (Figura 2) desde los archivos DBML de *08-uml* y verificar que ninguna imagen contenga secretos ni datos personales reales.
+Las Figuras 1 y 3 son diagramas elaborados a partir del código. La Figura 2 se generó el 16 de octubre de 2026 desde la base de datos real, con todos los servicios arrancados, por lo que muestra las 57 tablas tal como existen. Ninguna figura contiene secretos ni datos personales.
 
 ### Anexo B. Discrepancias Detectadas
 
@@ -1255,21 +1274,21 @@ La Tabla 29 reúne las contradicciones encontradas entre el código, la document
 | Pila de los servicios | La versión 2.0 indicaba Java 21 y Spring Boot 3 en los seis servicios. | Código: Spring Boot 4.0.8 en los servicios Java y .NET 8 en payment-service (ADR-013). |
 | Migraciones | La versión 2.0 describía un solo changelog maestro para toda la base de datos. | Código y estrategia de migraciones: un changelog por servicio aplicado al arrancar; pagos mediante payment-migrate. |
 | Gateway | La versión 2.0 decía que el gateway rechaza los JWT no válidos en el borde. | Documentación del gateway y ADR-006: no valida tokens; lo hace cada servicio. |
-| Bloqueo de cuenta | El requisito RF-004b, la política de seguridad y la versión 2.0 de los manuales describen un bloqueo después de cinco intentos. | Código: no implementado (TD-003). |
-| Asignación de operarios | Los requisitos y la versión 2.0 describen asignación automática y elección por parte del cliente. | Código y ADR-014: asignación manual por el administrador. |
+| Bloqueo de cuenta | La versión 3.1 indicaba que no existía. | Código del 2026-10-16: cinco intentos fallidos en 15 minutos bloquean la cuenta 15 minutos (RF-004b). Resuelta. |
+| Asignación de operarios | La versión 3.1 indicaba asignación solo manual y sin elección del cliente. | Código del 2026-10-16: asignación automática al confirmarse la reserva con la elección opcional del cliente (RF-008 y RF-010). Resuelta. |
 | Auditoría | La arquitectura dice que los disparadores alimentan audit.audit_log. | Código: la tabla existe, pero ningún disparador ni servicio escribe en ella. |
 | Solicitud de reserva | La versión 2.0 usaba customerVehicleId, scheduledStart y servicios con cantidad. | Código: vehicleId, serviceIds, date, time y notes. |
 | Códigos de ejecución | La versión 2.0 usaba códigos en español (PENDIENTE, EN_PROCESO...). | Modelo de datos: PENDING, IN_PROGRESS, PAUSED, COMPLETED, WITH_ISSUE. |
-| Número de tablas | La versión 2.0 citaba 43, 44 o 49 tablas; la versión 3.0 citaba 47. | 49 tablas al 2026-10-09 (se agregaron booking.schedule_history y notification.booking_tracking). |
+| Número de tablas | La versión 2.0 citaba 43, 44 o 49 tablas; la versión 3.1 citaba 49. | 57 tablas al 2026-10-16, comprobadas en la base de datos (se agregaron las del bloqueo de cuenta, la dirección de la persona, el perfil y las habilidades del operario y los cuatro de la inspección). |
 | Formato de los errores | La versión 2.0 describía un objeto con error, message y traceId. | Código: problem details del RFC 9457 con code. |
 | Promociones | La versión 3.0 indicaba que las promociones funcionaban solo en el navegador. | Código del 2026-10-09: cupones porcentuales en payment-service, desbloqueables con puntos (ADR-015). Resuelta. |
 | Avisos de pago y puntos | La versión 3.0 indicaba que payment-service no publicaba eventos. | Código del 2026-10-09: publica cinco eventos y acredita puntos (ADR-011 y ADR-015). Resuelta. |
 | Referencia repetida | ADR-008 y RF-016 prohíben reutilizar una referencia de transacción. | Código del 2026-10-09: se rechaza con TRANSACTION_REFERENCE_REUSED. Resuelta. |
 | Nombre del repositorio de operaciones | La versión 3.0 de los manuales lo llamaba lavarapido-operations-service. | Nombre real: lavarapido-operation-service (el que espera docker-compose.yml). Resuelta. |
 | Módulo de administración | La versión 2.0 del manual de administrador indicaba que no tenía código. | Código: módulo completo bajo /admin. |
-| README de lavarapido-infra | Marca operations-service y payment-service como planeados. | Están construidos (ADR-013 y ADR-014). |
-| Guía del equipo (sección 6) | Lista como datos de prueba pantallas que ya están conectadas. | Código: usan la API real, salvo las que se listan en la sección 12.7. |
-| Textos de la interfaz | La página de bienvenida anuncia un servicio de lavado "donde estés", pero el servicio solo se presta en el lavadero; el historial del operario muestra medios de pago (tarjeta, PSE) que el sistema no admite; la opción "Eliminar cuenta" desactiva la cuenta; el botón "Reportar progreso" no envía nada; los textos del reembolso están solo en español. | Se deben corregir en la interfaz (acciones ACO-06 a ACO-08). |
+| README de lavarapido-infra | Marcaba operations-service y payment-service como planeados. | Corregido el 2026-10-16: todos los servicios aparecen como implementados. Resuelta. |
+| Guía del equipo (sección 6) | Listaba como datos de prueba pantallas que ya estaban conectadas. | Corregida el 2026-10-16: solo quedan los reportes, calculados en el navegador, y la matriz de permisos, que no se aplica. Resuelta. |
+| Textos de la interfaz | La página de bienvenida anunciaba un servicio "donde estés", el botón "Reportar progreso" no enviaba nada, la opción "Eliminar cuenta" solo desactivaba la cuenta y los textos del reembolso estaban solo en español. | Corregidos el 2026-10-16: la página habla del servicio en el lavadero, el botón se retiró, la opción se llama "Desactivar mi cuenta" y el reembolso está traducido a los cuatro idiomas. Resuelta. |
 | Diccionario del esquema de notificaciones | Las columnas de device_token, processed_event y booking_reminder no se detallaron. | Propósito documentado; columnas por completar. |
 
 *Nota.* Elaborado por los autores a partir del análisis cruzado del código y de la documentación.
@@ -1286,7 +1305,7 @@ La Tabla 29 reúne las contradicciones encontradas entre el código, la document
 | Tabla de contenido con páginas actualizadas | Sí / No |
 | Objetivo y alcance explicados | Sí / No |
 | El contenido coincide con el código de la versión final | Sí / No |
-| Diagrama entidad-relación exportado | Sí / No |
+| Diagrama entidad-relación incluido | Sí / No |
 | Estructura del proyecto verificada contra el código real | Sí / No |
 | Discrepancias del Anexo B resueltas | Sí / No |
 | Sin credenciales, llaves ni datos sensibles | Sí / No |

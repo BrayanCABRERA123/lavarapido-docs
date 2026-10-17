@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 9, 2026
+October 16, 2026
 
-Manual Type: User Manual (Customer and Operator Roles) · Version 3.1
+Manual Type: User Manual (Customer and Operator Roles) · Version 4.0
 
 ## Version Control
 
@@ -32,6 +32,7 @@ Table 1 records the change history of this document. Each time the development t
 | 2.0 | 2026-10-05 | Cover data completed (ficha, instructor, and training center) and the system name adjusted to Vehicle Washing. | Development team |
 | 3.0 | 2026-10-07 | Translation into English, formatting according to the APA Style (7th ed.), restructuring according to the SENA guide, and verification against the source code of the web application. Corrected: screen routes, registration fields (ID number, first and last names, acceptance of the legal documents), password rules, absence of account lockout, booking flow (no operator choice, no rescheduling from the web), payment flow (no promotion code, reference rules), history filters, notifications by email, and operator statuses. | Development team |
 | 3.1 | 2026-10-09 | Update against the code of October 9, 2026, and creation of the Spanish version (Manual_usuario_LavadoVehicular_3145556_ES.md). Added: loyalty points per service and in the booking summary, loyalty progress and unlocked coupons in the dashboard, coupon redemption when paying, list of missing data under the confirm button, payment status in the history and Pay now only when the booking can be paid, email notices of approved, rejected, and refunded payments, points earned, unlocked coupons, and inspection reports, notification switches saved in the account, staff notices for the operator, and new messages. Removed: WhatsApp from the help center. | Development team |
+| 4.0 | 2026-10-16 | Review against the code of October 16, 2026. The figures changed from placeholders to real screenshots of the running system with test data. Added: optional operator choice when booking and automatic assignment of a free one, account lockout for 15 minutes after five failed attempts, messages that explain why a time cannot be booked, starting the service from 15 minutes before the booked time, downloading the Android application from the web, the profile address saved in the account, and the Deactivate my account option, formerly called Delete account. Removed: the Report progress button, which no longer exists on the operator screen. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -69,7 +70,7 @@ Table 1 records the change history of this document. Each time the development t
 - [14. Glossary](#14-glossary)
 - [References](#references)
 - [15. Annexes](#15-annexes)
-  - [Annex A. List of Figures Pending Capture](#annex-a-list-of-figures-pending-capture)
+  - [Annex A. Source of the Screenshots](#annex-a-source-of-the-screenshots)
   - [Annex B. Delivery Checklist](#annex-b-delivery-checklist)
 
 <!-- /toc -->
@@ -86,7 +87,7 @@ The document follows the structure of the guide for writing software manuals of 
 
 ### 4.1 Sources and Conventions of This Manual
 
-The screens, routes, buttons, and messages described here correspond to the *develop* branch of the web application as of October 9, 2026. The names of buttons, menus, and messages are written in **bold** or between quotation marks exactly as they appear when the interface language is English; the interface is also available in Spanish, French, and Portuguese. A route such as */client/vehicles* is the part of the web address that follows the domain of the system (for example, *http://localhost:4200/client/vehicles* in the local environment).
+The screens, routes, buttons, and messages described here correspond to the *develop* branch of the web application as of October 16, 2026. In the interface the system appears under its trade name, **LavaRápido**. The names of buttons, menus, and messages are written in **bold** or between quotation marks exactly as they appear when the interface language is English; the interface is also available in Spanish, French, and Portuguese. A route such as */client/vehicles* is the part of the web address that follows the domain of the system (for example, *http://localhost:4200/client/vehicles* in the local environment).
 
 ## 5. Objective
 
@@ -115,13 +116,13 @@ To explain step by step how the customer and the operator must log in, navigate,
 
 - The functions of the **Administrator** role (bookings, operator assignment, payment review, schedules and bays, users, services, reports, and configuration), which are explained in the Administrator Manual.
 - The installation, configuration, and internal construction of the software, which are explained in the Installation Manual and the Technical Manual.
-- The Android mobile application (React Native with Expo), which offers equivalent modules for the three roles but is still under development; this manual documents only the web version.
+- The Android mobile application (React Native with Expo), which offers equivalent modules for the three roles. It is downloaded from the home page of the web with the download button or the QR code; this manual documents only the web version.
 - At-home washing: in the current version the customer brings the vehicle to the business on the booked date and time.
 - Electronic invoicing with the DIAN (Colombian tax authority), payment gateways, and the management of supplies or inventory.
 
 ### 6.3 About the Screenshots
 
-The figures in this manual are placeholders that indicate the screen and the elements each screenshot must show. Before the final delivery, the team must replace each placeholder with a real screenshot of the final version of the software, with good resolution and ordered according to the flow of use (Annex A).
+The figures in this manual are real screenshots of the system running in the local environment, taken on October 16, 2026, with test accounts and data. They are ordered according to the flow of use, and their source is explained in Annex A.
 
 ## 7. Requirements to Use the System
 
@@ -170,7 +171,7 @@ The system recognizes three fixed roles. Each person sees only the options of th
 
 *System Welcome Screen*
 
-> **Screenshot to insert.** **Screen:** main address of the system (route */*), without a session. **Content:** full view with the top bar (logo, Home, About, Services, language selector, Login, and Register), the main block with the Get started and I already have an account buttons, and the service cards.
+![System Welcome Screen](capturas/user-01-system-welcome-screen.jpg)
 
 *Note.* Capture in a desktop browser with the full window.
 
@@ -225,7 +226,7 @@ Every person must have an account to use the functions of the system. Customers 
 
 *Customer Registration Form*
 
-> **Screenshot to insert.** **Screen:** "Create Account" (route */auth/register*). **Content:** form with the ID Number, First Names, Last Names, Email Address, Phone Number, Password (with the list of requirements), and Confirm Password fields, the two acceptance boxes, and the Register button, filled in with test data.
+![Customer Registration Form](capturas/user-02-customer-registration-form.jpg)
 
 *Note.* No real personal information may appear in the screenshot.
 
@@ -233,7 +234,7 @@ Every person must have an account to use the functions of the system. Customers 
 
 *Validation Messages in Registration*
 
-> **Screenshot to insert.** **Screen:** "Create Account" (route */auth/register*). **Content:** form with at least two fields in an error state (red border and message below the field), for example an email that does not end in @gmail.com and passwords that do not match.
+![Validation Messages in Registration](capturas/user-03-validation-messages-in-registration.jpg)
 
 *Note.* Supports Table 13 in section 11.
 
@@ -257,13 +258,13 @@ Every person must have an account to use the functions of the system. Customers 
 
 **Expected result:** The system opens the home screen of the person's role: */client* for the customer, */operator* for the operator, or */admin* for the administrator.
 
-**Notes or restrictions:** If the email or the password is wrong, the system shows "Incorrect email or password" and does not reveal which of the two failed. The system does not lock the account after failed attempts, so the person can try again or use password recovery. The session lasts one hour; when it expires, the system returns to the login screen with the message "Your session expired. Please sign in again." A deactivated account cannot log in and receives the message "Your account is disabled. Contact the administrator."
+**Notes or restrictions:** If the email or the password is wrong, the system shows "Incorrect email or password" and does not reveal which of the two failed. After five failed attempts within 15 minutes, the account is locked for 15 minutes and the system shows "Too many failed attempts. Your account is locked for 15 minutes; wait or use "Forgot your password?" to get in now." If the person resets the password, they can log in right away. The session lasts one hour; when it expires, the system returns to the login screen with the message "Your session expired. Please sign in again." A deactivated account cannot log in and receives the message "Your account is disabled. Contact the administrator."
 
 **Figure 4**
 
 *Login Screen*
 
-> **Screenshot to insert.** **Screen:** "Login" (route */auth*). **Content:** form with the Email Address and Password fields, the "Forgot your password?" link, the Login button, the "Don't have an account? Sign up" link, and the side panel of the screen.
+![Login Screen](capturas/user-04-login-screen.jpg)
 
 *Note.* Use a test email; do not show real passwords.
 
@@ -294,25 +295,25 @@ Every person must have an account to use the functions of the system. Customers 
 
 *Password Recovery, Step 1: Email Address*
 
-> **Screenshot to insert.** **Screen:** "Recover Password" (route */auth/forgot-password*), step 1. **Content:** three-step indicator with number 1 highlighted, the Email Address field, the Send Code button, and the Back to Login link.
+![Password Recovery, Step 1: Email Address](capturas/user-05-password-recovery-step-1-email-address.jpg)
 
 **Figure 6**
 
 *Password Recovery, Step 2: Verification Code*
 
-> **Screenshot to insert.** **Screen:** "Verification", step 2. **Content:** indicator with number 2 highlighted, the text "Enter the 6-digit code sent to" followed by the email, the six boxes, the resend link, and the Verify Code button.
+![Password Recovery, Step 2: Verification Code](capturas/user-06-password-recovery-step-2-verification-code.jpg)
 
 **Figure 7**
 
 *Password Recovery, Step 3: New Password*
 
-> **Screenshot to insert.** **Screen:** "New Password", step 3. **Content:** indicator with number 3 highlighted, the New Password and Confirm Password fields, the list of four requirements with some checked, and the Update Password button.
+![Password Recovery, Step 3: New Password](capturas/user-07-password-recovery-step-3-new-password.jpg)
 
 **Figure 8**
 
 *Password Change Confirmation*
 
-> **Screenshot to insert.** **Screen:** final screen of the recovery. **Content:** the message "Password updated!", the text "Your password was changed successfully. You can now log in with your new password", and the Go to login button.
+![Password Change Confirmation](capturas/user-08-password-change-confirmation.jpg)
 
 ## 9. Main Menu
 
@@ -342,7 +343,7 @@ After logging in, the system shows a side menu with the options of the person's 
 
 *Side Menu of the Customer Role*
 
-> **Screenshot to insert.** **Screen:** left side menu, visible on all customer screens. **Content:** initials, name, and email of the customer, the eight options in the order of Table 5, and the Log Out option at the end.
+![Side Menu of the Customer Role](capturas/user-09-side-menu-of-the-customer-role.jpg)
 
 ### 9.2 Operator Menu
 
@@ -368,7 +369,7 @@ After logging in, the system shows a side menu with the options of the person's 
 
 *Side Menu of the Operator Role*
 
-> **Screenshot to insert.** **Screen:** left side menu, visible on all operator screens. **Content:** initials, name, and email of the operator, the eight options in the order of Table 6, and the Log Out option at the end.
+![Side Menu of the Operator Role](capturas/user-10-side-menu-of-the-operator-role.jpg)
 
 ## 10. System Modules
 
@@ -402,7 +403,7 @@ Each module is documented with the same format: name, description, role that can
 
 *Customer Dashboard*
 
-> **Screenshot to insert.** **Screen:** Dashboard (route */client*). **Content:** the greeting "Hello, [name]!", the three summary cards, the Your next service block with its progress, the Quick access links, and the benefits block.
+![Customer Dashboard](capturas/user-11-customer-dashboard.jpg)
 
 #### 10.1.2 My Vehicles
 
@@ -432,13 +433,13 @@ Each module is documented with the same format: name, description, role that can
 
 *Customer Vehicle List*
 
-> **Screenshot to insert.** **Screen:** My vehicles (route */client/vehicles*). **Content:** the three indicators, the Register vehicle button, and at least two vehicle cards with type, color, plate, last wash, service, and total washes.
+![Customer Vehicle List](capturas/user-12-customer-vehicle-list.jpg)
 
 **Figure 13**
 
 *Form to Register a Vehicle*
 
-> **Screenshot to insert.** **Screen:** My vehicles > Register vehicle. **Content:** the "Register new vehicle" window with all the fields filled in with test data, the plate format hint, and the Cancel and Save vehicle buttons.
+![Form to Register a Vehicle](capturas/user-13-form-to-register-a-vehicle.jpg)
 
 #### 10.1.3 Book a Wash
 
@@ -456,17 +457,19 @@ Each module is documented with the same format: name, description, role that can
 2. **Step 1 (Choose your vehicle):** select one of the registered vehicles. If the vehicle is not listed, use the **My Vehicles** link to register it first.
 3. **Step 2 (Service type):** select Basic, Premium, or Complete. Each card shows what it includes, the duration, the price for the type of vehicle chosen, and the loyalty points it adds ("Earns N points").
 4. **Step 3 (Date and time):** choose the date and then one of the free times shown in **Select a time**. The times are offered every 30 minutes, within the opening hours, outside the break, and only when a washing bay is free for the whole duration of the service.
-5. Review **Your booking summary**: vehicle, plate, service, estimated duration, date, time, location, total, and **Points you earn**.
-6. Click **Book Now**.
+5. Optionally, choose in **Operator (optional)** one of the operators who are free at that time. If it is left as "No preference: we assign a free one", the system assigns one automatically.
+6. Review **Your booking summary**: vehicle, plate, service, estimated duration, date, time, location, total, and **Points you earn**.
+7. Click **Book Now**.
 
 **Expected result:** The booking is created immediately with the status Confirmed and a washing bay. The system shows "Booking created!" with the booking code, and the **Go to payment** button opens the payment screen for that booking.
 
 **Notes or restrictions:**
 
-- The customer does not choose the operator: the administrator assigns the operator later, and the customer is informed in the dashboard and in the notifications.
+- Choosing the operator is optional. If the chosen operator is no longer free when the booking is confirmed, the system assigns another one ("If the operator you chose is no longer free when we confirm, we assign another one."). The assigned operator is shown in the dashboard and in the notifications, and the administrator can change it later.
 - Bookings can be made up to 60 days in advance.
 - If the day is closed, the system shows "The car wash is closed that day"; if there are no free times, "No free times that day".
 - If another person takes the time while the customer is booking, the system saves nothing, shows "That time was just taken", and lists the closest free times of that same day (up to five) so that the customer can choose another one.
+- If the chosen time cannot be booked for another reason, the system explains which one: "The car wash is closed that day. Choose another date.", "At that time the service does not fit in the opening hours. Choose another time.", or "That time has already passed. Choose a later time."
 - A vehicle cannot have two bookings at the same time ("That vehicle already has a booking at that time.").
 - The service is provided at the business: the customer must bring the vehicle on the booked date and time.
 
@@ -474,19 +477,19 @@ Each module is documented with the same format: name, description, role that can
 
 *Book a Wash, Steps 1 and 2: Vehicle and Service*
 
-> **Screenshot to insert.** **Screen:** Book Wash (route */client/reserve*). **Content:** the vehicle cards with one selected and the Basic, Premium, and Complete service cards with one selected and their prices.
+![Book a Wash, Steps 1 and 2: Vehicle and Service](capturas/user-14-book-a-wash-steps-1-and-2-vehicle-and-service.jpg)
 
 **Figure 15**
 
 *Book a Wash, Step 3 and Summary*
 
-> **Screenshot to insert.** **Screen:** Book Wash, lower part. **Content:** the date and time selected and the "Your booking summary" card with all data complete and the Book Now button.
+![Book a Wash, Step 3 and Summary](capturas/user-15-book-a-wash-step-3-and-summary.jpg)
 
 **Figure 16**
 
 *Booking Confirmation*
 
-> **Screenshot to insert.** **Screen:** Book Wash, after clicking Book Now. **Content:** the "Booking created!" window with the booking code, the bay, the summary, and the Go to payment button.
+![Booking Confirmation](capturas/user-16-booking-confirmation.jpg)
 
 #### 10.1.4 View or Cancel a Booking
 
@@ -528,7 +531,7 @@ Each module is documented with the same format: name, description, role that can
 
 *Booking Cancellation Confirmation*
 
-> **Screenshot to insert.** **Screen:** History > Cancel booking. **Content:** the "Cancel booking?" window with the booking code and the Yes, cancel and Back buttons.
+![Booking Cancellation Confirmation](capturas/user-17-booking-cancellation-confirmation.jpg)
 
 #### 10.1.5 Pay for a Service
 
@@ -595,13 +598,13 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 
 *Payment Method Selection and Booking Summary*
 
-> **Screenshot to insert.** **Screen:** Pay service (route */client/payment*). **Content:** the four payment methods with one selected and the Booking summary card with subtotal, discount, and total to pay.
+![Payment Method Selection and Booking Summary](capturas/user-18-payment-method-selection-and-booking-summary.jpg)
 
 **Figure 19**
 
 *QR Code and Receipt Upload*
 
-> **Screenshot to insert.** **Screen:** Pay service, after choosing a digital method. **Content:** the QR code, the authorized key or account with the Copy number button, the amount to pay, the receipt upload area, and the Transaction reference and Amount paid fields.
+![QR Code and Receipt Upload](capturas/user-19-qr-code-and-receipt-upload.jpg)
 
 *Note.* Use a test QR code; do not show real bank accounts.
 
@@ -632,13 +635,13 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 
 *History With Filters*
 
-> **Screenshot to insert.** **Screen:** History (route */client/history*). **Content:** the All, Active, Completed, and Cancelled filters, the date range, the search box, and at least two booking cards with different statuses.
+![History With Filters](capturas/user-20-history-with-filters.jpg)
 
 **Figure 21**
 
 *Rating of a Completed Service*
 
-> **Screenshot to insert.** **Screen:** History > Rate Service. **Content:** the "Rate service" window with the five stars (some selected), the "Comments (optional)" field with a sample text, and the Submit rating button.
+![Rating of a Completed Service](capturas/user-21-rating-of-a-completed-service.jpg)
 
 #### 10.1.7 Notifications
 
@@ -667,7 +670,7 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 
 *Notification Center*
 
-> **Screenshot to insert.** **Screen:** Notifications (route */client/notifications*). **Content:** the unread counter, the type tabs, the filters, the Mark all as read button, and a list with read and unread notifications.
+![Notification Center](capturas/user-22-notification-center.jpg)
 
 #### 10.1.8 Profile
 
@@ -685,17 +688,17 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 2. To modify the data, click **Edit profile**, change the fields, and click **Save**; the message "Profile updated!" appears.
 3. To change the email, which is the login username, type the new one and confirm with the current password in the window "Confirm the email change"; from then on the new email is used to log in.
 4. To change the password, go to **Password** and click **Change**. Type the **Current password**, the **New password**, and **Confirm new password**, and click **Save**.
-5. To stop using the account, go to **Account**, click **Delete account**, read the message, and confirm with the password.
+5. To stop using the account, go to **Account**, click **Deactivate my account**, read the message, and confirm with the password.
 
 **Expected result:** The data is updated. If the password was changed, the new one is used at the next login.
 
-**Notes or restrictions:** If the current password is wrong, the change is rejected ("The current password is incorrect"); the new password must be different from the current one. Although the option is called **Delete account**, the account is deactivated, not erased: the person can no longer log in and the sessions are closed, but the history of bookings and payments is kept. To reactivate it, the person must contact the administrator. The **Address** field is not yet saved by the server.
+**Notes or restrictions:** If the current password is wrong, the change is rejected ("The current password is incorrect"); the new password must be different from the current one. The account is deactivated, not erased: the person can no longer log in and the sessions are closed, but the history of bookings and payments is kept. To reactivate it, the person must contact the administrator. The **Address** is saved in the account, so it appears the same on any device.
 
 **Figure 23**
 
 *User Profile*
 
-> **Screenshot to insert.** **Screen:** Profile. **Content:** the initials, the name, "Member since", the fields in view mode, the Edit profile button, and the Password and Account sections.
+![User Profile](capturas/user-23-user-profile.jpg)
 
 #### 10.1.9 Settings
 
@@ -724,7 +727,7 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 
 *Settings Screen*
 
-> **Screenshot to insert.** **Screen:** Settings (route */client/configuration*). **Content:** the Notifications, Help, Appearance, Languages, and Legal and privacy sections, with the current language selected.
+![Settings Screen](capturas/user-24-settings-screen.jpg)
 
 ### 10.2 Operator Role Modules
 
@@ -755,7 +758,7 @@ The operator receives the account from the business administrator. The operator 
 
 *Operator Dashboard*
 
-> **Screenshot to insert.** **Screen:** Dashboard (route */operator*). **Content:** the greeting with the number of pending services, the indicators, the progress bar, and the Today's services list with one service in progress and another pending.
+![Operator Dashboard](capturas/user-25-operator-dashboard.jpg)
 
 #### 10.2.2 My Schedule
 
@@ -783,7 +786,7 @@ The operator receives the account from the business administrator. The operator 
 
 *Operator Schedule*
 
-> **Screenshot to insert.** **Screen:** My Schedule (route */operator/schedule*). **Content:** the calendar with one day selected, the totals, the Next service block, and the list of the day's bookings with their Start or Finish buttons.
+![Operator Schedule](capturas/user-26-operator-schedule.jpg)
 
 #### 10.2.3 Assigned Services
 
@@ -808,7 +811,7 @@ The operator receives the account from the business administrator. The operator 
 
 **Expected result:** The status changes to In progress and then to Completed ("Service finished!"). The customer receives the notices and can rate the service.
 
-**Notes or restrictions:** The **Report progress** button only shows a confirmation in the current version; it does not send any update to the customer. The operator can only update the services assigned to them.
+**Notes or restrictions:** The service can be started from 15 minutes before the booked time. The operator can only update the services assigned to them.
 
 **Table 10**
 
@@ -816,7 +819,7 @@ The operator receives the account from the business administrator. The operator 
 
 | Status | Meaning | Available action |
 |---|---|---|
-| Pending | The service was assigned and has not started yet. | Start Service (only on the day of the booking). |
+| Pending | The service was assigned and has not started yet. | Start Service (from 15 minutes before the booked time). |
 | In progress | The operator started the wash. | Finish Service. |
 | Completed | The wash is finished and the customer can rate it. | View only. |
 
@@ -826,13 +829,13 @@ The operator receives the account from the business administrator. The operator 
 
 *List of Assigned Services With Filters*
 
-> **Screenshot to insert.** **Screen:** Assigned services (route */operator/assigned-services*). **Content:** the summary cards, the date and service type filters, and the table with the ID, Service type, Date & time, Vehicle, Client, and Status columns, with at least four rows.
+![List of Assigned Services With Filters](capturas/user-27-list-of-assigned-services-with-filters.jpg)
 
 **Figure 28**
 
 *Service Information and Action Buttons*
 
-> **Screenshot to insert.** **Screen:** Assigned services > click on a service. **Content:** the Service information panel with the service data and the Start Service and Finish Service buttons.
+![Service Information and Action Buttons](capturas/user-28-service-information-and-action-buttons.jpg)
 
 #### 10.2.4 Operator Notifications
 
@@ -842,7 +845,7 @@ The operator's notifications work like the customer's (section 10.1.7). The most
 
 *Operator Notifications*
 
-> **Screenshot to insert.** **Screen:** Notifications (route */operator/notifications*). **Content:** the unread counter, the type tabs, and a list that includes a notice of a new service assigned.
+![Operator Notifications](capturas/user-29-operator-notifications.jpg)
 
 #### 10.2.5 Service History
 
@@ -870,7 +873,7 @@ The operator's notifications work like the customer's (section 10.1.7). The most
 
 *Operator Service History*
 
-> **Screenshot to insert.** **Screen:** History (route */operator/service-history*). **Content:** the indicators, the final status tabs, and the table with date, service, vehicle, payment, amount, rating, and final status.
+![Operator Service History](capturas/user-30-operator-service-history.jpg)
 
 #### 10.2.6 Ratings Received
 
@@ -897,7 +900,7 @@ The operator's notifications work like the customer's (section 10.1.7). The most
 
 *Ratings Received by the Operator*
 
-> **Screenshot to insert.** **Screen:** Ratings (route */operator/qualifications*). **Content:** the average and total of ratings, the filters, and at least three ratings with comments.
+![Ratings Received by the Operator](capturas/user-31-ratings-received-by-the-operator.jpg)
 
 #### 10.2.7 Operator Profile and Settings
 
@@ -946,6 +949,10 @@ The system validates the information while the person types. When a piece of dat
 | A vehicle is already registered with this plate | The plate belongs to an active vehicle. | Verify the plate. |
 | The plate format does not match the vehicle type | The plate does not follow the official format for the type chosen. | Correct the plate or the type. |
 | That time was just taken | The slot was taken while booking. | Choose one of the times suggested. |
+| The car wash is closed that day. Choose another date. | The chosen day is marked as closed. | Choose another date. |
+| At that time the service does not fit in the opening hours. Choose another time. | The service would end after closing time or overlaps the break. | Choose another of the free times. |
+| That time has already passed. Choose a later time. | The chosen time is already in the past. | Choose a later time. |
+| Too many failed attempts. Your account is locked for 15 minutes... | The password was typed wrong five times within 15 minutes. | Wait 15 minutes or use Forgot your password?. |
 | That vehicle already has a booking at that time. | The vehicle is already booked in that slot. | Choose another time. |
 | That date cannot be booked. | The date is in the past or beyond the booking window. | Choose a valid date. |
 | This booking can no longer be changed. | The booking already started or was closed. | Contact the business. |
@@ -973,7 +980,7 @@ Logging out when finished prevents another person from using the account, especi
 
 *Log Out Confirmation*
 
-> **Screenshot to insert.** **Screen:** side menu > Log Out. **Content:** the "Log out" window with the message "Are you sure you want to log out?" and the Yes, log out and Cancel buttons.
+![Log Out Confirmation](capturas/user-32-log-out-confirmation.jpg)
 
 ## 13. Frequently Asked Questions
 
@@ -987,7 +994,7 @@ The system only accepts emails ending in @gmail.com, and each email and each ID 
 
 ##### Can my account be locked for typing the password wrong?
 
-No. The current version does not lock accounts for failed attempts. If you do not remember the password, use password recovery.
+Yes. After five failed attempts within 15 minutes, the account is locked for 15 minutes. You can wait that time or use **Forgot your password?** to create a new password and log in right away.
 
 ##### How do I know if my booking was confirmed?
 
@@ -999,7 +1006,7 @@ The screen only offers free times. If another person takes the time while you bo
 
 ##### Can I choose who washes my vehicle?
 
-No. The administrator assigns the operator. You can see the assigned operator in the dashboard and receive a notification when the operator is assigned.
+Yes, it is optional. When booking, **Operator (optional)** lists the operators who are free at that time. If you do not choose one, the system assigns a free operator automatically. You can see the assigned operator in the dashboard and receive a notification when the operator is assigned or changed.
 
 ##### How do I change the date of a booking?
 
@@ -1033,9 +1040,9 @@ When the booking is Completed, open History, click "Rate Service", choose from o
 
 Yes. In Settings you can choose Spanish, English, French, or Portuguese and one of four color themes.
 
-##### Can I delete my account?
+##### Can I delete or deactivate my account?
 
-The Delete account option deactivates the account: you will not be able to log in, but your history is kept. To reactivate it, contact the administrator.
+The **Deactivate my account** option deactivates the account, without erasing it: you will not be able to log in, but your history is kept. To reactivate it, contact the administrator.
 
 ##### I am an operator and cannot start a service. Why?
 
@@ -1081,9 +1088,9 @@ Vehicle Washing Development Team. (2026b). *Front-end-proyecto-web* (develop bra
 
 ## 15. Annexes
 
-### Annex A. List of Figures Pending Capture
+### Annex A. Source of the Screenshots
 
-Before delivery, the team must verify that each of the 32 placeholders of this manual was replaced by a real and sharp screenshot of the final version, ordered according to the flow of use. Screenshots must not contain real emails, ID numbers, phone numbers, plates, bank accounts, or passwords; test accounts must be used.
+The figures in this manual were taken on October 16, 2026, on the version of the *develop* branch, with the whole system running in Docker and the web at *http://localhost:4200*. Test accounts, vehicles, bookings, and payments created only for the screenshots were used, so no real emails, ID numbers, phone numbers, plates, or bank accounts appear. If a screen changes in a future version, the corresponding screenshot must be taken again with the same file name in the *capturas* folder.
 
 ### Annex B. Delivery Checklist
 
@@ -1097,7 +1104,7 @@ Before delivery, the team must verify that each of the 32 placeholders of this m
 | Includes a table of contents with updated pages | Yes / No |
 | Explains objective and scope | Yes / No |
 | The content matches the software of the final version | Yes / No |
-| All figures were replaced by real screenshots | Yes / No |
+| All figures are real screenshots of the final version | Yes / No |
 | The steps are clear and ordered | Yes / No |
 | Contains no sensitive information or real credentials | Yes / No |
 | Spelling and APA formatting reviewed | Yes / No |

@@ -41,12 +41,12 @@ Este documento describe el diseño tal como está construido: interfaces gráfic
 | notification-service | Spring Boot 4.0.8, Spring Mail, Java 21 | 3006 | `Backend/lavarapido-notification-service` |
 | Base de datos | SQL Server 2022 (una base, un esquema por servicio) | 1433 | `Backend/lavarapido-infra/docker-compose.yml` |
 | Mensajería | RabbitMQ 4 (exchange `carwash.events`) | 5672 | `Backend/lavarapido-infra/docker-compose.yml` |
-| Aplicación web | Angular 21.2.7, Angular Material, ngx-translate, Chart.js | 4200 | `Web` |
+| Aplicación web | Angular 21.2.25, Angular Material, ngx-translate, Chart.js | 4200 | `Web` |
 | Aplicación móvil | React Native 0.86.3, Expo ~57, React Navigation 7, i18next | 8081 (Expo) | `LavadoVehicular-Movil` |
 
 > *Nota.* Versiones tomadas de `pom.xml`, `Directory.Build.props` y `package.json`. Documentación oficial: Spring (s.f.), Microsoft (s.f.-a, s.f.-b), RabbitMQ (s.f.), Liquibase (s.f.), Angular (s.f.), React Native (s.f.) y Expo (s.f.).
 
-Fuera del alcance: requisitos (ver SRS v6, `lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`), diagramas dinámicos (producto de análisis) y costos.
+Fuera del alcance: requisitos (ver SRS v7, `lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`), diagramas dinámicos (producto de análisis) y costos.
 
 ## 2. Interfaces gráficas
 
