@@ -57,22 +57,22 @@ Estructura de `lavarapido-docs`: cada evidencia tiene una carpeta numerada (`01_
 
 ## 2. Repositorios de código fuente
 
-Rama de trabajo: **`develop`** en todos los repositorios de código. No hay release tags. Las columnas «Último commit» y «`main` atrasada» se tomaron el 15/10/2026.
+Rama de trabajo: **`develop`** en todos los repositorios de código. No hay release tags. Las columnas «Último commit» y «`main` atrasada» se tomaron el 16/10/2026.
 
 | Componente | Tecnología | Repositorio (rama `develop`) | Último commit | `main` atrasada | Acceso |
 |---|---|---|---|---|---|
-| Frontend web | Angular | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | `0def742` | 323 commits | Público |
-| Aplicación móvil | React Native (Expo) | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | `a3b98a3` | 123 commits | Público |
+| Frontend web | Angular | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | `ec72d23` | 394 commits | Público |
+| Aplicación móvil | React Native (Expo) | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | `1cdd392` | 171 commits | Público |
 | API Gateway | Spring Boot | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | `d752e5e` | 10 commits | Público |
-| Seguridad (autenticación, JWT, roles) | Spring Boot | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | `dab7cb2` | 37 commits | Público |
-| Clientes y vehículos | Spring Boot | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | `4e9f280` | 2 commits | Público |
-| Catálogo y reservas | Spring Boot | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | `1eca172` | 39 commits | Público |
-| Operación (operarios y bahías) | Spring Boot | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | `0906cdb` | 24 commits | Público |
-| Pagos y fidelización | .NET Core | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | `d10577a` | 32 commits | Público |
-| Notificaciones | Spring Boot | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | `524014c` | 23 commits | Público |
-| Infraestructura (Docker, base de datos, pruebas E2E) | Docker, SQL Server, RabbitMQ | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | `28c4a80` | 22 commits | Público |
-| Documentación técnica (SDD) | Markdown, OpenAPI | [vehicle-w-docs](https://github.com/code-sena/vehicle-w-docs/tree/docs) (rama `docs`) | `b47be20` | 278 commits | Pendiente de permisos |
-| Evidencias documentales | Markdown | [lavarapido-docs](https://github.com/BrayanCABRERA123/lavarapido-docs) (rama `main`) | `e4aa504` | — | Público |
+| Seguridad (autenticación, JWT, roles) | Spring Boot | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | `0c6e37f` | 47 commits | Público |
+| Clientes y vehículos | Spring Boot | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | `971655c` | 4 commits | Público |
+| Catálogo y reservas | Spring Boot | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | `5ae7ed3` | 43 commits | Público |
+| Operación (operarios y bahías) | Spring Boot | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | `438f605` | 33 commits | Público |
+| Pagos y fidelización | .NET Core | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | `3c3b0a6` | 37 commits | Público |
+| Notificaciones | Spring Boot | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | `6462b51` | 32 commits | Público |
+| Infraestructura (Docker, base de datos, pruebas E2E) | Docker, SQL Server, RabbitMQ | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | `c6259b5` | 52 commits | Público |
+| Documentación técnica (SDD) | Markdown, OpenAPI | [vehicle-w-docs](https://github.com/code-sena/vehicle-w-docs/tree/docs) (rama `docs`) | `f73c5ac` | 299 commits | Pendiente de permisos |
+| Evidencias documentales | Markdown | [lavarapido-docs](https://github.com/BrayanCABRERA123/lavarapido-docs) (rama `main`) | último commit de `main` | — | Público |
 
 **Base de datos:** SQL Server 2022 compartido, con un esquema por servicio (ADR-003, ADR-009). Cada servicio Spring Boot gestiona sus migraciones con Liquibase. Las migraciones del servicio de pagos están en [`lavarapido-payment-service/db`](https://github.com/merari0322/lavarapido-payment-service/tree/develop/db).
 
