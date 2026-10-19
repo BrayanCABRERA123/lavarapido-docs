@@ -34,6 +34,7 @@ Table 1 records the change history of this document. Each time an administrative
 | 4.0 | 2026-10-16 | Review against the code of October 16, 2026. The figures changed from placeholders to real screenshots. Updated: account lockout after failed attempts, automatic operator assignment with the optional choice of the customer, business data and inspection reports saved on the server, consent to the legal documents stored at registration, automatic creation of the first administrator with ADMIN_EMAIL and ADMIN_PASSWORD, translated refund texts, new traces in Table 15, risks in Table 16, and Annex B items that were resolved. | Development team |
 | 4.1 | 2026-10-17 | Review against the code of October 17, 2026. Added the inspection report from the mobile app (section 12.5): it opens from the booking detail, takes the photos with the camera or the gallery, shrinks them on the phone before uploading them, and shares the link with the phone menu. | Development team |
 | 4.2 | 2026-10-19 | The user type is changed from Management > Users (section 10.3); an administrator account cannot be deactivated (section 9.4). | Development team |
+| 4.3 | 2026-10-19 | Screenshots taken again on October 19, 2026, with demo data, and new Figure 5 of the business data to be completed (section 11.1). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -333,8 +334,8 @@ A system account consists of a person (*security.person*: ID number, first names
 ### 9.2 Consulting Users
 
 1. In the side menu, click **Management** and open the **Users** tab (route */admin/management*).
-2. Review the table with **Name**, **Email**, **User type**, **Last sign-in**, and **Status**.
-3. Use the **Enabled** and **Disabled** filters and the search box to find an account; **Clear filters** removes them.
+2. Review the table with **Name**, **Email**, **User type**, **Registration date**, **Last sign-in**, and **Status**. The user type is changed in the same table (section 10.3).
+3. Use the **Enabled**, **Registered** (every account), and **Disabled** filters and the search box to find an account; **Clear filters** removes them.
 
 **Figure 3**
 
@@ -441,7 +442,21 @@ Your own account does not show the list but the user type as a label ("You canno
 
 ### 11.1 Business Data
 
-**Settings > Business data** (route */admin/settings*) shows the legal name, tax ID, legal representative, address, phones, email, tax information, and official channels of the business. These data are saved in booking-service (*GET* and *PUT /api/v1/admin/establishment*), which validates each field before saving it. They are the same data customers see on the home page, in the footer, and in the help center, so a change reaches every user when the page is reloaded. The accounts and QR codes to receive payments are configured separately, in **Payment methods** (section 11.4).
+**Settings > Business data** (route */admin/settings*) gathers the data of the business in four cards: **General information** (legal name, trade name, tax ID, business type, founding date, and legal representative), **Location & contact** (address, phones, and email), **Tax information** (tax regime, CIIU activity, DIAN resolution, invoice prefix, and range), and **Official channels** (website, social networks, support line, and service hours). These data are saved in booking-service (*GET* and *PUT /api/v1/admin/establishment*), which validates each field before saving it. They are the same data customers see on the home page, in the footer, and in the help center, so a change reaches every user when the page is reloaded. The accounts and QR codes for receiving payments are configured separately, in **Payment methods** (section 11.4).
+
+The system is delivered without the data of a real business: missing fields show **To be completed**, and a notice at the top of the screen reminds the administrator to fill them in when the system is implemented for a company.
+
+1. Click the pencil of the card to change.
+2. Fill in the fields in the window and click **Apply**. The screen shows **Unsaved changes**.
+3. Repeat with the other cards if needed and click **Save changes** ("Data saved"). **Discard** undoes what has not been saved.
+
+The legal name, the tax ID, and the address are required; the phone must have at least 7 digits, the email must be valid, and the founding date cannot be in the future.
+
+**Figure 5**
+
+*Business Data to Be Completed*
+
+![Business Data to Be Completed](capturas/administrator-04b-business-data.jpg)
 
 ### 11.2 Opening Hours and Exceptions
 
@@ -454,7 +469,7 @@ The **Hours & Bays** screen (route */admin/schedule*) has two tabs: **Business h
 
 A change applies to future availability; bookings already confirmed are not relocated automatically. Before registering a closure, check the bookings of that day in **Bookings** (filter by date) and contact the customers to reschedule or cancel them (section 12.3).
 
-**Figure 5**
+**Figure 6**
 
 *Business Hours and Exceptions*
 
@@ -481,7 +496,7 @@ A bay is a physical washing spot, and the number of active bays defines the capa
 
 The QR images and the receipts are stored inside the database as images (data URLs); there is no separate folder of files to back up (section 14.1).
 
-**Figure 6**
+**Figure 7**
 
 *Payment Methods Configuration*
 
@@ -527,7 +542,7 @@ An operator is an account with the OPERATOR role that also has a record in *exec
 
 Some indicators of the detail screen (for example, punctuality, revenue goal, or skills) are illustrative and do not come from the server; the shifts, absences, services, and ratings do.
 
-**Figure 7**
+**Figure 8**
 
 *Operator Detail With Availability and Absences*
 
@@ -574,7 +589,7 @@ The life cycle rules are the same for everyone: a booking cannot fall outside th
 
 *Note.* Database codes according to ADR-010; the interface translates them.
 
-**Figure 8**
+**Figure 9**
 
 *Booking Management*
 
@@ -593,7 +608,7 @@ The assignments list shows the bay of each booking next to its operator, so the 
 
 Only bookings in SCHEDULED or CONFIRMED status can be assigned, and the operator can be changed while no line of the booking has started. If an operator who is not eligible is chosen, the server rejects the assignment and explains the reason.
 
-**Figure 9**
+**Figure 10**
 
 *Manual Assignment of an Operator*
 
@@ -653,7 +668,7 @@ The system does not integrate a payment gateway (ADR-008). The customer pays out
 
 **Export reconciliation** downloads the list in Excel, PDF, or CSV. Customer notices require *MESSAGING_ENABLED=true* in payment-service and notification-service.
 
-**Figure 10**
+**Figure 11**
 
 *Payment Review*
 
@@ -704,7 +719,7 @@ For queries that the screen does not offer, the IT administrator can use the sup
 | Loyalty points | Point movements and balances per customer. | payment.loyalty_transaction |
 | Users | Accounts by role and status. | security.app_user and security.user_role |
 
-**Figure 11**
+**Figure 12**
 
 *Administrative Reports*
 
@@ -830,7 +845,7 @@ docker cp lavarapido-sqlserver:/var/opt/mssql/data/backup_LavaRapido_2026-10-07_
 
 The *CHECKSUM* option detects damaged pages when backing up and when verifying.
 
-**Figure 12**
+**Figure 13**
 
 *Backup Generated and Verified*
 
@@ -928,7 +943,7 @@ Payments transferred to the business's account and not recorded because of the r
 
 Liquibase changesets are forward-only. Undoing a migration therefore means restoring the previous backup and correcting the change with a new changeset; an already executed changeset must never be edited.
 
-**Figure 13**
+**Figure 14**
 
 *Post-Restoration Verification*
 
@@ -995,7 +1010,7 @@ WHERE last_login IS NULL OR last_login < DATEADD(day, -90, SYSUTCDATETIME());
 - The documentation does not define a retention policy. Recommendation: keep the session records for at least 12 months and archive the older ones in the monthly backups.
 - When the audit triggers are built, do not modify or delete rows of *audit.audit_log*, because they would lose their evidentiary value.
 
-**Figure 14**
+**Figure 15**
 
 *Session History Query*
 

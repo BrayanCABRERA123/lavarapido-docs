@@ -35,6 +35,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 4.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026. Las figuras pasaron de marcadores a capturas reales del sistema funcionando con datos de prueba. Se agregaron: elección opcional del operario al reservar y asignación automática de uno libre, bloqueo de la cuenta por 15 minutos después de cinco intentos fallidos, mensajes que explican por qué una hora no se puede reservar, inicio del servicio desde 15 minutos antes de la hora reservada, descarga de la aplicación Android desde la web, dirección del perfil guardada en la cuenta y la opción Desactivar mi cuenta, que antes se llamaba Eliminar cuenta. Se retiró el botón Reportar progreso, que ya no existe en la pantalla del operario. | Equipo de desarrollo |
 | 4.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se actualizó la pantalla de bienvenida (sección "Quiénes somos" sin cifras, nueva sección de preguntas frecuentes, pie de página sin redes sociales ni enlaces de contacto) y se describió cómo se adapta a celulares y tabletas. Se aclaró que el avance del próximo servicio queda en 0 % hasta que empieza el lavado y que el saludo del panel nombra al lavadero como Lavado Vehicular. | Equipo de desarrollo |
 | 4.2 | 2026-10-19 | Las cuentas de administrador no tienen la opción Desactivar mi cuenta (preguntas frecuentes). | Equipo de desarrollo |
+| 4.3 | 2026-10-19 | Capturas tomadas de nuevo el 19 de octubre de 2026 (fecha en los paneles, calendarios sin días pasados y resumen de la reserva). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -460,7 +461,7 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 1. Hacer clic en **Reservar lavado**.
 2. **Paso 1 (Elige tu vehículo):** seleccionar uno de los vehículos registrados. Si el vehículo no aparece, usar el enlace **Mis Vehículos** para registrarlo primero.
 3. **Paso 2 (Tipo de servicio):** seleccionar Básico, Premium o Completo. Cada tarjeta muestra qué incluye, la duración, el precio para el tipo de vehículo elegido y los puntos de fidelización que suma ("Suma N puntos").
-4. **Paso 3 (Fecha y hora):** elegir la fecha y luego una de las horas libres que aparecen en **Selecciona una hora**. Las horas se ofrecen cada 30 minutos, dentro del horario de atención, fuera del descanso y solo cuando hay una bahía de lavado libre durante toda la duración del servicio.
+4. **Paso 3 (Fecha y hora):** elegir la fecha (el calendario no deja escoger días pasados) y luego una de las horas libres que aparecen en **Selecciona una hora**. Las horas se ofrecen cada 30 minutos, dentro del horario de atención, fuera del descanso y solo cuando hay una bahía de lavado libre durante toda la duración del servicio.
 5. Si se desea, elegir en **Operario (opcional)** uno de los operarios libres a esa hora. Si se deja en "Sin preferencia: te asignamos uno libre", el sistema asigna uno automáticamente.
 6. Revisar el **Resumen de tu reserva**: vehículo, placa, servicio, duración estimada, fecha, hora, ubicación, total y **Puntos que ganas**.
 7. Hacer clic en **Reservar Ahora**.

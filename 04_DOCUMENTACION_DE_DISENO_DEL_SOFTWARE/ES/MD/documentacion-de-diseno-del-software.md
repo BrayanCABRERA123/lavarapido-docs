@@ -15,8 +15,8 @@
 | Aprendices | Brayan Estiven Patiño Cabrera (líder de proyecto), Juan Camilo Guilombo Osorio (líder de frontend), Merari Urbano (líder de backend) |
 | Instructora | Karol Daniela Correa |
 | Centro de formación | Industria |
-| Fecha | 17 de octubre de 2026 |
-| Versión | 1.2 |
+| Fecha | 19 de octubre de 2026 |
+| Versión | 1.3 |
 
 
 

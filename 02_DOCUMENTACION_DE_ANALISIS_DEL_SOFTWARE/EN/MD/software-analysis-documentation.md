@@ -8,7 +8,7 @@ Software Analysis and Development Technologist program (ADSO), group (ficha) 314
 
 Instructor: Karol Daniela Correa
 
-Version 2.1, October 17, 2026
+Version 2.2, October 19, 2026
 
 ---
 
@@ -21,7 +21,7 @@ This document shows how LavaRápido behaves when someone uses it: what happens, 
 3. **Activity diagrams** of the business processes.
 4. **State diagrams** of the entities that change status (booking, payment, service execution, promotion and inspection report).
 
-On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end.
+On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle with the role change (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end.
 
 The full specification of each requirement and use case (actors, precondition, main flow, alternative flows and postcondition) is in the *Software Requirements Specification*, sections 5 and 7.3; here they are cited by their identifier (RF-XXX, CUXX).
 
@@ -31,7 +31,7 @@ The full specification of each requirement and use case (actors, precondition, m
 
 ### 1.1 Use Case Diagram
 
-The 30 use cases are presented in four diagrams, one per actor, grouped by module.
+The 32 use cases are presented in four diagrams, one per actor, grouped by module.
 
 **Use cases common to the three roles**
 
@@ -45,6 +45,7 @@ flowchart LR
     CU17(["CU17 Manage notifications"])
     CU18(["CU18 Customize visual theme"])
     CU19(["CU19 Select language"])
+    CU31(["CU31 Manage own account"])
 
     Usuario --- CU01
     Usuario --- CU03
@@ -53,6 +54,7 @@ flowchart LR
     Usuario --- CU17
     Usuario --- CU18
     Usuario --- CU19
+    Usuario --- CU31
 
     classDef actor fill:#08427b,color:#fff,stroke:#052e56
     class Usuario actor
@@ -151,6 +153,9 @@ flowchart LR
     subgraph REP["Reports"]
         CU23(["CU23 View reports"])
     end
+    subgraph AUT["Automatic processes"]
+        CU32(["CU32 Run automatic processes"])
+    end
 
     Administrador --- CU27
     Administrador --- CU20
@@ -164,24 +169,25 @@ flowchart LR
     Administrador --- CU24
     Administrador --- CU23
     Sistema --- CU08
+    Sistema --- CU32
 
     classDef actor fill:#08427b,color:#fff,stroke:#052e56
     class Administrador,Sistema actor
 ```
 
-*Note.* `«include»` means that CU05 always runs CU06; `«extend»` means that CU25 optionally extends CU12. CU22 appears as view-only for the operator and as management for the administrator, who is the one recording shifts, absences and the operator profile (RF-022, RF-038). The system runs CU08 each time a booking is confirmed. The customer does not record the inspection report (CU30): they view it through the link the administrator shares.
+*Note.* `«include»` means that CU05 always runs CU06; `«extend»` means that CU25 optionally extends CU12. CU22 appears as view-only for the operator and as management for the administrator, who is the one recording shifts, absences and the operator profile (RF-022, RF-038). The system runs CU08 each time a booking is confirmed, and CU32 groups the processes that run without anyone asking for them (reminders, alerts, notices and the first administrator). The customer does not record the inspection report (CU30): they view it through the link the administrator shares.
 
 ### 1.2 Actor and Use Case Matrix
 
 | Actor | Use cases |
 |---|---|
-| All roles | CU01, CU03, CU04, CU16, CU17, CU18, CU19 |
+| All roles | CU01, CU03, CU04, CU16, CU17, CU18, CU19, CU31 |
 | Customer | CU02, CU05, CU06, CU07, CU12, CU14, CU15, CU25, CU26, CU30 (view only) |
 | Operator | CU10, CU11, CU22 (view only) |
 | Administrator | CU09, CU13, CU20, CU21, CU22, CU23, CU24, CU27, CU28, CU29, CU30 |
-| System | CU06 (included in CU05), CU08 |
+| System | CU06 (included in CU05), CU08, CU32 |
 
-The specification of each of the 30 use cases (precondition, main flow, alternative flows, postcondition, status) is in the *Software Requirements Specification*, Tables 23 to 52.
+The specification of each of the 32 use cases (precondition, main flow, alternative flows, postcondition, status) is in the *Software Requirements Specification*, Tables 23 to 54.
 
 ---
 
@@ -558,6 +564,47 @@ sequenceDiagram
 
 *Source:* `operations-service` (`InspectionReport`, migration `033-execution-inspection-report.sql`), `notification-service` (shared report notice), web (`features/admin/pages/inspection`), and mobile app (`AdminInspectionScreen`, `InspectionService`). In the app the photos are taken with the camera or picked from the gallery and shrunk on the phone before the `POST /findings`; the **Publish and share link** button opens the phone share menu.
 
+### 2.10 Password recovery with a 6-digit code (RF-003)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant W as Web or app
+    participant S as security-service
+    participant DB as SQL Server (security)
+    participant M as Email (SMTP)
+
+    U->>W: Forgot my password → email
+    W->>S: POST /api/v1/auth/password/forgot
+    alt active account with that email
+        S->>DB: invalidates the previous codes that are still valid
+        S->>DB: stores the hash of the new code (expires in 15 min)
+        S->>M: email with the code
+    else unknown email or inactive account
+        S->>S: does nothing
+    end
+    S-->>W: 202 (the same answer in both cases)
+    U->>W: Types the code
+    W->>S: POST /api/v1/auth/password/verify
+    alt right code
+        S-->>W: 204
+    else wrong code
+        S->>S: counts the attempt, at the fifth the code is invalidated
+        S-->>W: 400 INVALID_RESET_CODE
+    end
+    U->>W: New password
+    W->>S: POST /api/v1/auth/password/reset
+    alt policy met and different from the current one
+        S->>DB: marks the code as used, stores the new password and clears the lockout
+        S-->>W: 204 (back to sign-in)
+    else weak or same as the current one
+        S-->>W: 400 WEAK_PASSWORD or SAME_PASSWORD (the code is not spent)
+    end
+```
+
+*Source:* `security-service` (`PasswordRecoveryService`, `PasswordResetToken`, `PasswordRecoveryPolicy` with `code-ttl: 15m` and `max-failed-attempts: 5`, `SecureRandomResetCodeGenerator`, `EmailResetCodeNotifier`). The *forgot* answer does not reveal whether the email exists.
+
 ---
 
 ## 3. Activity Diagrams
@@ -842,6 +889,25 @@ stateDiagram-v2
 ```
 
 *Source:* `operations-service`, `InspectionReport` (`publish`, `requirePublished`, `setPhaseStatus`, `addFinding`). The phases are reception, exterior, interior, engine and delivery; only a published report can be shared.
+
+### 4.6 User account (RF-002, RF-004b, RF-027, RF-028)
+
+```mermaid
+stateDiagram-v2
+    [*] --> ACTIVE : sign-up (CLIENT) or created by the administrator
+    state ACTIVE {
+        [*] --> UNLOCKED
+        UNLOCKED --> LOCKED : fifth failed attempt within 15 min
+        LOCKED --> UNLOCKED : 15 min pass or the password is recovered
+        UNLOCKED --> UNLOCKED : successful sign-in (clears the count)
+    }
+    ACTIVE --> ACTIVE : the administrator changes its role (closes its sessions)
+    ACTIVE --> INACTIVE : the administrator deactivates it (not if it is an administrator)
+    ACTIVE --> INACTIVE : the user closes their account with the password (not if administrator)
+    INACTIVE --> ACTIVE : the administrator activates it
+```
+
+*Source:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus` and `changeRole`, `AccountDeactivationService`). A locked account answers 423 even with the right password; an inactive one answers 403 after the password is checked. Each account has one role and nobody changes their own.
 
 ---
 

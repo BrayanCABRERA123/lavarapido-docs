@@ -34,6 +34,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026. Las figuras pasaron de marcadores a capturas reales. Se actualizaron: bloqueo de la cuenta por intentos fallidos, asignación automática de operarios con la elección opcional del cliente, datos del negocio e informes de inspección guardados en el servidor, consentimiento de los documentos legales guardado al registrarse, creación automática del primer administrador con ADMIN_EMAIL y ADMIN_PASSWORD, textos del reembolso traducidos, nuevas trazas de la Tabla 15, riesgos de la Tabla 16 y temas del Anexo B que quedaron resueltos. | Equipo de desarrollo |
 | 4.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se agregó el informe de inspección desde la aplicación móvil (sección 12.5): se abre desde el detalle de la reserva, toma las fotos con la cámara o la galería, las reduce en el celular antes de subirlas y comparte el enlace con el menú del teléfono. | Equipo de desarrollo |
 | 4.2 | 2026-10-19 | El cambio de tipo de usuario se hace desde Gestión > Usuarios (sección 10.3); una cuenta de administrador no se puede desactivar (sección 9.4). | Equipo de desarrollo |
+| 4.3 | 2026-10-19 | Capturas tomadas de nuevo el 19 de octubre de 2026 con datos de demostración, y nueva Figura 5 de datos del negocio por completar (sección 11.1). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -333,8 +334,8 @@ Una cuenta del sistema está formada por una persona (*security.person*: número
 ### 9.2 Consulta de Usuarios
 
 1. En el menú lateral, hacer clic en **Gestión** y abrir la pestaña **Usuarios** (ruta */admin/management*).
-2. Revisar la tabla con **Nombre**, **Correo**, **Tipo de usuario**, **Último ingreso** y **Estado**.
-3. Usar los filtros **Habilitados** e **Inhabilitados** y el cuadro de búsqueda para encontrar una cuenta; **Limpiar filtros** los quita.
+2. Revisar la tabla con **Nombres**, **Correo**, **Tipo de usuario**, **Fecha de registro**, **Último acceso** y **Estado**. El tipo de usuario se cambia en la misma tabla (sección 10.3).
+3. Usar los filtros **Habilitados**, **Registrados** (todas las cuentas) e **Inhabilitados** y el cuadro de búsqueda para encontrar una cuenta; **Limpiar filtros** los quita.
 
 **Figura 3**
 
@@ -441,7 +442,21 @@ La propia cuenta no muestra la lista, sino el tipo de usuario como etiqueta ("No
 
 ### 11.1 Datos del Negocio
 
-**Configuración > Datos del negocio** (ruta */admin/settings*) muestra la razón social, el NIT, el representante legal, la dirección, los teléfonos, el correo, la información tributaria y los canales oficiales del lavadero. Estos datos se guardan en booking-service (*GET* y *PUT /api/v1/admin/establishment*), que valida cada campo antes de guardarlo. Son los mismos que ven los clientes en la página de inicio, en el pie de página y en el centro de ayuda, por lo que un cambio se refleja para todos los usuarios al recargar la página. Las cuentas y los códigos QR para recibir pagos se configuran aparte, en **Medios de pago** (sección 11.4).
+**Configuración > Datos del negocio** (ruta */admin/settings*) reúne los datos del lavadero en cuatro tarjetas: **Información general** (razón social, nombre comercial, NIT, tipo de negocio, fecha de fundación y representante legal), **Ubicación y contacto** (dirección, teléfonos y correo), **Información fiscal** (régimen, actividad CIIU, resolución de la DIAN, prefijo y rango de facturación) y **Canales oficiales** (sitio web, redes sociales, línea de atención y horario). Estos datos se guardan en booking-service (*GET* y *PUT /api/v1/admin/establishment*), que valida cada campo antes de guardarlo. Son los mismos que ven los clientes en la página de inicio, en el pie de página y en el centro de ayuda, por lo que un cambio se refleja para todos los usuarios al recargar la página. Las cuentas y los códigos QR para recibir pagos se configuran aparte, en **Medios de pago** (sección 11.4).
+
+El sistema se entrega sin datos de un negocio real: los campos que faltan aparecen como **Por completar** y un aviso al inicio de la pantalla recuerda llenarlos cuando el sistema se implemente para una empresa.
+
+1. Hacer clic en el lápiz de la tarjeta que se quiere cambiar.
+2. Diligenciar los campos en la ventana y hacer clic en **Aplicar**. La pantalla muestra **Cambios sin guardar**.
+3. Repetir con las demás tarjetas si hace falta y hacer clic en **Guardar cambios** ("Datos guardados"). **Descartar** deshace lo que no se ha guardado.
+
+La razón social, el NIT y la dirección son obligatorios; el teléfono debe tener al menos 7 dígitos, el correo debe ser válido y la fecha de fundación no puede ser futura.
+
+**Figura 5**
+
+*Datos del Negocio por Completar*
+
+![Datos del Negocio por Completar](capturas/administrador-04b-datos-del-negocio.jpg)
 
 ### 11.2 Horario de Atención y Excepciones
 
@@ -454,7 +469,7 @@ La pantalla **Horarios y bahías** (ruta */admin/schedule*) tiene dos pestañas:
 
 Un cambio aplica a la disponibilidad futura; las reservas ya confirmadas no se reubican automáticamente. Antes de registrar un cierre, consultar las reservas de ese día en **Reservas** (filtro por fecha) y contactar a los clientes para reprogramarlas o cancelarlas (sección 12.3).
 
-**Figura 5**
+**Figura 6**
 
 *Horario de Atención y Excepciones*
 
@@ -481,7 +496,7 @@ Una bahía es un puesto físico de lavado, y el número de bahías activas defin
 
 Las imágenes de los QR y los comprobantes se guardan dentro de la base de datos como imágenes (URL de datos); no hay una carpeta aparte de archivos que respaldar (sección 14.1).
 
-**Figura 6**
+**Figura 7**
 
 *Configuración de los Medios de Pago*
 
@@ -527,7 +542,7 @@ Un operario es una cuenta con el rol OPERATOR que además tiene un registro en *
 
 Algunos indicadores de la pantalla de detalle (por ejemplo, puntualidad, meta de ingresos o habilidades) son ilustrativos y no provienen del servidor; los turnos, ausencias, servicios y calificaciones sí. Los operarios no quedan ligados a una bahía durante todo el turno: la bahía se elige por reserva (ADR-015).
 
-**Figura 7**
+**Figura 8**
 
 *Detalle del Operario con Disponibilidad y Ausencias*
 
@@ -574,7 +589,7 @@ Las reglas del ciclo de vida son las mismas para todos: una reserva no puede que
 
 *Nota.* Códigos de la base de datos según ADR-010; la interfaz los traduce.
 
-**Figura 8**
+**Figura 9**
 
 *Gestión de Reservas*
 
@@ -593,7 +608,7 @@ La lista de asignaciones muestra la bahía de cada reserva junto a su operario, 
 
 Solo se pueden asignar reservas en estado SCHEDULED o CONFIRMED, y el operario se puede cambiar mientras ninguna línea de la reserva haya comenzado. Si se elige un operario que no es elegible, el servidor rechaza la asignación y explica el motivo.
 
-**Figura 9**
+**Figura 10**
 
 *Asignación Manual de un Operario*
 
@@ -653,7 +668,7 @@ El sistema no integra una pasarela de pagos (ADR-008). El cliente paga por fuera
 
 **Exportar conciliación** descarga la lista en Excel, PDF o CSV. Los avisos al cliente requieren *MESSAGING_ENABLED=true* en payment-service y en notification-service.
 
-**Figura 10**
+**Figura 11**
 
 *Revisión de Pagos*
 
@@ -704,7 +719,7 @@ Para las consultas que la pantalla no ofrece, el administrador de TI puede usar 
 | Puntos de fidelización | Movimientos y saldos de puntos por cliente. | payment.loyalty_transaction |
 | Usuarios | Cuentas por rol y estado. | security.app_user y security.user_role |
 
-**Figura 11**
+**Figura 12**
 
 *Reportes Administrativos*
 
@@ -830,7 +845,7 @@ docker cp lavarapido-sqlserver:/var/opt/mssql/data/backup_LavaRapido_2026-10-16_
 
 La opción *CHECKSUM* detecta páginas dañadas al respaldar y al verificar.
 
-**Figura 12**
+**Figura 13**
 
 *Respaldo Generado y Verificado*
 
@@ -928,7 +943,7 @@ Los pagos transferidos a la cuenta del lavadero y no registrados por causa de la
 
 Los changesets de Liquibase solo avanzan. Deshacer una migración significa, por lo tanto, restaurar el respaldo anterior y corregir el cambio con un nuevo changeset; un changeset ya ejecutado nunca se edita.
 
-**Figura 13**
+**Figura 14**
 
 *Verificación Posterior a la Restauración*
 
@@ -995,7 +1010,7 @@ WHERE last_login IS NULL OR last_login < DATEADD(day, -90, SYSUTCDATETIME());
 - La documentación no define una política de retención. Recomendación: conservar los registros de sesión al menos 12 meses y archivar los más antiguos en los respaldos mensuales.
 - Cuando se construyan los disparadores de auditoría, no modificar ni borrar filas de *audit.audit_log*, porque perderían su valor probatorio.
 
-**Figura 14**
+**Figura 15**
 
 *Consulta del Historial de Sesiones*
 

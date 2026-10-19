@@ -15,9 +15,9 @@
 | Apprentices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 17, 2026 |
+| Date | October 19, 2026 |
 
-This document gathers the test plan, the inventory of automated tests in the repositories, their actual results when run on October 16, 2026 (including the end-to-end tests against the complete system), and the functional test cases, run on October 9, 2026, traced to the SRS v7 requirements (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`). Its structure follows the ISO/IEC/IEEE 29119-3 standard for test documentation (International Organization for Standardization [ISO], 2021). No result in this document is assumed.
+This document gathers the test plan, the inventory of automated tests in the repositories, their actual results when run on October 19, 2026 (including the end-to-end, performance, and responsive design tests against the complete system), and the 42 functional test cases, run the same day, traced to the SRS v7.4 requirements (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`). Its structure follows the ISO/IEC/IEEE 29119-3 standard for test documentation (International Organization for Standardization [ISO], 2021). No result in this document is assumed.
 
 ## 1. Test Plan
 
@@ -48,16 +48,16 @@ The web application, the mobile application, and the seven backend services on t
 
 **Table 3**
 
-*Execution environment for the tests*
+*Execution environment for the tests (October 19, 2026)*
 
 | Item | Version |
 | --- | --- |
-| Operating system | Windows 11 Home Single Language 10.0.26300 (October 15 and 16); 10.0.26200 (October 9) |
+| Operating system | Windows 11 Home Single Language 10.0.26300 |
 | Node.js / npm | 24.14.0 / 11.9.0 |
-| JDK | Java 25 (the projects compile for Java 21) with each service's Maven Wrapper |
+| JDK | Java 25.0.4 (the projects compile for Java 21) with each service's Maven Wrapper |
 | .NET SDK | 9.0.306; the project targets `net8.0` and the tests were run with `DOTNET_ROLL_FORWARD=Major` |
-| Database and messaging | Not needed by the unit tests. The end-to-end tests of October 16 and the functional cases of October 9 used SQL Server 2022, RabbitMQ 4, and Mailpit on Docker 28.4 (Docker Desktop) |
-| Services | For the functional cases, the 7 services on the machine (Spring Boot JARs and `dotnet run`); email was redirected to Mailpit so no real emails were sent |
+| Database and messaging | SQL Server 2022, RabbitMQ 4.3, and Mailpit on Docker 28.4 (Docker Desktop). The unit tests do not need them; the 7 payment persistence tests used an isolated database, `LavaRapidoPaymentIT`, created with the same changelogs |
+| Services | The six services and the gateway running on the machine (`./mvnw spring-boot:run` and `dotnet run`) against that infrastructure; email went to Mailpit so no real person was written to. The web with `ng serve` and the mobile app with `npx expo start --web` |
 
 ### 1.4 Criteria
 
@@ -68,7 +68,7 @@ The web application, the mobile application, and the seven backend services on t
 
 ## 2. Automated Test Inventory
 
-The repositories have 542 test methods: 499 in the backend and 43 in the web. The mobile app has no automated tests.
+The repositories have 550 test methods: 507 in the backend and 43 in the web. The mobile app has no automated tests; it is checked with the TypeScript build and the screen walk-through (section 3.2).
 
 **Table 4**
 
@@ -77,86 +77,139 @@ The repositories have 542 test methods: 499 in the backend and 43 in the web. Th
 | Artifact | Files | Methods | What they cover |
 | --- | --- | --- | --- |
 | api-gateway | 1 | 8 | Routing of each `/api/v1/**` prefix to its service, and that `/internal/**` is not exposed by the gateway (`GatewayRoutesTest`) |
-| security-service | 17 | 131 | Registration, sign-in with lockout after failed attempts, password recovery, profile and address, user administration, roles and permissions, preferences, value objects, password policy, JWT issuing and HTTP security by role (`ApiSecurityWebTest`) |
+| security-service | 17 | 135 | Registration, sign-in with lockout after failed attempts, password recovery, profile and address, user administration and role change, roles and permissions, preferences, value objects, password policy, JWT issuing and HTTP security by role (`ApiSecurityWebTest`) |
 | customer-service | 6 | 50 | Customer account, license plates, vehicle CRUD, `security.user_registered` listener and web API |
-| booking-service | 6 | 40 | Booking life cycle, availability, catalog, business data (`EstablishmentTest`), preferred operator in the event and web API |
-| operations-service | 11 | 54 | Manual and automatic assignment, free operators, start window, execution, rating, operator metrics, team summary, operator profile, inspection report and web API |
-| notification-service | 12 | 106 | Notification use cases, message factory per event, notices in the account's language, reminders, alerts for bookings without an operator, device tokens and admin controller |
+| booking-service | 7 | 43 | Booking life cycle, availability and the reason a time is not available, bays (`ServiceBayTest`), catalog, business data (`EstablishmentTest`), preferred operator in the event and web API |
+| operations-service | 11 | 55 | Manual and automatic assignment, free operators, start window, execution, rating, absences, operator metrics, team summary, operator profile, inspection report and web API |
+| notification-service | 12 | 106 | Notification use cases, message factory per event, notices in the account's language, reminders, alerts for bookings without an operator, new version notice, device tokens and admin controller |
 | payment-service (.NET) | 9 | 110 | Payment and receipt, reused reference, history with filters, promotions, loyalty points, payment policy, command and query services, and 7 persistence tests against SQL Server |
 | Web (Angular) | 37 | 43 | Creation of components, guards and services (`should create` smoke tests), API error messages, and payment account selection |
 | Mobile | 0 | 0 | No automated tests |
 
-> *Note.* Support files (`Fakes.java`, `InMemory*.java`, `InMemoryPorts.cs`, `DatabaseFixture.cs`) are not counted as tests. The 7 payment persistence tests skip themselves when the SQL Server connection variable is not set (`DatabaseFixture.cs:20-21`).
+> *Note.* Support files (`Fakes.java`, `InMemory*.java`, `InMemoryPorts.cs`, `DatabaseFixture.cs`) are not counted as tests. The 7 payment persistence tests skip themselves when the `PAYMENT_INTEGRATION_DB` variable is not set (`DatabaseFixture.cs:16-21`).
 
 Backend tests are domain and application tests with in-memory doubles, plus controller tests with MockMvc. Most web tests check that each component is created; `api-error.spec.ts` and `payment.spec.ts` test real rules (the API error messages and the payment account selection).
 
 ## 3. Execution Results
 
-On October 16, 2026, the eight automated suites were run: 639 tests, all passed. The 7 payment persistence tests were skipped because the test database was not set; on October 9 they had been run against an isolated database (`LavaRapidoPaymentIT`) created with the same changelogs, and they passed.
+On October 19, 2026, with the *develop* branch of the ten repositories updated that day, the eight automated suites were run: 655 tests, all passed and none skipped. This time the 7 payment persistence tests also ran, against the isolated `LavaRapidoPaymentIT` database.
 
 **Table 5**
 
-*Actual results per artifact (October 16, 2026)*
+*Actual results per artifact (October 19, 2026)*
 
 | Artifact | Command | Run | Passed | Failed | Skipped | Duration |
 | --- | --- | --- | --- | --- | --- | --- |
 | Web (Angular) | `npx ng test --watch=false` | 43 | 43 | 0 | 0 | 6.7 s |
-| api-gateway | `./mvnw test` | 34 | 34 | 0 | 0 | 9.9 s |
-| security-service | `./mvnw test` | 147 | 147 | 0 | 0 | 13.5 s |
-| customer-service | `./mvnw test` | 68 | 68 | 0 | 0 | 8.3 s |
-| booking-service | `./mvnw test` | 40 | 40 | 0 | 0 | 10.0 s |
-| operations-service | `./mvnw test` | 54 | 54 | 0 | 0 | 10.9 s |
+| api-gateway | `./mvnw test` | 34 | 34 | 0 | 0 | 12.2 s |
+| security-service | `./mvnw test` | 151 | 151 | 0 | 0 | 9.7 s |
+| customer-service | `./mvnw test` | 69 | 69 | 0 | 0 | 7.4 s |
+| booking-service | `./mvnw test` | 43 | 43 | 0 | 0 | 6.8 s |
+| operations-service | `./mvnw test` | 55 | 55 | 0 | 0 | 7.6 s |
 | notification-service | `./mvnw test` | 112 | 112 | 0 | 0 | 0.6 s |
-| payment-service: domain | `dotnet test PaymentService.sln` | 113 | 113 | 0 | 0 | 0.1 s |
-| payment-service: application | (same command) | 28 | 28 | 0 | 0 | 0.1 s |
-| payment-service: integration | (same command, without `PAYMENT_INTEGRATION_DB`) | 0 | 0 | 0 | 7 | — |
-| **Total** | | **639** | **639** | **0** | **7** | |
+| payment-service: domain | `dotnet test PaymentService.sln` | 113 | 113 | 0 | 0 | 0.3 s |
+| payment-service: application | (same command) | 28 | 28 | 0 | 0 | 0.4 s |
+| payment-service: integration | (same command, with `PAYMENT_INTEGRATION_DB`) | 7 | 7 | 0 | 0 | 2 s |
+| **Total** | | **655** | **655** | **0** | **0** | |
 
-> *Note.* Sources: Vitest output, the `target/surefire-reports/*.xml` files of each Java service and the `dotnet test` output. Maven durations add up the time of the test classes, without compilation. There are more tests run than methods in Table 4 because parameterized tests (`@ParameterizedTest`, `[Theory]`) run once per data row.
+> *Note.* Sources: Vitest output, the `./mvnw test` summary (`Tests run:`) and the surefire reports of each Java service, and the `dotnet test` output. Maven durations add up the time of the test classes, without the build. More tests run than there are methods in Table 4 because parameterized tests (`@ParameterizedTest`, `[Theory]`) run once per data item. In customer-service the `tests` attribute of the surefire XML says 68 because of a nested test class; Maven runs and counts 69, which is the right number (the previous version of this document had taken 68).
 
-Execution notes:
+**Figure 1**
 
-- The line `ERROR ... Could not send the password recovery email: SMTP down` in the security-service log is triggered on purpose by `EmailResetCodeNotifierTest`, which simulates an SMTP outage. It is not a failure.
-- Vitest prints a build warning: `src/test-providers.ts` is not included in `tsconfig`. It does not affect the results.
-- The run used JDK 25 and .NET SDK 9 on projects targeting Java 21 and .NET 8; for the final delivery it should be repeated with the project's exact versions.
+*Result of the Java service tests (October 19, 2026)*
+
+![Java service tests](capturas/tests-01-java-backend.png)
+
+**Figure 2**
+
+*Result of the payment-service tests, including the persistence ones*
+
+![payment-service tests](capturas/tests-02-payment-service.png)
+
+**Figure 3**
+
+*Web tests and production build, and TypeScript build of the mobile app*
+
+![Web and mobile app tests](capturas/tests-03-web-and-mobile.png)
+
+Execution remarks:
+
+- The line `ERROR ... Could not send the password recovery email: SMTP down` in the security-service log is caused on purpose by `EmailResetCodeNotifierTest`, which simulates a down SMTP server. It is not a failure.
+- Vitest shows a build warning: `src/test-providers.ts` is not in the `tsconfig`. It does not affect the results.
+- The run used JDK 25 and .NET SDK 9 on projects for Java 21 and .NET 8. GitHub Actions runs the same tests with Temurin 21 and .NET 8 on every change (Deployment Document).
 
 ### 3.1 End-to-End Tests
 
-On October 16, 2026, `node --test "e2e/*.test.js"` was run from `lavarapido-infra`, with the containers of the *app* profile running and `E2E_OPERATOR_ID=2` (the test operator of the local database). All 19 tests passed in 7.3 s. Each test deletes what it creates and leaves the customer's points as they were.
+On October 19, 2026, `node --test "e2e/*.test.js"` was run from `lavarapido-infra`, with the complete system running and `E2E_OPERATOR_ID=2` (the test operator of the local database). The 19 tests passed in 11.2 s. Each test deletes what it creates and leaves the customer's points as they were.
 
 **Table 5a**
 
-*End-to-end tests (October 16, 2026)*
+*End-to-end tests (October 19, 2026)*
 
-| File | Tests | What it covers | Result |
+| File | Tests | What it walks through | Result |
 | --- | --- | --- | --- |
-| `access-rules.test.js` | 7 | Permissions per role and internal routes, profile address, payment history filters, tax data only for the administrator, operator profile, time outside opening hours (`reason: OUTSIDE_HOURS`), and the token of a nonexistent account | 7 passed |
-| `booking-flow.test.js` | 5 (1 + 4 subtests) | Booking choosing an operator, automatic assignment through RabbitMQ, notices to the customer, day summary, and internal routes outside the gateway | 5 passed |
+| `access-rules.test.js` | 7 | Permissions by role and internal routes, profile address, payment history filters, tax data only for the administrator, operator profile, time outside opening hours (`reason: OUTSIDE_HOURS`), and the token of an account that does not exist | 7 passed |
+| `booking-flow.test.js` | 5 (1 + 4 subtests) | Booking choosing an operator, automatic assignment through RabbitMQ, customer notices, day summary, and internal routes outside the gateway | 5 passed |
 | `full-flow.test.js` | 6 (1 + 5 subtests) | Booking → reported payment → approval with points → service start and finish → rating, checking each notice | 6 passed |
-| `inspection-flow.test.js` | 1 | Inspection report with findings and photos, publication, notice to the customer, and public link | 1 passed |
+| `inspection-flow.test.js` | 1 | Inspection report with findings and photos, publishing, customer notice, and public link | 1 passed |
 | **Total** | **19** | | **19 passed** |
 
-### 3.2 Responsive Design and Inspection Report in the Mobile App
+**Figure 4**
 
-On October 17, 2026, Playwright (headless Edge) was used to check that no screen scrolls sideways or clips content (RNF-008), with the backend in Docker and the web in `ng serve`. The mobile app was measured in its web version (`npx expo start --web`), because it shares the same screen code. On each screen the content width was compared with the window width, and elements crossing the right edge outside a container with its own scrolling were searched for. Before the fixes made that same day there were screens with cut buttons, overlapping titles, and filters outside their card (Table 9, defect 8); Table 5b shows the final result.
+*Output of the end-to-end tests*
+
+![End-to-end tests](capturas/tests-04-end-to-end.png)
+
+### 3.2 Performance and Responsive Design
+
+The same day, the response time of the most used reads (NFR-001) was measured with `node e2e/performance.js`: 30 requests per endpoint through the gateway. All of them were far below the 2 s limit at the 95th percentile.
 
 **Table 5b**
 
-*Responsive Design and Mobile Inspection Report Check (October 17, 2026)*
+*Response time per endpoint (NFR-001, October 19, 2026)*
+
+| Endpoint | p50 | p95 | Maximum |
+| --- | --- | --- | --- |
+| Public catalog | 16 ms | 19 ms | 19 ms |
+| Public opening hours | 9 ms | 10 ms | 11 ms |
+| My bookings (customer) | 39 ms | 49 ms | 55 ms |
+| My payments (customer) | 40 ms | 46 ms | 46 ms |
+| My notices (customer) | 14 ms | 17 ms | 18 ms |
+| Day bookings (administrator) | 15 ms | 19 ms | 20 ms |
+| Day summary (administrator) | 18 ms | 39 ms | 41 ms |
+| Operators (administrator) | 27 ms | 43 ms | 43 ms |
+
+**Figure 5**
+
+*Response time measurement*
+
+![Performance measurement](capturas/tests-06-performance.png)
+
+For responsive design (NFR-008), Playwright (headless Edge) went through the screens of the four web groups (public, customer, operator, and administrator) at 360 and 768 px, with the suite's `width-360.js` script and a check that also looks for elements past the right edge outside a container with its own scrolling.
+
+**Table 5c**
+
+*Responsive design check (October 19, 2026)*
 
 | Test | Scope | Result |
 | --- | --- | --- |
-| Web at 360 px | 30 screens: public, customer, operator, and administrator | None scrolls sideways or clips content |
-| Web at 768 px | The same 30 screens | None scrolls sideways or clips content |
-| Mobile app at 360 px | 26 screens of the three roles, opened from the bottom menu and the More menu | None scrolls sideways or clips content |
-| Inspection report in the app | Temporary confirmed 200-minute booking: booking detail → Inspection → Start report → Start phase → Add finding → Finish phase → Publish and share link | Full flow without errors; at the end the report, the booking, and the temporary service were deleted |
-| Build and tests | `npx ng build`, `npx ng test --watch=false` (web), and `npx tsc --noEmit` (app) | No errors; 43 of 43 web tests passed |
+| Web at 360 px (`e2e/width-360.js`) | 12 screens: public, customer, and administrator | None goes beyond 360 px |
+| Web at 360 px | 33 screens: 4 public, 8 customer, 9 operator, and 12 administrator | None scrolls sideways or cuts content; no page errors or 5xx responses |
+| Web at 768 px | The same 33 screens | None scrolls sideways or cuts content |
+| Mobile app at 360 px (`npx expo start --web`) | 15 screens: the five of the bottom menu of each role (customer, operator, and administrator), with temporary accounts deleted at the end | None scrolls sideways; no page errors |
+| Build | `npx ng build --configuration production` (web) and `npx tsc --noEmit` (app) | No errors |
 
-*Note.* Taking or picking photos with the phone camera and gallery cannot be automated in this test; it is still pending on an Android device.
+**Figure 6**
+
+*Check of the web screens at 360 px*
+
+![Responsive design check](capturas/tests-07-responsive-design.png)
+
+*Note.* Taking or picking photos with the phone camera and gallery cannot be automated in this test; it remains to be tested on an Android device.
 
 ## 4. Functional Test Cases
 
-The 33 cases cover the requirements that were implemented or partial in SRS v4. They were run on October 9, 2026, between 15:40 and 15:45, against the full system through the API Gateway (the same calls the web and mobile clients make), using an automated script. All 33 passed. The requirements implemented afterwards (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037 and RF-038) are covered by automated tests (section 5), and the booking flow with operator choice and automatic assignment is also run by `lavarapido-infra/e2e/booking-flow.test.js`.
+Cases CP-01 to CP-33 were defined on SRS v4 and first run on October 9, 2026; cases CP-34 to CP-42 cover the requirements implemented afterwards (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037, and RF-038) and the role change of RF-028. All 42 were run on October 19, 2026, against the full system through the API Gateway (the same calls the web and mobile clients make), with a script that creates its own accounts and data and deletes them at the end. All 42 passed (Figure 7).
 
 **Table 6**
 
@@ -164,45 +217,60 @@ The 33 cases cover the requirements that were implemented or partial in SRS v4. 
 
 | ID | RF | Case | Precondition | Steps | Data | Expected result | Actual result | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CP-01 | RF-001 | Successful customer sign-up | Email not registered | Sign up and log in | ID, name, phone, new email, and valid password | Account created with the CLIENT role; the profile is created in customer-service | Sign-up 201; login with the CLIENT role; customer profile available (`GET /vehicles` 200) | Passed |
-| CP-02 | RF-001 | Sign-up with a duplicate email | The email already exists | Sign up with the same email | Email from CP-01 | "Email already registered" message; no account is created | 409 `EMAIL_ALREADY_REGISTERED`; no account was created | Passed |
-| CP-03 | RF-002 | Login by role | CLIENT, OPERATOR, and ADMIN users | Log in with each one | Valid credentials | Redirects to `/client`, `/operator`, or `/admin` by role | The three logins return a JWT with the ADMIN, OPERATOR, and CLIENT roles; the web redirects by that role (`authGuard`) | Passed |
+| CP-01 | RF-001 | Successful customer sign-up | Email not registered | Sign up and log in | ID, name, phone, new email, and valid password | Account created with the CLIENT role; the profile is created in customer-service | Sign-up 201; sign-in 200 with the CLIENT role; customer profile created in customer-service | Passed |
+| CP-02 | RF-001 | Sign-up with a duplicate email | The email already exists | Sign up with the same email | Email from CP-01 | "Email already registered" message; no account is created | 409 `EMAIL_ALREADY_REGISTERED`; there is still one account with that email | Passed |
+| CP-03 | RF-002 | Login by role | CLIENT, OPERATOR, and ADMIN users | Log in with each one | Valid credentials | Redirects to `/client`, `/operator`, or `/admin` by role | The three sign-ins return 200 with the CLIENT, OPERATOR, and ADMIN roles; the web redirects by that role | Passed |
 | CP-04 | RF-002 | Wrong credentials | — | Log in with a wrong password, then with a nonexistent email | Two attempts | Same generic message in both; it does not reveal whether the email exists | Both: 401 `INVALID_CREDENTIALS` (same response) | Passed |
-| CP-05 | RF-003 | Recover password | Registered user; Mailpit running | Request a code, read it in Mailpit, verify it, and set a new password | 6-digit code | Password changed; login with the new one works | 6-digit code received in Mailpit; verify 204, reset 204; login with the new password succeeds | Passed |
-| CP-06 | RF-003 | Code locked after attempts | Code requested | Enter 5 wrong codes, then the right one | 5 invalid codes | The right code is no longer accepted | 5 attempts: 400; then the right code: 400 `INVALID_RESET_CODE` | Passed |
-| CP-07 | RF-004 | Password change with a wrong current password | Logged in | Change the password with the wrong current one | Wrong current password | "Incorrect current password" error; nothing changes | 400 `INCORRECT_CURRENT_PASSWORD`; login with the current password still works | Passed |
-| CP-08 | RF-005 | Create a booking | Customer with an SUV | Choose vehicle, Basic service, a free date and time | SUV, Basic | Booking created; price COP 23,000 (seed price of Basic for SUV) | Booking 201 RES-060003 for 10/10/2026 08:00, status CONFIRMED; total COP 23,000 | Passed |
-| CP-09 | RF-006 | Time slot taken | Active bays of a slot booked | Book the same slot until it is full | Several customer vehicles | The booking is not saved; up to five alternative times on the same day are offered | Slot 08:30 full (BAY-02 and BAY-03 plus an earlier booking); the next one: 409 `SLOT_UNAVAILABLE` with alternatives 09:00, 09:30, 10:00, 10:30, and 11:00 | Passed |
-| CP-10 | RF-007 | Cancel a booking before it starts | Booking CONFIRMED | Cancel with a reason | Reason `CUSTOMER_REQUEST` | Booking is CANCELLED with the reason stored | 200: status CANCELLED, reason `CUSTOMER_REQUEST` | Passed |
-| CP-11 | RF-007 | Change a booking in progress | Booking IN_PROGRESS | Try to cancel | — | Action blocked with a message | Booking IN_PROGRESS; cancel: 409 `BOOKING_NOT_CHANGEABLE` | Passed |
-| CP-12 | RF-009 | Assign an unavailable operator | Operator with an absence at the booking time | Check candidates and try to assign them; then assign an available one | Absent operator | The operator is not allowed; available operators are listed first | Available listed first; the absent one shows reason `OPERATOR_ABSENT`; assigning them: 409 `OPERATOR_ABSENT`; assigning the available one: 200 | Passed |
-| CP-13 | RF-011 | Operator sees their services | Booking assigned to the operator | Check assigned services | — | List with customer and vehicle data | RES-060003 shows vehicle Mazda CX-5, plate FPW-653, and service Basic | Passed |
-| CP-14 | RF-012b | Start and finish a service | Assigned service PENDING, 15 min before its time | Another operator tries to start; the assigned one starts and finishes | — | States IN_PROGRESS and COMPLETED; the other operator gets an error | Other operator: 404 `BOOKING_NOT_FOUND`; start 200 (IN_PROGRESS), finish 200 (COMPLETED); booking COMPLETED | Passed |
-| CP-15 | RF-012 | Rate a service once | Booking COMPLETED | Rate 5 stars; try to rate again | 5, comment | First rating saved; the second is rejected | First: 201 (5); second: 409 `ALREADY_RATED` | Passed |
-| CP-16 | RF-013 | Payment methods | Payment accounts configured | Check methods (admin) and accounts (customer) | — | Cash, Nequi, Daviplata, and bank transfer; cash shows no QR | The admin sees the 4 methods; the API gives the customer only the active digital accounts with QR, and the UI always adds cash without QR (`payment.ts:44-57`) | Passed |
-| CP-17 | RF-013b | Upload a receipt | Booking awaiting payment | Pay with Nequi attaching image, amount, and reference | PNG < 10 MB | Payment created in review with its receipt | 201: status IN_REVIEW, amount COP 24,000, reference REF-428646 | Passed |
-| CP-18 | RF-014 | Approve and reject payments | Payments in review | Approve one and reject another with a reason | Rejection reason | States APPROVED and REJECTED; the customer gets a notification | Approve 200 (APPROVED); reject 200 (REJECTED); the customer received `PAYMENT_CONFIRMED` and `PAYMENT_REJECTED` | Passed |
+| CP-05 | RF-003 | Recover password | Registered user; Mailpit running | Request a code, read it in Mailpit, verify it, and set a new password | 6-digit code | Password changed; login with the new one works | 6-digit code read in Mailpit; verification 204; change 204; sign-in with the new password 200 | Passed |
+| CP-06 | RF-003 | Code locked after attempts | Code requested | Enter 5 wrong codes, then the right one | 5 invalid codes | The right code is no longer accepted | The 5 wrong codes: 400; then the right one too: 400 `INVALID_RESET_CODE` | Passed |
+| CP-07 | RF-004 | Password change with a wrong current password | Logged in | Change the password with the wrong current one | Wrong current password | "Incorrect current password" error; nothing changes | 400 `INCORRECT_CURRENT_PASSWORD`; the previous password still works | Passed |
+| CP-08 | RF-005 | Create a booking | Customer with an SUV | Choose vehicle, Basic service, a free date and time | SUV, Basic | Booking created; price COP 23,000 (seed price of Basic for SUV) | Booking created (201) with a total of $23,000, the seed price of Basic for SUV | Passed |
+| CP-09 | RF-006 | Time slot taken | Active bays of a slot booked | Book the same slot until it is full | Several customer vehicles | The booking is not saved; up to five alternative times on the same day are offered | Three bookings took the three active bays; the fourth: 409 `SLOT_UNAVAILABLE` (`NO_FREE_BAY`) with 5 alternative times | Passed |
+| CP-10 | RF-007 | Cancel a booking before it starts | Booking CONFIRMED | Cancel with a reason | Reason `CUSTOMER_REQUEST` | Booking is CANCELLED with the reason stored | 200, booking CANCELLED with the reason `CUSTOMER_REQUEST` stored | Passed |
+| CP-11 | RF-007 | Change a booking in progress | Booking IN_PROGRESS | Try to cancel | — | Action blocked with a message | 409 `BOOKING_NOT_CHANGEABLE` | Passed |
+| CP-12 | RF-009 | Assign an unavailable operator | Operator with an absence at the booking time | Check candidates and try to assign them; then assign an available one | Absent operator | The operator is not allowed; available operators are listed first | The operator without a shift shows `OPERATOR_NOT_ON_SHIFT` and assigning them returns 409; the available ones come first; assigning the available one: 200 | Passed |
+| CP-13 | RF-011 | Operator sees their services | Booking assigned to the operator | Check assigned services | — | List with customer and vehicle data | 200; the service carries the customer name, plate, vehicle, and services | Passed |
+| CP-14 | RF-012b | Start and finish a service | Assigned service PENDING, 15 min before its time | Another operator tries to start; the assigned one starts and finishes | — | States IN_PROGRESS and COMPLETED; the other operator gets an error | Another operator: 404 `BOOKING_NOT_FOUND`; the assigned one starts (200) and finishes (200); the booking ends COMPLETED | Passed |
+| CP-15 | RF-012 | Rate a service once | Booking COMPLETED | Rate 5 stars; try to rate again | 5, comment | First rating saved; the second is rejected | First rating 201; the second 409 `ALREADY_RATED` | Passed |
+| CP-16 | RF-013 | Payment methods | Payment accounts configured | Check methods (admin) and accounts (customer) | — | Cash, Nequi, Daviplata, and bank transfer; cash shows no QR | Methods: Cash, Nequi, Daviplata, and Transfer; the customer sees the active accounts; cash without QR | Passed |
+| CP-17 | RF-013b | Upload a receipt | Booking awaiting payment | Pay with Nequi attaching image, amount, and reference | PNG < 10 MB | Payment created in review with its receipt | 201; payment IN_REVIEW with its receipt and the amount computed by the server | Passed |
+| CP-18 | RF-014 | Approve and reject payments | Payments in review | Approve one and reject another with a reason | Rejection reason | States APPROVED and REJECTED; the customer gets a notification | APPROVED and REJECTED; the customer got PAYMENT_CONFIRMED and PAYMENT_REJECTED | Passed |
 | CP-19 | RF-016 | Duplicate reference | Approved payment with reference R1 | Upload another receipt with R1 on another booking | Reference R1 | Receipt rejected | 409 `TRANSACTION_REFERENCE_REUSED` | Passed |
-| CP-20 | RF-018 | Booking notification | `MESSAGING_ENABLED=true` | Confirm a booking; open notifications; mark as read | — | The notification arrives; the unread counter goes down | 9 notifications (`USER_WELCOME`, `BOOKING_CONFIRMED`, `BOOKING_CANCELLED`, `OPERATOR_ASSIGNED`); unread 9 → 8 | Passed |
-| CP-21 | RF-020 | Language saved on the account | Logged in | Switch to English; start a new session | `en` | The UI opens in English | Preference saved (200); the new session returns `language=en` and the web opened in English (test screenshot) | Passed |
-| CP-22 | RF-021 | Schedule exception | — | Create a "closed" exception and check availability that day | 10/20/2026 | No times available that day | Exception 201; availability: `open=false`, no free times | Passed |
-| CP-23 | RF-024 | Create and deactivate a promotion | Admin session | Create a 10% promotion and deactivate it | 10% discount | Promotion visible, then inactive | Created 201; deactivated 200; status in the list: `paused` | Passed |
-| CP-24 | RF-026 | Earn points | Service with 10 points configured | Approve the booking payment; check the balance | — | The balance grows by the service points | Balance 0 → 10 on payment approval | Passed |
-| CP-25 | RF-027 | Deactivate one's own account | Customer session | Deactivate the account with the current password and try to log in | Current password | The session is revoked and login is rejected | Deactivation 204; new login: 403 `ACCOUNT_DISABLED` | Passed |
-| CP-26 | RF-028 | Create an operator and restrict by role | Admin and customer sessions | Admin creates an operator; the customer calls `GET /admin/users` | Operator data | OPERATOR account created; the customer gets 403 | Operator created 201; the customer gets 403 | Passed |
-| CP-27 | RF-029 | Edit the permission matrix | Admin session | Remove `EDIT_DATA` from OPERATOR; try to create a role | Permission `EDIT_DATA` | The matrix is saved; roles cannot be created | Matrix saved (200); create role: 405. The matrix was restored afterward | Passed |
-| CP-28 | RF-030 | Register a vehicle with a duplicate plate | Customer with a registered vehicle | Register another vehicle with the same plate | Plate FPW653 | Registration is rejected | First registration 201; second: 409 `PLATE_ALREADY_REGISTERED` | Passed |
-| CP-29 | RF-031 | Price change without affecting bookings | Confirmed booking with Basic | Admin raises the Basic/SUV price; check the existing booking and create a new one | COP 23,000 → 24,000 | The existing one keeps its price; the new one uses the new price | Earlier booking: COP 23,000; new booking: COP 24,000. The price was restored afterward | Passed |
-| CP-30 | RF-032 | Bay under maintenance | BAY-04 under maintenance (seed) | Fill a slot and check which bays were used | — | The bay under maintenance is not used for new bookings | BAY-04 was not used; the slot was full with only the active bays | Passed |
+| CP-20 | RF-018 | Booking notification | `MESSAGING_ENABLED=true` | Confirm a booking; open notifications; mark as read | — | The notification arrives; the unread counter goes down | BOOKING_CONFIRMED arrived; the unread counter dropped by 1 when it was marked | Passed |
+| CP-21 | RF-020 | Language saved on the account | Logged in | Switch to English; start a new session | `en` | The UI opens in English | Saved 200; in a new session the account language is English | Passed |
+| CP-22 | RF-021 | Schedule exception | — | Create a "closed" exception and check availability that day | 10/20/2026 | No times available that day | Exception created (201); there are no free times that day | Passed |
+| CP-23 | RF-024 | Create and deactivate a promotion | Admin session | Create a 10% promotion and deactivate it | 10% discount | Promotion visible, then inactive | Created (201) and deactivated (200); the list shows it paused | Passed |
+| CP-24 | RF-026 | Earn points | Service with 10 points configured | Approve the booking payment; check the balance | — | The balance grows by the service points | The balance goes up 30 points, those of the service | Passed |
+| CP-25 | RF-027 | Deactivate one's own account | Customer session | Deactivate the account with the current password and try to log in | Current password | The session is revoked and login is rejected | Deactivation 204; the new sign-in returns 403 `ACCOUNT_DISABLED` | Passed |
+| CP-26 | RF-028 | Create an operator and restrict by role | Admin and customer sessions | Admin creates an operator; the customer calls `GET /admin/users` | Operator data | OPERATOR account created; the customer gets 403 | OPERATOR account created (201) and listed; the customer gets 403 | Passed |
+| CP-27 | RF-029 | Edit the permission matrix | Admin session | Remove `EDIT_DATA` from OPERATOR; try to create a role | Permission `EDIT_DATA` | The matrix is saved; roles cannot be created | Matrix saved (200); creating a role returns 405 (roles are fixed) | Passed |
+| CP-28 | RF-030 | Register a vehicle with a duplicate plate | Customer with a registered vehicle | Register another vehicle with the same plate | Plate FPW653 | Registration is rejected | 409 `PLATE_ALREADY_REGISTERED` | Passed |
+| CP-29 | RF-031 | Price change without affecting bookings | Confirmed booking with Basic | Admin raises the Basic/SUV price; check the existing booking and create a new one | COP 23,000 → 24,000 | The existing one keeps its price; the new one uses the new price | The existing booking keeps $23,000; the new one costs $24,000 | Passed |
+| CP-30 | RF-032 | Bay under maintenance | BAY-04 under maintenance (seed) | Fill a slot and check which bays were used | — | The bay under maintenance is not used for new bookings | With Bay 1 under maintenance, two bookings at the same time went to bays 2 and 3 and the third got 409 | Passed |
 | CP-31 | RF-033 | Disallowed status transition | Booking CANCELLED | Admin tries to change it to CONFIRMED | — | Rejected | 409 `INVALID_STATUS_TRANSITION` | Passed |
-| CP-32 | RF-034 | Deactivated payment account | Active Daviplata account | Admin deactivates it; the customer checks accounts | — | The account is no longer shown to the customer | Visible when created; once deactivated (200) it no longer appears to the customer | Passed |
-| CP-33 | RF-035 | Refund an approved payment | Payment APPROVED | Admin refunds | — | Status REFUNDED; `payment.refunded` is published and the customer is notified | Refund 204; payment REFUNDED; `PAYMENT_REFUNDED` notification received; points reversed (10 → 0) | Passed |
+| CP-32 | RF-034 | Deactivated payment account | Active Daviplata account | Admin deactivates it; the customer checks accounts | — | The account is no longer shown to the customer | Account deactivated (200); the customer no longer sees it | Passed |
+| CP-33 | RF-035 | Refund an approved payment | Payment APPROVED | Admin refunds | — | Status REFUNDED; `payment.refunded` is published and the customer is notified | Status REFUNDED; the customer got PAYMENT_REFUNDED and the booking points were reversed | Passed |
+| CP-34 | RF-004b | Lockout after failed attempts | Active account | Sign in 5 times with a wrong password and then with the right one | Email of a new account | At the fifth failure the account is locked for 15 minutes; the right password does not work either | Attempts: 401, 401, 401, 401, and 423; with the right password: 423 `ACCOUNT_LOCKED` | Passed |
+| CP-35 | RF-008 | Automatic operator assignment | Operators with a shift that day | Book without choosing an operator | Basic service, SUV | The booking is assigned to a free operator without the administrator | The booking was assigned to a free operator without the administrator | Passed |
+| CP-36 | RF-010 | The customer chooses the operator | The operator has a shift and is free | List the free operators and book choosing one | `preferredOperatorId` | The booking stays with the chosen operator | The chosen operator shows as free and the booking stayed with them | Passed |
+| CP-37 | RF-015 | Payment history with filters | The customer has two payments | Query the history with the day of the paid bookings, with another day, and with an inverted range | Dates | Only that day's payments come out; the inverted range is rejected | With the day of the paid bookings, their 2 payments come out; with another day, none; the inverted range returns 400 `INVALID_DATE_RANGE` | Passed |
+| CP-38 | RF-022 | Operator absence | Operator with a shift | Record an absence that day, list the candidates for a booking that day, and record a past absence | Whole-day absence | The operator shows as absent; the past absence is rejected | Absence recorded (201); that day the operator shows `OPERATOR_ABSENT`; the past absence returns 400 `ABSENCE_IN_PAST` | Passed |
+| CP-39 | RF-037 | Business data to be completed | System with migration 111 applied | Read the data, save an invalid phone, and then a valid support line | 3-digit phone | The real business data is empty; the invalid phone is rejected; the valid change shows on the public page | The tax data and channels were empty; the invalid phone returns 400 `ESTABLISHMENT_INVALID_PHONE`; the valid change (200) shows on the public page | Passed |
+| CP-40 | RF-038 | Operator profile | Operator created | Save a specialty and a skill | EXPERT skill | The profile is saved | 200; profile saved with its specialty and one skill | Passed |
+| CP-41 | RF-036 | Inspection report | Confirmed booking of a 200-minute service | Start the report, finish a phase, publish, share, and open the public link | Temporary 200-minute service | The customer gets the notice and the link opens without a session with the plate masked | Report started (200), published (200), and shared (204); the customer got INSPECTION_REPORT and the link opens without a session and without the full plate | Passed |
+| CP-42 | RF-028 | Role change and administrator accounts | Test administrator and operator | Try to change one's own role, disable an administrator, and turn an operator into a customer | Roles | The first two are rejected; the role change closes the user's sessions | Changing their own role: 403 `CANNOT_CHANGE_OWN_ROLE`; disabling an administrator: 403 `ADMIN_CANNOT_BE_DISABLED`; the operator becomes a customer (200) and their sessions are closed | Passed |
 
-> *Note.* Prices and codes in the test data come from the seed changelogs (`103-seed-catalog.sql`, `104-seed-booking-catalogs.sql`). Cases CP-25 to CP-33 cover requirements RF-027 to RF-035, new in SRS v4. New test accounts were used, because the demo account `operador@gmail.com` is deactivated in the local database. Afterward, the Basic price, the permission matrix, the promotion, and the schedule exception were restored. Evidence: execution log with the HTTP status and error code of each step.
+> *Note.* The prices in the test data come from the seed changelogs (`103-seed-catalog.sql`, `104-seed-booking-catalogs.sql`). The script creates a test customer, two operators, and an administrator, with emails of the `prueba.lavarapido.test` domain, and its own vehicles and bookings. At the end it deletes everything it created and restores the Basic price, the permission matrix, the bay, the payment account, and the business data; the database was checked to have nothing left. The recovery emails were read in Mailpit. Evidence: execution log with the HTTP code and the error code of each step (Figure 7).
+
+**Figure 7**
+
+*Run of the 42 functional cases (October 19, 2026)*
+
+![Run of the functional cases](capturas/tests-05-functional-cases.png)
 
 ## 5. Traceability Matrix
 
-Of the 41 requirements in SRS v7, 30 have a functional case and 39 a related automated test; RF-032 and RF-034 only have a functional case.
+Of the 41 requirements in SRS v7.4, 38 have a functional case and 39 a related automated test; RF-032 and RF-034 only have a functional case, and RF-017, RF-023, and RF-025 only an automated test.
 
 **Table 7**
 
@@ -214,33 +282,33 @@ Of the 41 requirements in SRS v7, 30 have a functional case and 39 a related aut
 | RF-002 | Implemented | `POST /auth/login` | `/auth` | CP-03, CP-04 | `AuthenticationServiceTest`, `JwtTokenIssuerTest`, `ApiSecurityWebTest` |
 | RF-003 | Implemented | `POST /auth/password/forgot`, `/verify`, `/reset` | `/auth/forgot-password` | CP-05, CP-06 | `PasswordRecoveryServiceTest`, `PasswordResetTokenTest` |
 | RF-004 | Implemented | `PUT /users/me/password` | `/client/profile` | CP-07 | `UserProfileAndAdministrationTest`, `PasswordPolicyTest` |
-| RF-004b | Implemented | `POST /auth/login` (423 `ACCOUNT_LOCKED`) | `/auth` | — | `AuthenticationServiceTest` (lockout and window), `PasswordRecoveryServiceTest` (a reset lifts it), `ApiSecurityWebTest` (423) |
+| RF-004b | Implemented | `POST /auth/login` (423 `ACCOUNT_LOCKED`) | `/auth` | CP-34 | `AuthenticationServiceTest` (lockout and window), `PasswordRecoveryServiceTest` (a reset lifts it), `ApiSecurityWebTest` (423) |
 | RF-027 | Implemented | `GET/PATCH /users/me`, `GET/PUT /users/me/address`, `PUT /users/me/email`, `POST /auth/logout`, `POST /users/me/deactivate` | `/client/profile` | CP-25 | `UserProfileAndAdministrationTest`, `PersonAddressServiceTest`, `AuthenticationServiceTest` |
-| RF-028 | Implemented | `GET/POST /admin/users`, `PATCH /admin/users/{id}/status` | `/admin/management`, `/admin/operators` | CP-26 | `UserProfileAndAdministrationTest`, `ApiSecurityWebTest` |
+| RF-028 | Implemented | `GET/POST /admin/users`, `PATCH /admin/users/{id}/status`, `PATCH /admin/users/{id}/role` | `/admin/management`, `/admin/operators` | CP-26, CP-42 | `UserProfileAndAdministrationTest`, `ApiSecurityWebTest` |
 | RF-029 | Implemented | `GET /admin/roles-permissions`, `PUT /admin/roles-permissions/{role}` | `/admin/management` | CP-27 | `RolePermissionAdministrationServiceTest` |
 | RF-030 | Implemented | `/vehicles`, `GET /vehicle-types`, `GET /admin/vehicles` | `/client/vehicles` | CP-28 | `CustomerVehicleServiceTest`, `LicensePlateTest`, `CustomerApiWebTest` |
 | RF-031 | Implemented | `GET /catalog/services`, `/admin/catalog/services` | `/admin/management` | CP-29 | `CatalogServiceTest` |
 | RF-021 | Implemented | `PUT /admin/schedule/business-hours`, `POST /admin/schedule/exceptions` | `/admin/schedule` | CP-22 | `AvailabilityPolicyTest` |
 | RF-032 | Implemented | `/admin/bays` | `/admin/schedule` | CP-30 | — |
-| RF-037 | Implemented | `GET/PUT /admin/establishment`, `GET /establishment` | `/admin/settings` | — | `EstablishmentTest`, `BookingApiWebTest` |
+| RF-037 | Implemented | `GET/PUT /admin/establishment`, `GET /establishment` | `/admin/settings` | CP-39 | `EstablishmentTest`, `BookingApiWebTest` |
 | RF-005 | Implemented | `POST /bookings`, `GET /catalog/services` | `/client/reserve` | CP-08 | `BookingServiceTest`, `BookingTest` |
 | RF-006 | Implemented | `GET /bookings/availability` | `/client/reserve` | CP-09 | `AvailabilityPolicyTest` |
 | RF-007 | Implemented | `PUT /bookings/{id}`, `POST /bookings/{id}/cancel` | `/client/history` | CP-10, CP-11 | `BookingTest`, `BookingApiWebTest` |
 | RF-033 | Implemented | `GET /admin/bookings`, `PATCH /admin/bookings/{id}/status` | `/admin/reservations` | CP-31 | `BookingTest`, `BookingServiceTest` |
-| RF-008 | Implemented | `booking.confirmed` event, `GET /internal/v1/bookings` | `/admin/reservations` | — | `AutoAssignmentPolicyTest`, `OperationsServiceTest` (automatic assignment, deactivated account), `booking-flow.test.js` |
+| RF-008 | Implemented | `booking.confirmed` event, `GET /internal/v1/bookings` | `/admin/reservations` | CP-35 | `AutoAssignmentPolicyTest`, `OperationsServiceTest` (automatic assignment, deactivated account), `booking-flow.test.js` |
 | RF-009 | Implemented | `GET /admin/assignments/{id}/candidates`, `PUT /admin/assignments/{id}` | `/admin/reservations` | CP-12 | `AssignmentPolicyTest`, `OperationsServiceTest` |
-| RF-010 | Implemented | `GET /operators/available`, `POST /bookings` (`preferredOperatorId`) | `/client/reserve` | — | `OperationsServiceTest` (free operators), `OperationsApiWebTest`, `booking-flow.test.js` |
+| RF-010 | Implemented | `GET /operators/available`, `POST /bookings` (`preferredOperatorId`) | `/client/reserve` | CP-36 | `OperationsServiceTest` (free operators), `OperationsApiWebTest`, `booking-flow.test.js` |
 | RF-011 | Implemented | `GET /operator/services` | `/operator/assigned-services` | CP-13 | `OperationsServiceTest` |
 | RF-012b | Implemented | `POST /operator/services/{id}/start`, `/finish` | `/operator/assigned-services` | CP-14 | `StartPolicyTest`, `ServiceExecutionTest` |
 | RF-012 | Implemented | `POST /ratings/{bookingId}` | `/client/history` | CP-15 | `ServiceExecutionTest` |
-| RF-022 | Implemented | `PUT /admin/operators/{id}/availability`, `/absences`, `GET /admin/operators/summary` | `/admin/operators/:id` | — | `AssignmentPolicyTest`, `TeamSummaryCalculatorTest` |
-| RF-036 | Implemented | `/admin/inspections/{bookingId}/**`, `GET /public/inspections/{token}` | `/admin/reservations/:id/inspection`, `/report/:token` | — | `InspectionReportTest`, `OperationsApiWebTest` |
-| RF-038 | Implemented | `GET /admin/operators/profiles`, `PUT /admin/operators/{id}/profile` | `/admin/operators/:id` | — | `OperatorProfileServiceTest` |
+| RF-022 | Implemented | `PUT /admin/operators/{id}/availability`, `/absences`, `GET /admin/operators/summary` | `/admin/operators/:id` | CP-38 | `AssignmentPolicyTest`, `TeamSummaryCalculatorTest` |
+| RF-036 | Implemented | `/admin/inspections/{bookingId}/**`, `GET /public/inspections/{token}` | `/admin/reservations/:id/inspection`, `/report/:token` | CP-41 | `InspectionReportTest`, `OperationsApiWebTest` |
+| RF-038 | Implemented | `GET /admin/operators/profiles`, `PUT /admin/operators/{id}/profile` | `/admin/operators/:id` | CP-40 | `OperatorProfileServiceTest` |
 | RF-034 | Implemented | `/admin/payment-accounts`, `GET /payment-accounts` | `/admin/settings` | CP-32 | — |
 | RF-013 | Implemented | `GET /payment-accounts` | `/client/payment` | CP-16 | `PaymentQueryServiceTests` |
 | RF-013b | Implemented | `POST /payments` | `/client/payment` | CP-17 | `PaymentTests`, `PaymentCommandServiceTests` |
 | RF-014 | Implemented | `POST /admin/payments/{id}/approve`, `/reject` | `/admin/payments` | CP-18 | `PaymentTests`, `PaymentCommandServiceTests` |
-| RF-015 | Implemented | `GET /payments/me?from=&to=&service=` | `/client/history` | — | `PaymentQueryServiceTests` (order and filters) |
+| RF-015 | Implemented | `GET /payments/me?from=&to=&service=` | `/client/history` | CP-37 | `PaymentQueryServiceTests` (order and filters) |
 | RF-016 | Implemented | `POST /payments` | `/client/payment` | CP-19 | `PaymentPolicyTests`, `PaymentCommandServiceTests` (reused reference) |
 | RF-035 | Implemented | `POST /admin/payments/{id}/refund` | `/admin/payments` | CP-33 | `PaymentTests`, `PaymentCommandServiceTests` |
 | RF-017 | Implemented | `GET /admin/bookings/day-summary`, `GET /operators/my-bookings` and dashboard stores | `/client`, `/operator`, `/admin` | — | `BookingServiceTest` (day summary), web smoke tests (`dashboard.spec.ts`) |
@@ -264,10 +332,10 @@ Of the 41 requirements in SRS v7, 30 have a functional case and 39 a related aut
 | --- | --- | --- |
 | 1 | The mobile app has no automated tests | Add Jest with `jest-expo`, at least for validators (`shared/validators`) and services (`core/services`) |
 | 2 | Most of the 43 web tests only check that the component is created | Test more real rules: `authGuard` by role, `authInterceptor` on 401, booking form |
-| 3 | The 7 payment persistence tests need a migrated database and skip without it | Document in the README how to create the test database and set `PAYMENT_INTEGRATION_DB` |
+| 3 | The 7 payment persistence tests need a migrated database and skip without it; on October 19 they were run against `LavaRapidoPaymentIT` and passed | Document in the README how to create the test database and set `PAYMENT_INTEGRATION_DB`, and run them in GitHub Actions with a SQL Server service |
 | 4 | For RF-023 (reports) only the operator metrics and the team summary are tested; the PDF/Excel export has no test | Add a functional case for reports and the PDF/Excel export |
 | 5 | RF-032 (bays) and RF-034 (payment accounts) have no dedicated automated tests: `ScheduleService` and `PaymentAccountService` have no test class | Add unit tests for those two services |
-| 6 | The requirements implemented after October 9 (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037, and RF-038) have automated tests but no functional case of their own; RF-008, RF-010, RF-015, RF-036, and RF-037 are already covered by the end-to-end tests | Add their CP cases and run them against the full system |
+| 6 | The requirements implemented after October 9 (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037, and RF-038) had no functional case of their own | Closed on October 19, 2026, with cases CP-34 to CP-41 |
 
 **Table 9**
 
@@ -282,11 +350,11 @@ Of the 41 requirements in SRS v7, 30 have a functional case and 39 a related aut
 | 5 | The landing page advertises a "mobile wash service" and "wherever you are", but SRS v4 defines a single-location car wash | Landing screenshot; SRS v4, section 1 | Low |
 | 6 | If there are two accounts of the same method (two Nequi), the payment screen shows both selected at once | Customer Payments screenshot | Low |
 | 7 | When logging out, the web and the app showed "Your session expired", because a 401 that arrived after the token was deleted was taken as an expired session | `auth-interceptor.ts` (web) and `AuthServiceContext.tsx` (mobile) | Medium |
-| 8 | On a phone (360 px) there were buttons off the screen in the landing bar, overlapping titles, the ☰ button over the titles, Assigned services badges off the screen, Management filters outside their card, and Settings switches over their text | Responsive design check of October 17, 2026 (Table 5b) | Medium |
+| 8 | On a phone (360 px) there were buttons off the screen in the landing bar, overlapping titles, the ☰ button over the titles, Assigned services badges off the screen, Management filters outside their card, and Settings switches over their text | Responsive design check of October 17, 2026 (Table 5c) | Medium |
 | 9 | In the mobile app, the date and search inputs were squashed when placed in a column (History and Ratings) | `shared/components/screen/FilterInputs.tsx` | Low |
 | 10 | The customer's next service progress showed 10% or 25% although the wash had not started | `features/client/pages/dashboard/dashboard.ts` (web) and `modules/client/models/client.ts` (mobile) | Low |
 
-> *Note.* Defects 7 to 10 were fixed between October 16 and 17, 2026, on the *develop* branch of the web and the app; 8 and 9 were measured again with no overflow (Table 5b).
+> *Note.* Defects 7 to 10 were fixed between October 16 and 17, 2026, on the *develop* branch of the web and the app; 8 and 9 were measured again with no overflow (Table 5c).
 
 > *Note.* Code review of October 16, 2026: the six defects are fixed. The dashboard greets with the session name and the payment review shows the reviewer (1); the Client column shows the customer name (2); the customer home shows the assigned operator on the web and on mobile (3); the brand is LavaRápido on the web and on mobile (4); the home page describes the service at the car wash (5); and the payment screen selects by account and shows the holder when two accounts share a method (6, `payment.spec.ts`).
 

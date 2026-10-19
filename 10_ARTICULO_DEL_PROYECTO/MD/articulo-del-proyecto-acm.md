@@ -6,7 +6,7 @@
 
 *Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556. Instructora: Karol Daniela Correa. 16 de octubre de 2026.*
 
-**Resumen.** Este artículo describe el diseño, la implementación y la verificación de Vehicle Washing (LavaRapido), una plataforma web y Android para un lavadero vehicular de una sola sede, desarrollada como proyecto formativo del SENA. El problema documentado es que las reservas por llamada, los registros a mano, la asignación discrecional del trabajo y los pagos en efectivo sin registro no dejan trazabilidad sobre turnos, servicios ni pagos. El trabajo siguió un enfoque de documentación de diseño de software (SDD) con siete sprints inspirados en Scrum, y su alcance evolucionó desde un servicio móvil por zonas con pasarela de pagos hacia un lavadero de sede única con pagos por QR o transferencia con comprobante revisado por el administrador, o en efectivo. La solución integra seis microservicios (cinco en Java 21 con Spring Boot 4 y uno en .NET 8) detrás de un API Gateway, SQL Server 2022 con 57 tablas, RabbitMQ y clientes en Angular 21 y React Native. Al 16 de octubre de 2026, 40 de los 41 requisitos funcionales estaban implementados y 1 era parcial. Ese día se ejecutaron 639 pruebas automatizadas, todas aprobadas (7 de persistencia quedaron omitidas porque necesitan una base de pruebas dedicada), y 19 pruebas de punta a punta contra el sistema completo en Docker, también aprobadas. El sistema corre además en un servidor público en Azure. Desde el 19 de octubre de 2026, cada repositorio compila y corre sus pruebas con GitHub Actions en cada cambio. Quedan pendientes los reportes consolidados y un límite de solicitudes en el gateway. Los beneficios operativos siguen siendo una hipótesis, porque no se han medido con personas usuarias reales.
+**Resumen.** Este artículo describe el diseño, la implementación y la verificación de Vehicle Washing (LavaRapido), una plataforma web y Android para un lavadero vehicular de una sola sede, desarrollada como proyecto formativo del SENA. El problema documentado es que las reservas por llamada, los registros a mano, la asignación discrecional del trabajo y los pagos en efectivo sin registro no dejan trazabilidad sobre turnos, servicios ni pagos. El trabajo siguió un enfoque de documentación de diseño de software (SDD) con siete sprints inspirados en Scrum, y su alcance evolucionó desde un servicio móvil por zonas con pasarela de pagos hacia un lavadero de sede única con pagos por QR o transferencia con comprobante revisado por el administrador, o en efectivo. La solución integra seis microservicios (cinco en Java 21 con Spring Boot 4 y uno en .NET 8) detrás de un API Gateway, SQL Server 2022 con 57 tablas, RabbitMQ y clientes en Angular 21 y React Native. Al 16 de octubre de 2026, 40 de los 41 requisitos funcionales estaban implementados y 1 era parcial. El 19 de octubre de 2026 se ejecutaron 655 pruebas automatizadas, todas aprobadas (incluidas 7 de persistencia contra una base aislada), y 19 pruebas de punta a punta y 42 casos funcionales contra el sistema completo, también aprobadas. El sistema corre además en un servidor público en Azure. Desde el 19 de octubre de 2026, cada repositorio compila y corre sus pruebas con GitHub Actions en cada cambio. Quedan pendientes los reportes consolidados y un límite de solicitudes en el gateway. Los beneficios operativos siguen siendo una hipótesis, porque no se han medido con personas usuarias reales.
 
 **Palabras clave:** microservicios, arquitectura hexagonal, sistema de reservas, lavado vehicular, pagos con código QR, documentación de diseño de software
 
@@ -79,7 +79,7 @@ El proyecto toma como marco de sus acciones correctivas, preventivas y de mejora
 
 ### 3.1. Tipo de Estudio
 
-Se trata de un trabajo de desarrollo tecnológico aplicado, presentado como estudio de caso único y de alcance descriptivo. La unidad de análisis es el sistema construido. La evidencia proviene de los artefactos del proyecto: el código de once repositorios, la documentación de diseño (requisitos, quince ADR, modelos de datos, contratos OpenAPI), los manuales técnicos verificados contra el código y los registros de pruebas y de acciones de mejora [Patiño Cabrera et al. 2026a; Patiño Cabrera et al. 2026b]. La SRS, en su versión 7.0, sigue la estructura de IEEE 830 [IEEE 1998] y los contenidos de ISO/IEC/IEEE 29148 [ISO/IEC/IEEE 2018], y define 41 requisitos funcionales, 12 requisitos no funcionales clasificados según el modelo de calidad de ISO/IEC 25010 [ISO/IEC 2023], 30 casos de uso y una matriz de trazabilidad con el estado de cada requisito [Guilombo Osorio et al. 2026].
+Se trata de un trabajo de desarrollo tecnológico aplicado, presentado como estudio de caso único y de alcance descriptivo. La unidad de análisis es el sistema construido. La evidencia proviene de los artefactos del proyecto: el código de once repositorios, la documentación de diseño (requisitos, quince ADR, modelos de datos, contratos OpenAPI), los manuales técnicos verificados contra el código y los registros de pruebas y de acciones de mejora [Patiño Cabrera et al. 2026a; Patiño Cabrera et al. 2026b]. La SRS, en su versión 7.0, sigue la estructura de IEEE 830 [IEEE 1998] y los contenidos de ISO/IEC/IEEE 29148 [ISO/IEC/IEEE 2018], y define 41 requisitos funcionales, 12 requisitos no funcionales clasificados según el modelo de calidad de ISO/IEC 25010 [ISO/IEC 2023], 32 casos de uso y una matriz de trazabilidad con el estado de cada requisito [Guilombo Osorio et al. 2026].
 
 ### 3.2. Contexto y Participantes
 
@@ -125,7 +125,7 @@ La Tabla 1 resume la pila tecnológica, tomada de los archivos de construcción 
 
 ### 3.6. Procedimiento de Análisis
 
-El estado de los requisitos se tomó de la matriz de trazabilidad de la SRS, verificada contra el código el 16 de octubre de 2026 [Guilombo Osorio et al. 2026]. Las pruebas se ejecutaron ese mismo día: las suites de cada servicio Java con el Maven Wrapper, las de payment-service con el SDK de .NET (destino *net8.0*), las de la web con Vitest y las pruebas de punta a punta de *lavarapido-infra/e2e* contra el sistema completo levantado con Docker.
+El estado de los requisitos se tomó de la matriz de trazabilidad de la SRS, verificada contra el código el 16 de octubre de 2026 [Guilombo Osorio et al. 2026]. Las pruebas se volvieron a ejecutar el 19 de octubre de 2026: las suites de cada servicio Java con el Maven Wrapper, las de payment-service con el SDK de .NET (destino *net8.0*), las de la web con Vitest, y las pruebas de punta a punta de *lavarapido-infra/e2e* y los 42 casos funcionales contra el sistema completo.
 
 ## 4. Resultados
 
@@ -201,25 +201,25 @@ De los 12 requisitos no funcionales, 5 están implementados y 7 son parciales [G
 
 ### 4.4. Resultados de las Pruebas
 
-El 16 de octubre de 2026 se ejecutaron todas las suites automatizadas: 639 pruebas aprobadas, ninguna fallida, y 7 pruebas de persistencia de payment-service omitidas porque necesitan una base de pruebas dedicada (Tabla 5). Ese mismo día pasaron las 19 pruebas de punta a punta de *lavarapido-infra/e2e*, que recorren el sistema completo en Docker: reserva con elección de operario y asignación automática, flujo de los tres roles con pago, aprobación, puntos, ejecución y calificación, informe de inspección con fotos y enlace público, y reglas de acceso por rol. La SRS registraba 347 pruebas el 6 de octubre [Guilombo Osorio et al. 2026]; la diferencia corresponde a las pruebas que se agregaron con cada función nueva.
+El 19 de octubre de 2026 se ejecutaron todas las suites automatizadas: 655 pruebas aprobadas, ninguna fallida ni omitida; las 7 pruebas de persistencia de payment-service corrieron contra una base de pruebas aislada (Tabla 5). Ese mismo día pasaron las 19 pruebas de punta a punta de *lavarapido-infra/e2e*, que recorren el sistema completo: reserva con elección de operario y asignación automática, flujo de los tres roles con pago, aprobación, puntos, ejecución y calificación, informe de inspección con fotos y enlace público, y reglas de acceso por rol. La SRS registraba 347 pruebas el 6 de octubre [Guilombo Osorio et al. 2026]; la diferencia corresponde a las pruebas que se agregaron con cada función nueva.
 
-**Tabla 5.** Resultados de la Ejecución de las Pruebas Automatizadas (16 de Octubre de 2026)
+**Tabla 5.** Resultados de la Ejecución de las Pruebas Automatizadas (19 de Octubre de 2026)
 
 | Componente | Casos | Aprobados | Fallidos | Omitidos |
 |---|---|---|---|---|
 | Aplicación web (Angular) | 43 | 43 | 0 | 0 |
 | api-gateway | 34 | 34 | 0 | 0 |
-| security-service | 147 | 147 | 0 | 0 |
-| customer-service | 68 | 68 | 0 | 0 |
-| booking-service | 40 | 40 | 0 | 0 |
-| operations-service | 54 | 54 | 0 | 0 |
+| security-service | 151 | 151 | 0 | 0 |
+| customer-service | 69 | 69 | 0 | 0 |
+| booking-service | 43 | 43 | 0 | 0 |
+| operations-service | 55 | 55 | 0 | 0 |
 | notification-service | 112 | 112 | 0 | 0 |
-| payment-service (.NET) | 148 | 141 | 0 | 7 |
-| **Total** | **646** | **639** | **0** | **7** |
+| payment-service (.NET) | 148 | 148 | 0 | 0 |
+| **Total** | **655** | **655** | **0** | **0** |
 
 *Nota.* Ejecución con *./mvnw test* en cada servicio Java, *dotnet test* en payment-service y *npx ng test --watch=false* en la web. Las 19 pruebas de punta a punta no se incluyen en la tabla.
 
-Además, los 33 casos funcionales de la documentación de pruebas se ejecutaron manualmente el 9 de octubre de 2026 contra el sistema completo. En cambio, **no hay resultados registrados de los casos de aceptación CA-01 a CA-16** con el responsable del negocio, no se mide la cobertura de código y los servicios Java no tienen pruebas de persistencia contra un SQL Server real fuera de la suite de punta a punta.
+Además, los 42 casos funcionales de la documentación de pruebas se ejecutaron el 19 de octubre de 2026 contra el sistema completo, todos aprobados. En cambio, **no hay resultados registrados de los casos de aceptación CA-01 a CA-16** con el responsable del negocio, no se mide la cobertura de código y los servicios Java no tienen pruebas de persistencia contra un SQL Server real fuera de la suite de punta a punta.
 
 ### 4.5. Seguridad
 
@@ -275,7 +275,7 @@ La arquitectura también evolucionó respecto de lo planeado. La propuesta técn
 
 Garantizar las reglas críticas en la base de datos, y no solo en el código, resultó adecuado para un dominio con concurrencia: dos clientes que reservan la misma bahía o dos administradores que aprueban el mismo pago no dependen de que el código de la aplicación sea correcto en todos sus caminos. Las pruebas de persistencia de payment-service que cubren estos casos existen, pero necesitan una base de pruebas dedicada; la suite de punta a punta sí ejercita esas reglas contra el SQL Server real del entorno Docker.
 
-La aplicación de la arquitectura hexagonal [Cockburn 2005] se refleja en la forma de las pruebas: las 639 pruebas automatizadas se ejecutan sin base de datos, porque prueban el dominio, los casos de uso y la capa web con dobles de prueba en lugar de la infraestructura real, lo que las hace rápidas y deterministas. Desde el 19 de octubre de 2026 esas pruebas corren solas en cada cambio con GitHub Actions; sin embargo, la ausencia de medición de cobertura limita la confianza que estas cifras pueden dar, y la suite de punta a punta, que prueba los servicios integrados, todavía se corre a mano. La investigación de Forsgren et al. [2018] asocia la integración continua y la automatización de pruebas con un mejor desempeño en la entrega de software; por eso el proyecto cerró su deuda técnica TD-006 con GitHub Actions.
+La aplicación de la arquitectura hexagonal [Cockburn 2005] se refleja en la forma de las pruebas: 648 de las 655 pruebas automatizadas se ejecutan sin base de datos, porque prueban el dominio, los casos de uso y la capa web con dobles de prueba en lugar de la infraestructura real, lo que las hace rápidas y deterministas. Desde el 19 de octubre de 2026 esas pruebas corren solas en cada cambio con GitHub Actions; sin embargo, la ausencia de medición de cobertura limita la confianza que estas cifras pueden dar, y la suite de punta a punta, que prueba los servicios integrados, todavía se corre a mano. La investigación de Forsgren et al. [2018] asocia la integración continua y la automatización de pruebas con un mejor desempeño en la entrega de software; por eso el proyecto cerró su deuda técnica TD-006 con GitHub Actions.
 
 La verificación cruzada entre documentación y código fue uno de los aportes más útiles del proceso: las 19 discrepancias encontradas muestran que, incluso con un enfoque que pone el diseño antes del código, la documentación se desactualiza si no se modifica en el mismo cambio que el código, como recoge la lección aprendida L-09 del proyecto [Patiño Cabrera et al. 2026a]. Los ADR [Nygard 2011] permitieron que los cambios de alcance, como la asignación manual de operarios, quedaran justificados en lugar de aparecer como incumplimientos silenciosos.
 
@@ -287,7 +287,7 @@ Este trabajo tiene limitaciones importantes. Primera, no hay evidencia con perso
 
 El proyecto diseñó e implementó una plataforma de microservicios para un lavadero vehicular de una sola sede que integra reservas con disponibilidad real, asignación automática y manual del trabajo, ejecución, pagos por QR o transferencia con comprobante revisado por el administrador o en efectivo, notificaciones, fidelización e informes de inspección. La arquitectura resultante, con seis servicios de dominio, un gateway, una base de datos de 57 tablas con un dueño por esquema y mensajería asíncrona, se documentó en quince ADR y se verificó contra el código. Frente a los seis objetivos específicos de la SRS, se cumplieron el registro de vehículos y la reserva desde la web y Android, la validación del horario y de las bahías con horas alternativas, la asignación de operarios sin cruces de horario, el registro de pagos con revisión del comprobante y la calificación con puntos que desbloquean promociones; el módulo administrativo está construido, salvo los reportes consolidados por periodo, que son la única brecha frente a los requisitos. Respecto de la propuesta original, el servicio móvil por zonas y la pasarela de pagos en línea se retiraron del alcance.
 
-El estado verificado es favorable en lo técnico: 40 de 41 requisitos funcionales implementados, 639 pruebas automatizadas y 19 pruebas de punta a punta aprobadas sin fallos, y el sistema desplegado en un servidor público con HTTPS. Las reglas críticas del negocio se garantizan en la base de datos, lo que protege el sistema frente a la concurrencia en reservas, pagos y puntos.
+El estado verificado es favorable en lo técnico: 40 de 41 requisitos funcionales implementados, 655 pruebas automatizadas, 19 pruebas de punta a punta y 42 casos funcionales aprobados sin fallos, y el sistema desplegado en un servidor público con HTTPS. Las reglas críticas del negocio se garantizan en la base de datos, lo que protege el sistema frente a la concurrencia en reservas, pagos y puntos.
 
 Al mismo tiempo, falta lo más importante para operar con personas usuarias reales: la validación con el negocio. También falta un límite de solicitudes en el gateway. Por tanto, los beneficios operativos planteados en el problema siguen siendo una hipótesis que este trabajo no confirma ni refuta.
 
@@ -379,7 +379,7 @@ La Tabla A1 lista la información que no se encontró en las carpetas revisadas 
 
 *Technologist in Software Analysis and Development (ADSO), Ficha 3145556. Instructor: Karol Daniela Correa. October 16, 2026.*
 
-**Abstract.** This article describes the design, implementation, and verification of Vehicle Washing (LavaRapido), a web and Android platform for a single-location car wash, developed as a training project in SENA's Technologist in Software Analysis and Development program. The documented problem is that bookings made by phone or in person, handwritten records, discretionary work assignment, and unrecorded cash payments leave no traceability over time slots, service execution, or payments. The work followed a software design documentation (SDD) approach with seven Scrum-inspired sprints. The scope evolved from a mobile, zone-based service with a payment gateway to a single-location car wash with payments by QR or transfer with a receipt reviewed by the administrator, or in cash. The solution consists of six domain microservices (five in Java 21 with Spring Boot 4 and one in .NET 8) behind an API gateway, a SQL Server 2022 database with nine schemas and 57 tables, RabbitMQ messaging, and Angular 21 and React Native clients. As of October 16, 2026, 40 of the 41 functional requirements were implemented and 1 was partial. That day 639 automated tests were run and all passed (7 persistence tests were skipped because they need a dedicated test database), and 19 end-to-end tests against the complete system in Docker also passed. The system also runs on a public server on Azure. Since October 19, 2026, each repository builds and runs its tests with GitHub Actions on every change. The consolidated reports and a request rate limit in the gateway are still pending. The operational benefits for the business remain a hypothesis, because they have not yet been measured with real users.
+**Abstract.** This article describes the design, implementation, and verification of Vehicle Washing (LavaRapido), a web and Android platform for a single-location car wash, developed as a training project in SENA's Technologist in Software Analysis and Development program. The documented problem is that bookings made by phone or in person, handwritten records, discretionary work assignment, and unrecorded cash payments leave no traceability over time slots, service execution, or payments. The work followed a software design documentation (SDD) approach with seven Scrum-inspired sprints. The scope evolved from a mobile, zone-based service with a payment gateway to a single-location car wash with payments by QR or transfer with a receipt reviewed by the administrator, or in cash. The solution consists of six domain microservices (five in Java 21 with Spring Boot 4 and one in .NET 8) behind an API gateway, a SQL Server 2022 database with nine schemas and 57 tables, RabbitMQ messaging, and Angular 21 and React Native clients. As of October 16, 2026, 40 of the 41 functional requirements were implemented and 1 was partial. On October 19, 2026, 655 automated tests were run and all passed (including 7 persistence tests against an isolated database), and 19 end-to-end tests and 42 functional cases against the complete system also passed. The system also runs on a public server on Azure. Since October 19, 2026, each repository builds and runs its tests with GitHub Actions on every change. The consolidated reports and a request rate limit in the gateway are still pending. The operational benefits for the business remain a hypothesis, because they have not yet been measured with real users.
 
 **Keywords:** microservices, hexagonal architecture, booking system, car wash, QR code payments, software design documentation
 
@@ -452,7 +452,7 @@ The project frames its corrective, preventive, and improvement actions within th
 
 ### 3.1. Type of Study
 
-This is an applied technological development work, presented as a single, descriptive case study. The unit of analysis is the system that was built. The evidence comes from the project artifacts: the code of eleven repositories, the design documentation (requirements, fifteen ADRs, data models, OpenAPI contracts), the technical manuals verified against the code, and the test and improvement action records [Patiño Cabrera et al. 2026a; Patiño Cabrera et al. 2026c]. Version 7.0 of the SRS follows the structure of IEEE 830 [IEEE 1998] and the contents of ISO/IEC/IEEE 29148 [ISO/IEC/IEEE 2018], and defines 41 functional requirements, 12 non-functional requirements classified according to the ISO/IEC 25010 quality model [ISO/IEC 2023], 30 use cases, and a traceability matrix with the status of each requirement [Guilombo Osorio et al. 2026].
+This is an applied technological development work, presented as a single, descriptive case study. The unit of analysis is the system that was built. The evidence comes from the project artifacts: the code of eleven repositories, the design documentation (requirements, fifteen ADRs, data models, OpenAPI contracts), the technical manuals verified against the code, and the test and improvement action records [Patiño Cabrera et al. 2026a; Patiño Cabrera et al. 2026c]. Version 7.0 of the SRS follows the structure of IEEE 830 [IEEE 1998] and the contents of ISO/IEC/IEEE 29148 [ISO/IEC/IEEE 2018], and defines 41 functional requirements, 12 non-functional requirements classified according to the ISO/IEC 25010 quality model [ISO/IEC 2023], 32 use cases, and a traceability matrix with the status of each requirement [Guilombo Osorio et al. 2026].
 
 ### 3.2. Context and Participants
 
@@ -498,7 +498,7 @@ Table 1 summarizes the technology stack, taken from the build files of each repo
 
 ### 3.6. Analysis Procedure
 
-The status of the requirements was taken from the SRS traceability matrix, verified against the code on October 16, 2026 [Guilombo Osorio et al. 2026]. The tests were run that same day: the suites of each Java service with the Maven Wrapper, those of payment-service with the .NET SDK (target *net8.0*), those of the web with Vitest, and the end-to-end tests of *lavarapido-infra/e2e* against the complete system started with Docker.
+The status of the requirements was taken from the SRS traceability matrix, verified against the code on October 16, 2026 [Guilombo Osorio et al. 2026]. The tests were run again on October 19, 2026: the suites of each Java service with the Maven Wrapper, those of payment-service with the .NET SDK (target *net8.0*), those of the web with Vitest, and the end-to-end tests of *lavarapido-infra/e2e* and the 42 functional cases against the complete system.
 
 ## 4. Results
 
@@ -574,25 +574,25 @@ Of the 12 non-functional requirements, 5 are implemented and 7 are partial [Guil
 
 ### 4.4. Test Results
 
-On October 16, 2026, all the automated suites were run: 639 tests passed, none failed, and 7 payment-service persistence tests were skipped because they need a dedicated test database (Table 5). That same day the 19 end-to-end tests of *lavarapido-infra/e2e* passed; they run through the complete system in Docker: booking with operator choice and automatic assignment, the flow of the three roles with payment, approval, points, execution, and rating, the inspection report with photos and a public link, and access rules per role. The SRS recorded 347 tests on October 6 [Guilombo Osorio et al. 2026]; the difference corresponds to the tests added with each new function.
+On October 19, 2026, all the automated suites were run: 655 tests passed, none failed or skipped; the 7 payment-service persistence tests ran against an isolated test database (Table 5). That same day the 19 end-to-end tests of *lavarapido-infra/e2e* passed; they run through the complete system: booking with operator choice and automatic assignment, the flow of the three roles with payment, approval, points, execution, and rating, the inspection report with photos and a public link, and access rules per role. The SRS recorded 347 tests on October 6 [Guilombo Osorio et al. 2026]; the difference corresponds to the tests added with each new function.
 
-**Table 5.** Results of the Automated Test Run (October 16, 2026)
+**Table 5.** Results of the Automated Test Run (October 19, 2026)
 
 | Component | Cases | Passed | Failed | Skipped |
 |---|---|---|---|---|
 | Web application (Angular) | 43 | 43 | 0 | 0 |
 | api-gateway | 34 | 34 | 0 | 0 |
-| security-service | 147 | 147 | 0 | 0 |
-| customer-service | 68 | 68 | 0 | 0 |
-| booking-service | 40 | 40 | 0 | 0 |
-| operations-service | 54 | 54 | 0 | 0 |
+| security-service | 151 | 151 | 0 | 0 |
+| customer-service | 69 | 69 | 0 | 0 |
+| booking-service | 43 | 43 | 0 | 0 |
+| operations-service | 55 | 55 | 0 | 0 |
 | notification-service | 112 | 112 | 0 | 0 |
-| payment-service (.NET) | 148 | 141 | 0 | 7 |
-| **Total** | **646** | **639** | **0** | **7** |
+| payment-service (.NET) | 148 | 148 | 0 | 0 |
+| **Total** | **655** | **655** | **0** | **0** |
 
 *Note.* Run with *./mvnw test* in each Java service, *dotnet test* in payment-service, and *npx ng test --watch=false* in the web. The 19 end-to-end tests are not included in the table.
 
-In addition, the 33 functional cases of the test documentation were run manually on October 9, 2026, against the complete system. In contrast, **there are no recorded results for acceptance cases CA-01 to CA-16** with the business owner, code coverage is not measured, and the Java services have no persistence tests against a real SQL Server outside the end-to-end suite.
+In addition, the 42 functional cases of the test documentation were run on October 19, 2026, against the complete system, all of them passing. In contrast, **there are no recorded results for acceptance cases CA-01 to CA-16** with the business owner, code coverage is not measured, and the Java services have no persistence tests against a real SQL Server outside the end-to-end suite.
 
 ### 4.5. Security
 
@@ -648,7 +648,7 @@ The architecture also evolved from what was planned. The technical proposal chos
 
 Enforcing the critical rules in the database, and not only in code, proved appropriate for a domain with concurrency: two customers booking the same bay or two administrators approving the same payment do not depend on the application code being correct on every path. The payment-service persistence tests that cover these cases exist, but they need a dedicated test database; the end-to-end suite does exercise those rules against the real SQL Server of the Docker environment.
 
-The application of hexagonal architecture [Cockburn 2005] is reflected in the shape of the tests: all 639 automated tests run without a database, because they test the domain, the use cases, and the web layer with test doubles instead of the real infrastructure, which makes them fast and deterministic. Since October 19, 2026, these tests run automatically on every change with GitHub Actions; however, the lack of coverage measurement limits the confidence these figures can provide, and the end-to-end suite, which tests the integrated services, is still run by hand. Research by Forsgren et al. [2018] associates continuous integration and test automation with better software delivery performance, which is why the project closed its technical debt TD-006 with GitHub Actions.
+The application of hexagonal architecture [Cockburn 2005] is reflected in the shape of the tests: 648 of the 655 automated tests run without a database, because they test the domain, the use cases, and the web layer with test doubles instead of the real infrastructure, which makes them fast and deterministic. Since October 19, 2026, these tests run automatically on every change with GitHub Actions; however, the lack of coverage measurement limits the confidence these figures can provide, and the end-to-end suite, which tests the integrated services, is still run by hand. Research by Forsgren et al. [2018] associates continuous integration and test automation with better software delivery performance, which is why the project closed its technical debt TD-006 with GitHub Actions.
 
 Cross-verification between documentation and code was one of the most useful contributions of the process: the 19 discrepancies found show that, even with an approach that puts design before code, documentation becomes outdated if it is not changed in the same change as the code, as captured in the project's lesson learned L-09 [Patiño Cabrera et al. 2026a]. The ADRs [Nygard 2011] allowed scope changes, such as manual operator assignment, to be justified rather than appearing as silent non-compliance.
 
@@ -660,7 +660,7 @@ This work has important limitations. First, there is no evidence from users: the
 
 The project designed and implemented a microservices platform for a single-location car wash that integrates bookings with real availability, automatic and manual work assignment, execution, payments by QR or transfer with a receipt reviewed by the administrator or in cash, notifications, loyalty, and inspection reports. The resulting architecture, with six domain services, a gateway, a 57-table database with one owner per schema, and asynchronous messaging, was documented in fifteen ADRs and verified against the code. Against the six specific objectives of the SRS, vehicle registration and booking from the web and Android, schedule and bay validation with alternative times, operator assignment without schedule overlaps, payment recording with receipt review, and ratings with points that unlock promotions were achieved; the administrative module is built, except for the consolidated reports per period, which are the only gap against the requirements. Compared with the original proposal, the mobile, zone-based service and the online payment gateway were removed from scope.
 
-The verified status is favorable on the technical side: 40 of 41 functional requirements implemented, 639 automated tests and 19 end-to-end tests passing with no failures, and the system deployed on a public server with HTTPS. The critical business rules are enforced in the database, which protects the system against concurrency in bookings, payments, and points.
+The verified status is favorable on the technical side: 40 of 41 functional requirements implemented, 655 automated tests, 19 end-to-end tests, and 42 functional cases passing with no failures, and the system deployed on a public server with HTTPS. The critical business rules are enforced in the database, which protects the system against concurrency in bookings, payments, and points.
 
 At the same time, the most important step to operate with real users is still missing: validation with the business. A request rate limit in the gateway is also missing. Therefore, the operational benefits stated in the problem remain a hypothesis that this work neither confirms nor refutes.
 

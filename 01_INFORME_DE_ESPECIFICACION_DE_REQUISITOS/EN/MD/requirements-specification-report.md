@@ -30,12 +30,14 @@ Version 7.1, October 17, 2026
 | V7.1 | 2026-10-17 | Development team | Status verified against the code as of October 17, 2026: the inspection report (RF-036) is also managed from the mobile app, and the RNF-008 width check was extended to 60 web screens and 26 mobile app screens, with no overflow. |
 | V7.2 | 2026-10-19 | Development team | Continuous integration with GitHub Actions in the 10 repositories: every change is built and its tests are run. Continuous integration with Jenkins is removed from the pending items. |
 | V7.3 | 2026-10-19 | Development team | The administrator can change the role of an account (RF-028, CU27); an administrator account cannot be deactivated and an administrator cannot close their own account (RF-027). |
+| V7.4 | 2026-10-19 | Development team | New use cases CU31 (manage own account, RF-027) and CU32 (automatic processes: first administrator, notifications per event, reminders, alert of a booking without an operator and new version notice). There are now 32 use cases. |
+| V7.5 | 2026-10-19 | Development team | Tests of October 19, 2026 (655 automated, 19 end-to-end, and 42 functional cases, Table 58) and system screenshots taken again that day. |
 
 ---
 
 ## Abstract
 
-This document specifies the requirements of LavaRápido, a web and mobile platform that organizes the operation of a single-site car wash: customer and vehicle registration, booking of time slots with opening-hours and bay validation, automatic or manual operator assignment, service execution and rating, vehicle inspection report, payment by QR code or bank transfer with receipt review, promotions, loyalty points and notifications. The specification follows the structure of IEEE 830 (IEEE, 1998) and ISO/IEC/IEEE 29148 (ISO/IEC/IEEE, 2018), and is based on the project's technical documentation (`vehicle-w-docs` repository) and on the code of its seven server components, reviewed on October 16, 2026. It defines 41 functional requirements with verifiable acceptance criteria, 12 non-functional requirements with their verification metric, 30 use cases, the business rules, the life cycles of the booking, the payment and the service execution, the data requirements, and the technical, data, operational and regulatory constraints. As of October 16, 2026, 40 functional requirements are implemented and 1 is partially implemented.
+This document specifies the requirements of LavaRápido, a web and mobile platform that organizes the operation of a single-site car wash: customer and vehicle registration, booking of time slots with opening-hours and bay validation, automatic or manual operator assignment, service execution and rating, vehicle inspection report, payment by QR code or bank transfer with receipt review, promotions, loyalty points and notifications. The specification follows the structure of IEEE 830 (IEEE, 1998) and ISO/IEC/IEEE 29148 (ISO/IEC/IEEE, 2018), and is based on the project's technical documentation (`vehicle-w-docs` repository) and on the code of its seven server components, reviewed on October 16, 2026. It defines 41 functional requirements with verifiable acceptance criteria, 12 non-functional requirements with their verification metric, 32 use cases, the business rules, the life cycles of the booking, the payment and the service execution, the data requirements, and the technical, data, operational and regulatory constraints. As of October 16, 2026, 40 functional requirements are implemented and 1 is partially implemented.
 
 **Keywords:** requirements specification, car wash, bookings, microservices, use cases.
 
@@ -676,7 +678,7 @@ Non-functional requirements are classified according to the product quality char
 
 ### 7.1 Use Case Diagram
 
-The 30 use cases are presented in four diagrams, one per actor, grouped by module (Figures 3a to 3d).
+The 32 use cases are presented in four diagrams, one per actor, grouped by module (Figures 3a to 3d).
 
 **Figure 3a**
 *Use Cases Common to the Three Roles*
@@ -691,6 +693,7 @@ flowchart LR
     CU17(["CU17 Manage notifications"])
     CU18(["CU18 Customize visual theme"])
     CU19(["CU19 Select language"])
+    CU31(["CU31 Manage own account"])
 
     Usuario --- CU01
     Usuario --- CU03
@@ -699,6 +702,7 @@ flowchart LR
     Usuario --- CU17
     Usuario --- CU18
     Usuario --- CU19
+    Usuario --- CU31
 
     classDef actor fill:#08427b,color:#fff,stroke:#052e56
     class Usuario actor
@@ -802,6 +806,9 @@ flowchart LR
     subgraph REP["Reports"]
         CU23(["CU23 View reports"])
     end
+    subgraph AUT["Automatic processes"]
+        CU32(["CU32 Run automatic processes"])
+    end
 
     Administrador --- CU27
     Administrador --- CU20
@@ -815,12 +822,13 @@ flowchart LR
     Administrador --- CU24
     Administrador --- CU23
     Sistema --- CU08
+    Sistema --- CU32
 
     classDef actor fill:#08427b,color:#fff,stroke:#052e56
     class Administrador,Sistema actor
 ```
 
-*Note.* CU22 appears as a view-only use case in the operator diagram and as full management in the administrator diagram, since the administrator is the one who records shifts, absences and the operator profile (RF-022, RF-038). CU08 is run by the system each time a booking is confirmed. Diagrams by the authors.
+*Note.* CU22 appears as a view-only use case in the operator diagram and as full management in the administrator diagram, since the administrator is the one who records shifts, absences and the operator profile (RF-022, RF-038). CU08 is run by the system each time a booking is confirmed, and CU32 groups the processes that run without anyone asking for them (reminders, alerts, notices and the first administrator). Diagrams by the authors.
 
 ### 7.2 Actor and Use Case Matrix
 
@@ -829,11 +837,11 @@ flowchart LR
 
 | Actor | Use cases |
 |---|---|
-| All roles | CU01, CU03, CU04, CU16, CU17, CU18, CU19 |
+| All roles | CU01, CU03, CU04, CU16, CU17, CU18, CU19, CU31 |
 | Customer | CU02, CU05, CU06, CU07, CU12, CU14, CU15, CU25, CU26, CU30 (view only) |
 | Operator | CU10, CU11, CU22 (view only) |
 | Administrator | CU09, CU13, CU20, CU21, CU22, CU23, CU24, CU27, CU28, CU29, CU30 |
-| System | CU06 (included in CU05), CU08 |
+| System | CU06 (included in CU05), CU08, CU32 |
 
 ### 7.3 Use Case Specifications
 
@@ -1229,6 +1237,33 @@ Each use case is specified with the Cockburn (2001) format: actors, precondition
 | Requirements | RF-036 |
 | Status | Implemented |
 
+
+**Table 53**
+*CU31: Manage own account*
+
+| Field | Description |
+|---|---|
+| Actors | Customer, operator or administrator (each with their own account). |
+| Precondition | The user is authenticated. |
+| Main flow | 1. They open their profile. 2. They update first and last names, phone and contact address. 3. They change their email by confirming the current password. 4. They sign out. 5. If they will no longer use the account, they deactivate it by confirming the password: all their sessions are closed. |
+| Alternative flows | • Email already registered by another account: it is not changed. • Wrong current password: the email is not changed and the account is not deactivated. • Administrator account: it does not have the option to deactivate itself. • Empty address: it is deleted. |
+| Postcondition | The profile data is updated, or the account is deactivated and keeps its history. |
+| Requirements | RF-027 |
+| Status | Implemented |
+
+**Table 54**
+*CU32: Run automatic processes*
+
+| Field | Description |
+|---|---|
+| Actors | System (scheduled tasks and events). The notice of a new app version is started by a team member when they publish the APK. |
+| Precondition | The services and RabbitMQ are running. |
+| Main flow | 1. At start-up, if there is no administrator, the system creates the first one with the data of the server configuration. 2. Each booking, operator, payment or inspection event is turned into notifications for the customer, the operator and the administrators, once per event. 3. When a booking is confirmed it schedules its reminders (24 hours and 1 hour before) and sends them on time. 4. Two hours before a booking without an operator it warns the administrators. 5. When a new APK is published it notifies the users who have the app installed. |
+| Alternative flows | • The booking is cancelled, started or finished: the pending reminders are removed. • The service was down and the booking time already passed: the reminder is closed without being sent. • The same app version is published again: the notice is not repeated. • An administrator already exists: no other one is created. |
+| Postcondition | Users get the notices that apply to them, without duplicates. |
+| Requirements | RF-018 |
+| Status | Implemented |
+
 ---
 
 ## 8. Business Flows
@@ -1310,9 +1345,9 @@ stateDiagram-v2
 
 ### 8.4 Domain Events and Notifications
 
-The services publish events to RabbitMQ to notify other services without blocking the operation (ADR-004). Table 53 links each event to its effect.
+The services publish events to RabbitMQ to notify other services without blocking the operation (ADR-004). Table 55 links each event to its effect.
 
-**Table 53**
+**Table 55**
 *Domain Events and Their Effect*
 
 | Event | Producer | Effect |
@@ -1337,9 +1372,9 @@ The services publish events to RabbitMQ to notify other services without blockin
 
 ### 9.1 Data Ownership
 
-The database has 9 schemas and 57 tables. Each schema has a single owner service, which is the only one allowed to write to it (see Table 54).
+The database has 9 schemas and 57 tables. Each schema has a single owner service, which is the only one allowed to write to it (see Table 56).
 
-**Table 54**
+**Table 56**
 *Data Schemas and Owner Service*
 
 | Schema | Owner service | Main data |
@@ -1368,9 +1403,9 @@ The database has 9 schemas and 57 tables. Each schema has a single owner service
 
 ## 10. Traceability Matrix
 
-Table 55 links each functional requirement to its user story, its use cases, the service that implements it and its status. The requirements without a user story (RF-027 to RF-038) describe built functions that must be added to the backlog.
+Table 57 links each functional requirement to its user story, its use cases, the service that implements it and its status. The requirements without a user story (RF-027 to RF-038) describe built functions that must be added to the backlog.
 
-**Table 55**
+**Table 57**
 *Functional Requirements Traceability*
 
 | RF | Name | HU | CU | Service | Status |
@@ -1395,7 +1430,7 @@ Table 55 links each functional requirement to its user story, its use cases, the
 | RF-015 | Payment history | HU-PAY-002 | CU14 | payment | Implemented |
 | RF-016 | Payment constraints | HU-PAY-001 | CU12 | payment | Implemented |
 | RF-017 | Dashboard per role | HU-UI-001 | CU16 | frontend | Implemented |
-| RF-018 | Notifications | HU-UI-002 | CU17 | notification | Implemented |
+| RF-018 | Notifications | HU-UI-002 | CU17, CU32 | notification | Implemented |
 | RF-019 | Visual theme per account | HU-UI-003 | CU18 | security | Implemented |
 | RF-020 | Language per account | HU-UI-003 | CU19 | security | Implemented |
 | RF-021 | Opening hours and exceptions | HU-ADMIN-001 | CU20 | booking | Implemented |
@@ -1404,7 +1439,7 @@ Table 55 links each functional requirement to its user story, its use cases, the
 | RF-024 | Promotion management | HU-PROMO-001 | CU24 | payment | Implemented |
 | RF-025 | Applying a promotion at payment | HU-PROMO-002 | CU25 | payment | Implemented |
 | RF-026 | Loyalty points | HU-PROMO-002 | CU25 | payment | Implemented |
-| RF-027 | Own account management | — | — | security | Implemented |
+| RF-027 | Own account management | — | CU31 | security | Implemented |
 | RF-028 | User administration | — | CU27 | security | Implemented |
 | RF-029 | Roles and permissions | — | CU27 | security | Implemented |
 | RF-030 | Customer vehicle management | — | CU26 | customer | Implemented |
@@ -1423,24 +1458,24 @@ Table 55 links each functional requirement to its user story, its use cases, the
 
 ### 11.1 Progress Summary
 
-Of the 41 functional requirements, 40 are implemented and 1 is partially implemented (RF-023, consolidated reports). The seven server components are built; on October 9, 2026 the six services and the gateway were started, and each one answered `200 OK` on its health endpoint. The web and the Android app are connected to the six services through the gateway. Table 56 summarizes the automated tests of the services and the web, run on October 16, 2026.
+Of the 41 functional requirements, 40 are implemented and 1 is partially implemented (RF-023, consolidated reports). The seven server components are built; on October 9, 2026 the six services and the gateway were started, and each one answered `200 OK` on its health endpoint. The web and the Android app are connected to the six services through the gateway. Table 58 summarizes the automated tests of the services and the web, run on October 16, 2026.
 
-**Table 56**
+**Table 58**
 *Automated Tests by Component*
 
 | Component | Command | Tests | Count date |
 |---|---|---|---|
-| Web application (Angular) | `npx ng test --watch=false` | 43 | October 16, 2026 |
-| api-gateway | `./mvnw test` | 34 | October 16, 2026 |
-| security-service | `./mvnw test` | 147 | October 16, 2026 |
-| customer-service | `./mvnw test` | 68 | October 16, 2026 |
-| booking-service | `./mvnw test` | 40 | October 16, 2026 |
-| operations-service | `./mvnw test` | 54 | October 16, 2026 |
-| notification-service | `./mvnw test` | 112 | October 16, 2026 |
-| payment-service | `dotnet test` | 141 | October 16, 2026 |
-| **Total** | | **639** | |
+| Web application (Angular) | `npx ng test --watch=false` | 43 | October 19, 2026 |
+| api-gateway | `./mvnw test` | 34 | October 19, 2026 |
+| security-service | `./mvnw test` | 151 | October 19, 2026 |
+| customer-service | `./mvnw test` | 69 | October 19, 2026 |
+| booking-service | `./mvnw test` | 43 | October 19, 2026 |
+| operations-service | `./mvnw test` | 55 | October 19, 2026 |
+| notification-service | `./mvnw test` | 112 | October 19, 2026 |
+| payment-service | `dotnet test` | 148 | October 19, 2026 |
+| **Total** | | **655** | |
 
-*Note.* All tests passed. payment-service also has 7 integration tests that are skipped because they need SQL Server. In addition, `lavarapido-infra/e2e` has 19 end-to-end tests that run with the system up and passed on October 16, 2026: the booking flow with operator choice and automatic assignment, the complete flow of the three roles (booking, payment, approval with points, service, and rating), the inspection report with photos and public link, and the access rules per role. The folder also includes the RNF-001 measurement and the check of the web screens at 360 px (RNF-008). During the manual review of October 9, a missing API Gateway route (`/api/v1/loyalty/**`) and a style that misaligned the promotion badges were fixed.
+*Note.* All tests passed. The 148 of payment-service include 7 persistence tests that need SQL Server; on October 19 they were run against an isolated database. In addition, `lavarapido-infra/e2e` has 19 end-to-end tests that run with the system up and passed on October 19, 2026, and the 42 functional cases of the Test Documentation passed that same day: the booking flow with operator choice and automatic assignment, the complete flow of the three roles (booking, payment, approval with points, service, and rating), the inspection report with photos and public link, and the access rules per role. The folder also includes the RNF-001 measurement and the check of the web screens at 360 px (RNF-008). During the manual review of October 9, a missing API Gateway route (`/api/v1/loyalty/**`) and a style that misaligned the promotion badges were fixed.
 
 ### 11.2 Pending Items for Delivery
 
@@ -1452,7 +1487,7 @@ Of the 41 functional requirements, 40 are implemented and 1 is partially impleme
 
 ### 11.3 Open Decisions
 
-**Table 57**
+**Table 59**
 *Open Decisions*
 
 | Topic | Current situation | Owner |

@@ -32,6 +32,7 @@ Table 1 records the change history of this document. The action register (sectio
 | 2.0 | 2026-10-16 | Review against the code of October 16, 2026. Eleven open corrective actions were closed (ACO-01 to ACO-03 and ACO-05 to ACO-12, now AC-24 to AC-34) and five improvement actions (AM-01, AM-04, AM-08, AM-10, and AM-11); five nonconformities found in the complete review of the system were recorded and closed (AC-35 to AC-39); the preventive actions, indicators, lessons learned, and traceability were updated. | Development team |
 | 2.1 | 2026-10-17 | Review against the code of October 17, 2026. Corrective actions AC-40 to AC-43 were closed (expired session notice when logging out, screens overflowing on phones, squashed filter inputs in the app, and service progress before it started), preventive action AP-15 was added (responsive design check before merging), and improvements AM-07 (inspection report in the mobile app) and AM-08 (frequently asked questions on the home page) were closed. | Development team |
 | 2.2 | 2026-10-19 | Preventive action AP-01 was closed with continuous integration in GitHub Actions in the 10 repositories. | Development team |
+| 2.3 | 2026-10-19 | Test indicator with the run of October 19 (655 automated, 19 end-to-end, and 42 functional cases). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -344,7 +345,7 @@ Preventive actions address the causes of risks that have not yet materialized or
 | On-time closure | Actions closed within the time of their severity / closed actions × 100 | ≥ 90% | To be measured from version 1.0 |
 | Recurrence | Closed corrective actions whose problem reappears / closed corrective actions × 100 | 0% | 0% |
 | Escaped defects | Defects found in acceptance or operation / total defects of the period × 100 | Downward trend | To be measured from the first implementation |
-| Automated tests | Tests run and passed in every repository | Increasing | 639 unit and integration tests (web 43, gateway 34, Java services 421, and payment-service 141) and 19 end-to-end tests |
+| Automated tests | Tests run and passed in every repository | Increasing | 655 unit and integration tests (web 43, gateway 34, Java services 430, and payment-service 148) as of October 19, 2026, 19 end-to-end tests, and 42 functional cases |
 
 *Note.* Prepared by the authors. The test count corresponds to the run of October 16, 2026; version 1.0 counted annotations (about 400).
 
