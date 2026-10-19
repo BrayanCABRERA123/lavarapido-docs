@@ -31,6 +31,7 @@ Versión 7.1, 17 de octubre de 2026
 | V7.2 | 19/10/2026 | Equipo de desarrollo | Integración continua con GitHub Actions en los 10 repositorios: en cada cambio se compila y se corren las pruebas. Se retira de los pendientes la integración continua con Jenkins. |
 | V7.3 | 19/10/2026 | Equipo de desarrollo | El administrador puede cambiar el rol de una cuenta (RF-028, CU27); una cuenta de administrador no se desactiva y un administrador no cierra su propia cuenta (RF-027). |
 | V7.4 | 19/10/2026 | Equipo de desarrollo | Nuevos casos de uso CU31 (gestionar la cuenta propia, RF-027) y CU32 (procesos automáticos: primer administrador, notificaciones por evento, recordatorios, alerta de reserva sin operario y aviso de versión nueva). Pasan a ser 32 casos de uso. |
+| V7.5 | 19/10/2026 | Equipo de desarrollo | Pruebas del 19 de octubre de 2026 (655 automatizadas, 19 de punta a punta y 42 casos funcionales, Tabla 58) y capturas del sistema tomadas de nuevo ese día. |
 
 ---
 
@@ -1464,17 +1465,17 @@ De los 41 requisitos funcionales, 40 están implementados y 1 parcialmente (RF-0
 
 | Componente | Comando | Pruebas | Fecha del conteo |
 |---|---|---|---|
-| Aplicación web (Angular) | `npx ng test --watch=false` | 43 | 16 de octubre de 2026 |
-| api-gateway | `./mvnw test` | 34 | 16 de octubre de 2026 |
-| security-service | `./mvnw test` | 147 | 16 de octubre de 2026 |
-| customer-service | `./mvnw test` | 68 | 16 de octubre de 2026 |
-| booking-service | `./mvnw test` | 40 | 16 de octubre de 2026 |
-| operations-service | `./mvnw test` | 54 | 16 de octubre de 2026 |
-| notification-service | `./mvnw test` | 112 | 16 de octubre de 2026 |
-| payment-service | `dotnet test` | 141 | 16 de octubre de 2026 |
-| **Total** | | **639** | |
+| Aplicación web (Angular) | `npx ng test --watch=false` | 43 | 19 de octubre de 2026 |
+| api-gateway | `./mvnw test` | 34 | 19 de octubre de 2026 |
+| security-service | `./mvnw test` | 151 | 19 de octubre de 2026 |
+| customer-service | `./mvnw test` | 69 | 19 de octubre de 2026 |
+| booking-service | `./mvnw test` | 43 | 19 de octubre de 2026 |
+| operations-service | `./mvnw test` | 55 | 19 de octubre de 2026 |
+| notification-service | `./mvnw test` | 112 | 19 de octubre de 2026 |
+| payment-service | `dotnet test` | 148 | 19 de octubre de 2026 |
+| **Total** | | **655** | |
 
-*Nota.* Todas las pruebas pasaron. payment-service tiene además 7 pruebas de integración que se omiten porque necesitan SQL Server. Además, `lavarapido-infra/e2e` tiene 19 pruebas de punta a punta que se ejecutan con el sistema levantado y que pasaron el 16 de octubre de 2026: el flujo de reserva con elección de operario y asignación automática, el flujo completo de los tres roles (reserva, pago, aprobación con puntos, servicio y calificación), el informe de inspección con fotos y enlace público, y las reglas de acceso por rol. La carpeta incluye también la medición de RNF-001 y la revisión de las pantallas web a 360 px (RNF-008). En la revisión manual del 9 de octubre se corrigieron una ruta que faltaba en el API Gateway (`/api/v1/loyalty/**`) y un estilo que desalineaba las insignias de las promociones.
+*Nota.* Todas las pruebas pasaron. Las 148 de payment-service incluyen 7 de persistencia que necesitan SQL Server; el 19 de octubre se corrieron contra una base aislada. Además, `lavarapido-infra/e2e` tiene 19 pruebas de punta a punta que se ejecutan con el sistema levantado y que pasaron el 19 de octubre de 2026, y los 42 casos funcionales de la Documentación de Pruebas pasaron ese mismo día: el flujo de reserva con elección de operario y asignación automática, el flujo completo de los tres roles (reserva, pago, aprobación con puntos, servicio y calificación), el informe de inspección con fotos y enlace público, y las reglas de acceso por rol. La carpeta incluye también la medición de RNF-001 y la revisión de las pantallas web a 360 px (RNF-008). En la revisión manual del 9 de octubre se corrigieron una ruta que faltaba en el API Gateway (`/api/v1/loyalty/**`) y un estilo que desalineaba las insignias de las promociones.
 
 ### 11.2 Pendientes para la Entrega
 

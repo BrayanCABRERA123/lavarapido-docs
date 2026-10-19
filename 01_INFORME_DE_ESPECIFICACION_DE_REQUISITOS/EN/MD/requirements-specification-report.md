@@ -31,6 +31,7 @@ Version 7.1, October 17, 2026
 | V7.2 | 2026-10-19 | Development team | Continuous integration with GitHub Actions in the 10 repositories: every change is built and its tests are run. Continuous integration with Jenkins is removed from the pending items. |
 | V7.3 | 2026-10-19 | Development team | The administrator can change the role of an account (RF-028, CU27); an administrator account cannot be deactivated and an administrator cannot close their own account (RF-027). |
 | V7.4 | 2026-10-19 | Development team | New use cases CU31 (manage own account, RF-027) and CU32 (automatic processes: first administrator, notifications per event, reminders, alert of a booking without an operator and new version notice). There are now 32 use cases. |
+| V7.5 | 2026-10-19 | Development team | Tests of October 19, 2026 (655 automated, 19 end-to-end, and 42 functional cases, Table 58) and system screenshots taken again that day. |
 
 ---
 
@@ -1464,17 +1465,17 @@ Of the 41 functional requirements, 40 are implemented and 1 is partially impleme
 
 | Component | Command | Tests | Count date |
 |---|---|---|---|
-| Web application (Angular) | `npx ng test --watch=false` | 43 | October 16, 2026 |
-| api-gateway | `./mvnw test` | 34 | October 16, 2026 |
-| security-service | `./mvnw test` | 147 | October 16, 2026 |
-| customer-service | `./mvnw test` | 68 | October 16, 2026 |
-| booking-service | `./mvnw test` | 40 | October 16, 2026 |
-| operations-service | `./mvnw test` | 54 | October 16, 2026 |
-| notification-service | `./mvnw test` | 112 | October 16, 2026 |
-| payment-service | `dotnet test` | 141 | October 16, 2026 |
-| **Total** | | **639** | |
+| Web application (Angular) | `npx ng test --watch=false` | 43 | October 19, 2026 |
+| api-gateway | `./mvnw test` | 34 | October 19, 2026 |
+| security-service | `./mvnw test` | 151 | October 19, 2026 |
+| customer-service | `./mvnw test` | 69 | October 19, 2026 |
+| booking-service | `./mvnw test` | 43 | October 19, 2026 |
+| operations-service | `./mvnw test` | 55 | October 19, 2026 |
+| notification-service | `./mvnw test` | 112 | October 19, 2026 |
+| payment-service | `dotnet test` | 148 | October 19, 2026 |
+| **Total** | | **655** | |
 
-*Note.* All tests passed. payment-service also has 7 integration tests that are skipped because they need SQL Server. In addition, `lavarapido-infra/e2e` has 19 end-to-end tests that run with the system up and passed on October 16, 2026: the booking flow with operator choice and automatic assignment, the complete flow of the three roles (booking, payment, approval with points, service, and rating), the inspection report with photos and public link, and the access rules per role. The folder also includes the RNF-001 measurement and the check of the web screens at 360 px (RNF-008). During the manual review of October 9, a missing API Gateway route (`/api/v1/loyalty/**`) and a style that misaligned the promotion badges were fixed.
+*Note.* All tests passed. The 148 of payment-service include 7 persistence tests that need SQL Server; on October 19 they were run against an isolated database. In addition, `lavarapido-infra/e2e` has 19 end-to-end tests that run with the system up and passed on October 19, 2026, and the 42 functional cases of the Test Documentation passed that same day: the booking flow with operator choice and automatic assignment, the complete flow of the three roles (booking, payment, approval with points, service, and rating), the inspection report with photos and public link, and the access rules per role. The folder also includes the RNF-001 measurement and the check of the web screens at 360 px (RNF-008). During the manual review of October 9, a missing API Gateway route (`/api/v1/loyalty/**`) and a style that misaligned the promotion badges were fixed.
 
 ### 11.2 Pending Items for Delivery
 
