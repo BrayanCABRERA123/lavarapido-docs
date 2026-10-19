@@ -8,7 +8,7 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 2.1, 17 de octubre de 2026
+Versión 2.2, 19 de octubre de 2026
 
 ---
 
@@ -21,7 +21,7 @@ Este documento muestra cómo se comporta LavaRápido cuando alguien lo usa: qué
 3. **Diagramas de actividades** de los procesos de negocio.
 4. **Diagramas de estados** de las entidades que cambian de estado (reserva, pago, ejecución del servicio, promoción e informe de inspección).
 
-El 17 de octubre de 2026 se agregaron el consentimiento de los documentos legales en el registro (sección 2.1) y el informe de inspección desde la aplicación móvil (sección 2.9). Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol.
+El 19 de octubre de 2026 se agregaron los casos de uso CU31 y CU32, la recuperación de la contraseña (sección 2.10) y el ciclo de vida de la cuenta con el cambio de rol (sección 4.6). El 17 de octubre de 2026 se agregaron el consentimiento de los documentos legales en el registro (sección 2.1) y el informe de inspección desde la aplicación móvil (sección 2.9). Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol.
 
 La especificación completa de cada requisito y caso de uso (actores, precondición, flujo normal, flujos alternos y postcondición) está en el *Informe de especificación de requisitos*, secciones 5 y 7.3; aquí se citan por su identificador (RF-XXX, CUXX).
 
@@ -31,7 +31,7 @@ La especificación completa de cada requisito y caso de uso (actores, precondici
 
 ### 1.1 Diagrama de Casos de Uso
 
-Los 30 casos de uso se presentan en cuatro diagramas, uno por actor, agrupados por módulo.
+Los 32 casos de uso se presentan en cuatro diagramas, uno por actor, agrupados por módulo.
 
 **Casos de uso comunes a los tres roles**
 
@@ -45,6 +45,7 @@ flowchart LR
     CU17(["CU17 Gestionar notificaciones"])
     CU18(["CU18 Personalizar tema visual"])
     CU19(["CU19 Seleccionar idioma"])
+    CU31(["CU31 Gestionar la cuenta propia"])
 
     Usuario --- CU01
     Usuario --- CU03
@@ -53,6 +54,7 @@ flowchart LR
     Usuario --- CU17
     Usuario --- CU18
     Usuario --- CU19
+    Usuario --- CU31
 
     classDef actor fill:#08427b,color:#fff,stroke:#052e56
     class Usuario actor
@@ -151,6 +153,9 @@ flowchart LR
     subgraph REP["Reportes"]
         CU23(["CU23 Consultar reportes"])
     end
+    subgraph AUT["Procesos automáticos"]
+        CU32(["CU32 Ejecutar procesos automáticos"])
+    end
 
     Administrador --- CU27
     Administrador --- CU20
@@ -164,24 +169,25 @@ flowchart LR
     Administrador --- CU24
     Administrador --- CU23
     Sistema --- CU08
+    Sistema --- CU32
 
     classDef actor fill:#08427b,color:#fff,stroke:#052e56
     class Administrador,Sistema actor
 ```
 
-*Nota.* `«include»` indica que CU05 siempre ejecuta CU06; `«extend»` indica que CU25 amplía opcionalmente CU12. CU22 aparece como consulta para el operario y como gestión para el administrador, que es quien registra los turnos, las ausencias y la ficha del operario (RF-022, RF-038). El sistema ejecuta CU08 cada vez que se confirma una reserva. El cliente no registra el informe de inspección (CU30): lo consulta por el enlace que le comparte el administrador.
+*Nota.* `«include»` indica que CU05 siempre ejecuta CU06; `«extend»` indica que CU25 amplía opcionalmente CU12. CU22 aparece como consulta para el operario y como gestión para el administrador, que es quien registra los turnos, las ausencias y la ficha del operario (RF-022, RF-038). El sistema ejecuta CU08 cada vez que se confirma una reserva, y CU32 agrupa los procesos que corren sin que nadie los pida (recordatorios, alertas, avisos y primer administrador). El cliente no registra el informe de inspección (CU30): lo consulta por el enlace que le comparte el administrador.
 
 ### 1.2 Matriz de Actores y Casos de Uso
 
 | Actor | Casos de uso |
 |---|---|
-| Todos los roles | CU01, CU03, CU04, CU16, CU17, CU18, CU19 |
+| Todos los roles | CU01, CU03, CU04, CU16, CU17, CU18, CU19, CU31 |
 | Cliente | CU02, CU05, CU06, CU07, CU12, CU14, CU15, CU25, CU26, CU30 (consulta) |
 | Operario | CU10, CU11, CU22 (consulta) |
 | Administrador | CU09, CU13, CU20, CU21, CU22, CU23, CU24, CU27, CU28, CU29, CU30 |
-| Sistema | CU06 (incluido en CU05), CU08 |
+| Sistema | CU06 (incluido en CU05), CU08, CU32 |
 
-La especificación de cada uno de los 30 casos de uso (precondición, flujo normal, flujos alternos, postcondición, estado) está en el *Informe de especificación de requisitos*, Tablas 23 a 52.
+La especificación de cada uno de los 32 casos de uso (precondición, flujo normal, flujos alternos, postcondición, estado) está en el *Informe de especificación de requisitos*, Tablas 23 a 54.
 
 ---
 
@@ -558,6 +564,47 @@ sequenceDiagram
 
 *Fuente:* `operations-service` (`InspectionReport`, migración `033-execution-inspection-report.sql`), `notification-service` (aviso del informe compartido), web (`features/admin/pages/inspection`) y app móvil (`AdminInspectionScreen`, `InspectionService`). En la app las fotos se toman con la cámara o se eligen de la galería y se reducen en el celular antes del `POST /findings`; el botón **Publicar y compartir enlace** abre el menú de compartir del teléfono.
 
+### 2.10 Recuperación de la contraseña con un código de 6 dígitos (RF-003)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Usuario
+    participant W as Web o app
+    participant S as security-service
+    participant DB as SQL Server (security)
+    participant M as Correo (SMTP)
+
+    U->>W: Olvidé mi contraseña → correo
+    W->>S: POST /api/v1/auth/password/forgot
+    alt cuenta activa con ese correo
+        S->>DB: invalida los códigos anteriores que sigan vigentes
+        S->>DB: guarda el hash del código nuevo (vence en 15 min)
+        S->>M: correo con el código
+    else correo desconocido o cuenta inactiva
+        S->>S: no hace nada
+    end
+    S-->>W: 202 (la misma respuesta en los dos casos)
+    U->>W: Escribe el código
+    W->>S: POST /api/v1/auth/password/verify
+    alt código correcto
+        S-->>W: 204
+    else código incorrecto
+        S->>S: suma el intento, al quinto invalida el código
+        S-->>W: 400 INVALID_RESET_CODE
+    end
+    U->>W: Contraseña nueva
+    W->>S: POST /api/v1/auth/password/reset
+    alt política cumplida y distinta de la actual
+        S->>DB: marca el código como usado, guarda la contraseña nueva y borra el bloqueo
+        S-->>W: 204 (vuelve al inicio de sesión)
+    else débil o igual a la actual
+        S-->>W: 400 WEAK_PASSWORD o SAME_PASSWORD (el código no se gasta)
+    end
+```
+
+*Fuente:* `security-service` (`PasswordRecoveryService`, `PasswordResetToken`, `PasswordRecoveryPolicy` con `code-ttl: 15m` y `max-failed-attempts: 5`, `SecureRandomResetCodeGenerator`, `EmailResetCodeNotifier`). La respuesta de *forgot* no revela si el correo existe.
+
 ---
 
 ## 3. Diagramas de Actividades
@@ -842,6 +889,25 @@ stateDiagram-v2
 ```
 
 *Fuente:* `operations-service`, `InspectionReport` (`publish`, `requirePublished`, `setPhaseStatus`, `addFinding`). Las fases son recepción, exterior, interior, motor y entrega; solo se puede compartir un informe publicado.
+
+### 4.6 Cuenta de usuario (RF-002, RF-004b, RF-027, RF-028)
+
+```mermaid
+stateDiagram-v2
+    [*] --> ACTIVA : registro (CLIENT) o creada por el administrador
+    state ACTIVA {
+        [*] --> DESBLOQUEADA
+        DESBLOQUEADA --> BLOQUEADA : quinto intento fallido en 15 min
+        BLOQUEADA --> DESBLOQUEADA : pasan 15 min o recupera la contraseña
+        DESBLOQUEADA --> DESBLOQUEADA : ingreso correcto (borra el conteo)
+    }
+    ACTIVA --> ACTIVA : el administrador cambia su rol (cierra sus sesiones)
+    ACTIVA --> INACTIVA : el administrador la desactiva (no si es administrador)
+    ACTIVA --> INACTIVA : el usuario cierra su cuenta con la contraseña (no si es administrador)
+    INACTIVA --> ACTIVA : el administrador la activa
+```
+
+*Fuente:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus` y `changeRole`, `AccountDeactivationService`). Una cuenta bloqueada responde 423 aun con la contraseña correcta; una inactiva responde 403 después de validar la contraseña. Cada cuenta tiene un solo rol y nadie cambia el suyo propio.
 
 ---
 
