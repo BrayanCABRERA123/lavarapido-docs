@@ -4,6 +4,19 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-10-19 — Despliegue, integración continua, casos de uso y pruebas del día
+
+**Contenido** (español e inglés)
+
+- 07 Documento de despliegue 1.3: actualización del servidor del 19 de octubre (migración 039, APK 1.1.0), acceso de cada integrante con su propia llave SSH, despliegue desde GitHub Actions y evidencias nuevas del servidor.
+- Integración continua con GitHub Actions en los 10 repositorios: SRS, procedimiento de implementación 2.2, acciones 2.2 (AP-01 cerrada), manuales de instalación y técnico 4.2 y artículos.
+- 01 SRS 7.3 a 7.5: cambio de rol de una cuenta y reglas de las cuentas de administrador (RF-027, RF-028, CU27); nuevos casos de uso CU31 (cuenta propia) y CU32 (procesos automáticos), con lo que pasan a ser 32; pruebas del 19 de octubre.
+- 02 Análisis 2.2: CU31 y CU32, secuencia de recuperación de la contraseña y estados de la cuenta de usuario.
+- 06 Pruebas: ejecución del 19 de octubre con 655 pruebas automatizadas (incluidas las 7 de persistencia de payment-service), 19 de punta a punta, 42 casos funcionales (CP-34 a CP-42 nuevos), rendimiento (RNF-001) y diseño adaptable en 66 pantallas web y 15 de la app, con siete figuras de evidencia. Se corrigió el conteo de customer-service: son 69 pruebas, no 68.
+- 09 Manuales: cambio de tipo de usuario desde la tabla de usuarios y datos del negocio por completar (administrador 4.2 y 4.3); todas las capturas de los manuales de usuario y de administrador tomadas de nuevo (4.3).
+- 01, 02 y 04: capturas del sistema tomadas de nuevo con datos de demostración (las anteriores mostraban la marca vieja y correos reales).
+- PDF y Word regenerados para todos los documentos que cambiaron.
+
 ## 2026-10-17 — Actualización contra el código del 17 de octubre
 
 **Organización**
