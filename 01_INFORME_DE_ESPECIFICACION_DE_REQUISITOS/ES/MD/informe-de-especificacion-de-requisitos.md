@@ -30,12 +30,13 @@ Versión 7.1, 17 de octubre de 2026
 | V7.1 | 17/10/2026 | Equipo de desarrollo | Estado verificado contra el código al 17 de octubre de 2026: el informe de inspección (RF-036) también se gestiona desde la aplicación móvil, y la revisión de ancho de RNF-008 se amplió a 60 pantallas web y 26 de la app móvil, sin desbordes. |
 | V7.2 | 19/10/2026 | Equipo de desarrollo | Integración continua con GitHub Actions en los 10 repositorios: en cada cambio se compila y se corren las pruebas. Se retira de los pendientes la integración continua con Jenkins. |
 | V7.3 | 19/10/2026 | Equipo de desarrollo | El administrador puede cambiar el rol de una cuenta (RF-028, CU27); una cuenta de administrador no se desactiva y un administrador no cierra su propia cuenta (RF-027). |
+| V7.4 | 19/10/2026 | Equipo de desarrollo | Nuevos casos de uso CU31 (gestionar la cuenta propia, RF-027) y CU32 (procesos automáticos: primer administrador, notificaciones por evento, recordatorios, alerta de reserva sin operario y aviso de versión nueva). Pasan a ser 32 casos de uso. |
 
 ---
 
 ## Resumen
 
-Este documento especifica los requisitos de LavaRápido, una plataforma web y móvil que organiza la operación de un lavadero de vehículos de un único local: registro de clientes y vehículos, reserva de turnos con validación de horario y bahías, asignación automática o manual de operarios, ejecución y calificación del servicio, informe de inspección del vehículo, pago por QR o transferencia con revisión del comprobante, promociones, puntos de fidelización y notificaciones. La especificación sigue la estructura de IEEE 830 (IEEE, 1998) y de ISO/IEC/IEEE 29148 (ISO/IEC/IEEE, 2018), y se basa en la documentación técnica del proyecto (repositorio `vehicle-w-docs`) y en el código de sus siete componentes de servidor, revisado el 16 de octubre de 2026. Define 41 requisitos funcionales con criterios de aceptación verificables, 12 requisitos no funcionales con su métrica de verificación, 30 casos de uso, las reglas de negocio, los ciclos de vida de la reserva, del pago y de la ejecución, los requisitos de datos y las restricciones técnicas, de datos, de operación y regulatorias. Al 16 de octubre de 2026, 40 requisitos funcionales están implementados y 1 parcialmente.
+Este documento especifica los requisitos de LavaRápido, una plataforma web y móvil que organiza la operación de un lavadero de vehículos de un único local: registro de clientes y vehículos, reserva de turnos con validación de horario y bahías, asignación automática o manual de operarios, ejecución y calificación del servicio, informe de inspección del vehículo, pago por QR o transferencia con revisión del comprobante, promociones, puntos de fidelización y notificaciones. La especificación sigue la estructura de IEEE 830 (IEEE, 1998) y de ISO/IEC/IEEE 29148 (ISO/IEC/IEEE, 2018), y se basa en la documentación técnica del proyecto (repositorio `vehicle-w-docs`) y en el código de sus siete componentes de servidor, revisado el 16 de octubre de 2026. Define 41 requisitos funcionales con criterios de aceptación verificables, 12 requisitos no funcionales con su métrica de verificación, 32 casos de uso, las reglas de negocio, los ciclos de vida de la reserva, del pago y de la ejecución, los requisitos de datos y las restricciones técnicas, de datos, de operación y regulatorias. Al 16 de octubre de 2026, 40 requisitos funcionales están implementados y 1 parcialmente.
 
 **Palabras clave:** especificación de requisitos, lavadero de vehículos, reservas, microservicios, casos de uso.
 
@@ -676,7 +677,7 @@ Los requisitos no funcionales se clasifican según las características de calid
 
 ### 7.1 Diagrama de Casos de Uso
 
-Los 30 casos de uso se presentan en cuatro diagramas, uno por actor, agrupados por módulo (Figuras 3a a 3d).
+Los 32 casos de uso se presentan en cuatro diagramas, uno por actor, agrupados por módulo (Figuras 3a a 3d).
 
 **Figura 3a**
 *Casos de Uso Comunes a los Tres Roles*
@@ -691,6 +692,7 @@ flowchart LR
     CU17(["CU17 Gestionar notificaciones"])
     CU18(["CU18 Personalizar tema visual"])
     CU19(["CU19 Seleccionar idioma"])
+    CU31(["CU31 Gestionar la cuenta propia"])
 
     Usuario --- CU01
     Usuario --- CU03
@@ -699,6 +701,7 @@ flowchart LR
     Usuario --- CU17
     Usuario --- CU18
     Usuario --- CU19
+    Usuario --- CU31
 
     classDef actor fill:#08427b,color:#fff,stroke:#052e56
     class Usuario actor
@@ -802,6 +805,9 @@ flowchart LR
     subgraph REP["Reportes"]
         CU23(["CU23 Consultar reportes"])
     end
+    subgraph AUT["Procesos automáticos"]
+        CU32(["CU32 Ejecutar procesos automáticos"])
+    end
 
     Administrador --- CU27
     Administrador --- CU20
@@ -815,12 +821,13 @@ flowchart LR
     Administrador --- CU24
     Administrador --- CU23
     Sistema --- CU08
+    Sistema --- CU32
 
     classDef actor fill:#08427b,color:#fff,stroke:#052e56
     class Administrador,Sistema actor
 ```
 
-*Nota.* CU22 aparece como consulta en el diagrama del operario y como gestión en el del administrador, que es quien registra los turnos, las ausencias y la ficha del operario (RF-022, RF-038). CU08 lo ejecuta el sistema al confirmarse cada reserva. Elaboración propia.
+*Nota.* CU22 aparece como consulta en el diagrama del operario y como gestión en el del administrador, que es quien registra los turnos, las ausencias y la ficha del operario (RF-022, RF-038). CU08 lo ejecuta el sistema al confirmarse cada reserva, y CU32 agrupa los procesos que corren sin que nadie los pida (recordatorios, alertas, avisos y primer administrador). Elaboración propia.
 
 ### 7.2 Matriz de Actores y Casos de Uso
 
@@ -829,11 +836,11 @@ flowchart LR
 
 | Actor | Casos de uso |
 |---|---|
-| Todos los roles | CU01, CU03, CU04, CU16, CU17, CU18, CU19 |
+| Todos los roles | CU01, CU03, CU04, CU16, CU17, CU18, CU19, CU31 |
 | Cliente | CU02, CU05, CU06, CU07, CU12, CU14, CU15, CU25, CU26, CU30 (consulta) |
 | Operario | CU10, CU11, CU22 (consulta) |
 | Administrador | CU09, CU13, CU20, CU21, CU22, CU23, CU24, CU27, CU28, CU29, CU30 |
-| Sistema | CU06 (incluido en CU05), CU08 |
+| Sistema | CU06 (incluido en CU05), CU08, CU32 |
 
 ### 7.3 Especificación de los Casos de Uso
 
@@ -1229,6 +1236,33 @@ Cada caso de uso se especifica con el formato de Cockburn (2001): actores, preco
 | Requisitos | RF-036 |
 | Estado | Implementado |
 
+
+**Tabla 53**
+*CU31: Gestionar la cuenta propia*
+
+| Campo | Descripción |
+|---|---|
+| Actores | Cliente, operario o administrador (cada uno con su cuenta). |
+| Precondición | El usuario está autenticado. |
+| Flujo normal | 1. Abre su perfil. 2. Actualiza nombres, apellidos, teléfono y dirección de contacto. 3. Cambia su correo confirmando la contraseña actual. 4. Cierra la sesión. 5. Si ya no usará la cuenta, la desactiva confirmando la contraseña: se cierran todas sus sesiones. |
+| Flujos alternos | • Correo ya registrado por otra cuenta: no se cambia. • Contraseña actual incorrecta: no se cambia el correo ni se desactiva la cuenta. • Cuenta de administrador: no tiene la opción de desactivarse. • Dirección vacía: se borra. |
+| Postcondición | Los datos del perfil quedan actualizados, o la cuenta queda desactivada con su historial. |
+| Requisitos | RF-027 |
+| Estado | Implementado |
+
+**Tabla 54**
+*CU32: Ejecutar procesos automáticos*
+
+| Campo | Descripción |
+|---|---|
+| Actores | Sistema (tareas programadas y eventos). Para el aviso de una versión nueva de la app, lo inicia un integrante del equipo al publicar el APK. |
+| Precondición | Los servicios y RabbitMQ están en marcha. |
+| Flujo normal | 1. Al arrancar, si no existe ningún administrador, el sistema crea el primero con los datos de la configuración del servidor. 2. Cada evento de reserva, operario, pago o inspección se convierte en notificaciones para el cliente, el operario y los administradores, una sola vez por evento. 3. Al confirmarse una reserva programa sus recordatorios (24 horas y 1 hora antes) y los envía a su hora. 4. Dos horas antes de una reserva sin operario avisa a los administradores. 5. Al publicarse un APK nuevo avisa a los usuarios que tienen la app instalada. |
+| Flujos alternos | • La reserva se cancela, inicia o termina: los recordatorios pendientes se quitan. • El servicio estuvo apagado y la hora de la reserva ya pasó: el recordatorio se cierra sin enviarse. • La misma versión de la app se publica otra vez: no se repite el aviso. • Ya existe un administrador: no se crea otro. |
+| Postcondición | Los usuarios reciben los avisos que les corresponden, sin duplicados. |
+| Requisitos | RF-018 |
+| Estado | Implementado |
+
 ---
 
 ## 8. Flujos de Negocio
@@ -1310,9 +1344,9 @@ stateDiagram-v2
 
 ### 8.4 Eventos de Dominio y Notificaciones
 
-Los servicios publican eventos en RabbitMQ para avisar a otros servicios sin bloquear la operación (ADR-004). La Tabla 53 relaciona cada evento con su efecto.
+Los servicios publican eventos en RabbitMQ para avisar a otros servicios sin bloquear la operación (ADR-004). La Tabla 55 relaciona cada evento con su efecto.
 
-**Tabla 53**
+**Tabla 55**
 *Eventos de Dominio y su Efecto*
 
 | Evento | Productor | Efecto |
@@ -1337,9 +1371,9 @@ Los servicios publican eventos en RabbitMQ para avisar a otros servicios sin blo
 
 ### 9.1 Propiedad de los Datos
 
-La base de datos tiene 9 esquemas y 57 tablas. Cada esquema tiene un único servicio dueño, que es el único autorizado para escribir en él (véase la Tabla 54).
+La base de datos tiene 9 esquemas y 57 tablas. Cada esquema tiene un único servicio dueño, que es el único autorizado para escribir en él (véase la Tabla 56).
 
-**Tabla 54**
+**Tabla 56**
 *Esquemas de Datos y Servicio Dueño*
 
 | Esquema | Servicio dueño | Datos principales |
@@ -1368,9 +1402,9 @@ La base de datos tiene 9 esquemas y 57 tablas. Cada esquema tiene un único serv
 
 ## 10. Matriz de Trazabilidad
 
-La Tabla 55 relaciona cada requisito funcional con su historia de usuario, sus casos de uso, el servicio que lo implementa y su estado. Los requisitos sin historia de usuario (RF-027 a RF-038) describen funciones construidas que deben incorporarse al backlog.
+La Tabla 57 relaciona cada requisito funcional con su historia de usuario, sus casos de uso, el servicio que lo implementa y su estado. Los requisitos sin historia de usuario (RF-027 a RF-038) describen funciones construidas que deben incorporarse al backlog.
 
-**Tabla 55**
+**Tabla 57**
 *Trazabilidad de Requisitos Funcionales*
 
 | RF | Nombre | HU | CU | Servicio | Estado |
@@ -1395,7 +1429,7 @@ La Tabla 55 relaciona cada requisito funcional con su historia de usuario, sus c
 | RF-015 | Historial de pagos | HU-PAY-002 | CU14 | payment | Implementado |
 | RF-016 | Restricciones de pago | HU-PAY-001 | CU12 | payment | Implementado |
 | RF-017 | Panel por rol | HU-UI-001 | CU16 | frontend | Implementado |
-| RF-018 | Notificaciones | HU-UI-002 | CU17 | notification | Implementado |
+| RF-018 | Notificaciones | HU-UI-002 | CU17, CU32 | notification | Implementado |
 | RF-019 | Tema visual por cuenta | HU-UI-003 | CU18 | security | Implementado |
 | RF-020 | Idioma por cuenta | HU-UI-003 | CU19 | security | Implementado |
 | RF-021 | Horario y excepciones | HU-ADMIN-001 | CU20 | booking | Implementado |
@@ -1404,7 +1438,7 @@ La Tabla 55 relaciona cada requisito funcional con su historia de usuario, sus c
 | RF-024 | Gestión de promociones | HU-PROMO-001 | CU24 | payment | Implementado |
 | RF-025 | Aplicación de promoción en el pago | HU-PROMO-002 | CU25 | payment | Implementado |
 | RF-026 | Puntos de fidelización | HU-PROMO-002 | CU25 | payment | Implementado |
-| RF-027 | Gestión de la cuenta propia | — | — | security | Implementado |
+| RF-027 | Gestión de la cuenta propia | — | CU31 | security | Implementado |
 | RF-028 | Administración de usuarios | — | CU27 | security | Implementado |
 | RF-029 | Roles y permisos | — | CU27 | security | Implementado |
 | RF-030 | Gestión de vehículos del cliente | — | CU26 | customer | Implementado |
@@ -1423,9 +1457,9 @@ La Tabla 55 relaciona cada requisito funcional con su historia de usuario, sus c
 
 ### 11.1 Resumen del Avance
 
-De los 41 requisitos funcionales, 40 están implementados y 1 parcialmente (RF-023, reportes consolidados). Los siete componentes de servidor están construidos; el 9 de octubre de 2026 se levantaron los seis servicios y el gateway, y cada uno respondió `200 OK` en su endpoint de salud. La web y la aplicación Android están conectadas a los seis servicios a través del gateway. La Tabla 56 resume las pruebas automatizadas de los servicios y de la web, ejecutadas el 16 de octubre de 2026.
+De los 41 requisitos funcionales, 40 están implementados y 1 parcialmente (RF-023, reportes consolidados). Los siete componentes de servidor están construidos; el 9 de octubre de 2026 se levantaron los seis servicios y el gateway, y cada uno respondió `200 OK` en su endpoint de salud. La web y la aplicación Android están conectadas a los seis servicios a través del gateway. La Tabla 58 resume las pruebas automatizadas de los servicios y de la web, ejecutadas el 16 de octubre de 2026.
 
-**Tabla 56**
+**Tabla 58**
 *Pruebas Automatizadas por Componente*
 
 | Componente | Comando | Pruebas | Fecha del conteo |
@@ -1452,7 +1486,7 @@ De los 41 requisitos funcionales, 40 están implementados y 1 parcialmente (RF-0
 
 ### 11.3 Decisiones Abiertas
 
-**Tabla 57**
+**Tabla 59**
 *Decisiones Abiertas*
 
 | Tema | Situación actual | Responsable |
