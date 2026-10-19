@@ -31,6 +31,7 @@ Table 1 records the change history of this document. Each time the implementatio
 | 1.0 | 2026-10-09 | Creation of the procedure (in Spanish and English) from the code of the eleven repositories (*develop* branch as of October 9, 2026), *lavarapido-infra/docker-compose.yml*, and the project documentation on deployment, environments, operations, and quality. | Development team |
 | 2.0 | 2026-10-16 | Review against the code of October 16, 2026, and the public server already set up. Updated: public server on Azure with Caddy, HTTPS, and the web served with nginx, APK distribution, first administrator through environment variables, 57 tables, operations-service queue, payment-service health, web and end-to-end tests in the entry criteria, automatic assignment in the smoke tests, business data in the initial load, and implementation risks. | Development team |
 | 2.1 | 2026-10-17 | Review against the code of October 17, 2026. Stated that the mobile app needs a new APK because of the native modules of the inspection report (section 11.7, Phase 6). | Development team |
+| 2.2 | 2026-10-19 | Continuous integration with GitHub Actions in the 10 repositories and deployment from GitHub: the scope (6.2) and risk R-I09 were updated. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -126,7 +127,7 @@ To establish an orderly, verifiable, and reversible procedure for putting a rele
 
 - A high-availability production environment (several replicas, database managed by the provider): the documentation declares it outside the academic scope. Section 14 lists what would be missing to reach it. The step-by-step setup of the public server is in the Deployment Document.
 - The publication of the mobile application in app stores; the Android application is distributed as an APK from the public server (button and QR code on the home page).
-- Continuous integration: Jenkins is planned but not configured (technical debt TD-006), so the release is built with the commands of section 11.3.
+- Setting up continuous integration: since October 19, 2026, each repository builds and runs its tests with GitHub Actions on every change, and the server update can also be launched from GitHub (Deployment Document). Phase 2 is kept to verify the release before implementing it.
 - The migration of historical data: the business has no previous system; the paper schedule is not digitized (section 8.1).
 
 ## 7. Roles and Responsibilities
@@ -590,12 +591,12 @@ docker compose stop api-gateway security-service customer-service booking-servic
 | R-I06 | A wrongly loaded QR code or payment account sends the money to a third party. | Low | High | Step 9 of Table 7. |
 | R-I07 | Data loss caused by *docker compose down -v* or a damaged volume. | Low | High | Pre-implementation backup (phase 3) and daily backup. |
 | R-I08 | In the local network the web is served with *ng serve* and without HTTPS. | Medium | Medium | Use it only inside the car wash network; outside it, use the public server with HTTPS. |
-| R-I09 | There is still no continuous integration (TD-006), and a regression can go unnoticed. | Medium | Medium | Run the unit tests, the end-to-end suite, and the smoke tests before each deployment. |
+| R-I09 | Continuous integration does not run the end-to-end tests, which need the complete system, so a regression across services can go unnoticed. | Low | Medium | Confirm that GitHub Actions is green in the 10 repositories and run the end-to-end suite and the smoke tests before each deployment. |
 | R-I10 | The role permissions editable in the panel are mistaken for real access control (ADR-015). | Low | Medium | Explain it in the training; real authorization comes from the role in the token. |
 
 *Note.* Prepared by the authors from the risk register, the technical backlog, and the verification of the code (Vehicle Washing Development Team, 2026a).
 
-To take the system to a real production environment, in addition to the above, the following would be missing: continuous integration per repository, SQL Server and RabbitMQ hosted with the secrets in a provider vault, one database login per service instead of *sa*, a request rate limit, and an Outbox for the events if losing an event during a broker outage is not accepted (Vehicle Washing Development Team, 2026a).
+To take the system to a real production environment, in addition to the above, the following would be missing: SQL Server and RabbitMQ hosted with the secrets in a provider vault, one database login per service instead of *sa*, a request rate limit, and an Outbox for the events if losing an event during a broker outage is not accepted (Vehicle Washing Development Team, 2026a).
 
 ## 15. Communication Plan
 

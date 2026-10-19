@@ -31,6 +31,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 1.0 | 2026-10-09 | Creación del procedimiento (en español y en inglés) a partir del código de los once repositorios (rama *develop* al 9 de octubre de 2026), de *lavarapido-infra/docker-compose.yml* y de la documentación de despliegue, entornos, operación y calidad del proyecto. | Equipo de desarrollo |
 | 2.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026 y el servidor público ya montado. Se actualizaron: servidor público en Azure con Caddy, HTTPS y la web servida con nginx, distribución del APK, primer administrador por variables de entorno, 57 tablas, cola de operations-service, salud de payment-service, pruebas web y de punta a punta en los criterios de entrada, asignación automática en las pruebas de humo, datos del negocio en la carga inicial y riesgos de la implementación. | Equipo de desarrollo |
 | 2.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se indicó que la aplicación móvil necesita un APK nuevo por los módulos nativos del informe de inspección (sección 11.7, Fase 6). | Equipo de desarrollo |
+| 2.2 | 2026-10-19 | Integración continua con GitHub Actions en los 10 repositorios y despliegue desde GitHub: se actualizaron el alcance (6.2) y el riesgo R-I09. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -126,7 +127,7 @@ Establecer un procedimiento ordenado, verificable y reversible para poner en ope
 
 - Un entorno de producción con alta disponibilidad (varias réplicas, base de datos administrada por el proveedor): la documentación lo declara fuera del alcance académico. La sección 14 lista lo que faltaría para llegar a él. El montaje paso a paso del servidor público está en el Documento de Despliegue.
 - La publicación de la aplicación móvil en tiendas de aplicaciones; la aplicación Android se distribuye como APK desde el servidor público (botón y código QR de la página de inicio).
-- La integración continua: Jenkins está planeado pero no configurado (deuda técnica TD-006), por lo que la construcción de la versión se hace con los comandos de la sección 11.3.
+- La configuración de la integración continua: desde el 19 de octubre de 2026 cada repositorio compila y corre sus pruebas con GitHub Actions en cada cambio, y la actualización del servidor también se puede lanzar desde GitHub (Documento de Despliegue). La fase 2 se mantiene para verificar la versión antes de implementarla.
 - La migración de datos históricos: el negocio no tiene un sistema anterior; la agenda en papel no se digitaliza (sección 8.1).
 
 ## 7. Roles y Responsabilidades
@@ -590,12 +591,12 @@ docker compose stop api-gateway security-service customer-service booking-servic
 | R-I06 | Un código QR o una cuenta de pago mal cargada envía el dinero a un tercero. | Baja | Alto | Paso 9 de la Tabla 7. |
 | R-I07 | Pérdida de datos por *docker compose down -v* o por un volumen dañado. | Baja | Alto | Respaldo previo (fase 3) y respaldo diario. |
 | R-I08 | En la red local la web se sirve con *ng serve* y sin HTTPS. | Media | Medio | Usarla solo dentro de la red del lavadero; fuera de ella, usar el servidor público con HTTPS. |
-| R-I09 | Todavía no hay integración continua (TD-006) y una regresión puede pasar sin detectarse. | Media | Medio | Ejecutar las pruebas unitarias, la suite de punta a punta y las pruebas de humo antes de cada despliegue. |
+| R-I09 | La integración continua no corre las pruebas de punta a punta, que necesitan el sistema completo, y una regresión entre servicios puede pasar sin detectarse. | Baja | Medio | Confirmar que GitHub Actions está en verde en los 10 repositorios y ejecutar la suite de punta a punta y las pruebas de humo antes de cada despliegue. |
 | R-I10 | Los permisos por rol editables en el panel se confunden con control de acceso real (ADR-015). | Baja | Medio | Explicarlo en la capacitación; la autorización real la da el rol del token. |
 
 *Nota.* Elaborado por los autores a partir del registro de riesgos, del backlog técnico y de la verificación del código (Equipo de Desarrollo Vehicle Washing, 2026a).
 
-Para llevar el sistema a un entorno de producción real, además de lo anterior faltaría: integración continua por repositorio, SQL Server y RabbitMQ alojados con los secretos en un almacén del proveedor, un inicio de sesión de base de datos por servicio en lugar de *sa*, un límite de solicitudes y un Outbox para los eventos si no se acepta perder un evento durante una caída del intermediario (Equipo de Desarrollo Vehicle Washing, 2026a).
+Para llevar el sistema a un entorno de producción real, además de lo anterior faltaría: SQL Server y RabbitMQ alojados con los secretos en un almacén del proveedor, un inicio de sesión de base de datos por servicio en lugar de *sa*, un límite de solicitudes y un Outbox para los eventos si no se acepta perder un evento durante una caída del intermediario (Equipo de Desarrollo Vehicle Washing, 2026a).
 
 ## 15. Plan de Comunicación
 
