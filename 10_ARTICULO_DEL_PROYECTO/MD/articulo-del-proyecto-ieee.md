@@ -78,7 +78,7 @@ El proyecto toma como marco de sus acciones correctivas, preventivas y de mejora
 
 ### A. Tipo de Estudio
 
-Se trata de un trabajo de desarrollo tecnológico aplicado, presentado como estudio de caso único y de alcance descriptivo. La unidad de análisis es el sistema construido. La evidencia proviene de los artefactos del proyecto: el código de once repositorios, la documentación de diseño (requisitos, quince ADR, modelos de datos, contratos OpenAPI), los manuales técnicos verificados contra el código y los registros de pruebas y de acciones de mejora [21], [22]. La SRS, en su versión 7.0, sigue la estructura de IEEE 830 [23] y los contenidos de ISO/IEC/IEEE 29148 [24], y define 41 requisitos funcionales, 12 requisitos no funcionales clasificados según el modelo de calidad de ISO/IEC 25010 [25], 30 casos de uso y una matriz de trazabilidad con el estado de cada requisito [1].
+Se trata de un trabajo de desarrollo tecnológico aplicado, presentado como estudio de caso único y de alcance descriptivo. La unidad de análisis es el sistema construido. La evidencia proviene de los artefactos del proyecto: el código de once repositorios, la documentación de diseño (requisitos, quince ADR, modelos de datos, contratos OpenAPI), los manuales técnicos verificados contra el código y los registros de pruebas y de acciones de mejora [21], [22]. La SRS, en su versión 7.0, sigue la estructura de IEEE 830 [23] y los contenidos de ISO/IEC/IEEE 29148 [24], y define 41 requisitos funcionales, 12 requisitos no funcionales clasificados según el modelo de calidad de ISO/IEC 25010 [25], 32 casos de uso y una matriz de trazabilidad con el estado de cada requisito [1].
 
 ### B. Contexto y Participantes
 
@@ -458,7 +458,7 @@ The project frames its corrective, preventive, and improvement actions within th
 
 ### A. Type of Study
 
-This is an applied technological development work, presented as a single, descriptive case study. The unit of analysis is the system that was built. The evidence comes from the project artifacts: the code of eleven repositories, the design documentation (requirements, fifteen ADRs, data models, OpenAPI contracts), the technical manuals verified against the code, and the test and improvement action records [21], [22]. Version 7.0 of the SRS follows the structure of IEEE 830 [23] and the contents of ISO/IEC/IEEE 29148 [24], and defines 41 functional requirements, 12 non-functional requirements classified according to the ISO/IEC 25010 quality model [25], 30 use cases, and a traceability matrix with the status of each requirement [1].
+This is an applied technological development work, presented as a single, descriptive case study. The unit of analysis is the system that was built. The evidence comes from the project artifacts: the code of eleven repositories, the design documentation (requirements, fifteen ADRs, data models, OpenAPI contracts), the technical manuals verified against the code, and the test and improvement action records [21], [22]. Version 7.0 of the SRS follows the structure of IEEE 830 [23] and the contents of ISO/IEC/IEEE 29148 [24], and defines 41 functional requirements, 12 non-functional requirements classified according to the ISO/IEC 25010 quality model [25], 32 use cases, and a traceability matrix with the status of each requirement [1].
 
 ### B. Context and Participants
 
