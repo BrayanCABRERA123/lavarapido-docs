@@ -15,8 +15,8 @@
 | Apprentices | Brayan Estiven Patiño Cabrera (project lead), Juan Camilo Guilombo Osorio (frontend lead), Merari Urbano (backend lead) |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 17, 2026 |
-| Version | 1.2 |
+| Date | October 19, 2026 |
+| Version | 1.3 |
 
 > *Note.* Cover data was taken from the project's Technical Manual v2.0. All design content was derived from the source code in the `Sistema Lavado Vehicular` repository (Backend, Web, and LavadoVehicular-Movil) and must be validated with the instructor.
 
