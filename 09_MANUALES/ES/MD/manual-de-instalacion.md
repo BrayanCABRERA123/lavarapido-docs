@@ -33,6 +33,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 3.1 | 2026-10-09 | Actualización contra el código del 9 de octubre de 2026 y creación de esta versión en español (la versión en inglés es Manual_instalacion_LavadoVehicular_3145556_EN.md). Se corrigieron: el repositorio de operaciones se llama *lavarapido-operation-service* y se debe clonar con ese nombre; direcciones reales de los cuatro repositorios que estaban pendientes; payment-service ahora corre en Docker con el perfil *app* y el contenedor del gateway recibe ROUTE_PAYMENT_URL; los orígenes CORS incluyen Expo web (8081); nuevos changelogs (security 023, 026 y 030; booking 021, 022 y 024; notification 025, 027, 028 y 029; payment 017 a 020); 49 tablas; 22 tipos de notificación; payment-service publica eventos con MESSAGING_ENABLED; se agregó SPRING_PROFILES_ACTIVE. | Equipo de desarrollo |
 | 4.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026. Las figuras pasaron de marcadores a capturas reales de la instalación. Se actualizaron: 57 tablas en los nueve esquemas (comprobado con la consulta de la sección 11.5), bloqueo de la cuenta por intentos fallidos, endpoint de salud de payment-service que ahora comprueba la base de datos, referencia al Documento de Despliegue para el servidor de Azure y el APK, y temas del Anexo B que quedaron resueltos. | Equipo de desarrollo |
 | 4.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se agregaron la variable opcional *EXPO_PUBLIC_WEB_URL* de la aplicación móvil (sección 10.5) y las dependencias nativas *expo-image-picker* y *expo-image-manipulator*, que exigen *npm install* y un APK nuevo (sección 13.2). | Equipo de desarrollo |
+| 4.2 | 2026-10-19 | Integración continua con GitHub Actions: se actualizó el alcance y se retiró del Anexo B. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -124,7 +125,7 @@ Los procedimientos se verificaron contra el repositorio de infraestructura (*lav
 
 **Cubre:** la instalación local con Docker de SQL Server, RabbitMQ y Mailpit; la creación de la base de datos *LavaRapido* y sus migraciones; el arranque de los seis servicios y del gateway, en contenedores o desde una terminal; las aplicaciones web y móvil; el primer acceso, las cuentas de prueba, la verificación y la solución de errores comunes.
 
-**No cubre:** el montaje del servidor público en Azure (Documento de Despliegue), la canalización de integración continua (Jenkins está planeado, pero no configurado), la compilación y publicación del APK de la aplicación móvil (Documento de Despliegue) ni el uso funcional del sistema, que se explica en el Manual de Usuario y en el Manual de Administrador.
+**No cubre:** el montaje del servidor público en Azure (Documento de Despliegue), la integración continua (GitHub Actions; se describe en el Documento de Despliegue), la compilación y publicación del APK de la aplicación móvil (Documento de Despliegue) ni el uso funcional del sistema, que se explica en el Manual de Usuario y en el Manual de Administrador.
 
 ## 5. Objetivo
 
@@ -966,7 +967,6 @@ Las figuras de este manual se tomaron el 16 de octubre de 2026 en un computador 
 | Tema | Qué falta | Sección |
 |---|---|---|
 | Un inicio de sesión de base de datos por servicio | Los servicios usan sa. | 11.4 |
-| Integración continua | Jenkins está planeado, pero no configurado (TD-006). | 4.2 |
 
 *Nota.* Elaborado por los autores a partir de la verificación de los repositorios y del backlog técnico.
 

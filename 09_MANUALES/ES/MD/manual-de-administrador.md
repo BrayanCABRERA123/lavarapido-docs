@@ -33,6 +33,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 3.1 | 2026-10-09 | Actualización contra el código del 9 de octubre de 2026 (ADR-011, secciones 9 a 12, y ADR-015) y creación de esta versión en español (la versión en inglés es Manual_administrador_LavadoVehicular_3145556_EN.md). Se actualizaron: tabla de estado de implementación; matriz de permisos de los tres roles fijos guardada en el servidor (informativa, no aplicada); puntos de fidelización por servicio; promociones como cupones porcentuales desbloqueables con puntos; reembolsos desde la interfaz con reversión de puntos; comparación del monto declarado; validación de referencias reutilizadas; avisos al cliente de los resultados de pago; avisos al personal para los administradores; informe de inspección notificado al cliente en lugar de WhatsApp; payment-service en Docker; nuevos tipos de notificación y revisiones de colas de mensajes muertos. | Equipo de desarrollo |
 | 4.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026. Las figuras pasaron de marcadores a capturas reales. Se actualizaron: bloqueo de la cuenta por intentos fallidos, asignación automática de operarios con la elección opcional del cliente, datos del negocio e informes de inspección guardados en el servidor, consentimiento de los documentos legales guardado al registrarse, creación automática del primer administrador con ADMIN_EMAIL y ADMIN_PASSWORD, textos del reembolso traducidos, nuevas trazas de la Tabla 15, riesgos de la Tabla 16 y temas del Anexo B que quedaron resueltos. | Equipo de desarrollo |
 | 4.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se agregó el informe de inspección desde la aplicación móvil (sección 12.5): se abre desde el detalle de la reserva, toma las fotos con la cámara o la galería, las reduce en el celular antes de subirlas y comparte el enlace con el menú del teléfono. | Equipo de desarrollo |
+| 4.2 | 2026-10-19 | El cambio de tipo de usuario se hace desde Gestión > Usuarios (sección 10.3); una cuenta de administrador no se puede desactivar (sección 9.4). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -233,7 +234,7 @@ El sistema define tres roles fijos: Administrador (código ADMIN), Operario (OPE
 | Gestiona reservas, operarios, horarios, bahías, servicios, precios, puntos, promociones y cuentas de pago. | Trabaja solo desde el panel con una cuenta individual; el acceso directo a la base de datos corresponde al administrador de TI. |
 | Revisa, aprueba, rechaza o reembolsa pagos y registra pagos manuales. | Una reserva admite un solo pago aprobado; un pago en revisión no se puede duplicar; un reembolso no se puede deshacer. |
 | Ve la información de clientes, vehículos y reservas necesaria para operar. | Debe tratarla conforme a la Ley 1581 de 2012 y a la política de seguridad. |
-| Crea cuentas y las activa o desactiva. | Las cuentas se desactivan, no se borran; el administrador no puede desactivar su propia cuenta. |
+| Crea cuentas, cambia su tipo de usuario y las activa o desactiva. | Las cuentas se desactivan, no se borran; una cuenta de administrador no se desactiva y nadie cambia su propio tipo de usuario. |
 | Consulta los roles y marca los permisos de cada uno. | No puede crear ni eliminar roles; la matriz de permisos todavía no cambia el acceso real. |
 
 *Nota.* Todas las rutas bajo */admin* requieren el rol ADMIN; una persona con otro rol que intente abrirlas vuelve a la pantalla de inicio de su propio rol.
@@ -299,7 +300,7 @@ Los datos iniciales cargan los tres roles, pero ninguna cuenta de usuario. Cuand
 
 En cualquier otro entorno, como el servidor público, la primera cuenta de administrador la crea security-service al arrancar (*AdministratorBootstrapRunner*). El administrador de TI escribe *ADMIN_EMAIL* y *ADMIN_PASSWORD* (y, si quiere, *ADMIN_FIRST_NAME* y *ADMIN_LAST_NAME*) en el archivo *.env.production* del servidor y reinicia el servicio. Si todavía no existe ninguna cuenta con el rol ADMIN, el servicio la crea con las mismas reglas de cualquier cuenta (política de contraseñas, correo y documento únicos) y el registro muestra *First administrator created*. Si ya existe un administrador, las variables se ignoran y se pueden borrar del archivo. La contraseña se escribe directamente en el servidor y nunca se guarda en un repositorio.
 
-Para convertir en administrador una cuenta que ya existe (por ejemplo, una registrada desde la pantalla pública), el rol se puede asignar con SQL, porque la contraseña ya la generó la aplicación:
+Para convertir en administrador una cuenta que ya existe (por ejemplo, una registrada desde la pantalla pública), otro administrador le cambia el tipo de usuario desde **Gestión > Usuarios** (sección 10.3). Solo si todavía no hay ningún administrador con acceso, el rol se asigna con SQL, porque la contraseña ya la generó la aplicación:
 
 1. Verificar que la persona ya tiene su cuenta (si no, que se registre desde la pantalla pública).
 2. Consultar los identificadores de la cuenta y del rol ADMIN.
@@ -365,7 +366,7 @@ Los operarios también se pueden crear desde **Operarios > Nuevo operario** (sec
 3. Confirmar el mensaje que advierte que la persona ya no podrá iniciar sesión.
 4. Verificar que el estado cambie a **Inhabilitado** y, si la persona es un operario con servicios pendientes, reasignarlos (sección 12.4).
 
-El sistema no permite que un administrador desactive su propia cuenta ("No puedes desactivar tu propia cuenta"). Antes de desactivar a un administrador, verificar que quede al menos otro administrador activo.
+Una cuenta de administrador no se puede desactivar: el botón aparece bloqueado con el mensaje "Una cuenta de administrador no se puede desactivar. Cambia primero su tipo de usuario." Para retirar a un administrador, primero se le cambia el tipo de usuario (sección 10.3) y luego se desactiva. Tampoco se puede desactivar la propia cuenta, ni desde esta tabla ni desde **Perfil**.
 
 ### 9.5 Restablecimiento de la Contraseña
 
@@ -426,14 +427,15 @@ Un rol válido no basta: cada servicio también verifica la propiedad del recurs
 
 ### 10.3 Cambio del Rol de una Persona
 
-El panel no ofrece una opción para cambiar el rol de una cuenta existente. Cuando sea necesario, el administrador de TI sigue este procedimiento:
+Cada cuenta tiene un solo tipo de usuario (Cliente, Operario o Administrador), y el nuevo reemplaza al anterior.
 
-1. Registrar la solicitud: quién la pide, quién la aprueba, el rol actual, el rol nuevo y el motivo.
-2. Verificar la identidad de la persona.
-3. Modificar la asignación en *security.user_role*; quitar el rol anterior si no debe permanecer.
-4. Si el rol nuevo es OPERATOR, el servicio de operaciones crea el registro del operario automáticamente la próxima vez que se listen los operarios.
-5. Pedir a la persona que cierre la sesión e ingrese de nuevo, para que el nuevo token refleje el rol.
-6. Archivar la solicitud con la fecha y el autor del cambio.
+1. En **Gestión > Usuarios**, ubicar la cuenta.
+2. En la columna **Tipo de usuario**, elegir el nuevo tipo en la lista **Cambiar tipo de usuario**.
+3. Confirmar el mensaje "¿Cambiar el tipo de usuario?", que advierte que se cerrarán las sesiones abiertas de la persona.
+4. Pedir a la persona que inicie sesión de nuevo: entrará al panel de su nuevo rol.
+5. Si el nuevo tipo es Operario, el servicio de operaciones crea su registro de operario la próxima vez que se listen los operarios; asignarle turnos en **Operarios** (sección 12).
+
+La propia cuenta no muestra la lista, sino el tipo de usuario como etiqueta ("No puedes cambiar el tipo de usuario de tu propia cuenta"). Se recomienda registrar quién pidió el cambio y el motivo en la bitácora del equipo.
 
 ## 11. Configuración del Sistema
 

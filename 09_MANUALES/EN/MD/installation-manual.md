@@ -33,6 +33,7 @@ Table 1 records the change history of this document. Each time the installation 
 | 3.1 | 2026-10-09 | Update against the code of October 9, 2026, and creation of the Spanish version (Manual_instalacion_LavadoVehicular_3145556_ES.md). Corrected: the operations repository is called *lavarapido-operation-service* and must be cloned with that name; real addresses of the four repositories that were pending; payment-service now runs in Docker with the *app* profile and the gateway container receives ROUTE_PAYMENT_URL; CORS origins include Expo web (8081); new changelogs (security 023, 026, and 030; booking 021, 022, and 024; notification 025, 027, 028, and 029; payment 017 to 020); 49 tables; 22 notification types; payment-service publishes events with MESSAGING_ENABLED; SPRING_PROFILES_ACTIVE added. | Development team |
 | 4.0 | 2026-10-16 | Review against the code of October 16, 2026. The figures changed from placeholders to real screenshots of the installation. Updated: 57 tables in the nine schemas (checked with the query in section 11.5), account lockout after failed attempts, the payment-service health endpoint that now checks the database, a reference to the Deployment Document for the Azure server and the APK, and Annex B items that were resolved. | Development team |
 | 4.1 | 2026-10-17 | Review against the code of October 17, 2026. Added the optional *EXPO_PUBLIC_WEB_URL* variable of the mobile app (section 10.5) and the native dependencies *expo-image-picker* and *expo-image-manipulator*, which require *npm install* and a new APK (section 13.2). | Development team |
+| 4.2 | 2026-10-19 | Continuous integration with GitHub Actions: the scope was updated and it was removed from Annex B. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -124,7 +125,7 @@ The procedures were verified against the infrastructure repository (*lavarapido-
 
 **It covers:** local installation with Docker of SQL Server, RabbitMQ, and Mailpit; the creation of the *LavaRapido* database and its migrations; the start of the six services and the gateway, in containers or from a terminal; the web and mobile applications; the first access, the test accounts, the verification, and the solution of common errors.
 
-**It does not cover:** setting up the public server on Azure (Deployment Document), the continuous integration pipeline (Jenkins is planned but not configured), building and publishing the APK of the mobile application (Deployment Document), or the functional use of the system, which is explained in the User Manual and the Administrator Manual.
+**It does not cover:** setting up the public server on Azure (Deployment Document), continuous integration (GitHub Actions; described in the Deployment Document), building and publishing the APK of the mobile application (Deployment Document), or the functional use of the system, which is explained in the User Manual and the Administrator Manual.
 
 ## 5. Objective
 
@@ -966,7 +967,6 @@ The figures in this manual were taken on October 16, 2026, on a Windows 11 compu
 | Topic | What is missing | Section |
 |---|---|---|
 | One database login per service | The services use sa. | 11.4 |
-| Continuous integration | Jenkins is planned but not configured (TD-006). | 4.2 |
 
 *Note.* Prepared by the authors from the verification of the repositories and the technical backlog.
 

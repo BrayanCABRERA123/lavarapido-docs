@@ -34,6 +34,7 @@ Table 1 records the change history of this document. Each modification must add 
 | 3.1 | 2026-10-09 | Update against the code of the eleven repositories as of October 9, 2026 (ADR-011 sections 9 to 12 and ADR-015), and creation of the Spanish version (Manual_tecnico_LavadoVehicular_3145556_ES.md). Updated: 49 tables (booking.schedule_history and notification.booking_tracking); loyalty points per service and points ledger with reversal; promotions as percentage coupons; permission matrix of the fixed roles; notification switches of the user; payment-service events, tests, structure, and container; staff notifications; new endpoints, gateway routes, and error codes; real name of the operations repository; technical debt TD-002, TD-014, TD-015, TD-016, and TD-018 resolved. | Development team |
 | 4.0 | 2026-10-16 | Review of the eleven repositories with the system running. Updated: 57 tables with the entity-relationship diagram generated from the database, dictionary of the new tables (account lockout, address, consent, operator profile, and inspection), automatic assignment and operator choice, lockout after failed attempts, inspection reports on the server, business data, health and correlation of payment-service, new endpoints and events, real test results (639 unit and 19 end-to-end), technical debt, and resolved discrepancies. | Development team |
 | 4.1 | 2026-10-17 | Review against the code of October 17, 2026. Documented the inspection report of the mobile app (section 10.5), the mobile HTTP client with multipart forms and the *EXPO_PUBLIC_WEB_URL* variable (section 12.7), the *expo-image-picker* and *expo-image-manipulator* dependencies (Table 3), and the rule that ignores a late 401 after logging out. | Development team |
+| 4.2 | 2026-10-19 | Continuous integration with GitHub Actions in the 10 repositories (Table 6) and closure of TD-006. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -232,7 +233,7 @@ It is a distributed client-server system with a microservices backend (Figure 1 
 | Containers | Docker and Docker Compose | Docker 24 or later; Compose v2 |
 | Testing | JUnit 5 and Spring Boot Test (Java), xUnit (.NET), Vitest (web) | Through the Maven Wrapper, *dotnet test*, and *ng test* |
 | Version control | Git and GitHub | Branches *main*, *develop*, and *feature/\** |
-| Continuous integration | Jenkins | Planned, not configured (TD-006) |
+| Continuous integration | GitHub Actions | `ci.yml` in the 10 repositories: builds and runs the tests on every push or pull request to *develop* and *main*; `lavarapido-infra` also has the manual deployment to Azure |
 | Diagrams and contracts | Mermaid (C4 and UML diagrams), OpenAPI 3 | Folders 08-uml and 07-api of the documentation |
 
 *Note.* Versions taken from *pom.xml*, *Directory.Build.props*, the *.csproj* files, and *package.json* of each repository.
@@ -1180,7 +1181,6 @@ The testing strategy proposes a pyramid of unit, integration, contract, and end-
 
 | Item | Description | Priority |
 |---|---|---|
-| TD-006 | Jenkins pipeline per repository. | Medium |
 | TD-007 | Forward X-Correlation-Id from customer-service and notification-service to security-service and in the messages; generate it in the gateway. | Low |
 | TD-008 | Optimistic locking with @Version. | Low |
 | TD-010 | Persistence tests against a real SQL Server (Testcontainers). | Low |
@@ -1188,7 +1188,7 @@ The testing strategy proposes a pyramid of unit, integration, contract, and end-
 | TD-012 | Metrics with Micrometer and Prometheus. | Low |
 | TD-019 | payment changelogs with their own numbering. | Low |
 
-*Note.* Source: *15-project-control/technical-backlog.md* of the documentation (Vehicle Washing Development Team, 2026a), reviewed against the code on October 16, 2026. Between October 8 and 16, 2026, TD-001, TD-002, TD-003, TD-009, TD-013, TD-014, TD-015, TD-016, TD-017, TD-018, TD-020, and TD-021 were resolved; their closure is recorded in the corrective, preventive, and improvement actions document.
+*Note.* Source: *15-project-control/technical-backlog.md* of the documentation (Vehicle Washing Development Team, 2026a), reviewed against the code on October 16, 2026. Between October 8 and 16, 2026, TD-001, TD-002, TD-003, TD-009, TD-013, TD-014, TD-015, TD-016, TD-017, TD-018, TD-020, and TD-021 were resolved; their closure is recorded in the corrective, preventive, and improvement actions document. TD-006 was also closed on October 19, 2026, with continuous integration in GitHub Actions.
 
 ### 16.8 Recommended Evolution
 

@@ -31,6 +31,7 @@ Table 1 records the change history of this document. The action register (sectio
 | 1.0 | 2026-10-09 | Creation of the document (in Spanish and English). The management procedure is defined, and 23 closed corrective actions, 13 open corrective actions, 14 preventive actions, and 13 improvement actions are recorded, verified against the code of the eleven repositories (*develop* branch as of October 9, 2026), the Git history, the risk register, and the technical backlog of the project. | Development team |
 | 2.0 | 2026-10-16 | Review against the code of October 16, 2026. Eleven open corrective actions were closed (ACO-01 to ACO-03 and ACO-05 to ACO-12, now AC-24 to AC-34) and five improvement actions (AM-01, AM-04, AM-08, AM-10, and AM-11); five nonconformities found in the complete review of the system were recorded and closed (AC-35 to AC-39); the preventive actions, indicators, lessons learned, and traceability were updated. | Development team |
 | 2.1 | 2026-10-17 | Review against the code of October 17, 2026. Corrective actions AC-40 to AC-43 were closed (expired session notice when logging out, screens overflowing on phones, squashed filter inputs in the app, and service progress before it started), preventive action AP-15 was added (responsive design check before merging), and improvements AM-07 (inspection report in the mobile app) and AM-08 (frequently asked questions on the home page) were closed. | Development team |
+| 2.2 | 2026-10-19 | Preventive action AP-01 was closed with continuous integration in GitHub Actions in the 10 repositories. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -286,7 +287,7 @@ Preventive actions address the causes of risks that have not yet materialized or
 
 | ID | Risk or potential cause | Preventive action | Responsible | Priority | Status | Origin |
 |---|---|---|---|---|---|---|
-| AP-01 | Regressions reach *develop* unnoticed. | Jenkins pipeline per repository (*./mvnw -B verify*, *dotnet test*, *ng build*, and *ng test*) and the rule of merging only with a green pipeline. | Project leader | High | Open | R-003, TD-006 |
+| AP-01 | Regressions reach *develop* unnoticed. | Continuous integration per repository (*./mvnw verify*, *dotnet test*, *ng build*, *ng test*, and *tsc*) and the rule of merging only with a green result. | Project leader | High | Closed (2026-10-19): GitHub Actions in the 10 repositories, on every push or pull request to *develop* and *main* | R-003, TD-006 |
 | AP-02 | An event is lost between the commit and the publication. | Outbox pattern in security, booking, operations, and payment. | Backend leader | Low | Accepted as a risk until leaving the academic scope | R-005, TD-011 |
 | AP-03 | Secret leakage (*.env*, mail app password, *JWT_SECRET*). | Keep *.env* ignored, check with *git check-ignore* before each implementation, and rotate secrets every quarter or on suspicion. | Whole team | High | In progress (permanent) | R-004 |
 | AP-04 | Data loss before a demonstration or in operation. | Automated daily backup with verification and a monthly restoration test (Administrator Manual, section 14). | IT administrator | High | Open | R-008 |
