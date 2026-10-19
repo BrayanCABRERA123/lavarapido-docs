@@ -32,6 +32,7 @@ La Tabla 1 registra el historial de cambios de este documento. El registro de ac
 | 2.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026. Se cerraron once acciones correctivas abiertas (ACO-01 a ACO-03 y ACO-05 a ACO-12, ahora AC-24 a AC-34) y cinco de mejoramiento (AM-01, AM-04, AM-08, AM-10 y AM-11); se registraron y cerraron cinco no conformidades encontradas en la revisión completa del sistema (AC-35 a AC-39); se actualizaron las acciones preventivas, los indicadores, las lecciones aprendidas y la trazabilidad. | Equipo de desarrollo |
 | 2.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se cerraron las correctivas AC-40 a AC-43 (aviso de sesión expirada al cerrar sesión, pantallas que se salían en el celular, campos de filtro aplastados en la app y avance del servicio antes de empezar), se agregó la preventiva AP-15 (revisión de diseño adaptable antes de fusionar) y se cerraron las mejoras AM-07 (informe de inspección en la app móvil) y AM-08 (preguntas frecuentes en la página de inicio). | Equipo de desarrollo |
 | 2.2 | 2026-10-19 | Se cerró la acción preventiva AP-01 con la integración continua en GitHub Actions de los 10 repositorios. | Equipo de desarrollo |
+| 2.3 | 2026-10-19 | Indicador de pruebas con la ejecución del 19 de octubre (655 automatizadas, 19 de punta a punta y 42 casos funcionales). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -344,7 +345,7 @@ Las acciones preventivas atacan las causas de riesgos que todavía no se han mat
 | Cierre en plazo | Acciones cerradas dentro del plazo de su severidad / acciones cerradas × 100 | ≥ 90 % | Por medir desde la versión 1.0 |
 | Reincidencia | Correctivas cerradas cuyo problema reaparece / correctivas cerradas × 100 | 0 % | 0 % |
 | Defectos escapados | Defectos encontrados en aceptación u operación / defectos totales del periodo × 100 | Tendencia a la baja | Por medir desde la primera implementación |
-| Pruebas automatizadas | Pruebas ejecutadas y aprobadas en todos los repositorios | Creciente | 639 unitarias y de integración (web 43, gateway 34, servicios Java 421 y payment-service 141) y 19 de punta a punta |
+| Pruebas automatizadas | Pruebas ejecutadas y aprobadas en todos los repositorios | Creciente | 655 unitarias y de integración (web 43, gateway 34, servicios Java 430 y payment-service 148) al 19 de octubre de 2026, 19 de punta a punta y 42 casos funcionales |
 
 *Nota.* Elaborado por los autores. El conteo de pruebas corresponde a la ejecución del 16 de octubre de 2026; en la versión 1.0 se contaban anotaciones (unas 400).
 
