@@ -450,7 +450,7 @@ El sistema se entrega sin datos de un negocio real: los campos que faltan aparec
 2. Diligenciar los campos en la ventana y hacer clic en **Aplicar**. La pantalla muestra **Cambios sin guardar**.
 3. Repetir con las demás tarjetas si hace falta y hacer clic en **Guardar cambios** ("Datos guardados"). **Descartar** deshace lo que no se ha guardado.
 
-La razón social, el NIT y la dirección son obligatorios; el teléfono debe tener al menos 7 dígitos, el correo debe ser válido y la fecha de fundación no puede ser futura.
+La razón social, el NIT y la dirección son obligatorios; el teléfono debe tener al menos 7 dígitos, el correo debe ser válido y la fecha de fundación no puede ser futura. En la aplicación móvil, **Más > Configuración > Datos del negocio** muestra las mismas tarjetas con su lápiz y guarda en el mismo lugar.
 
 **Figura 5**
 

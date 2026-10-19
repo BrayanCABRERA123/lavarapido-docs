@@ -450,7 +450,7 @@ The system is delivered without the data of a real business: missing fields show
 2. Fill in the fields in the window and click **Apply**. The screen shows **Unsaved changes**.
 3. Repeat with the other cards if needed and click **Save changes** ("Data saved"). **Discard** undoes what has not been saved.
 
-The legal name, the tax ID, and the address are required; the phone must have at least 7 digits, the email must be valid, and the founding date cannot be in the future.
+The legal name, the tax ID, and the address are required; the phone must have at least 7 digits, the email must be valid, and the founding date cannot be in the future. In the mobile app, **More > Settings > Business data** shows the same cards with their pencil and saves to the same place.
 
 **Figure 5**
 
