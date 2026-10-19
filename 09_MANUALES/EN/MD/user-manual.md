@@ -35,6 +35,7 @@ Table 1 records the change history of this document. Each time the development t
 | 4.0 | 2026-10-16 | Review against the code of October 16, 2026. The figures changed from placeholders to real screenshots of the running system with test data. Added: optional operator choice when booking and automatic assignment of a free one, account lockout for 15 minutes after five failed attempts, messages that explain why a time cannot be booked, starting the service from 15 minutes before the booked time, downloading the Android application from the web, the profile address saved in the account, and the Deactivate my account option, formerly called Delete account. Removed: the Report progress button, which no longer exists on the operator screen. | Development team |
 | 4.1 | 2026-10-17 | Review against the code of October 17, 2026. Updated the welcome screen ("About us" section without figures, new frequently asked questions section, footer without social networks or contact links) and described how it adapts to phones and tablets. Clarified that the progress of the next service stays at 0% until the wash starts and that the dashboard greeting names the car wash Lavado Vehicular. | Development team |
 | 4.2 | 2026-10-19 | Administrator accounts do not have the Deactivate my account option (frequently asked questions). | Development team |
+| 4.3 | 2026-10-19 | Screenshots taken again on October 19, 2026 (date on the dashboards, calendars without past days, and booking summary). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -460,7 +461,7 @@ Each module is documented with the same format: name, description, role that can
 1. Click **Book Wash**.
 2. **Step 1 (Choose your vehicle):** select one of the registered vehicles. If the vehicle is not listed, use the **My Vehicles** link to register it first.
 3. **Step 2 (Service type):** select Basic, Premium, or Complete. Each card shows what it includes, the duration, the price for the type of vehicle chosen, and the loyalty points it adds ("Earns N points").
-4. **Step 3 (Date and time):** choose the date and then one of the free times shown in **Select a time**. The times are offered every 30 minutes, within the opening hours, outside the break, and only when a washing bay is free for the whole duration of the service.
+4. **Step 3 (Date and time):** choose the date (the calendar does not allow past days) and then one of the free times shown in **Select a time**. The times are offered every 30 minutes, within the opening hours, outside the break, and only when a washing bay is free for the whole duration of the service.
 5. Optionally, choose in **Operator (optional)** one of the operators who are free at that time. If it is left as "No preference: we assign a free one", the system assigns one automatically.
 6. Review **Your booking summary**: vehicle, plate, service, estimated duration, date, time, location, total, and **Points you earn**.
 7. Click **Book Now**.
