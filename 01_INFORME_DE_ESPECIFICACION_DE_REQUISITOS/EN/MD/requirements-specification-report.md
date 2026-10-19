@@ -28,6 +28,7 @@ Version 7.1, October 17, 2026
 | V6 | 2026-10-15 | Development team | Status checked against the code as of October 15, 2026. Account lockout (RF-004b), automatic assignment (RF-008), operator choice by the customer (RF-010), payment history filters (RF-015) and operator availability (RF-022) are now implemented. New requirements RF-036 to RF-038 (inspection report, business data and operator profile) and use case CU30. Service start window, alert for bookings without an operator, notifications in each account's language, profile address, 57 tables, 601 automated tests and measurements for RNF-001 and RNF-008. |
 | V7 | 2026-10-16 | Development team | Complete review with the system running in Docker. The date and time the customer accepts the Terms and the Data Processing Policy are stored on the server (RR-01); HTTPS active on the public server; reason why a time is rejected (closed day, outside opening hours, time passed, or no free bay); 639 automated tests and 19 end-to-end tests passed. |
 | V7.1 | 2026-10-17 | Development team | Status verified against the code as of October 17, 2026: the inspection report (RF-036) is also managed from the mobile app, and the RNF-008 width check was extended to 60 web screens and 26 mobile app screens, with no overflow. |
+| V7.2 | 2026-10-19 | Development team | Continuous integration with GitHub Actions in the 10 repositories: every change is built and its tests are run. Continuous integration with Jenkins is removed from the pending items. |
 
 ---
 
@@ -1446,7 +1447,7 @@ Of the 41 functional requirements, 40 are implemented and 1 is partially impleme
 - Write the user stories for RF-027 to RF-038.
 - Write integration tests against SQL Server for the concurrency rules (RNF-003).
 - Test the app on an Android 8 device (RNF-008) and run a usability test with users (RNF-009).
-- Set up continuous integration with Jenkins.
+- Add the end-to-end tests to the continuous integration; today they are run by hand with the system up.
 
 ### 11.3 Open Decisions
 

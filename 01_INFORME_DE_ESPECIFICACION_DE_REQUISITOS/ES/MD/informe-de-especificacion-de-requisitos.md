@@ -28,6 +28,7 @@ Versión 7.1, 17 de octubre de 2026
 | V6 | 15/10/2026 | Equipo de desarrollo | Estado verificado contra el código al 15 de octubre de 2026. Quedan implementados el bloqueo de cuenta (RF-004b), la asignación automática (RF-008), la elección de operario por el cliente (RF-010), los filtros del historial de pagos (RF-015) y la disponibilidad de operarios (RF-022). Nuevos requisitos RF-036 a RF-038 (informe de inspección, datos del negocio y ficha del operario) y caso de uso CU30. Ventana de inicio del servicio, alerta de reserva sin operario, notificaciones en el idioma de la cuenta, dirección del perfil, 57 tablas, 601 pruebas automatizadas y mediciones de RNF-001 y RNF-008. |
 | V7 | 16/10/2026 | Equipo de desarrollo | Revisión completa con el sistema corriendo en Docker. La fecha y la hora en que el cliente acepta los Términos y la Política de Tratamiento de Datos quedan guardadas en el servidor (RR-01); HTTPS activo en el servidor público; motivo del rechazo de una hora (día cerrado, fuera del horario, hora pasada o sin bahía libre); 639 pruebas automatizadas y 19 pruebas de punta a punta aprobadas. |
 | V7.1 | 17/10/2026 | Equipo de desarrollo | Estado verificado contra el código al 17 de octubre de 2026: el informe de inspección (RF-036) también se gestiona desde la aplicación móvil, y la revisión de ancho de RNF-008 se amplió a 60 pantallas web y 26 de la app móvil, sin desbordes. |
+| V7.2 | 19/10/2026 | Equipo de desarrollo | Integración continua con GitHub Actions en los 10 repositorios: en cada cambio se compila y se corren las pruebas. Se retira de los pendientes la integración continua con Jenkins. |
 
 ---
 
@@ -1446,7 +1447,7 @@ De los 41 requisitos funcionales, 40 están implementados y 1 parcialmente (RF-0
 - Crear las historias de usuario de RF-027 a RF-038.
 - Escribir pruebas de integración contra SQL Server para las reglas de concurrencia (RNF-003).
 - Probar la aplicación en un dispositivo con Android 8 (RNF-008) y hacer una prueba de usabilidad con usuarios (RNF-009).
-- Montar la integración continua con Jenkins.
+- Agregar a la integración continua las pruebas de punta a punta, que hoy se corren a mano con el sistema levantado.
 
 ### 11.3 Decisiones Abiertas
 
