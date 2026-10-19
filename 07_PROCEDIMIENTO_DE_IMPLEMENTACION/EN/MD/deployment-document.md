@@ -27,7 +27,7 @@
 | Components | 6 backend microservices, API Gateway, web application, Android mobile app |
 | Version (Release Tag) | `v1.0.0` *(pending: create the tag when `develop` is merged into `main`)* |
 | Deployed branch | `develop` (in every repository) |
-| Mobile app version | versionCode **2** (APK) + OTA update "Tapping the new-version notice opens the download" |
+| Mobile app version | **1.1.0** (versionCode **5**), APK published on 2026-10-19 + over-the-air updates (EAS Update) |
 | Repositories | `lavarapido-infra`, `lavarapido-api-gateway`, `lavarapido-security-service`, `lavarapido-customer-service`, `lavarapido-booking-service`, `lavarapido-operation-service`, `lavarapido-notification-service`, `lavarapido-payment-service`, `Front-end-proyecto-web`, `LavadoVehicular-Movil` |
 | Public address | https://lavarapidovehicular.northcentralus.cloudapp.azure.com |
 
@@ -40,6 +40,7 @@
 | Actual duration | ~2 h 30 min (provisioning, image builds, HTTPS setup and testing) |
 | User downtime | Not applicable: first deployment (no users in production yet) |
 | Window for future updates | Outside the car wash's business hours (before 07:00 or after 18:00) |
+| Latest update | 2026-10-19, 03:20 (server time), with `update-server.sh`: `develop` code up to October 17 and 18 and migration 039 |
 
 #### 1.1.3 Target environment (VPS / Staging / Production)
 
@@ -71,6 +72,7 @@
 | 1.0 | 2026-10-16 | Brayan Cabrera | Initial version: deployment on Azure |
 | 1.1 | 2026-10-16 | Brayan Cabrera | Portainer CE installed, real evidence (5.4) and correction of Liquibase schemas and tables |
 | 1.2 | 2026-10-16 | Juan Camilo Guilombo | Table count corrected (57) and first administrator created with the environment variables |
+| 1.3 | 2026-10-19 | Juan Camilo Guilombo | Update of 2026-10-19 (migration 039 and app 1.1.0), SSH access with a personal key per member, deployment from GitHub Actions, continuous integration in the 10 repositories, and new terminal and web evidence |
 
 ### 1.3 Change Summary (Release Notes)
 
@@ -125,7 +127,7 @@
 |---|---|
 | Docker images | Java: `eclipse-temurin:21-jdk` (build) and `21-jre` (runtime) · .NET: `dotnet/sdk:8.0` and `aspnet:8.0` · Web: `node:22-alpine` and `nginx:1.27-alpine` |
 | Infrastructure services | `mcr.microsoft.com/mssql/server:2022-latest` (Express), `rabbitmq:4-management`, `caddy:2-alpine`, `liquibase/liquibase:4.29` |
-| New migrations | 032 (business data), 033 (inspection report), 034 (login lockout), 035 (address), 036 (registration date), 037 (operator profile), 038 (new-version notice type) |
+| New migrations | 032 (business data), 033 (inspection report), 034 (login lockout), 035 (address), 036 (registration date), 037 (operator profile), 038 (new-version notice type), and 039 (acceptance of the legal documents, applied on 2026-10-19) |
 | Web dependencies | `qrcode` 1.5.4 |
 | Mobile dependencies | `expo-notifications`, `expo-device`, `expo-build-properties`, `expo-updates`, `expo-application` |
 | External services | Expo Push + Firebase Cloud Messaging (push), Gmail SMTP (email), EAS (app builds and updates) |
@@ -138,6 +140,17 @@
 - **First administrator:** the demo accounts (`admin@gmail.com`, etc.) **only exist in development**. In production the administrator is created with `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 - **Mobile app:** the Android package changed to `com.vehiclecarwash.app`. Previous versions must be uninstalled once; later ones install on top.
 - **CORS:** each service only accepts the origin defined in `PUBLIC_URL`.
+
+#### 1.3.5 Update of 2026-10-19
+
+On 2026-10-19 at 03:20 (server time), `update-server.sh` was run. The `develop` changes up to October 17 and 18 were deployed:
+
+- **Database:** migration 039, which stores the date and time each person accepts the Terms and the Data Processing Policy.
+- **Backend:** the payment-service health check queries the database, payment-service handles the correlation identifier, the schedule error carries the reason (`reason`), two simultaneous requests no longer fail when creating the same operator, and a bay cannot be created in maintenance.
+- **Web:** the payment screen selects by account, the profile option is called "Deactivate my account", Angular is on 21.2.25 and xlsx on 0.20.3, and there are layout fixes for phones.
+- **Mobile app:** version 1.1.0 (versionCode 5), published on 2026-10-19 at 05:03, with the version shown in Settings.
+
+The changes pushed afterwards are left for the next update: the error messages with `spring.web.error` in the Java services and the latest web and app fixes.
 
 ---
 
@@ -260,8 +273,8 @@ flowchart LR
 | Resource | Minimum required | Available (Azure B2as_v2) | Measured in operation | ✓ |
 |---|---|---|---|---|
 | CPU | 2 x86-64 vCPU (SQL Server does not run on ARM) | 2 AMD x64 vCPU | Peaks only while building images | ✅ |
-| RAM | 8 GB | 7.7 GB + 4 GB of swap | **3.3 GB** used with the 11 containers | ✅ |
-| Disk | 30 GB | 64 GB standard SSD | ~8 GB (system, images and data) | ✅ |
+| RAM | 8 GB | 7.7 GB + 4 GB of swap | **3.3 GB** used with the 12 containers, Portainer included (2026-10-19) | ✅ |
+| Disk | 30 GB | 64 GB standard SSD | 26 GB used of 61 GB (42%), mostly images and build cache (2026-10-19) | ✅ |
 | Operating system | Ubuntu 24.04 or 26.04 LTS | Ubuntu 24.04.4 LTS | — | ✅ |
 | Network | Ports 22, 80 and 443 open | Azure security group | Verified from the internet | ✅ |
 
@@ -376,6 +389,15 @@ The stack configuration (`docker-compose.yml`, `docker-compose.prod.yml`, `deplo
 ssh -i ~/.ssh/lavarapido_azure azureuser@64.236.160.129
 ```
 
+**Access of each member with their own key:** each person creates their key on their computer and only shares the public part (`.pub`). The private one is never sent or pushed to a repository.
+
+```powershell
+ssh-keygen -t ed25519 -f $HOME\.ssh\lavarapido_azure      # on the person's PC
+Get-Content $HOME\.ssh\lavarapido_azure.pub                # this line is the one to share
+```
+
+The DevOps owner adds it once, from the portal (*vehiclecarwash-vm → Reset password → Reset SSH public key*, user `azureuser`) or from the server with `echo "<public key>" >> ~/.ssh/authorized_keys`. As of 2026-10-19, the keys with access are the DevOps owner's, Juan Camilo's, and GitHub Actions' (restricted, see 4.3.3). To remove an access, delete its line from `authorized_keys`.
+
 **Portainer CE installation** *(done on 2026-10-16; listens only inside the server)*:
 
 ```bash
@@ -404,7 +426,7 @@ Migrations are **automatic**:
 
 1. The `db-init` container creates the `LavaRapido` database if it does not exist.
 2. The `payment-migrate` container (Liquibase 4.29) applies the payment-service changelogs (`db/changelog/db.changelog-master.yaml`) and exits.
-3. Each Java service applies its own changelogs on startup. Numbering is global: 001–038 plus the 1xx catalog seeds.
+3. Each Java service applies its own changelogs on startup. Numbering is global: 001–039 plus the 1xx catalog seeds.
 4. Hibernate only validates that the model matches the tables (`ddl-auto: validate`); it never alters tables.
 
 Production **does not load test data**: only catalogs (roles, services, statuses, schedule and business data).
@@ -425,7 +447,7 @@ q "SELECT u.username, r.code FROM security.app_user u JOIN security.user_role ur
 
 Expected result:
 - the 9 schemas with their tables;
-- in each service, `ok` equal to `changesets` (2026-10-16: 143 of 143);
+- in each service, `ok` equal to `changesets` (2026-10-16: 143 of 143; 2026-10-19: 144 of 144, with 039);
 - the initial administrator created (security log: `First administrator created`).
 
 ### 4.3 Application Stack Deployment and Orchestration
@@ -477,6 +499,18 @@ bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh web             # onl
 bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh security-service notification-service
 ```
 
+**From GitHub, without SSH:** with the machine on, in the `lavarapido-infra` repository → *Actions → Desplegar en Azure → Run workflow*. In *Servicios*, leave it empty to update everything or write the names (`web payment-service`). At the end, the workflow checks that the web and the API answer 200. It uses its own GitHub key (secret `AZURE_SSH_KEY`) that on the server can only run `deploy/ci-deploy.sh`, which validates the names and does not let two updates run at the same time.
+
+**Continuous integration:** since 2026-10-19 the 10 repositories have `.github/workflows/ci.yml`, which runs on every push or pull request to `develop` and `main`, and the result appears as ✓ or ✗ next to each commit:
+
+| Repository | What it checks |
+|---|---|
+| Java services and api-gateway | `./mvnw verify`: builds and runs the tests (Java 21) |
+| payment-service | `dotnet build` and `dotnet test` (.NET 8; integration tests are skipped without SQL Server) |
+| Front-end-proyecto-web | Production build and `ng test` |
+| LavadoVehicular-Movil | `tsc --noEmit` (the APK is still built with EAS) |
+| lavarapido-infra | Syntax and `shellcheck` of `deploy/*.sh`, `docker compose config`, and `e2e/` syntax |
+
 **Publishing the mobile app**, from the PC, in the app folder:
 
 ```bash
@@ -517,12 +551,12 @@ npm run publish:update -- "what changed"        # screen-only changes: over-the-
 
 #### 5.1.2 Public web interface (Angular SPA)
 
-| Link | Expected | Result (2026-10-16) |
+| Link | Expected | Result (2026-10-19) |
 |---|---|---|
 | `https://<domain>/` | Home page with the "Download app" section | ✅ 200 |
 | `https://<domain>/client`, `/admin` | Angular routes (load `index.html`) | ✅ 200 |
 | `http://<domain>/` | Redirect to HTTPS | ✅ 308 |
-| `https://<domain>/app/version.json` | Published app version | ✅ 200 (`versionCode 2`) |
+| `https://<domain>/app/version.json` | Published app version | ✅ 200 (`versionCode 5`, version 1.1.0) |
 | `https://<domain>/app/LavaRapidoVehicular.apk` | APK download (`application/vnd.android.package-archive`) | ✅ 200 |
 
 #### 5.1.3 Backend health endpoints (/actuator/health)
@@ -618,25 +652,26 @@ sudo docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsa
 free -h
 ```
 
-Measurement on 2026-10-16, with the system idle:
+Measurement on 2026-10-19, with the system idle and the machine just started:
 
 | Container | Memory |
 |---|---|
-| security-service | 341 MB / 512 MB |
-| notification-service | 319 MB / 512 MB |
-| operations-service | 313 MB / 512 MB |
-| booking-service | 304 MB / 512 MB |
-| customer-service | 300 MB / 512 MB |
-| api-gateway | 157 MB / 512 MB |
-| payment-service | 62 MB / 384 MB |
-| sqlserver | 644 MB |
-| rabbitmq | 124 MB |
-| web / caddy | 6 MB / 12 MB |
+| security-service | 311 MB / 512 MB |
+| notification-service | 326 MB / 512 MB |
+| operations-service | 327 MB / 512 MB |
+| booking-service | 341 MB / 512 MB |
+| customer-service | 292 MB / 512 MB |
+| api-gateway | 176 MB / 512 MB |
+| payment-service | 78 MB / 384 MB |
+| sqlserver | 777 MB |
+| rabbitmq | 148 MB |
+| web / caddy | 12 MB / 60 MB |
+| portainer | 61 MB |
 | **Machine total** | **3.3 GB of 7.7 GB · swap unused** |
 
 ### 5.4 Visual Evidence Record (Screenshots)
 
-> Screenshots taken on 2026-10-16 on the production server, after updating it to the latest version of `develop`. The terminal ones show the real output of the commands. The screenshots keep the original interface language (Spanish).
+> The terminal and web screenshots were taken on 2026-10-19 on the production server, with the version deployed that day at 03:20; the terminal ones show the real output of the commands. The Portainer ones (5.4.1) are from 2026-10-16, because the panel requires logging in and only the DevOps owner uses it.
 
 #### 5.4.1 Screenshot of the Portainer panel with containers in Running state
 
@@ -646,29 +681,33 @@ Measurement on 2026-10-16, with the system idle:
 
 ![Portainer: lavarapido stack](capturas/5.4.1b-portainer-stack.png)
 
+![Container status and usage from the terminal](capturas/5.4.1c-contenedores-y-consumo.png)
+
+*Status taken from the terminal on 2026-10-19: the 11 containers of the system Up (SQL Server and RabbitMQ* healthy*), `db-init` and `payment-migrate` in* Exited (0)*, and the memory usage of each container.*
+
 #### 5.4.2 Screenshot of the Backend services log viewer
 
 ![Startup logs of the services](capturas/5.4.2-logs-backend.png)
 
-*Each Java service shows* Started … in N seconds *, payment* Now listening on :3005 *, and security confirms that the administrator already exists. There are 0 error traces in the last 15 minutes.*
+*Each Java service shows* Started … in N seconds *(between 45 and 91 seconds with the machine just started) and payment* Now listening on :3005*. There are 0 error traces in the last 15 minutes.*
 
 #### 5.4.3 Screenshot of the HTTP 200 response of the Health Checks
 
 ![Health checks UP](capturas/5.4.3-health-checks.png)
 
-*`/actuator/health` responds `UP` (HTTP 200) in the 6 Java services from the internal network; the web, the API and `/app/version.json` respond 200 from the internet.*
+*`/actuator/health` answers `UP` (HTTP 200) in the 6 Java services from the internal network, and payment-service answers `ok`. From the internet, the web, the API, and `/app/version.json` answer 200, and HTTP redirects to HTTPS with 308.*
 
 #### 5.4.4 Screenshot of the web interface with a clean DevTools console
 
 ![Web in production with the console without errors](capturas/5.4.4-web-devtools.png)
 
-*Home page in production over HTTPS. Console: 0 errors and 0 warnings on load.*
+*Home page in production over HTTPS (TLS 1.3, Let's Encrypt certificate valid until 2027-01-14). On load: 0 errors and 0 warnings in the console, and 0 error responses.*
 
 #### 5.4.5 Screenshot of the successful migration record in the database
 
 ![Liquibase changesets executed](capturas/5.4.5-migraciones.png)
 
-*Latest migrations (up to 038), 143 changesets `EXECUTED` in the 6 histories and the tables per schema.*
+*Migration 039 (acceptance of the legal documents) was applied on 2026-10-19; there are 144 `EXECUTED` changesets in the 6 histories and 57 tables in the 9 schemas.*
 
 ---
 

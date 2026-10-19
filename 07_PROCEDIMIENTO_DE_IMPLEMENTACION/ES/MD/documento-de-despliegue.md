@@ -27,7 +27,7 @@
 | Componentes | 6 microservicios backend, API Gateway, aplicación web, aplicación móvil Android |
 | Versión (Release Tag) | `v1.0.0` *(pendiente: crear la etiqueta al pasar `develop` a `main`)* |
 | Rama desplegada | `develop` (en todos los repositorios) |
-| Versión de la app móvil | versionCode **2** (APK) + actualización OTA "Tocar el aviso de versión nueva abre la descarga" |
+| Versión de la app móvil | **1.1.0** (versionCode **5**), APK publicado el 19-10-2026 + actualizaciones por internet (EAS Update) |
 | Repositorios | `lavarapido-infra`, `lavarapido-api-gateway`, `lavarapido-security-service`, `lavarapido-customer-service`, `lavarapido-booking-service`, `lavarapido-operation-service`, `lavarapido-notification-service`, `lavarapido-payment-service`, `Front-end-proyecto-web`, `LavadoVehicular-Movil` |
 | Dirección pública | https://lavarapidovehicular.northcentralus.cloudapp.azure.com |
 
@@ -40,6 +40,7 @@
 | Duración real | ~2 h 30 min (aprovisionamiento, compilación de imágenes, configuración de HTTPS y pruebas) |
 | Interrupción a usuarios | No aplica: primer despliegue (no había usuarios en producción) |
 | Ventana para próximas actualizaciones | Fuera de horario de atención del lavadero (antes de las 07:00 o después de las 18:00) |
+| Última actualización | 19-10-2026, 03:20 (hora del servidor), con `update-server.sh`: código de `develop` hasta el 17 y 18 de octubre y migración 039 |
 
 #### 1.1.3 Entorno de destino (VPS / Staging / Producción)
 
@@ -71,6 +72,7 @@
 | 1.0 | 2026-10-16 | Brayan Cabrera | Versión inicial: despliegue en Azure |
 | 1.1 | 2026-10-16 | Brayan Cabrera | Portainer CE instalado, evidencias reales (5.4) y corrección de esquemas y tablas de Liquibase |
 | 1.2 | 2026-10-16 | Juan Camilo Guilombo | Conteo de tablas corregido (57) y creación del primer administrador con las variables de entorno |
+| 1.3 | 2026-10-19 | Juan Camilo Guilombo | Actualización del 19-10-2026 (migración 039 y app 1.1.0), acceso SSH con llave propia por integrante, despliegue desde GitHub Actions, integración continua en los 10 repositorios y evidencias nuevas de terminal y de la web |
 
 ### 1.3 Resumen de Cambios (Release Notes)
 
@@ -125,7 +127,7 @@
 |---|---|
 | Imágenes Docker | Java: `eclipse-temurin:21-jdk` (compilación) y `21-jre` (ejecución) · .NET: `dotnet/sdk:8.0` y `aspnet:8.0` · Web: `node:22-alpine` y `nginx:1.27-alpine` |
 | Servicios de infraestructura | `mcr.microsoft.com/mssql/server:2022-latest` (Express), `rabbitmq:4-management`, `caddy:2-alpine`, `liquibase/liquibase:4.29` |
-| Migraciones nuevas | 032 (datos del negocio), 033 (reporte de inspección), 034 (bloqueo de login), 035 (dirección), 036 (fecha de registro), 037 (perfil del operario), 038 (tipo de aviso de versión nueva) |
+| Migraciones nuevas | 032 (datos del negocio), 033 (reporte de inspección), 034 (bloqueo de login), 035 (dirección), 036 (fecha de registro), 037 (perfil del operario), 038 (tipo de aviso de versión nueva) y 039 (aceptación de los documentos legales, aplicada el 19-10-2026) |
 | Dependencias web | `qrcode` 1.5.4 |
 | Dependencias móviles | `expo-notifications`, `expo-device`, `expo-build-properties`, `expo-updates`, `expo-application` |
 | Servicios externos | Expo Push + Firebase Cloud Messaging (push), Gmail SMTP (correo), EAS (compilación y actualizaciones de la app) |
@@ -138,6 +140,17 @@
 - **Primer administrador:** las cuentas demo (`admin@gmail.com`, etc.) **solo existen en desarrollo**. En producción el administrador se crea con `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 - **App móvil:** el paquete Android cambió a `com.vehiclecarwash.app`. Las versiones anteriores se deben desinstalar una vez; las siguientes se instalan encima.
 - **CORS:** cada servicio solo acepta el origen definido en `PUBLIC_URL`.
+
+#### 1.3.5 Actualización del 19-10-2026
+
+El 19-10-2026 a las 03:20 (hora del servidor) se corrió `update-server.sh`. Quedaron desplegados los cambios de `develop` hasta el 17 y 18 de octubre:
+
+- **Base de datos:** migración 039, que guarda la fecha y la hora en que cada persona acepta los Términos y la Política de Tratamiento de Datos.
+- **Backend:** la salud de payment-service consulta la base de datos, payment-service maneja el identificador de correlación, el error de horario trae el motivo (`reason`), dos solicitudes simultáneas ya no fallan al crear el mismo operario y no se puede crear una bahía en mantenimiento.
+- **Web:** la pantalla de pagos selecciona por cuenta, la opción del perfil se llama "Desactivar mi cuenta", Angular quedó en 21.2.25 y xlsx en 0.20.3, y hay ajustes de diseño para celular.
+- **App móvil:** versión 1.1.0 (versionCode 5), publicada el 19-10-2026 a las 05:03, con la versión visible en Configuración.
+
+Quedan para la próxima actualización los cambios subidos después: los mensajes de error con `spring.web.error` en los servicios Java y los últimos ajustes de la web y de la app.
 
 ---
 
@@ -260,8 +273,8 @@ flowchart LR
 | Recurso | Mínimo requerido | Disponible (Azure B2as_v2) | Medido en operación | ✓ |
 |---|---|---|---|---|
 | CPU | 2 vCPU x86-64 (SQL Server no corre en ARM) | 2 vCPU AMD x64 | Picos solo al compilar imágenes | ✅ |
-| RAM | 8 GB | 7,7 GB + 4 GB de swap | **3,3 GB** usados con los 11 contenedores | ✅ |
-| Disco | 30 GB | 64 GB SSD estándar | ~8 GB (sistema, imágenes y datos) | ✅ |
+| RAM | 8 GB | 7,7 GB + 4 GB de swap | **3,3 GB** usados con los 12 contenedores, incluido Portainer (19-10-2026) | ✅ |
+| Disco | 30 GB | 64 GB SSD estándar | 26 GB usados de 61 GB (42 %), sobre todo imágenes y caché de compilación (19-10-2026) | ✅ |
 | Sistema operativo | Ubuntu 24.04 o 26.04 LTS | Ubuntu 24.04.4 LTS | — | ✅ |
 | Red | Puertos 22, 80 y 443 abiertos | Grupo de seguridad de Azure | Verificado desde internet | ✅ |
 
@@ -376,6 +389,15 @@ La configuración del stack (`docker-compose.yml`, `docker-compose.prod.yml`, `d
 ssh -i ~/.ssh/lavarapido_azure azureuser@64.236.160.129
 ```
 
+**Acceso de cada integrante con su propia llave:** cada persona crea su llave en su computador y solo comparte la parte pública (`.pub`). La privada nunca se envía ni se sube a un repositorio.
+
+```powershell
+ssh-keygen -t ed25519 -f $HOME\.ssh\lavarapido_azure      # en el PC de la persona
+Get-Content $HOME\.ssh\lavarapido_azure.pub                # esta línea es la que se comparte
+```
+
+El responsable de DevOps la agrega una sola vez, desde el portal (*vehiclecarwash-vm → Restablecer contraseña → Restablecer clave pública SSH*, usuario `azureuser`) o desde el servidor con `echo "<llave pública>" >> ~/.ssh/authorized_keys`. Al 19-10-2026 tienen acceso la llave del responsable de DevOps, la de Juan Camilo y la de GitHub Actions (restringida, ver 4.3.3). Para quitar un acceso basta con borrar su línea de `authorized_keys`.
+
 **Instalación de Portainer CE** *(realizada el 16-10-2026; escucha solo dentro del servidor)*:
 
 ```bash
@@ -404,7 +426,7 @@ Las migraciones son **automáticas**:
 
 1. El contenedor `db-init` crea la base `LavaRapido` si no existe.
 2. El contenedor `payment-migrate` (Liquibase 4.29) aplica los changelogs de payment-service (`db/changelog/db.changelog-master.yaml`) y termina.
-3. Cada servicio Java aplica sus propios changelogs al arrancar. La numeración es global: 001–038 más las semillas 1xx de catálogos.
+3. Cada servicio Java aplica sus propios changelogs al arrancar. La numeración es global: 001–039 más las semillas 1xx de catálogos.
 4. Hibernate solo valida que el modelo coincida con las tablas (`ddl-auto: validate`); nunca altera tablas.
 
 Producción **no carga datos de prueba**: solo catálogos (roles, servicios, estados, horario y datos del negocio).
@@ -425,7 +447,7 @@ q "SELECT u.username, r.code FROM security.app_user u JOIN security.user_role ur
 
 Resultado esperado:
 - los 9 esquemas con sus tablas;
-- en cada servicio, `ok` igual a `changesets` (16-10-2026: 143 de 143);
+- en cada servicio, `ok` igual a `changesets` (16-10-2026: 143 de 143; 19-10-2026: 144 de 144, con la 039);
 - el administrador inicial creado (log de security: `First administrator created`).
 
 ### 4.3 Despliegue y Orquestación del Stack de Aplicación
@@ -477,6 +499,18 @@ bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh web             # sol
 bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh security-service notification-service
 ```
 
+**Desde GitHub, sin SSH:** con la máquina encendida, en el repositorio `lavarapido-infra` → *Actions → Desplegar en Azure → Run workflow*. En *Servicios* se deja vacío para actualizar todo o se escriben los nombres (`web payment-service`). Al terminar, el flujo comprueba que la web y la API respondan 200. Usa una llave propia de GitHub (secreto `AZURE_SSH_KEY`) que en el servidor solo puede ejecutar `deploy/ci-deploy.sh`, que valida los nombres y no deja correr dos actualizaciones a la vez.
+
+**Integración continua:** desde el 19-10-2026 los 10 repositorios tienen `.github/workflows/ci.yml`, que corre en cada push o pull request a `develop` y `main`, y el resultado aparece como ✓ o ✗ junto a cada commit:
+
+| Repositorio | Qué revisa |
+|---|---|
+| Servicios Java y api-gateway | `./mvnw verify`: compila y corre las pruebas (Java 21) |
+| payment-service | `dotnet build` y `dotnet test` (.NET 8; las de integración se omiten sin SQL Server) |
+| Front-end-proyecto-web | Compilación de producción y `ng test` |
+| LavadoVehicular-Movil | `tsc --noEmit` (el APK se sigue generando con EAS) |
+| lavarapido-infra | Sintaxis y `shellcheck` de `deploy/*.sh`, `docker compose config` y sintaxis de `e2e/` |
+
 **Publicación de la app móvil**, desde el PC, en la carpeta de la app:
 
 ```bash
@@ -517,12 +551,12 @@ npm run publish:update -- "qué cambió"          # cambios solo de pantallas: a
 
 #### 5.1.2 Interfaz web pública (SPA Angular)
 
-| Enlace | Esperado | Resultado (16-10-2026) |
+| Enlace | Esperado | Resultado (19-10-2026) |
 |---|---|---|
 | `https://<dominio>/` | Página de inicio con la sección "Descargar app" | ✅ 200 |
 | `https://<dominio>/client`, `/admin` | Rutas de Angular (cargan `index.html`) | ✅ 200 |
 | `http://<dominio>/` | Redirección a HTTPS | ✅ 308 |
-| `https://<dominio>/app/version.json` | Versión publicada de la app | ✅ 200 (`versionCode 2`) |
+| `https://<dominio>/app/version.json` | Versión publicada de la app | ✅ 200 (`versionCode 5`, versión 1.1.0) |
 | `https://<dominio>/app/LavaRapidoVehicular.apk` | Descarga del APK (`application/vnd.android.package-archive`) | ✅ 200 |
 
 #### 5.1.3 Endpoints de salud del Backend (/actuator/health)
@@ -618,25 +652,26 @@ sudo docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsa
 free -h
 ```
 
-Medición del 16-10-2026, con el sistema en reposo:
+Medición del 19-10-2026, con el sistema en reposo y la máquina recién encendida:
 
 | Contenedor | Memoria |
 |---|---|
-| security-service | 341 MB / 512 MB |
-| notification-service | 319 MB / 512 MB |
-| operations-service | 313 MB / 512 MB |
-| booking-service | 304 MB / 512 MB |
-| customer-service | 300 MB / 512 MB |
-| api-gateway | 157 MB / 512 MB |
-| payment-service | 62 MB / 384 MB |
-| sqlserver | 644 MB |
-| rabbitmq | 124 MB |
-| web / caddy | 6 MB / 12 MB |
+| security-service | 311 MB / 512 MB |
+| notification-service | 326 MB / 512 MB |
+| operations-service | 327 MB / 512 MB |
+| booking-service | 341 MB / 512 MB |
+| customer-service | 292 MB / 512 MB |
+| api-gateway | 176 MB / 512 MB |
+| payment-service | 78 MB / 384 MB |
+| sqlserver | 777 MB |
+| rabbitmq | 148 MB |
+| web / caddy | 12 MB / 60 MB |
+| portainer | 61 MB |
 | **Total de la máquina** | **3,3 GB de 7,7 GB · swap sin uso** |
 
 ### 5.4 Registro de Evidencias Visuales (Screenshots)
 
-> Capturas tomadas el 16-10-2026 sobre el servidor de producción, después de actualizarlo a la última versión de `develop`. Las de terminal muestran la salida real de los comandos.
+> Las capturas de terminal y de la web se tomaron el 19-10-2026 sobre el servidor de producción, con la versión desplegada ese día a las 03:20; las de terminal muestran la salida real de los comandos. Las de Portainer (5.4.1) son del 16-10-2026, porque el panel pide iniciar sesión y solo lo usa el responsable de DevOps.
 
 #### 5.4.1 Captura del panel de Portainer con contenedores en estado Running
 
@@ -646,29 +681,33 @@ Medición del 16-10-2026, con el sistema en reposo:
 
 ![Portainer: stack lavarapido](capturas/5.4.1b-portainer-stack.png)
 
+![Estado de los contenedores y consumo desde la terminal](capturas/5.4.1c-contenedores-y-consumo.png)
+
+*Estado tomado desde la terminal el 19-10-2026: los 11 contenedores del sistema en Up (SQL Server y RabbitMQ en* healthy*), `db-init` y `payment-migrate` en* Exited (0)*, y el consumo de memoria de cada contenedor.*
+
 #### 5.4.2 Captura de visor de logs de los servicios Backend
 
 ![Logs de arranque de los servicios](capturas/5.4.2-logs-backend.png)
 
-*Cada servicio Java muestra* Started … in N seconds *, payment* Now listening on :3005 *, y security confirma que el administrador ya existe. Hay 0 trazas con error en los últimos 15 minutos.*
+*Cada servicio Java muestra* Started … in N seconds *(entre 45 y 91 segundos con la máquina recién encendida) y payment* Now listening on :3005*. Hay 0 trazas con error en los últimos 15 minutos.*
 
 #### 5.4.3 Captura de respuesta HTTP 200 de los Health Checks
 
 ![Health checks en UP](capturas/5.4.3-health-checks.png)
 
-*`/actuator/health` responde `UP` (HTTP 200) en los 6 servicios Java desde la red interna; la web, la API y `/app/version.json` responden 200 desde internet.*
+*`/actuator/health` responde `UP` (HTTP 200) en los 6 servicios Java desde la red interna y payment-service responde `ok`. Desde internet, la web, la API y `/app/version.json` responden 200, y HTTP redirige a HTTPS con 308.*
 
 #### 5.4.4 Captura de interfaz web con consola DevTools limpia
 
 ![Web en producción con la consola sin errores](capturas/5.4.4-web-devtools.png)
 
-*Portada en producción por HTTPS. Consola: 0 errores y 0 advertencias al cargar.*
+*Portada en producción por HTTPS (TLS 1.3, certificado de Let's Encrypt vigente hasta el 14-01-2027). Al cargar: 0 errores y 0 advertencias en la consola, y 0 respuestas con error.*
 
 #### 5.4.5 Captura de registro de migración exitosa en base de datos
 
 ![Changesets de Liquibase ejecutados](capturas/5.4.5-migraciones.png)
 
-*Últimas migraciones (hasta la 038), 143 changesets `EXECUTED` en los 6 historiales y las tablas por esquema.*
+*La 039 (aceptación de los documentos legales) quedó aplicada el 19-10-2026; hay 144 changesets `EXECUTED` en los 6 historiales y 57 tablas en los 9 esquemas.*
 
 ---
 
