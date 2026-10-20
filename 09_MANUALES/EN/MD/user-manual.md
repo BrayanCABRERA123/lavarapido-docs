@@ -36,6 +36,7 @@ Table 1 records the change history of this document. Each time the development t
 | 4.1 | 2026-10-17 | Review against the code of October 17, 2026. Updated the welcome screen ("About us" section without figures, new frequently asked questions section, footer without social networks or contact links) and described how it adapts to phones and tablets. Clarified that the progress of the next service stays at 0% until the wash starts and that the dashboard greeting names the car wash Lavado Vehicular. | Development team |
 | 4.2 | 2026-10-19 | Administrator accounts do not have the Deactivate my account option (frequently asked questions). | Development team |
 | 4.3 | 2026-10-19 | Screenshots taken again on October 19, 2026 (date on the dashboards, calendars without past days, and booking summary). | Development team |
+| 4.4 | 2026-10-20 | The customer's and the operator's history go from the newest booking to the oldest and open the detail on click, with the **Go to payment** and **Go to ratings** buttons. Notifications open their detail on click, with a button to go to the section the notice comes from. Once the payment is approved, the payment screen only shows the summary. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -509,7 +510,7 @@ Each module is documented with the same format: name, description, role that can
 **Steps to use it:**
 
 1. Open the **Dashboard** or **History** and locate the booking.
-2. Click **View detail** to check the service, the vehicle, the date, the time, the assigned operator, and the status.
+2. On the Dashboard, click **View detail** to check the service, the vehicle, the date, the time, the assigned operator, and the status. In **History**, click the booking card to see its detail (section 10.1.6).
 3. To cancel, click **Cancel booking** on the booking card in **History** (or on the **Pay service** screen).
 4. Read the message "Cancel booking?" and click **Yes, cancel**; click **Back** to keep the booking.
 
@@ -583,6 +584,7 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 - While a payment is in review, another one cannot be reported for the same booking; a booking admits a single approved payment.
 - If the administrator rejects the payment, the customer can report it again with a correct receipt.
 - When the payment is approved, the customer receives the notice "Payment confirmed" (inbox and email), the loyalty points of the booking ("You earned N points", inbox only), and, for each coupon those points unlock, the notice "You have a redeemable coupon!" with its code (inbox and email). If the payment is rejected or refunded, the customer receives a notice and an email; a refund reverses the points earned by that booking.
+- Once the payment is approved, the **Pay service** screen of that booking only shows the summary: the payment method, the QR code, the receipt upload, and the **I've made the payment** button disappear, and the coupon used (if any) can no longer be removed.
 - A coupon is accepted only if it is active, is within its dates, and the customer has reached the points it requires; it can be redeemed once per booking. The system answers "That coupon doesn't exist.", "That coupon isn't active, or you haven't reached the points it needs yet.", or "You already redeemed this coupon on this booking." A successful redemption sends a confirmation notice and email.
 
 **Table 9**
@@ -625,12 +627,13 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 
 **Steps to use it:**
 
-1. Click **History**.
+1. Click **History**. Bookings appear from the newest to the oldest.
 2. Use the **All**, **Active**, **Completed**, and **Cancelled** filters, and the **From** and **To** dates, to narrow the list.
 3. Use **Search by service, vehicle or code** to find a booking.
 4. On each card, review the **Service type**, the **Vehicle**, the **Status**, and the **Payment** status, and use **Pay now** or **Cancel booking** when they are available. **Pay now** appears only when the booking can be paid (payable status, without an approved payment and without one pending or in review).
-5. On a completed service, click **Rate Service**.
-6. Choose from one to five stars, write a comment if desired (maximum 500 characters), and click **Submit rating**.
+5. Click the card to open the **Booking details** (services, date and time, vehicle, total, payment status, and rating). The **Go to payment** button opens the payment screen of that booking; it does not appear on cancelled or no-show bookings.
+6. On a completed service, click **Rate Service**.
+7. Choose from one to five stars, write a comment if desired (maximum 500 characters), and click **Submit rating**.
 
 **Expected result:** The message "Thanks for your rating!" appears, the card shows **Rated**, and the operator who performed the service can see the rating.
 
@@ -663,7 +666,7 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 1. Click **Notifications**. The header shows how many notifications are unread.
 2. Use the **All**, **Reminders**, **Promotions**, **Confirmations**, and **Others** tabs to filter by type.
 3. Use the **Read status** filter and the dates to narrow the list.
-4. Open a notification to read it completely; it is marked as read.
+4. Click a notification (or **View detail**) to read it completely; it is marked as read. If the notice belongs to a section, the detail has a button to go there: **Go to history** (bookings, payments, service, and inspection report) or **Go to home** (welcome, points, and coupons); for the operator, **Go to assigned services**.
 5. Use **Mark as read** or **Mark as unread** on each notification, or **Mark all as read**.
 6. To delete a notification, use the delete option and confirm "Delete this notification?".
 
@@ -844,7 +847,7 @@ The operator receives the account from the business administrator. The operator 
 
 #### 10.2.4 Operator Notifications
 
-The operator's notifications work like the customer's (section 10.1.7). The most frequent notices are a new service assigned, a service moved to another time, a service cancelled, and a service reassigned to another operator. These staff notices arrive in the inbox and as push notifications, never by email. The operator opens them with **Notifications** in the side menu and uses the tabs, the filters, and the **Mark as read** and **Mark all as read** buttons.
+The operator's notifications work like the customer's (section 10.1.7). The most frequent notices are a new service assigned, a service moved to another time, a service cancelled, and a service reassigned to another operator. These staff notices arrive in the inbox and as push notifications, never by email. The operator opens them with **Notifications** in the side menu and uses the tabs, the filters, and the **Mark as read** and **Mark all as read** buttons. Clicking one of these notices opens its detail with the **Go to assigned services** button.
 
 **Figure 29**
 
@@ -869,8 +872,9 @@ The operator's notifications work like the customer's (section 10.1.7). The most
 3. Use the **All**, **Completed**, **Canceled**, and **Reassigned** tabs and the **All services** filter.
 4. Use the search box to find a service by code, plate, client, or vehicle.
 5. Click **Clear** to remove the filters.
+6. Click a service to see its detail. If the customer rated it, the **Go to ratings** button opens **Ratings received** (section 10.2.6).
 
-**Expected result:** The operator consults the completed work and the final status of each service.
+**Expected result:** The operator consults the completed work, from the newest to the oldest, and the final status of each service.
 
 **Notes or restrictions:** A reassigned service is one that the administrator moved to another operator; it no longer counts as the operator's own service.
 

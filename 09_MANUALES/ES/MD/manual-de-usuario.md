@@ -36,6 +36,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 4.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se actualizó la pantalla de bienvenida (sección "Quiénes somos" sin cifras, nueva sección de preguntas frecuentes, pie de página sin redes sociales ni enlaces de contacto) y se describió cómo se adapta a celulares y tabletas. Se aclaró que el avance del próximo servicio queda en 0 % hasta que empieza el lavado y que el saludo del panel nombra al lavadero como Lavado Vehicular. | Equipo de desarrollo |
 | 4.2 | 2026-10-19 | Las cuentas de administrador no tienen la opción Desactivar mi cuenta (preguntas frecuentes). | Equipo de desarrollo |
 | 4.3 | 2026-10-19 | Capturas tomadas de nuevo el 19 de octubre de 2026 (fecha en los paneles, calendarios sin días pasados y resumen de la reserva). | Equipo de desarrollo |
+| 4.4 | 2026-10-20 | El historial del cliente y el del operario van de la reserva más reciente a la más antigua y abren el detalle al hacer clic, con los botones **Ir al pago** e **Ir a calificaciones**. Las notificaciones abren su detalle al hacer clic, con un botón para ir al apartado de donde viene el aviso. Con el pago aprobado, la pantalla de pago solo muestra el resumen. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -509,7 +510,7 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 **Pasos para utilizarlo:**
 
 1. Abrir el **Dashboard** o el **Historial** y ubicar la reserva.
-2. Hacer clic en **Ver detalle** para consultar el servicio, el vehículo, la fecha, la hora, el operario asignado y el estado.
+2. En el Dashboard, hacer clic en **Ver detalle** para consultar el servicio, el vehículo, la fecha, la hora, el operario asignado y el estado. En el **Historial**, hacer clic en la tarjeta de la reserva para ver su detalle (sección 10.1.6).
 3. Para cancelar, hacer clic en **Cancelar reserva** en la tarjeta de la reserva en **Historial** (o en la pantalla **Pagar servicio**).
 4. Leer el mensaje "¿Cancelar reserva?" y hacer clic en **Sí, cancelar**; hacer clic en **Volver** para conservar la reserva.
 
@@ -583,6 +584,7 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 - Mientras un pago está en revisión no se puede reportar otro para la misma reserva; una reserva admite un solo pago aprobado.
 - Si el administrador rechaza el pago, el cliente puede reportarlo de nuevo con un comprobante correcto.
 - Cuando el pago se aprueba, el cliente recibe el aviso de pago confirmado (bandeja y correo), los puntos de fidelización de la reserva ("Ganaste N puntos", solo en la bandeja) y, por cada cupón que esos puntos desbloquean, el aviso "¡Tienes un cupón canjeable!" con su código (bandeja y correo). Si el pago se rechaza o se reembolsa, el cliente recibe un aviso y un correo; un reembolso revierte los puntos ganados por esa reserva.
+- Cuando el pago queda aprobado, la pantalla **Pagar servicio** de esa reserva solo muestra el resumen: desaparecen el método de pago, el código QR, la carga del comprobante y el botón **Ya realicé el pago**, y el cupón usado (si lo hay) ya no se puede quitar.
 - Un cupón se acepta solo si está activo, está dentro de sus fechas y el cliente alcanzó los puntos que exige; se puede canjear una vez por reserva. El sistema responde "Ese cupón no existe.", "Ese cupón no está vigente o todavía no acumulas los puntos necesarios." o "Ya canjeaste este cupón en esta reserva." Un canje exitoso envía un aviso y un correo de confirmación.
 
 **Tabla 9**
@@ -625,12 +627,13 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 
 **Pasos para utilizarlo:**
 
-1. Hacer clic en **Historial**.
+1. Hacer clic en **Historial**. Las reservas aparecen de la más reciente a la más antigua.
 2. Usar los filtros **Todas**, **Activas**, **Completadas** y **Canceladas**, y las fechas **Desde** y **Hasta**, para acotar la lista.
 3. Usar **Buscar por servicio, vehículo o código** para encontrar una reserva.
 4. En cada tarjeta, revisar el **Tipo de servicio**, el **Vehículo**, el **Estado** y el estado del **Pago**, y usar **Pagar ahora** o **Cancelar reserva** cuando estén disponibles. **Pagar ahora** aparece solo cuando la reserva se puede pagar (estado pagable, sin un pago aprobado y sin uno pendiente o en revisión).
-5. En un servicio completado, hacer clic en **Calificar Servicio**.
-6. Elegir de una a cinco estrellas, escribir un comentario si se desea (máximo 500 caracteres) y hacer clic en **Enviar calificación**.
+5. Hacer clic en la tarjeta para abrir el **Detalle de la reserva** (servicios, fecha y hora, vehículo, total, estado del pago y calificación). El botón **Ir al pago** lleva a la pantalla de pago de esa reserva; no aparece en las reservas canceladas o en las que el cliente no asistió.
+6. En un servicio completado, hacer clic en **Calificar Servicio**.
+7. Elegir de una a cinco estrellas, escribir un comentario si se desea (máximo 500 caracteres) y hacer clic en **Enviar calificación**.
 
 **Resultado esperado:** Aparece el mensaje "¡Gracias por tu calificación!", la tarjeta muestra **Calificado** y el operario que realizó el servicio puede ver la calificación.
 
@@ -663,7 +666,7 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 1. Hacer clic en **Notificaciones**. El encabezado muestra cuántas notificaciones no se han leído.
 2. Usar las pestañas **Todas**, **Recordatorios**, **Promociones**, **Confirmaciones** y **Otras** para filtrar por tipo.
 3. Usar el filtro **Estado de lectura** y las fechas para acotar la lista.
-4. Abrir una notificación para leerla completa; queda marcada como leída.
+4. Hacer clic en una notificación (o en **Ver detalle**) para leerla completa; queda marcada como leída. Si el aviso pertenece a un apartado, el detalle trae un botón para ir allí: **Ir al historial** (reservas, pagos, servicio e informe de inspección) o **Ir al inicio** (bienvenida, puntos y cupones); en el operario, **Ir a servicios asignados**.
 5. Usar **Marcar leído** o **Marcar no leído** en cada notificación, o **Marcar todo como leído**.
 6. Para eliminar una notificación, usar la opción de eliminar y confirmar "¿Eliminar esta notificación?".
 
@@ -844,7 +847,7 @@ El operario recibe la cuenta del administrador del negocio. El operario solo pue
 
 #### 10.2.4 Notificaciones del Operario
 
-Las notificaciones del operario funcionan como las del cliente (sección 10.1.7). Los avisos más frecuentes son un nuevo servicio asignado, un servicio movido a otra hora, un servicio cancelado y un servicio reasignado a otro operario. Estos avisos al personal llegan a la bandeja y como notificación push, nunca por correo. El operario los abre con **Notificaciones** en el menú lateral y usa las pestañas, los filtros y los botones **Marcar leído** y **Marcar todo como leído**.
+Las notificaciones del operario funcionan como las del cliente (sección 10.1.7). Los avisos más frecuentes son un nuevo servicio asignado, un servicio movido a otra hora, un servicio cancelado y un servicio reasignado a otro operario. Estos avisos al personal llegan a la bandeja y como notificación push, nunca por correo. El operario los abre con **Notificaciones** en el menú lateral y usa las pestañas, los filtros y los botones **Marcar leído** y **Marcar todo como leído**. Al hacer clic en uno de estos avisos se abre su detalle con el botón **Ir a servicios asignados**.
 
 **Figura 29**
 
@@ -869,8 +872,9 @@ Las notificaciones del operario funcionan como las del cliente (sección 10.1.7)
 3. Usar las pestañas **Todos**, **Finalizados**, **Cancelados** y **Reasignados** y el filtro **Todos los servicios**.
 4. Usar el cuadro de búsqueda para encontrar un servicio por código, placa, cliente o vehículo.
 5. Hacer clic en **Limpiar** para quitar los filtros.
+6. Hacer clic en un servicio para ver su detalle. Si el cliente lo calificó, el botón **Ir a calificaciones** lleva a **Calificaciones recibidas** (sección 10.2.6).
 
-**Resultado esperado:** El operario consulta el trabajo realizado y el estado final de cada servicio.
+**Resultado esperado:** El operario consulta el trabajo realizado, del más reciente al más antiguo, y el estado final de cada servicio.
 
 **Observaciones o restricciones:** Un servicio reasignado es uno que el administrador pasó a otro operario; deja de contar como servicio propio del operario.
 

@@ -6,7 +6,7 @@ Vehicle Washing Management System (Vehicle Washing)
 
 Requirements, Configuration, Deployment With Docker, SQL Server Database, and Service Verification
 
-Brayan Estiven Patiño Cabrera (Project Leader), Juan Camilo Guilombo Osorio (Frontend Leader), and Merari Urbano (Backend Leader)
+Brayan Estiven Patiño Cabrera (Project Leader), Juan Camilo Guilombo Osorio (Frontend Leader), and Merari Urbano Quintero (Backend Leader)
 
 Technologist in Software Analysis and Development (ADSO), Servicio Nacional de Aprendizaje (SENA), Training Center: Industria
 
@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 17, 2026
+October 20, 2026
 
-Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.1
+Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.3
 
 ## Version Control
 
@@ -34,6 +34,7 @@ Table 1 records the change history of this document. Each time the installation 
 | 4.0 | 2026-10-16 | Review against the code of October 16, 2026. The figures changed from placeholders to real screenshots of the installation. Updated: 57 tables in the nine schemas (checked with the query in section 11.5), account lockout after failed attempts, the payment-service health endpoint that now checks the database, a reference to the Deployment Document for the Azure server and the APK, and Annex B items that were resolved. | Development team |
 | 4.1 | 2026-10-17 | Review against the code of October 17, 2026. Added the optional *EXPO_PUBLIC_WEB_URL* variable of the mobile app (section 10.5) and the native dependencies *expo-image-picker* and *expo-image-manipulator*, which require *npm install* and a new APK (section 13.2). | Development team |
 | 4.2 | 2026-10-19 | Continuous integration with GitHub Actions: the scope was updated and it was removed from Annex B. | Development team |
+| 4.3 | 2026-10-20 | Review against the code of October 20, 2026: the *notification.notification_type* catalog has 24 rows (migrations 031 and 038 added the alert for a booking without an operator and the new app version notice). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -574,7 +575,7 @@ SELECT payment_status_id, code FROM payment.payment_status WHERE payment_status_
 | payment.payment_status | 5 rows; identifier 3 corresponds to APPROVED. |
 | payment.payment_method_type | 4 rows: EFECTIVO, NEQUI, DAVIPLATA, and TRANSFERENCIA. |
 | payment.loyalty_movement_type | 5 rows: EARNED, REDEEMED, EXPIRED, ADJUSTED, and REVERSED. |
-| notification.notification_type | 22 rows. |
+| notification.notification_type | 24 rows. |
 | security.permission | The permission catalog loaded by changelog 026. |
 
 *Note.* If a catalog table is empty, the service that owns it has not started yet or its seed changeset did not run.
