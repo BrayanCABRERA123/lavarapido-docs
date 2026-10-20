@@ -4,6 +4,19 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-10-20 — Revisión completa contra el código y diagramas sin cruces
+
+**Contenido** (español e inglés)
+
+- Se quitó el cambio de rol de una cuenta, que se retiró del backend, la web y la app: el rol se elige al crear la cuenta. Ajustes en 01 SRS 7.6 (RF-028, CU27), 06 Pruebas (CP-42), 09 Manuales técnico 4.4 y de administrador 4.4 y en los diagramas de 02 y 04.
+- El cliente solo cancela, con una confirmación y sin motivo; la reprogramación la hace el administrador (RF-007, CU07, CU29, actividades y estados).
+- 01 SRS 7.6: tipos de notificación, eventos que se publican y los que solo quedan en la bitácora, estados reales de la ejecución y despliegue en Azure.
+- 02 Análisis 2.3 y 04 Diseño 1.4: secuencias, estados y modelo de datos corregidos contra el código; las figuras de servicios y puertos muestran las clases ordenadas y las dependencias en una lista.
+- 03 Propuesta 1.3, 05 Artefactos, 07 Procedimiento 2.3 y Despliegue 1.4, 08 Acciones 2.4, 09 Manual de instalación 4.3 y de usuario 4.4, 10 Artículos y 11 Evidencias: cifras, fechas y textos al día.
+- Diagramas: todos se dibujan con líneas rectas y codos de 90°; donde dos líneas no pueden dejar de cruzarse llevan un puente. Los casos de uso tienen la figura del actor y los óvalos alineados, y las actividades usan los símbolos UML de inicio y fin. La arquitectura y los estados de la reserva del manual técnico y de los artículos dejaron de ser imágenes SVG y pasaron a diagramas que se mantienen con el resto.
+- Capturas de la lista de usuarios tomadas de nuevo el 20 de octubre (01, 02, 04 y manual de administrador).
+- PDF y Word regenerados para todos los documentos.
+
 ## 2026-10-19 — Despliegue, integración continua, casos de uso y pruebas del día
 
 **Contenido** (español e inglés)
