@@ -6,7 +6,7 @@ Vehicle Washing Management System (Vehicle Washing)
 
 Management Procedure, Action Register, Root Cause Analysis, Follow-Up, and Lessons Learned
 
-Brayan Estiven Patiño Cabrera (Project Leader), Juan Camilo Guilombo Osorio (Frontend Leader), and Merari Urbano (Backend Leader)
+Brayan Estiven Patiño Cabrera (Project Leader), Juan Camilo Guilombo Osorio (Frontend Leader), and Merari Urbano Quintero (Backend Leader)
 
 Technologist in Software Analysis and Development (ADSO), Servicio Nacional de Aprendizaje (SENA), Training Center: Industria
 
@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 17, 2026
+October 20, 2026
 
-Document Type: Register of Corrective, Preventive, and Improvement Actions (Development Team and Instructor) · Version 2.1
+Document Type: Register of Corrective, Preventive, and Improvement Actions (Development Team and Instructor) · Version 2.4
 
 ## Version Control
 
@@ -33,6 +33,7 @@ Table 1 records the change history of this document. The action register (sectio
 | 2.1 | 2026-10-17 | Review against the code of October 17, 2026. Corrective actions AC-40 to AC-43 were closed (expired session notice when logging out, screens overflowing on phones, squashed filter inputs in the app, and service progress before it started), preventive action AP-15 was added (responsive design check before merging), and improvements AM-07 (inspection report in the mobile app) and AM-08 (frequently asked questions on the home page) were closed. | Development team |
 | 2.2 | 2026-10-19 | Preventive action AP-01 was closed with continuous integration in GitHub Actions in the 10 repositories. | Development team |
 | 2.3 | 2026-10-19 | Test indicator with the run of October 19 (655 automated, 19 end-to-end, and 42 functional cases). | Development team |
+| 2.4 | 2026-10-20 | Review against the code of October 20, 2026: the register is still current (AM-03, rescheduling from the web and the app, and AM-12, the pause and issue states, remain open); the backend leader's full name was completed. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -202,7 +203,7 @@ An action is closed only when its closure criterion is met and there is verifiab
 | Role | Person | Responsibility |
 |---|---|---|
 | Project leader | Brayan Estiven Patiño Cabrera | Approves priorities, accepts risks, verifies closure, and maintains this document. |
-| Backend leader | Merari Urbano | Responsible for the actions of services, database, and infrastructure. |
+| Backend leader | Merari Urbano Quintero | Responsible for the actions of services, database, and infrastructure. |
 | Frontend leader | Juan Camilo Guilombo Osorio | Responsible for the actions of the web and mobile applications. |
 | Author of each pull request | Any team member | Updates the affected documentation in the same pull request. |
 | Instructor | Karol Daniela Correa | Source of remarks; reviews the document at the deliveries. |
