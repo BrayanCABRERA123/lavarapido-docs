@@ -8,7 +8,7 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 2.2, 19 de octubre de 2026
+Versión 2.3, 20 de octubre de 2026
 
 ---
 
@@ -21,7 +21,7 @@ Este documento muestra cómo se comporta LavaRápido cuando alguien lo usa: qué
 3. **Diagramas de actividades** de los procesos de negocio.
 4. **Diagramas de estados** de las entidades que cambian de estado (reserva, pago, ejecución del servicio, promoción e informe de inspección).
 
-El 19 de octubre de 2026 se agregaron los casos de uso CU31 y CU32, la recuperación de la contraseña (sección 2.10) y el ciclo de vida de la cuenta con el cambio de rol (sección 4.6), y las capturas del inventario de pantallas se tomaron de nuevo con datos de demostración. El 17 de octubre de 2026 se agregaron el consentimiento de los documentos legales en el registro (sección 2.1) y el informe de inspección desde la aplicación móvil (sección 2.9). Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol.
+El 20 de octubre de 2026 el contenido se revisó otra vez contra el código: el cliente solo cancela (la reprogramación la hace el administrador), se quitó el cambio de rol de las cuentas, se corrigieron las secuencias y los estados que no coincidían, y los casos de uso y diagramas se dibujaron de nuevo con líneas rectas y sin cruces. El 19 de octubre de 2026 se agregaron los casos de uso CU31 y CU32, la recuperación de la contraseña (sección 2.10) y el ciclo de vida de la cuenta (sección 4.6), y las capturas del inventario de pantallas se tomaron de nuevo con datos de demostración. El 17 de octubre de 2026 se agregaron el consentimiento de los documentos legales en el registro (sección 2.1) y el informe de inspección desde la aplicación móvil (sección 2.9). Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol.
 
 La especificación completa de cada requisito y caso de uso (actores, precondición, flujo normal, flujos alternos y postcondición) está en el *Informe de especificación de requisitos*, secciones 5 y 7.3; aquí se citan por su identificador (RF-XXX, CUXX).
 
@@ -175,7 +175,7 @@ flowchart LR
     class Administrador,Sistema actor
 ```
 
-*Nota.* `«include»` indica que CU05 siempre ejecuta CU06; `«extend»` indica que CU25 amplía opcionalmente CU12. CU22 aparece como consulta para el operario y como gestión para el administrador, que es quien registra los turnos, las ausencias y la ficha del operario (RF-022, RF-038). El sistema ejecuta CU08 cada vez que se confirma una reserva, y CU32 agrupa los procesos que corren sin que nadie los pida (recordatorios, alertas, avisos y primer administrador). El cliente no registra el informe de inspección (CU30): lo consulta por el enlace que le comparte el administrador.
+*Nota.* `«include»` indica que CU05 siempre ejecuta CU06; `«extend»` indica que CU25 amplía opcionalmente CU12. CU22 aparece como consulta para el operario y como gestión para el administrador, que es quien registra los turnos, las ausencias y la ficha del operario (RF-022, RF-038). El sistema ejecuta CU08 cada vez que se confirma una reserva, y CU32 agrupa los procesos que corren sin que nadie los pida (recordatorios, alertas, avisos y primer administrador). El cliente no registra el informe de inspección (CU30): lo consulta por el enlace que le comparte el administrador. En CU07 el cliente cancela desde el historial o la pantalla de pago; la nueva fecha u hora la fija el administrador desde Reservas (CU29), porque ni la web ni la app tienen una pantalla de reprogramación para el cliente. En CU27 el rol se elige al crear la cuenta; la lista de usuarios no lo cambia.
 
 ### 1.2 Matriz de Actores y Casos de Uso
 
@@ -267,12 +267,14 @@ sequenceDiagram
         N->>S: GET /internal/v1/users/{id}/contact (X-Internal-Key)
         N->>N: Notificación BOOKING_CONFIRMED + recordatorios (24 h, 1 h)
         N-->>C: bandeja + push + correo
+    else el vehículo ya tiene otra reserva a esa hora
+        B-->>W: 409 VEHICLE_ALREADY_BOOKED
     else horario ocupado
-        B-->>W: 409 SLOT_UNAVAILABLE + hasta 5 horas alternativas
+        B-->>W: 409 SLOT_UNAVAILABLE + motivo + hasta 5 horas alternativas
     end
 ```
 
-*Fuente:* `booking-service` (`BookingService.confirmNew`), `operations-service` (`AvailableOperatorsController`), contratos en `07-api/contracts/openapi/`.
+*Fuente:* `booking-service` (`BookingService.create`, `Booking.confirmNew`, `AvailabilityPolicy`), `operations-service` (`AvailableOperatorsController`), contratos en `07-api/contracts/openapi/`.
 
 ### 2.3 Recordatorios y alerta de reserva sin operario (ADR-011)
 
@@ -395,11 +397,11 @@ sequenceDiagram
     W->>P: POST /api/v1/payments
     P->>B: GET /bookings/{id} (JWT cliente)
     B-->>P: estado, total, dueño
-    alt reserva pagable y sin pago abierto/aprobado
-        P->>DB: pago PENDING (monto = total de la reserva) + comprobante → IN_REVIEW
+    alt reserva pagable, sin pago abierto/aprobado y referencia no usada en otra reserva
+        P->>DB: pago PENDING (monto = total de la reserva menos los cupones aplicados) + comprobante → IN_REVIEW
         P-->>W: 201 pago IN_REVIEW
-    else no pagable / ya reportado / ya aprobado
-        P-->>W: 400 BOOKING_NOT_PAYABLE | 409 PAYMENT_ALREADY_REPORTED | 409 PAYMENT_ALREADY_APPROVED
+    else no pagable / ya reportado / ya aprobado / referencia repetida
+        P-->>W: 409 BOOKING_NOT_PAYABLE | PAYMENT_ALREADY_REPORTED | PAYMENT_ALREADY_APPROVED | TRANSACTION_REFERENCE_REUSED
     end
 
     A->>W: Pagos → Verificar
@@ -409,18 +411,24 @@ sequenceDiagram
     alt aprobar
         W->>P: POST /api/v1/admin/payments/{id}/approve
         P->>DB: APPROVED, approved_by, processed_at (índice único: uno por reserva)
+        P->>DB: loyalty_transaction EARNED (puntos de las líneas de la reserva)
+        P-)P: payment.confirmed y payment.loyalty_points_earned a RabbitMQ
     else rechazar
         W->>P: POST /api/v1/admin/payments/{id}/reject {motivo}
         P->>DB: REJECTED + motivo (el cliente puede reportar de nuevo)
+        P-)P: payment.rejected a RabbitMQ
     end
 
     A->>W: Pagos → Registro manual (efectivo en el local)
     W->>P: POST /api/v1/admin/payments {bookingId, paymentAccountId}
     P->>B: GET /admin/bookings/{id}
-    P->>DB: pago APPROVED directamente (monto = total de la reserva)
+    P->>DB: pago APPROVED directamente (monto = valor pendiente) + puntos EARNED
+    A->>W: Pagos → Reembolsar un pago aprobado
+    W->>P: POST /api/v1/admin/payments/{id}/refund
+    P->>DB: REFUNDED + loyalty_transaction REVERSED
 ```
 
-*Fuente:* `payment-service` (`PaymentApplicationService.ReportPaymentAsync / ApproveAsync / RejectAsync / RegisterManualAsync`, agregado `Payment`, ADR-008, ADR-013).
+*Fuente:* `payment-service` (`PaymentCommandService.ReportAsync / ApproveAsync / RejectAsync / RegisterInPersonAsync / RefundAsync`, `BookingPaymentGuard`, `LoyaltyRewardService`, agregado `Payment`, ADR-008, ADR-013). notification-service convierte cada evento `payment.*` en un aviso para el cliente.
 
 ### 2.6 Canje de cupón y puntos de fidelización (RF-024, RF-025, RF-026)
 
@@ -437,12 +445,12 @@ sequenceDiagram
     participant N as notification-service
 
     A->>W: Gestión → Promociones → Crear
-    W->>P: POST /api/v1/admin/promotions {código, vigencia, % descuento 1-100, puntos requeridos}
+    W->>P: POST /api/v1/admin/promotions {código, vigencia, tipo PERCENT o FIXED y valor, puntos requeridos}
     P->>DB: INSERT promotion
     P-->>W: 201 promoción
 
     Note over C,P: --- Acreditación de puntos (al aprobar un pago, flujo 2.5) ---
-    P->>DB: INSERT loyalty_transaction (+puntos del servicio pagado, sequence_no único por cliente)
+    P->>DB: INSERT loyalty_transaction EARNED (+puntos de las líneas de la reserva, sequence_no único por cliente)
     Note over P: El saldo nunca se guarda aparte: se calcula siempre<br/>desde la última fila del libro de movimientos (INV-LOY-001)
 
     C->>W: Dashboard → ve sus puntos y promociones desbloqueadas
@@ -459,12 +467,14 @@ sequenceDiagram
     P->>DB: busca la promoción por código
     alt vigente, desbloqueada, no canjeada antes en esta reserva y dentro de los límites de uso
         P->>P: Promotion.Redeem(...) calcula el descuento sobre el subtotal (nunca lo supera)
-        P->>DB: INSERT promotion_redemption (consume un uso, así que dos canjes simultáneos chocan entre sí)
+        P->>DB: INSERT booking_promotion (applied_amount)
         P-)MQ: PromotionRedeemed (payment.promotion_redeemed)
         MQ-)N: notifica el canje en la bandeja y por correo
         P-->>W: 200 {descuento aplicado, nuevo total a pagar}
-    else vencida / no desbloqueada / ya canjeada / sin cupos
-        P-->>W: 409 PromotionNotRedeemable | PromotionAlreadyRedeemed | PromotionExhausted | PromotionCustomerLimitReached
+    else la reserva ya tiene un pago reportado o aprobado
+        P-->>W: 409 PAYMENT_ALREADY_REPORTED | PAYMENT_ALREADY_APPROVED
+    else vencida / no desbloqueada / ya canjeada / compra mínima / sin cupos
+        P-->>W: 400 PROMOTION_NOT_REDEEMABLE | PROMOTION_ALREADY_REDEEMED | PROMOTION_MIN_PURCHASE_NOT_MET | PROMOTION_EXHAUSTED | PROMOTION_CUSTOMER_LIMIT_REACHED
     end
 ```
 
@@ -490,7 +500,7 @@ sequenceDiagram
         S->>DB: reemplaza exactamente esos permisos para el rol (transacción)
         S-->>W: 200 permisos actualizados del rol
     else algún id no existe en el catálogo
-        S-->>W: 400 UnknownPermissionException (permiso inexistente, no se guarda nada)
+        S-->>W: 400 UNKNOWN_PERMISSION (permiso inexistente, no se guarda nada)
     end
     Note over S: No se pueden crear ni borrar roles (ADR-010).<br/>Esta matriz es informativa: la autorización real sigue viniendo<br/>del claim roles del JWT, no de esta tabla (decisión abierta, sección 11.3 del SRS)
 ```
@@ -518,6 +528,8 @@ sequenceDiagram
     else contraseña incorrecta
         S->>DB: suma el fallo (ventana de 15 min) y al quinto pone locked_until en ahora + 15 min
         S-->>W: 401 INVALID_CREDENTIALS (o 423 si este fallo la bloqueó)
+    else contraseña correcta y cuenta desactivada
+        S-->>W: 403 ACCOUNT_DISABLED
     else contraseña correcta
         S->>DB: borra el conteo de fallos, registra la sesión
         S-->>W: 200 JWT (1 h)
@@ -546,7 +558,7 @@ sequenceDiagram
     OP->>B: GET /admin/bookings/{id} (JWT admin)
     alt reserva larga y Confirmada o En proceso
         OP->>DB: informe con 5 fases PENDING y un código público aleatorio
-        OP-->>W: 201 informe
+        OP-->>W: 200 informe (si ya existía, devuelve el mismo)
     else corta, cancelada o completada
         OP-->>W: 409 INSPECTION_NOT_EDITABLE
     end
@@ -688,14 +700,15 @@ flowchart TD
     confirm --> notif["Notificar confirmación, programar recordatorios 24h/1h<br/>y asignar operario (sección 3.3)"]
     notif --> stop1([Fin: reserva Confirmada])
 
-    stop1 -.-> manage{¿El cliente quiere<br/>modificar o cancelar?}
-    manage -->|Reprogramar| state{¿Reserva Programada<br/>o Confirmada?}
+    stop1 -.-> manage{¿Hay un cambio<br/>antes de iniciar?}
+    manage -->|El cliente cancela| state{¿Reserva Programada<br/>o Confirmada?}
     state -->|No - en proceso/terminada| block[Bloquear la acción con mensaje explicativo]
     block --> stop2([Fin])
-    state -->|Sí| date
-    manage -->|Cancelar| reason[Pedir motivo del catálogo de motivos]
-    reason --> free[Liberar la bahía, marcar Cancelada]
+    state -->|Sí| ask[Confirmar en el diálogo, sin pedir motivo]
+    ask --> free[Liberar la bahía, marcar Cancelada]
     free --> stop3([Fin])
+    manage -->|El administrador reprograma| resched["Nueva fecha y hora desde Reservas (CU29)"]
+    resched --> check
 ```
 
 ### 3.3 Asignación de operario y ejecución del servicio (RF-008, RF-009, RF-010, RF-011, RF-012b)
@@ -749,7 +762,7 @@ flowchart TD
     cash --> register[Admin registra el pago manualmente]
     register --> approved1["Pago → Aprobado directamente"]
     approved1 --> points1["Acreditar puntos de fidelización (RF-026)"]
-    points1 --> stop3([Fin])
+    points1 --> lockui
 
     stop2 -.-> review[Admin abre pagos pendientes]
     review --> compare{¿Valor declarado =<br/>valor a pagar y comprobante legible?}
@@ -758,7 +771,8 @@ flowchart TD
     compare -->|Sí| approve["Pago → Aprobado"]
     approve --> points2["Acreditar puntos de fidelización (RF-026)"]
     points2 --> notifyc[Notificar al cliente]
-    notifyc --> stop5([Fin])
+    notifyc --> lockui[La pantalla de pago solo muestra el resumen<br/>sin método, QR ni comprobante]
+    lockui --> stop5([Fin])
 ```
 
 ### 3.5 Canjear un cupón de fidelización (RF-024, RF-025, RF-026)
@@ -807,23 +821,23 @@ stateDiagram-v2
     [*] --> CONFIRMED : crear (se asigna bahía libre de inmediato, RF-006)
     SCHEDULED --> CONFIRMED : confirmar (necesita bahía)
     SCHEDULED --> CANCELLED : cancelar
-    CONFIRMED --> CONFIRMED : reprogramar (nueva hora/bahía, se conservan precios)
+    CONFIRMED --> CONFIRMED : reprogramar (admin, nueva hora/bahía, se conservan precios)
     CONFIRMED --> IN_PROGRESS : iniciar
     CONFIRMED --> NO_SHOW : el cliente no llegó
-    CONFIRMED --> CANCELLED : cancelar (cliente o admin, con motivo)
+    CONFIRMED --> CANCELLED : cancelar (cliente antes del inicio o admin)
     IN_PROGRESS --> COMPLETED : finalizar
     COMPLETED --> [*]
     CANCELLED --> [*]
     NO_SHOW --> [*]
 ```
 
-*Fuente:* `booking-service`, `Booking.moveTo`, `Booking.cancel`, `BookingStatus`. Solo `SCHEDULED` y `CONFIRMED` se pueden reprogramar o cancelar (RF-007); `SCHEDULED` existe en el modelo pero el flujo actual siempre crea la reserva directo en `CONFIRMED`.
+*Fuente:* `booking-service`, `Booking.moveTo`, `Booking.cancel`, `BookingStatus`. Solo `SCHEDULED` y `CONFIRMED` se pueden reprogramar o cancelar (RF-007). El cliente solo cancela, antes de la hora de inicio y sin escribir motivo (la reserva guarda `CUSTOMER_REQUEST`); el administrador reprograma (CU29) y puede elegir el motivo de la cancelación. `SCHEDULED` existe en el modelo pero el flujo actual siempre crea la reserva directo en `CONFIRMED`.
 
 ### 4.2 Ciclo de vida del pago (RF-013b, RF-014, ADR-008)
 
 ```mermaid
 stateDiagram-v2
-    [*] --> PENDING : crear (monto = total de la reserva)
+    [*] --> PENDING : crear (monto = total de la reserva menos cupones)
     PENDING --> PENDING : adjuntar comprobante
     PENDING --> IN_REVIEW : enviar a revisión (requiere al menos un comprobante)
     IN_REVIEW --> APPROVED : aprobar (admin)
@@ -834,39 +848,34 @@ stateDiagram-v2
     APPROVED --> [*]
 ```
 
-*Fuente:* `payment-service`, agregado `Payment`. Una reserva admite un solo pago aprobado y un solo pago abierto a la vez; después de `REJECTED` el cliente puede reportar un pago nuevo.
+*Fuente:* `payment-service`, agregado `Payment`. Una reserva admite un solo pago aprobado y un solo pago abierto a la vez; después de `REJECTED` el cliente puede reportar un pago nuevo. El pago del cliente pasa de `PENDING` a `IN_REVIEW` en la misma petición; el pago en efectivo que registra el administrador queda `APPROVED` de una vez.
 
 ### 4.3 Ciclo de vida de la ejecución del servicio (RF-012b)
 
 ```mermaid
 stateDiagram-v2
-    [*] --> PENDING : asignar operario (RF-009)
-    PENDING --> IN_PROGRESS : iniciar servicio (RF-012b)
-    IN_PROGRESS --> PAUSED : pausar
-    PAUSED --> IN_PROGRESS : reanudar
+    [*] --> PENDING : asignar operario (automático o admin, RF-008, RF-009)
+    PENDING --> PENDING : reasignar (admin, antes de iniciar)
+    PENDING --> IN_PROGRESS : iniciar servicio (desde 15 min antes, RF-012b)
     IN_PROGRESS --> COMPLETED : finalizar servicio (RF-012b)
-    IN_PROGRESS --> WITH_ISSUE : registrar incidente
+    COMPLETED --> COMPLETED : calificar 1 a 5 (cliente, una vez)
     COMPLETED --> [*]
-    WITH_ISSUE --> [*]
 ```
 
-*Fuente:* `operations-service`. `COMPLETED` habilita la calificación del cliente (RF-012).
+*Fuente:* `operations-service` (`ServiceExecution`, `StartPolicy`). `COMPLETED` habilita la calificación del cliente (RF-012). `PAUSED` y `WITH_ISSUE` existen en el catálogo `execution.execution_status`, pero ningún caso de uso los usa hoy.
 
 ### 4.4 Ciclo de vida de una promoción (RF-024)
 
 ```mermaid
 stateDiagram-v2
-    [*] --> ACTIVA : crear (código, vigencia, % descuento, puntos requeridos)
-    ACTIVA --> INACTIVA : desactivar (admin)
-    INACTIVA --> ACTIVA : reactivar (admin)
-    ACTIVA --> VENCIDA : fecha actual > fecha de fin
-    INACTIVA --> VENCIDA : fecha actual > fecha de fin
-    VENCIDA --> [*]
-    ACTIVA --> [*] : eliminar
-    INACTIVA --> [*] : eliminar
+    [*] --> ACTIVA : crear (código, vigencia, descuento, puntos requeridos)
+    ACTIVA --> PAUSADA : pausar (admin)
+    PAUSADA --> ACTIVA : reanudar (admin)
+    ACTIVA --> [*] : eliminar (borrado lógico)
+    PAUSADA --> [*] : eliminar (borrado lógico)
 ```
 
-*Fuente:* `payment-service`, `Promotion.IsAvailableOn` (activa y dentro de vigencia). Una promoción `INACTIVA` o `VENCIDA` no se puede canjear (RF-024, RN-PROMO-01).
+*Fuente:* `payment-service`, `Promotion.SetActive`, `Promotion.StatusFor`, `Promotion.IsAvailableOn`. Lo único que se guarda es si está activa o pausada; la pantalla del administrador muestra "programada" mientras no llega la fecha de inicio. Solo se puede canjear una promoción activa y dentro de su vigencia (RF-024, RN-PROMO-01): pasada la fecha de fin ya no se ofrece ni se canjea, aunque no tiene un estado "vencida" guardado.
 
 ### 4.5 Informe de inspección y sus fases (RF-036)
 
@@ -877,7 +886,7 @@ stateDiagram-v2
     BORRADOR --> PUBLICADO : publicar (el enlace empieza a mostrarlo)
     PUBLICADO --> PUBLICADO : editar mientras la reserva siga Confirmada o En proceso
     PUBLICADO --> PUBLICADO : compartir (notifica al cliente)
-    PUBLICADO --> [*] : la reserva se completa (solo lectura)
+    PUBLICADO --> [*] : la reserva se completa (fases y hallazgos de solo lectura)
 
     state "Cada fase" as fase {
         [*] --> PENDING
@@ -901,19 +910,18 @@ stateDiagram-v2
         BLOQUEADA --> DESBLOQUEADA : pasan 15 min o recupera la contraseña
         DESBLOQUEADA --> DESBLOQUEADA : ingreso correcto (borra el conteo)
     }
-    ACTIVA --> ACTIVA : el administrador cambia su rol (cierra sus sesiones)
     ACTIVA --> INACTIVA : el administrador la desactiva (no si es administrador)
     ACTIVA --> INACTIVA : el usuario cierra su cuenta con la contraseña (no si es administrador)
     INACTIVA --> ACTIVA : el administrador la activa
 ```
 
-*Fuente:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus` y `changeRole`, `AccountDeactivationService`). Una cuenta bloqueada responde 423 aun con la contraseña correcta; una inactiva responde 403 después de validar la contraseña. Cada cuenta tiene un solo rol y nadie cambia el suyo propio.
+*Fuente:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus`, `AccountDeactivationService`). Una cuenta bloqueada responde 423 aun con la contraseña correcta; una inactiva responde 403 después de validar la contraseña. Ninguna cuenta de administrador se puede desactivar (403 `ADMIN_CANNOT_BE_DISABLED`) y un administrador no puede desactivar ni cerrar su propia cuenta (403 `CANNOT_DISABLE_OWN_ACCOUNT`). Cada cuenta tiene un solo rol, fijado al crearla: no hay cambio de rol.
 
 ---
 
 ## 5. Inventario de Pantallas (mockup)
 
-Pantalla por pantalla y por rol, incluyendo los modales de crear/editar de cada módulo. Todas las capturas están en `capturas/`, en esta misma carpeta.
+Pantalla por pantalla y por rol, incluyendo los modales de crear/editar de cada módulo. Todas las capturas están en `capturas/`, en esta misma carpeta. La captura de Gestión → Usuarios se tomó de nuevo el 20 de octubre de 2026: la tabla solo muestra el tipo de usuario y tiene los filtros Habilitados e Inhabilitados. Desde el 20 de octubre, al hacer clic en una notificación o en una reserva del historial se abre su detalle, con un botón para ir al apartado correspondiente (por ejemplo, **Ir al pago**).
 
 ### 5.1 Pantallas comunes (sin sesión)
 
