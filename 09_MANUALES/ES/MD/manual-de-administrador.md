@@ -35,6 +35,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se agregó el informe de inspección desde la aplicación móvil (sección 12.5): se abre desde el detalle de la reserva, toma las fotos con la cámara o la galería, las reduce en el celular antes de subirlas y comparte el enlace con el menú del teléfono. | Equipo de desarrollo |
 | 4.2 | 2026-10-19 | El cambio de tipo de usuario se hace desde Gestión > Usuarios (sección 10.3); una cuenta de administrador no se puede desactivar (sección 9.4). | Equipo de desarrollo |
 | 4.3 | 2026-10-19 | Capturas tomadas de nuevo el 19 de octubre de 2026 con datos de demostración, y nueva Figura 5 de datos del negocio por completar (sección 11.1). | Equipo de desarrollo |
+| 4.4 | 2026-10-20 | Se retiró el cambio de tipo de usuario desde Gestión > Usuarios, que el equipo revirtió en la web, la app y el servidor: el rol se elige al crear la cuenta (sección 10.3). Se quitó el filtro Registrados de la lista de usuarios (sección 9.2). Las notificaciones abren su detalle con un botón para ir a Reservas o al inicio (sección 12.7). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -235,7 +236,7 @@ El sistema define tres roles fijos: Administrador (código ADMIN), Operario (OPE
 | Gestiona reservas, operarios, horarios, bahías, servicios, precios, puntos, promociones y cuentas de pago. | Trabaja solo desde el panel con una cuenta individual; el acceso directo a la base de datos corresponde al administrador de TI. |
 | Revisa, aprueba, rechaza o reembolsa pagos y registra pagos manuales. | Una reserva admite un solo pago aprobado; un pago en revisión no se puede duplicar; un reembolso no se puede deshacer. |
 | Ve la información de clientes, vehículos y reservas necesaria para operar. | Debe tratarla conforme a la Ley 1581 de 2012 y a la política de seguridad. |
-| Crea cuentas, cambia su tipo de usuario y las activa o desactiva. | Las cuentas se desactivan, no se borran; una cuenta de administrador no se desactiva y nadie cambia su propio tipo de usuario. |
+| Crea cuentas con su tipo de usuario y las activa o desactiva. | Las cuentas se desactivan, no se borran; el tipo de usuario no se cambia después de crear la cuenta; una cuenta de administrador no se desactiva y nadie desactiva la suya. |
 | Consulta los roles y marca los permisos de cada uno. | No puede crear ni eliminar roles; la matriz de permisos todavía no cambia el acceso real. |
 
 *Nota.* Todas las rutas bajo */admin* requieren el rol ADMIN; una persona con otro rol que intente abrirlas vuelve a la pantalla de inicio de su propio rol.
@@ -301,7 +302,7 @@ Los datos iniciales cargan los tres roles, pero ninguna cuenta de usuario. Cuand
 
 En cualquier otro entorno, como el servidor público, la primera cuenta de administrador la crea security-service al arrancar (*AdministratorBootstrapRunner*). El administrador de TI escribe *ADMIN_EMAIL* y *ADMIN_PASSWORD* (y, si quiere, *ADMIN_FIRST_NAME* y *ADMIN_LAST_NAME*) en el archivo *.env.production* del servidor y reinicia el servicio. Si todavía no existe ninguna cuenta con el rol ADMIN, el servicio la crea con las mismas reglas de cualquier cuenta (política de contraseñas, correo y documento únicos) y el registro muestra *First administrator created*. Si ya existe un administrador, las variables se ignoran y se pueden borrar del archivo. La contraseña se escribe directamente en el servidor y nunca se guarda en un repositorio.
 
-Para convertir en administrador una cuenta que ya existe (por ejemplo, una registrada desde la pantalla pública), otro administrador le cambia el tipo de usuario desde **Gestión > Usuarios** (sección 10.3). Solo si todavía no hay ningún administrador con acceso, el rol se asigna con SQL, porque la contraseña ya la generó la aplicación:
+Un administrador nuevo se crea normalmente desde **Gestión > Usuarios > Crear usuario** con el rol Administrador (sección 9.3). La web y la app no permiten cambiar el tipo de usuario de una cuenta que ya existe (sección 10.3); si hay que convertir en administrador una cuenta ya creada (por ejemplo, una registrada desde la pantalla pública), el administrador de TI asigna el rol con SQL, porque la contraseña ya la generó la aplicación:
 
 1. Verificar que la persona ya tiene su cuenta (si no, que se registre desde la pantalla pública).
 2. Consultar los identificadores de la cuenta y del rol ADMIN.
@@ -334,8 +335,8 @@ Una cuenta del sistema está formada por una persona (*security.person*: número
 ### 9.2 Consulta de Usuarios
 
 1. En el menú lateral, hacer clic en **Gestión** y abrir la pestaña **Usuarios** (ruta */admin/management*).
-2. Revisar la tabla con **Nombres**, **Correo**, **Tipo de usuario**, **Fecha de registro**, **Último acceso** y **Estado**. El tipo de usuario se cambia en la misma tabla (sección 10.3).
-3. Usar los filtros **Habilitados**, **Registrados** (todas las cuentas) e **Inhabilitados** y el cuadro de búsqueda para encontrar una cuenta; **Limpiar filtros** los quita.
+2. Revisar la tabla con **Nombres**, **Correo**, **Tipo de usuario**, **Fecha de registro**, **Último acceso** y **Estado**. El tipo de usuario solo se muestra; no se cambia desde la tabla (sección 10.3).
+3. Usar los filtros **Habilitados** e **Inhabilitados** y el cuadro de búsqueda (nombre, correo o tipo de usuario) para encontrar una cuenta. Si la búsqueda no encuentra nada, **Limpiar filtros** vuelve a mostrar las cuentas habilitadas.
 
 **Figura 3**
 
@@ -367,7 +368,7 @@ Los operarios también se pueden crear desde **Operarios > Nuevo operario** (sec
 3. Confirmar el mensaje que advierte que la persona ya no podrá iniciar sesión.
 4. Verificar que el estado cambie a **Inhabilitado** y, si la persona es un operario con servicios pendientes, reasignarlos (sección 12.4).
 
-Una cuenta de administrador no se puede desactivar: el botón aparece bloqueado con el mensaje "Una cuenta de administrador no se puede desactivar. Cambia primero su tipo de usuario." Para retirar a un administrador, primero se le cambia el tipo de usuario (sección 10.3) y luego se desactiva. Tampoco se puede desactivar la propia cuenta, ni desde esta tabla ni desde **Perfil**.
+Una cuenta de administrador no se puede desactivar: el botón aparece bloqueado con el mensaje "Una cuenta de administrador no se puede desactivar." Como el tipo de usuario no se cambia desde el panel (sección 10.3), retirar a un administrador requiere que el administrador de TI le quite ese rol en la base de datos y lo anote en la bitácora del equipo. Tampoco se puede desactivar la propia cuenta, ni desde esta tabla ni desde **Perfil**.
 
 ### 9.5 Restablecimiento de la Contraseña
 
@@ -426,17 +427,11 @@ El servidor aplica solo los tres roles fijos ADMIN, OPERATOR y CLIENT (Tabla 7).
 
 Un rol válido no basta: cada servicio también verifica la propiedad del recurso. Un operario no puede iniciar ni finalizar un servicio asignado a otro operario, y un cliente solo llega a sus propias reservas, vehículos y pagos. Cada servicio valida el token y el rol que exige cada ruta; el gateway solo enruta las solicitudes y no valida tokens (ADR-006). Una solicitud de un rol a un recurso de otro devuelve el error 403.
 
-### 10.3 Cambio del Rol de una Persona
+### 10.3 Rol de una Persona
 
-Cada cuenta tiene un solo tipo de usuario (Cliente, Operario o Administrador), y el nuevo reemplaza al anterior.
+Cada cuenta tiene un solo tipo de usuario (Cliente, Operario o Administrador), que se elige al crearla: Cliente cuando la persona se registra desde la pantalla pública, o el **Rol asignado** de **Crear usuario** (sección 9.3) cuando la crea el administrador. Desde el 20 de octubre de 2026 la web y la app no ofrecen cambiar el tipo de usuario de una cuenta ya creada: la columna **Tipo de usuario** de **Gestión > Usuarios** solo lo muestra, y el servidor no tiene una ruta para cambiarlo.
 
-1. En **Gestión > Usuarios**, ubicar la cuenta.
-2. En la columna **Tipo de usuario**, elegir el nuevo tipo en la lista **Cambiar tipo de usuario**.
-3. Confirmar el mensaje "¿Cambiar el tipo de usuario?", que advierte que se cerrarán las sesiones abiertas de la persona.
-4. Pedir a la persona que inicie sesión de nuevo: entrará al panel de su nuevo rol.
-5. Si el nuevo tipo es Operario, el servicio de operaciones crea su registro de operario la próxima vez que se listen los operarios; asignarle turnos en **Operarios** (sección 12).
-
-La propia cuenta no muestra la lista, sino el tipo de usuario como etiqueta ("No puedes cambiar el tipo de usuario de tu propia cuenta"). Se recomienda registrar quién pidió el cambio y el motivo en la bitácora del equipo.
+Si de verdad una persona necesita otro rol, el administrador de TI lo ajusta en la base de datos (*security.user_role*, con el mismo procedimiento de la sección 8.4), le pide que cierre la sesión e ingrese de nuevo y registra quién pidió el cambio y el motivo en la bitácora del equipo. Si el nuevo rol es Operario, el servicio de operaciones crea su registro de operario la próxima vez que se listen los operarios; luego se le asignan turnos en **Operarios** (sección 12).
 
 ## 11. Configuración del Sistema
 
@@ -678,7 +673,7 @@ El sistema no integra una pasarela de pagos (ADR-008). El cliente paga por fuera
 
 ### 12.7 Notificaciones y Avisos
 
-La opción **Notificaciones** del administrador funciona como la de los demás roles: lista las notificaciones con filtros y permite marcarlas como leídas o eliminarlas. Todo administrador activo recibe avisos al personal en la bandeja y como notificación push (nunca por correo): una nueva reserva confirmada, una reserva movida a otra hora y una reserva cancelada (con el motivo).
+La opción **Notificaciones** del administrador funciona como la de los demás roles: lista las notificaciones con filtros y permite marcarlas como leídas o eliminarlas. Al hacer clic en una notificación se abre su detalle y queda leída; los avisos de reservas traen el botón **Ir a reservas** y el de bienvenida **Ir al inicio**. Todo administrador activo recibe avisos al personal en la bandeja y como notificación push (nunca por correo): una nueva reserva confirmada, una reserva movida a otra hora y una reserva cancelada (con el motivo).
 
 Los avisos se envían con *POST /api/v1/admin/notifications* (rol ADMIN), que acepta solo dos tipos: *SYSTEM_MESSAGE* (aviso libre, solo bandeja y push; disponible solo por la API, porque el panel no tiene una pantalla para ello) e *INSPECTION_REPORT* (enviado desde la pantalla de inspección, también por correo). Cualquier otro tipo se rechaza con 400 *NOTIFICATION_TYPE_NOT_ALLOWED*, para que nadie pueda escribir a mano un aviso que parezca automático (por ejemplo, un falso pago aprobado). El mensaje siempre se guarda en la bandeja del destinatario; la notificación push es adicional (requiere *PUSH_ENABLED=true* y la aplicación móvil) y respeta los interruptores de cada usuario.
 

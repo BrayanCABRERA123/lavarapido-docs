@@ -6,7 +6,7 @@ Sistema de Gestión de Lavado Vehicular (Vehicle Washing)
 
 Procedimiento de Gestión, Registro de Acciones, Análisis de Causa Raíz, Seguimiento y Lecciones Aprendidas
 
-Brayan Estiven Patiño Cabrera (líder de proyecto), Juan Camilo Guilombo Osorio (líder de frontend) y Merari Urbano (líder de backend)
+Brayan Estiven Patiño Cabrera (líder de proyecto), Juan Camilo Guilombo Osorio (líder de frontend) y Merari Urbano Quintero (líder de backend)
 
 Tecnólogo en Análisis y Desarrollo de Software (ADSO), Servicio Nacional de Aprendizaje (SENA), Centro de Formación: Industria
 
@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-17 de octubre de 2026
+20 de octubre de 2026
 
-Tipo de documento: Registro de acciones correctivas, preventivas y de mejoramiento (equipo de desarrollo e instructora) · Versión 2.1
+Tipo de documento: Registro de acciones correctivas, preventivas y de mejoramiento (equipo de desarrollo e instructora) · Versión 2.4
 
 ## Control de Versiones
 
@@ -33,6 +33,7 @@ La Tabla 1 registra el historial de cambios de este documento. El registro de ac
 | 2.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se cerraron las correctivas AC-40 a AC-43 (aviso de sesión expirada al cerrar sesión, pantallas que se salían en el celular, campos de filtro aplastados en la app y avance del servicio antes de empezar), se agregó la preventiva AP-15 (revisión de diseño adaptable antes de fusionar) y se cerraron las mejoras AM-07 (informe de inspección en la app móvil) y AM-08 (preguntas frecuentes en la página de inicio). | Equipo de desarrollo |
 | 2.2 | 2026-10-19 | Se cerró la acción preventiva AP-01 con la integración continua en GitHub Actions de los 10 repositorios. | Equipo de desarrollo |
 | 2.3 | 2026-10-19 | Indicador de pruebas con la ejecución del 19 de octubre (655 automatizadas, 19 de punta a punta y 42 casos funcionales). | Equipo de desarrollo |
+| 2.4 | 2026-10-20 | Revisión contra el código del 20 de octubre de 2026: el registro sigue vigente (AM-03, la reprogramación desde la web y la app, y AM-12, los estados de pausa y novedad, siguen abiertas); se completó el nombre de la líder de backend. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -202,7 +203,7 @@ Una acción solo se cierra cuando se cumple su criterio de cierre y existe evide
 | Rol | Persona | Responsabilidad |
 |---|---|---|
 | Líder de proyecto | Brayan Estiven Patiño Cabrera | Aprueba prioridades, acepta riesgos, verifica el cierre y mantiene este documento. |
-| Líder de backend | Merari Urbano | Responsable de las acciones de servicios, base de datos e infraestructura. |
+| Líder de backend | Merari Urbano Quintero | Responsable de las acciones de servicios, base de datos e infraestructura. |
 | Líder de frontend | Juan Camilo Guilombo Osorio | Responsable de las acciones de las aplicaciones web y móvil. |
 | Autor de cada pull request | Cualquier integrante | Actualiza la documentación afectada en el mismo pull request. |
 | Instructora | Karol Daniela Correa | Fuente de observaciones; revisa el documento en las entregas. |

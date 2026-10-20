@@ -31,7 +31,7 @@ El proyecto también se justifica por sus restricciones. El tratamiento de datos
 
 ### C. Objetivos
 
-Los objetivos vigentes del proyecto están en la versión 7.0 de la SRS [1].
+Los objetivos vigentes del proyecto están en la versión 7.6 de la SRS [1].
 
 **Objetivo general.** Desarrollar un sistema web y móvil que organice la reserva, la asignación de operarios, el pago y el seguimiento de los lavados en un lavadero de vehículos, garantizando que cada bahía y cada operario se asignen sin cruces de horario y que cada pago quede asociado a su reserva.
 
@@ -78,7 +78,7 @@ El proyecto toma como marco de sus acciones correctivas, preventivas y de mejora
 
 ### A. Tipo de Estudio
 
-Se trata de un trabajo de desarrollo tecnológico aplicado, presentado como estudio de caso único y de alcance descriptivo. La unidad de análisis es el sistema construido. La evidencia proviene de los artefactos del proyecto: el código de once repositorios, la documentación de diseño (requisitos, quince ADR, modelos de datos, contratos OpenAPI), los manuales técnicos verificados contra el código y los registros de pruebas y de acciones de mejora [21], [22]. La SRS, en su versión 7.0, sigue la estructura de IEEE 830 [23] y los contenidos de ISO/IEC/IEEE 29148 [24], y define 41 requisitos funcionales, 12 requisitos no funcionales clasificados según el modelo de calidad de ISO/IEC 25010 [25], 32 casos de uso y una matriz de trazabilidad con el estado de cada requisito [1].
+Se trata de un trabajo de desarrollo tecnológico aplicado, presentado como estudio de caso único y de alcance descriptivo. La unidad de análisis es el sistema construido. La evidencia proviene de los artefactos del proyecto: el código de once repositorios, la documentación de diseño (requisitos, quince ADR, modelos de datos, contratos OpenAPI), los manuales técnicos verificados contra el código y los registros de pruebas y de acciones de mejora [21], [22]. La SRS, en su versión 7.6, sigue la estructura de IEEE 830 [23] y los contenidos de ISO/IEC/IEEE 29148 [24], y define 41 requisitos funcionales, 12 requisitos no funcionales clasificados según el modelo de calidad de ISO/IEC 25010 [25], 32 casos de uso y una matriz de trazabilidad con el estado de cada requisito [1].
 
 ### B. Contexto y Participantes
 
@@ -90,7 +90,7 @@ El sistema se diseñó para un único lavadero con horarios fijos y operarios as
 
 El equipo aplicó documentación de diseño de software (SDD), un enfoque en el que el diseño documentado precede y guía la implementación, la documentación se actualiza con cada cambio y cada requisito se rastrea hasta sus pruebas. El proceso se organizó en cuatro fases con puntos de control: descubrimiento (contexto, dominio y producto), definición (requisitos, arquitectura, datos y API), diseño detallado (UML, servicios y experiencia de usuario) e implementación con pruebas y operación [2].
 
-La gestión del trabajo adaptó prácticas de Scrum [26] al calendario académico. La instructora técnica actuó como *Product Owner* y aprobaron el cierre de cada sprint; el líder de proyecto actuó como *Scrum Master*. El plan de actividades organizó 21 historias de usuario (151 puntos de historia) en siete sprints de entre dos y seis semanas, programados del 1 de enero al 15 de julio: inicio y planeación, requerimientos, diseño técnico, modelado y preparación del desarrollo, dos fases de construcción del software, e implementación y cierre [27]. Los registros de verificación más recientes del código y de los manuales son del 16 de octubre de 2026, posteriores al cierre planeado; las fechas reales de cada sprint no están registradas. Las convenciones del equipo definieron, además, planificación, revisión y retrospectiva por sprint, reuniones diarias asíncronas por mensajería, estimación con una escala de puntos de 1 a 13 mediante *Planning Poker* y un backlog en hoja de cálculo complementado con *issues* de GitHub. El código se integró con un flujo de ramas *feature*, *develop* y *main*, y cada decisión de arquitectura relevante se registró como ADR (quince al cierre de este informe).
+La gestión del trabajo adaptó prácticas de Scrum [26] al calendario académico. La instructora técnica actuó como *Product Owner* y aprobó el cierre de cada sprint; el líder de proyecto actuó como *Scrum Master*. El plan de actividades organizó 21 historias de usuario (151 puntos de historia) en siete sprints de entre dos y seis semanas, programados del 1 de enero al 15 de julio: inicio y planeación, requerimientos, diseño técnico, modelado y preparación del desarrollo, dos fases de construcción del software, e implementación y cierre [27]. Los registros de verificación más recientes del código y de los manuales son del 16 de octubre de 2026, posteriores al cierre planeado; las fechas reales de cada sprint no están registradas. Las convenciones del equipo definieron, además, planificación, revisión y retrospectiva por sprint, reuniones diarias asíncronas por mensajería, estimación con una escala de puntos de 1 a 13 mediante *Planning Poker* y un backlog en hoja de cálculo complementado con *issues* de GitHub. El código se integró con un flujo de ramas *feature*, *develop* y *main*, y cada decisión de arquitectura relevante se registró como ADR (quince al cierre de este informe).
 
 ### D. Técnicas e Instrumentos de Verificación
 
@@ -133,7 +133,42 @@ El estado de los requisitos se tomó de la matriz de trazabilidad de la SRS, ver
 
 El backend quedó compuesto por seis microservicios de dominio detrás de un API Gateway (Fig. 1). Los clientes web y móvil llaman solo al gateway, que enruta las rutas */api/v1/\** hacia el servicio dueño y no valida tokens: cada servicio verifica el JWT por sí mismo. Los cinco servicios Java siguen la arquitectura hexagonal (dominio, aplicación e infraestructura, con un dominio que no importa Spring ni JPA), y el servicio de pagos sigue una arquitectura por capas en .NET con el mismo contrato de seguridad y de errores [22].
 
-![Diagrama de Contenedores del Sistema](capturas/arquitectura_es.svg)
+```mermaid
+flowchart TB
+    people(["Cliente · Operario · Administrador"]):::person
+    web["App web<br/>Angular 21"]
+    mobile["App Android<br/>React Native / Expo"]
+    gateway["API Gateway · :8080<br/>Spring Cloud Gateway<br/>enrutamiento + CORS"]
+
+    subgraph services["Microservicios"]
+        direction LR
+        security["security-service :3001<br/>cuentas, roles, JWT, preferencias"]
+        customer["customer-service :3002<br/>clientes, vehículos"]
+        booking["booking-service :3003<br/>catálogo, horario, bahías, reservas"]
+        operations["operations-service :3004<br/>operarios, asignación, ejecución, inspección"]
+        payment["payment-service :3005 · .NET 8<br/>pagos, comprobantes, promociones, puntos"]
+        notification["notification-service :3006<br/>bandeja, push, correo, recordatorios"]
+        booking ~~~ notification
+        customer ~~~ payment
+        security ~~~ operations
+    end
+
+    sql[("SQL Server 2022<br/>base LavaRapido<br/>un esquema por servicio")]
+    rabbit[["RabbitMQ<br/>exchange carwash.events"]]
+    ext["Gmail SMTP / Mailpit<br/>Expo Push API"]:::ext
+
+    people --> web
+    people --> mobile
+    web -- "REST + JWT" --> gateway
+    mobile -- "REST + JWT" --> gateway
+    gateway -- "/api/v1/**" --> services
+    services -- "cada uno sus esquemas" --> sql
+    services -- "eventos" --> rabbit
+    services -- "correo y push" --> ext
+
+    classDef person fill:#08427b,color:#fff,stroke:#052e56
+    classDef ext fill:#999,color:#fff
+```
 
 **Fig. 1.** Diagrama de Contenedores del Sistema
 
@@ -156,7 +191,7 @@ Por razones académicas, todos los servicios comparten una instancia y una base 
 
 *Nota.* Elaborado a partir del manual técnico [22].
 
-La comunicación síncrona (REST) se usa cuando quien llama necesita una respuesta para continuar, por ejemplo, cuando el servicio de reservas consulta al servicio de clientes si el vehículo pertenece a quien reserva. La comunicación asíncrona usa un solo exchange de RabbitMQ y once tipos de evento publicados (entre ellos *BookingConfirmed*, *OperatorAssigned*, *PaymentConfirmed* y *LoyaltyPointsEarned*), con entrega al menos una vez, consumo idempotente por identificador de evento, tres reintentos y cola de mensajes muertos. El equipo decidió explícitamente no adoptar Outbox, Saga, CQRS ni base de datos por servicio en esta versión; la consecuencia aceptada es que un evento puede perderse si un servicio se detiene entre la confirmación de la transacción y la publicación [22].
+La comunicación síncrona (REST) se usa cuando quien llama necesita una respuesta para continuar, por ejemplo, cuando el servicio de reservas consulta al servicio de clientes si el vehículo pertenece a quien reserva. La comunicación asíncrona usa un solo exchange de RabbitMQ y doce tipos de evento publicados (entre ellos *BookingConfirmed*, *OperatorAssigned*, *PaymentConfirmed* y *LoyaltyPointsEarned*), con entrega al menos una vez, consumo idempotente por identificador de evento, tres reintentos y cola de mensajes muertos. El equipo decidió explícitamente no adoptar Outbox, Saga, CQRS ni base de datos por servicio en esta versión; la consecuencia aceptada es que un evento puede perderse si un servicio se detiene entre la confirmación de la transacción y la publicación [22].
 
 ### B. Reglas del Negocio e Integridad de los Datos
 
@@ -178,7 +213,21 @@ Las reglas más críticas no dependen solo del código de la aplicación, sino q
 
 La reserva, la asignación y el pago tienen ciclos de vida independientes, de modo que una reserva confirmada no hace parecer aprobado un pago pendiente. La Fig. 2 muestra el ciclo de vida de la reserva; el pago recorre los estados PENDING, IN_REVIEW, APPROVED o REJECTED, y un pago aprobado puede pasar a REFUNDED.
 
-![Diagrama de Estados de la Reserva](capturas/estados_reserva_es.svg)
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> CONFIRMED : reservar con bahía libre
+    SCHEDULED --> CONFIRMED : confirmar (admin)
+    SCHEDULED --> CANCELLED : cancelar
+    CONFIRMED --> CONFIRMED : reprogramar (admin)
+    CONFIRMED --> IN_PROGRESS : iniciar (operario, desde 15 min antes)
+    CONFIRMED --> CANCELLED : cancelar (cliente antes de la hora, o admin)
+    CONFIRMED --> NO_SHOW : no asistió (admin)
+    IN_PROGRESS --> COMPLETED : finalizar (operario)
+    COMPLETED --> [*]
+    CANCELLED --> [*]
+    NO_SHOW --> [*]
+```
 
 **Fig. 2.** Diagrama de Estados de la Reserva
 
@@ -196,7 +245,7 @@ La SRS define 41 requisitos funcionales: los 29 originales (RF-001 a RF-026, con
 | Implementado | 40 | RF-001 a RF-022 (con RF-004b, RF-012b y RF-013b) y RF-024 a RF-038 | Construidos y verificados contra el código y las pruebas |
 | Parcial | 1 | RF-023 | La web lee reservas y pagos reales y operations-service calcula las métricas semanales de cada operario, pero faltan los reportes consolidados para un periodo elegido |
 
-*Nota.* Elaborado a partir de la matriz de trazabilidad de la SRS, versión 7.0 [1].
+*Nota.* Elaborado a partir de la matriz de trazabilidad de la SRS, versión 7.6 [1].
 
 Dos decisiones se tomaron mediante ADR. La asignación de operarios se construyó primero como asignación manual del administrador, apoyada en una lista de candidatos con el motivo por el que cada operario no está disponible (ADR-014); sobre esa misma política se agregó después la asignación automática al confirmarse la reserva, que respeta el operario que el cliente elige si sigue libre. Las promociones se rediseñaron como cupones de descuento porcentual que se desbloquean con el saldo de puntos, sin consumirlos (ADR-015).
 
@@ -301,7 +350,7 @@ Como trabajo futuro, la propia documentación propone: ejecutar los casos de ace
 
 ## Referencias
 
-[1] J. C. Guilombo Osorio, B. E. Patiño Cabrera y M. Urbano Quintero, «Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos», versión 7.0, documento no publicado, Servicio Nacional de Aprendizaje, 2026.
+[1] J. C. Guilombo Osorio, B. E. Patiño Cabrera y M. Urbano Quintero, «Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos», versión 7.6, documento no publicado, Servicio Nacional de Aprendizaje, 2026.
 
 [2] Equipo de Desarrollo Vehicle Washing, *Vehicle Washing Management System: Project Documentation* (vehicle-w-docs), documentación de proyecto no publicada, 2026. [En línea]. Disponible en: https://github.com/code-sena/vehicle-w-docs
 
@@ -411,7 +460,7 @@ The project is also justified by its constraints. Personal data processing must 
 
 ### C. Objectives
 
-The current project objectives are stated in version 7.0 of the SRS [1].
+The current project objectives are stated in version 7.6 of the SRS [1].
 
 **General objective.** To develop a web and mobile system that organizes booking, operator assignment, payment, and wash tracking at a car wash, ensuring that every bay and every operator is assigned without schedule overlaps and that every payment is linked to its booking.
 
@@ -458,7 +507,7 @@ The project frames its corrective, preventive, and improvement actions within th
 
 ### A. Type of Study
 
-This is an applied technological development work, presented as a single, descriptive case study. The unit of analysis is the system that was built. The evidence comes from the project artifacts: the code of eleven repositories, the design documentation (requirements, fifteen ADRs, data models, OpenAPI contracts), the technical manuals verified against the code, and the test and improvement action records [21], [22]. Version 7.0 of the SRS follows the structure of IEEE 830 [23] and the contents of ISO/IEC/IEEE 29148 [24], and defines 41 functional requirements, 12 non-functional requirements classified according to the ISO/IEC 25010 quality model [25], 32 use cases, and a traceability matrix with the status of each requirement [1].
+This is an applied technological development work, presented as a single, descriptive case study. The unit of analysis is the system that was built. The evidence comes from the project artifacts: the code of eleven repositories, the design documentation (requirements, fifteen ADRs, data models, OpenAPI contracts), the technical manuals verified against the code, and the test and improvement action records [21], [22]. Version 7.6 of the SRS follows the structure of IEEE 830 [23] and the contents of ISO/IEC/IEEE 29148 [24], and defines 41 functional requirements, 12 non-functional requirements classified according to the ISO/IEC 25010 quality model [25], 32 use cases, and a traceability matrix with the status of each requirement [1].
 
 ### B. Context and Participants
 
@@ -513,7 +562,42 @@ The status of the requirements was taken from the SRS traceability matrix, verif
 
 The backend consists of six domain microservices behind an API gateway (Fig. 1). The web and mobile clients call only the gateway, which routes */api/v1/\** paths to the owning service and does not validate tokens: each service verifies the JWT itself. The five Java services follow the hexagonal architecture (domain, application, and infrastructure, with a domain that does not import Spring or JPA), and the payment service follows a layered architecture in .NET with the same security and error contract [22].
 
-![System Container Diagram](capturas/arquitectura_en.svg)
+```mermaid
+flowchart TB
+    people(["Client · Operator · Administrator"]):::person
+    web["Web app<br/>Angular 21"]
+    mobile["Android app<br/>React Native / Expo"]
+    gateway["API Gateway · :8080<br/>Spring Cloud Gateway<br/>routing + CORS"]
+
+    subgraph services["Microservices"]
+        direction LR
+        security["security-service :3001<br/>accounts, roles, JWT, preferences"]
+        customer["customer-service :3002<br/>customers, vehicles"]
+        booking["booking-service :3003<br/>catalog, schedule, bays, bookings"]
+        operations["operations-service :3004<br/>operators, assignment, execution, inspection"]
+        payment["payment-service :3005 · .NET 8<br/>payments, receipts, promotions, points"]
+        notification["notification-service :3006<br/>inbox, push, email, reminders"]
+        booking ~~~ notification
+        customer ~~~ payment
+        security ~~~ operations
+    end
+
+    sql[("SQL Server 2022<br/>database LavaRapido<br/>one schema per service")]
+    rabbit[["RabbitMQ<br/>exchange carwash.events"]]
+    ext["Gmail SMTP / Mailpit<br/>Expo Push API"]:::ext
+
+    people --> web
+    people --> mobile
+    web -- "REST + JWT" --> gateway
+    mobile -- "REST + JWT" --> gateway
+    gateway -- "/api/v1/**" --> services
+    services -- "each one its schemas" --> sql
+    services -- "events" --> rabbit
+    services -- "email and push" --> ext
+
+    classDef person fill:#08427b,color:#fff,stroke:#052e56
+    classDef ext fill:#999,color:#fff
+```
 
 **Fig. 1.** System Container Diagram
 
@@ -536,7 +620,7 @@ For academic reasons, all services share one SQL Server instance and database, b
 
 *Note.* Based on the technical manual [22].
 
-Synchronous communication (REST) is used when the caller needs a response to continue, for example, when the booking service asks the customer service whether the vehicle belongs to the person booking. Asynchronous communication uses a single RabbitMQ exchange and eleven published event types (among them *BookingConfirmed*, *OperatorAssigned*, *PaymentConfirmed*, and *LoyaltyPointsEarned*), with at-least-once delivery, idempotent consumption by event identifier, three retries, and a dead-letter queue. The team explicitly decided not to adopt Outbox, Saga, CQRS, or a database per service in this version; the accepted consequence is that an event can be lost if a service stops between committing the transaction and publishing [22].
+Synchronous communication (REST) is used when the caller needs a response to continue, for example, when the booking service asks the customer service whether the vehicle belongs to the person booking. Asynchronous communication uses a single RabbitMQ exchange and twelve published event types (among them *BookingConfirmed*, *OperatorAssigned*, *PaymentConfirmed*, and *LoyaltyPointsEarned*), with at-least-once delivery, idempotent consumption by event identifier, three retries, and a dead-letter queue. The team explicitly decided not to adopt Outbox, Saga, CQRS, or a database per service in this version; the accepted consequence is that an event can be lost if a service stops between committing the transaction and publishing [22].
 
 ### B. Business Rules and Data Integrity
 
@@ -558,7 +642,21 @@ The most critical rules do not depend only on application code; they are also en
 
 Booking, assignment, and payment have independent life cycles, so a confirmed booking does not make a pending payment look approved. Fig. 2 shows the booking life cycle; a payment moves through the states PENDING, IN_REVIEW, APPROVED or REJECTED, and an approved payment can move to REFUNDED.
 
-![Booking State Diagram](capturas/estados_reserva_en.svg)
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> CONFIRMED : book with a free bay
+    SCHEDULED --> CONFIRMED : confirm (admin)
+    SCHEDULED --> CANCELLED : cancel
+    CONFIRMED --> CONFIRMED : reschedule (admin)
+    CONFIRMED --> IN_PROGRESS : start (operator, from 15 min before)
+    CONFIRMED --> CANCELLED : cancel (client before the time, or admin)
+    CONFIRMED --> NO_SHOW : no show (admin)
+    IN_PROGRESS --> COMPLETED : finish (operator)
+    COMPLETED --> [*]
+    CANCELLED --> [*]
+    NO_SHOW --> [*]
+```
 
 **Fig. 2.** Booking State Diagram
 
@@ -576,7 +674,7 @@ The SRS defines 41 functional requirements: the original 29 (RF-001 to RF-026, w
 | Implemented | 40 | RF-001 to RF-022 (with RF-004b, RF-012b, and RF-013b) and RF-024 to RF-038 | Built and verified against the code and the tests |
 | Partial | 1 | RF-023 | The web reads real bookings and payments, and operations-service calculates the weekly metrics of each operator, but the consolidated reports for a chosen period are missing |
 
-*Note.* Based on the traceability matrix of the SRS, version 7.0 [1].
+*Note.* Based on the traceability matrix of the SRS, version 7.6 [1].
 
 Two decisions were made through ADRs. Operator assignment was first built as manual assignment by the administrator, supported by a candidate list that shows why each operator is not available (ADR-014); automatic assignment when a booking is confirmed was later added on top of that same policy, and it respects the operator chosen by the customer if that operator is still free. Promotions were redesigned as percentage discount coupons that are unlocked with the points balance without spending it (ADR-015).
 
@@ -681,7 +779,7 @@ As future work, the documentation itself proposes: running the acceptance cases 
 
 ## References
 
-[1] J. C. Guilombo Osorio, B. E. Patiño Cabrera and M. Urbano Quintero, “Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos” [Software requirements specification (SRS) of the LavaRápido system: Web and mobile booking and management platform for a car wash], version 7.0, unpublished document, Servicio Nacional de Aprendizaje, 2026.
+[1] J. C. Guilombo Osorio, B. E. Patiño Cabrera and M. Urbano Quintero, “Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos” [Software requirements specification (SRS) of the LavaRápido system: Web and mobile booking and management platform for a car wash], version 7.6, unpublished document, Servicio Nacional de Aprendizaje, 2026.
 
 [2] Vehicle Washing Development Team, *Vehicle Washing Management System: Project Documentation* (vehicle-w-docs), unpublished project documentation, 2026. [Online]. Available: https://github.com/code-sena/vehicle-w-docs
 

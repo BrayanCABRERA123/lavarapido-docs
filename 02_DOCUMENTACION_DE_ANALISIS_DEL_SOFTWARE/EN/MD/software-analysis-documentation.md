@@ -21,7 +21,7 @@ This document shows how LavaRápido behaves when someone uses it: what happens, 
 3. **Activity diagrams** of the business processes.
 4. **State diagrams** of the entities that change status (booking, payment, service execution, promotion and inspection report).
 
-On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle with the role change (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end.
+On October 20, 2026, the content was checked again against the code: the client only cancels (the administrator reschedules), the role change of accounts was removed, the sequences and states that did not match were corrected, and the use case and other diagrams were redrawn with straight lines and no crossings. On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end.
 
 The full specification of each requirement and use case (actors, precondition, main flow, alternative flows and postcondition) is in the *Software Requirements Specification*, sections 5 and 7.3; here they are cited by their identifier (RF-XXX, CUXX).
 
@@ -175,7 +175,7 @@ flowchart LR
     class Administrador,Sistema actor
 ```
 
-*Note.* `«include»` means that CU05 always runs CU06; `«extend»` means that CU25 optionally extends CU12. CU22 appears as view-only for the operator and as management for the administrator, who is the one recording shifts, absences and the operator profile (RF-022, RF-038). The system runs CU08 each time a booking is confirmed, and CU32 groups the processes that run without anyone asking for them (reminders, alerts, notices and the first administrator). The customer does not record the inspection report (CU30): they view it through the link the administrator shares.
+*Note.* `«include»` means that CU05 always runs CU06; `«extend»` means that CU25 optionally extends CU12. CU22 appears as view-only for the operator and as management for the administrator, who is the one recording shifts, absences and the operator profile (RF-022, RF-038). The system runs CU08 each time a booking is confirmed, and CU32 groups the processes that run without anyone asking for them (reminders, alerts, notices and the first administrator). The customer does not record the inspection report (CU30): they view it through the link the administrator shares. In CU07 the customer cancels from the history or the payment screen; a new date or time is set by the administrator from Bookings (CU29), since neither the web nor the app has a reschedule screen for the customer. In CU27 the role is chosen when the account is created; the users list does not change it.
 
 ### 1.2 Actor and Use Case Matrix
 
@@ -267,12 +267,14 @@ sequenceDiagram
         N->>S: GET /internal/v1/users/{id}/contact (X-Internal-Key)
         N->>N: BOOKING_CONFIRMED notification + reminders (24 h, 1 h)
         N-->>C: inbox + push + email
+    else the vehicle already has another booking at that time
+        B-->>W: 409 VEHICLE_ALREADY_BOOKED
     else slot taken
-        B-->>W: 409 SLOT_UNAVAILABLE + up to 5 alternative times
+        B-->>W: 409 SLOT_UNAVAILABLE + reason + up to 5 alternative times
     end
 ```
 
-*Source:* `booking-service` (`BookingService.confirmNew`), `operations-service` (`AvailableOperatorsController`), contracts in `07-api/contracts/openapi/`.
+*Source:* `booking-service` (`BookingService.create`, `Booking.confirmNew`, `AvailabilityPolicy`), `operations-service` (`AvailableOperatorsController`), contracts in `07-api/contracts/openapi/`.
 
 ### 2.3 Reminders and alert for bookings without an operator (ADR-011)
 
@@ -395,11 +397,11 @@ sequenceDiagram
     W->>P: POST /api/v1/payments
     P->>B: GET /bookings/{id} (customer JWT)
     B-->>P: status, total, owner
-    alt booking can be paid and has no open or approved payment
-        P->>DB: PENDING payment (amount = booking total) + receipt → IN_REVIEW
+    alt booking can be paid, has no open or approved payment and the reference was not used on another booking
+        P->>DB: PENDING payment (amount = booking total minus the coupons applied) + receipt → IN_REVIEW
         P-->>W: 201 payment IN_REVIEW
-    else not payable / already reported / already approved
-        P-->>W: 400 BOOKING_NOT_PAYABLE | 409 PAYMENT_ALREADY_REPORTED | 409 PAYMENT_ALREADY_APPROVED
+    else not payable / already reported / already approved / reference reused
+        P-->>W: 409 BOOKING_NOT_PAYABLE | PAYMENT_ALREADY_REPORTED | PAYMENT_ALREADY_APPROVED | TRANSACTION_REFERENCE_REUSED
     end
 
     A->>W: Payments → Verify
@@ -409,18 +411,24 @@ sequenceDiagram
     alt approve
         W->>P: POST /api/v1/admin/payments/{id}/approve
         P->>DB: APPROVED, approved_by, processed_at (unique index: one per booking)
+        P->>DB: loyalty_transaction EARNED (points of the booking lines)
+        P-)P: payment.confirmed and payment.loyalty_points_earned to RabbitMQ
     else reject
         W->>P: POST /api/v1/admin/payments/{id}/reject {reason}
         P->>DB: REJECTED + reason (the customer can report again)
+        P-)P: payment.rejected to RabbitMQ
     end
 
     A->>W: Payments → Manual record (cash at the site)
     W->>P: POST /api/v1/admin/payments {bookingId, paymentAccountId}
     P->>B: GET /admin/bookings/{id}
-    P->>DB: APPROVED payment directly (amount = booking total)
+    P->>DB: APPROVED payment directly (amount = amount due) + EARNED points
+    A->>W: Payments → Refund an approved payment
+    W->>P: POST /api/v1/admin/payments/{id}/refund
+    P->>DB: REFUNDED + loyalty_transaction REVERSED
 ```
 
-*Source:* `payment-service` (`PaymentApplicationService.ReportPaymentAsync / ApproveAsync / RejectAsync / RegisterManualAsync`, `Payment` aggregate, ADR-008, ADR-013).
+*Source:* `payment-service` (`PaymentCommandService.ReportAsync / ApproveAsync / RejectAsync / RegisterInPersonAsync / RefundAsync`, `BookingPaymentGuard`, `LoyaltyRewardService`, `Payment` aggregate, ADR-008, ADR-013). notification-service turns each `payment.*` event into a notice for the customer.
 
 ### 2.6 Coupon redemption and loyalty points (RF-024, RF-025, RF-026)
 
@@ -437,12 +445,12 @@ sequenceDiagram
     participant N as notification-service
 
     A->>W: Management → Promotions → Create
-    W->>P: POST /api/v1/admin/promotions {code, validity, % discount 1-100, required points}
+    W->>P: POST /api/v1/admin/promotions {code, validity, type PERCENT or FIXED and value, required points}
     P->>DB: INSERT promotion
     P-->>W: 201 promotion
 
     Note over C,P: --- Points credit (when a payment is approved, flow 2.5) ---
-    P->>DB: INSERT loyalty_transaction (+points of the paid service, unique sequence_no per customer)
+    P->>DB: INSERT loyalty_transaction EARNED (+points of the booking lines, unique sequence_no per customer)
     Note over P: The balance is never stored separately: it is always calculated<br/>from the last row of the ledger of movements (INV-LOY-001)
 
     C->>W: Dashboard → sees their points and unlocked promotions
@@ -459,12 +467,14 @@ sequenceDiagram
     P->>DB: looks up the promotion by code
     alt valid, unlocked, not redeemed before for this booking and within the usage limits
         P->>P: Promotion.Redeem(...) calculates the discount on the subtotal (never exceeds it)
-        P->>DB: INSERT promotion_redemption (uses up one redemption, so two simultaneous redemptions collide)
+        P->>DB: INSERT booking_promotion (applied_amount)
         P-)MQ: PromotionRedeemed (payment.promotion_redeemed)
         MQ-)N: notifies the redemption in the inbox and by email
         P-->>W: 200 {discount applied, new total to pay}
-    else expired / not unlocked / already redeemed / no redemptions left
-        P-->>W: 409 PromotionNotRedeemable | PromotionAlreadyRedeemed | PromotionExhausted | PromotionCustomerLimitReached
+    else the booking already has a reported or approved payment
+        P-->>W: 409 PAYMENT_ALREADY_REPORTED | PAYMENT_ALREADY_APPROVED
+    else expired / not unlocked / already redeemed / minimum purchase / no redemptions left
+        P-->>W: 400 PROMOTION_NOT_REDEEMABLE | PROMOTION_ALREADY_REDEEMED | PROMOTION_MIN_PURCHASE_NOT_MET | PROMOTION_EXHAUSTED | PROMOTION_CUSTOMER_LIMIT_REACHED
     end
 ```
 
@@ -490,7 +500,7 @@ sequenceDiagram
         S->>DB: replaces exactly those permissions for the role (transaction)
         S-->>W: 200 updated permissions of the role
     else some id does not exist in the catalog
-        S-->>W: 400 UnknownPermissionException (unknown permission, nothing is saved)
+        S-->>W: 400 UNKNOWN_PERMISSION (unknown permission, nothing is saved)
     end
     Note over S: Roles cannot be created or deleted (ADR-010).<br/>This matrix is informational: real authorization still comes<br/>from the roles claim in the JWT, not from this table (open decision, section 11.3 of the SRS)
 ```
@@ -518,6 +528,8 @@ sequenceDiagram
     else wrong password
         S->>DB: adds the failure (15-min window) and on the fifth one sets locked_until to now + 15 min
         S-->>W: 401 INVALID_CREDENTIALS (or 423 if this failure locked it)
+    else correct password and deactivated account
+        S-->>W: 403 ACCOUNT_DISABLED
     else correct password
         S->>DB: clears the failure count, records the session
         S-->>W: 200 JWT (1 h)
@@ -546,7 +558,7 @@ sequenceDiagram
     OP->>B: GET /admin/bookings/{id} (admin JWT)
     alt long booking, Confirmed or In progress
         OP->>DB: report with 5 PENDING phases and a random public code
-        OP-->>W: 201 report
+        OP-->>W: 200 report (if one already exists, the same one)
     else short, cancelled or completed
         OP-->>W: 409 INSPECTION_NOT_EDITABLE
     end
@@ -688,14 +700,15 @@ flowchart TD
     confirm --> notif["Send confirmation, schedule 24h/1h reminders<br/>and assign an operator (section 3.3)"]
     notif --> stop1([End: booking Confirmed])
 
-    stop1 -.-> manage{Does the customer want<br/>to reschedule or cancel?}
-    manage -->|Reschedule| state{Is the booking Scheduled<br/>or Confirmed?}
+    stop1 -.-> manage{Any change<br/>before the start?}
+    manage -->|The customer cancels| state{Is the booking Scheduled<br/>or Confirmed?}
     state -->|No - in progress/finished| block[Block the action with an explanatory message]
     block --> stop2([End])
-    state -->|Yes| date
-    manage -->|Cancel| reason[Ask for a reason from the list of reasons]
-    reason --> free[Free the bay, mark as Cancelled]
+    state -->|Yes| ask[Confirm in the dialog, no reason asked]
+    ask --> free[Free the bay, mark as Cancelled]
     free --> stop3([End])
+    manage -->|The administrator reschedules| resched["New date and time from Bookings (CU29)"]
+    resched --> check
 ```
 
 ### 3.3 Operator assignment and service execution (RF-008, RF-009, RF-010, RF-011, RF-012b)
@@ -749,7 +762,7 @@ flowchart TD
     cash --> register[Admin records the payment manually]
     register --> approved1["Payment → Approved directly"]
     approved1 --> points1["Credit loyalty points (RF-026)"]
-    points1 --> stop3([End])
+    points1 --> lockui
 
     stop2 -.-> review[Admin opens pending payments]
     review --> compare{Declared amount =<br/>amount due and receipt readable?}
@@ -758,7 +771,8 @@ flowchart TD
     compare -->|Yes| approve["Payment → Approved"]
     approve --> points2["Credit loyalty points (RF-026)"]
     points2 --> notifyc[Notify the customer]
-    notifyc --> stop5([End])
+    notifyc --> lockui[The payment screen only shows the summary<br/>no method, QR or receipt]
+    lockui --> stop5([End])
 ```
 
 ### 3.5 Redeeming a loyalty coupon (RF-024, RF-025, RF-026)
@@ -807,23 +821,23 @@ stateDiagram-v2
     [*] --> CONFIRMED : create (a free bay is assigned immediately, RF-006)
     SCHEDULED --> CONFIRMED : confirm (needs a bay)
     SCHEDULED --> CANCELLED : cancel
-    CONFIRMED --> CONFIRMED : reschedule (new time/bay, prices are kept)
+    CONFIRMED --> CONFIRMED : reschedule (admin, new time/bay, prices are kept)
     CONFIRMED --> IN_PROGRESS : start
     CONFIRMED --> NO_SHOW : the customer did not show up
-    CONFIRMED --> CANCELLED : cancel (customer or admin, with a reason)
+    CONFIRMED --> CANCELLED : cancel (customer before the start, or admin)
     IN_PROGRESS --> COMPLETED : finish
     COMPLETED --> [*]
     CANCELLED --> [*]
     NO_SHOW --> [*]
 ```
 
-*Source:* `booking-service`, `Booking.moveTo`, `Booking.cancel`, `BookingStatus`. Only `SCHEDULED` and `CONFIRMED` can be rescheduled or cancelled (RF-007); `SCHEDULED` exists in the model, but the current flow always creates the booking directly as `CONFIRMED`.
+*Source:* `booking-service`, `Booking.moveTo`, `Booking.cancel`, `BookingStatus`. Only `SCHEDULED` and `CONFIRMED` can be rescheduled or cancelled (RF-007). The customer only cancels, before the start time and without writing a reason (the booking stores `CUSTOMER_REQUEST`); the administrator reschedules (CU29) and may choose the cancellation reason. `SCHEDULED` exists in the model, but the current flow always creates the booking directly as `CONFIRMED`.
 
 ### 4.2 Payment life cycle (RF-013b, RF-014, ADR-008)
 
 ```mermaid
 stateDiagram-v2
-    [*] --> PENDING : create (amount = booking total)
+    [*] --> PENDING : create (amount = booking total minus coupons)
     PENDING --> PENDING : attach receipt
     PENDING --> IN_REVIEW : send for review (requires at least one receipt)
     IN_REVIEW --> APPROVED : approve (admin)
@@ -834,39 +848,34 @@ stateDiagram-v2
     APPROVED --> [*]
 ```
 
-*Source:* `payment-service`, `Payment` aggregate. A booking allows only one approved payment and only one open payment at a time; after `REJECTED` the customer can report a new payment.
+*Source:* `payment-service`, `Payment` aggregate. A booking allows only one approved payment and only one open payment at a time; after `REJECTED` the customer can report a new payment. A customer payment goes from `PENDING` to `IN_REVIEW` in the same request; the cash payment the administrator registers is `APPROVED` at once.
 
 ### 4.3 Service execution life cycle (RF-012b)
 
 ```mermaid
 stateDiagram-v2
-    [*] --> PENDING : assign operator (RF-009)
-    PENDING --> IN_PROGRESS : start service (RF-012b)
-    IN_PROGRESS --> PAUSED : pause
-    PAUSED --> IN_PROGRESS : resume
+    [*] --> PENDING : assign operator (automatic or admin, RF-008, RF-009)
+    PENDING --> PENDING : reassign (admin, before the start)
+    PENDING --> IN_PROGRESS : start service (from 15 min before, RF-012b)
     IN_PROGRESS --> COMPLETED : finish service (RF-012b)
-    IN_PROGRESS --> WITH_ISSUE : report an issue
+    COMPLETED --> COMPLETED : rate 1 to 5 (customer, once)
     COMPLETED --> [*]
-    WITH_ISSUE --> [*]
 ```
 
-*Source:* `operations-service`. `COMPLETED` enables the customer's rating (RF-012).
+*Source:* `operations-service` (`ServiceExecution`, `StartPolicy`). `COMPLETED` enables the customer's rating (RF-012). `PAUSED` and `WITH_ISSUE` exist in the `execution.execution_status` catalog, but no use case uses them today.
 
 ### 4.4 Promotion life cycle (RF-024)
 
 ```mermaid
 stateDiagram-v2
-    [*] --> ACTIVE : create (code, validity, % discount, required points)
-    ACTIVE --> INACTIVE : deactivate (admin)
-    INACTIVE --> ACTIVE : reactivate (admin)
-    ACTIVE --> EXPIRED : current date > end date
-    INACTIVE --> EXPIRED : current date > end date
-    EXPIRED --> [*]
-    ACTIVE --> [*] : delete
-    INACTIVE --> [*] : delete
+    [*] --> ACTIVE : create (code, validity, discount, required points)
+    ACTIVE --> PAUSED : pause (admin)
+    PAUSED --> ACTIVE : resume (admin)
+    ACTIVE --> [*] : delete (soft delete)
+    PAUSED --> [*] : delete (soft delete)
 ```
 
-*Source:* `payment-service`, `Promotion.IsAvailableOn` (active and within the validity period). An `INACTIVE` or `EXPIRED` promotion cannot be redeemed (RF-024, RN-PROMO-01).
+*Source:* `payment-service`, `Promotion.SetActive`, `Promotion.StatusFor`, `Promotion.IsAvailableOn`. The only thing stored is whether it is active or paused; the administrator's screen shows "scheduled" until the start date arrives. Only an active promotion within its validity period can be redeemed (RF-024, RN-PROMO-01): after the end date it is no longer offered or redeemed, although no "expired" status is stored.
 
 ### 4.5 Inspection report and its phases (RF-036)
 
@@ -877,7 +886,7 @@ stateDiagram-v2
     DRAFT --> PUBLISHED : publish (the link starts showing it)
     PUBLISHED --> PUBLISHED : edit while the booking is still Confirmed or In progress
     PUBLISHED --> PUBLISHED : share (notifies the customer)
-    PUBLISHED --> [*] : the booking is completed (read only)
+    PUBLISHED --> [*] : the booking is completed (phases and findings read only)
 
     state "Each phase" as fase {
         [*] --> PENDING
@@ -901,19 +910,18 @@ stateDiagram-v2
         LOCKED --> UNLOCKED : 15 min pass or the password is recovered
         UNLOCKED --> UNLOCKED : successful sign-in (clears the count)
     }
-    ACTIVE --> ACTIVE : the administrator changes its role (closes its sessions)
     ACTIVE --> INACTIVE : the administrator deactivates it (not if it is an administrator)
     ACTIVE --> INACTIVE : the user closes their account with the password (not if administrator)
     INACTIVE --> ACTIVE : the administrator activates it
 ```
 
-*Source:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus` and `changeRole`, `AccountDeactivationService`). A locked account answers 423 even with the right password; an inactive one answers 403 after the password is checked. Each account has one role and nobody changes their own.
+*Source:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus`, `AccountDeactivationService`). A locked account answers 423 even with the right password; an inactive one answers 403 after the password is checked. No administrator account can be deactivated (403 `ADMIN_CANNOT_BE_DISABLED`), and an administrator cannot deactivate or close their own account (403 `CANNOT_DISABLE_OWN_ACCOUNT`). Each account has one role, set when it is created: there is no role change.
 
 ---
 
 ## 5. Screen Inventory (mockup)
 
-Screen by screen and by role, including the create and edit modals of each module. All screenshots are in the `capturas/` folder of this document.
+Screen by screen and by role, including the create and edit modals of each module. All screenshots are in the `capturas/` folder of this document. The Management → Users screenshot was taken again on October 20, 2026: the table only shows the user type and has the Enabled and Disabled filters. Since October 20, clicking a notification or a booking of the history opens its detail, with a button to go to the related section (for example, **Go to payment**).
 
 ### 5.1 Common screens (no session)
 

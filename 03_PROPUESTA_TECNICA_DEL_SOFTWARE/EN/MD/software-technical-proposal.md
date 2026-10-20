@@ -8,7 +8,7 @@ Software Analysis and Development Technologist program (ADSO), group (ficha) 314
 
 Instructor: Karol Daniela Correa
 
-Version 1.2, October 17, 2026
+Version 1.3, October 20, 2026
 
 ---
 
@@ -27,74 +27,42 @@ LavaRápido consists of **six microservices** behind an API Gateway, each one ow
 
 ```mermaid
 flowchart TB
-    client([Customer]):::person
-    operator([Operator]):::person
-    admin([Administrator]):::person
+    people(["Client · Operator · Administrator"]):::person
+    web["Web app<br/>Angular 21"]
+    mobile["Android app<br/>React Native / Expo"]
+    gateway["API Gateway · :8080<br/>Spring Cloud Gateway<br/>routing + CORS"]
 
-    subgraph frontends["Front ends"]
-        web["Web app<br/>Angular 21 · :4200"]
-        mobile["Android app<br/>React Native / Expo"]
-    end
-
-    gateway["API Gateway<br/>Spring Cloud Gateway · :8080<br/>routing + CORS"]
-
-    subgraph services["Spring Boot 4 · Java 21 · hexagonal (payment: .NET 8)"]
-        security["security-service :3001<br/>accounts, roles, JWT, lockout, preferences"]
+    subgraph services["Microservices"]
+        direction LR
+        security["security-service :3001<br/>accounts, roles, JWT, preferences"]
         customer["customer-service :3002<br/>customers, vehicles"]
-        booking["booking-service :3003<br/>catalog, hours, bays, bookings, business data"]
-        notification["notification-service :3006<br/>inbox, push, email, reminders, alerts"]
-        operations["operations-service :3004<br/>operators, assignment, execution, ratings, inspection"]
-        payment["payment-service :3005 · .NET 8<br/>payment accounts, payments, receipts, promotions"]
+        booking["booking-service :3003<br/>catalog, schedule, bays, bookings"]
+        operations["operations-service :3004<br/>operators, assignment, execution, inspection"]
+        payment["payment-service :3005 · .NET 8<br/>payments, receipts, promotions, points"]
+        notification["notification-service :3006<br/>inbox, push, email, reminders"]
+        booking ~~~ notification
+        customer ~~~ payment
+        security ~~~ operations
     end
 
-    sql[("SQL Server 2022 · :1433<br/>LavaRapido database<br/>one schema per service")]
-    rabbit[["RabbitMQ · :5672<br/>exchange carwash.events"]]
-    smtp["SMTP<br/>Gmail / Mailpit"]:::ext
-    expo["Expo Push API"]:::ext
+    sql[("SQL Server 2022<br/>database LavaRapido<br/>one schema per service")]
+    rabbit[["RabbitMQ<br/>exchange carwash.events"]]
+    ext["Gmail SMTP / Mailpit<br/>Expo Push API"]:::ext
 
-    client --> web
-    client --> mobile
-    operator --> mobile
-    admin --> web
-    admin --> mobile
+    people --> web
+    people --> mobile
     web -- "REST + JWT" --> gateway
     mobile -- "REST + JWT" --> gateway
-    gateway --> security
-    gateway --> customer
-    gateway --> booking
-    gateway --> operations
-    gateway --> payment
-    gateway --> notification
-
-    booking -- "REST (user JWT)<br/>validates vehicle" --> customer
-    customer -- "REST (user JWT)<br/>/users/me" --> security
-    notification -- "REST (X-Internal-Key)<br/>/internal/v1/users" --> security
-    operations -- "REST (user JWT or X-Internal-Key)<br/>bookings, status" --> booking
-    operations -- "REST (admin JWT or X-Internal-Key)<br/>accounts and contact" --> security
-    payment -- "REST (user JWT)<br/>booking total" --> booking
-
-    security -- user_registered --> rabbit
-    booking -- "booking.confirmed / cancelled" --> rabbit
-    operations -- "execution.*" --> rabbit
-    payment -- "payment.* / promotion_redeemed" --> rabbit
-    rabbit -- user_registered --> customer
-    rabbit -- "booking.confirmed<br/>(automatic assignment)" --> operations
-    rabbit -- "user, booking and execution events" --> notification
-
-    security --> sql
-    customer --> sql
-    booking --> sql
-    operations --> sql
-    payment --> sql
-    notification --> sql
-
-    security -- "recovery code" --> smtp
-    notification -- "welcome, booking, reminder" --> smtp
-    notification --> expo
+    gateway -- "/api/v1/**" --> services
+    services -- "each one its schemas" --> sql
+    services -- "events" --> rabbit
+    services -- "email and push" --> ext
 
     classDef person fill:#08427b,color:#fff,stroke:#052e56
     classDef ext fill:#999,color:#fff
 ```
+
+The REST calls between services and the RabbitMQ events are detailed in section 3.3 of the *Software Design Documentation*.
 
 Inside each service we follow **hexagonal architecture** (domain → application → infrastructure): the business rules do not depend on Spring, JPA or the database, so they can be tested on their own. `payment-service` follows the same idea in .NET (Clean Architecture with four projects), because it was built on a different stack; section 3 explains why.
 
@@ -185,7 +153,7 @@ Every important decision was recorded as an ADR (Architecture Decision Record) i
 
 *Note.* Environments planned in the proposal; the costs of section 8.2 were calculated with these specifications.
 
-**Follow-up as of October 17, 2026.** For the academic demonstration, the system was deployed on a Microsoft Azure virtual machine (*Azure for Students* subscription, B2as_v2 size: 2 vCPU, 7.7 GB of RAM, and a 64 GB SSD, Ubuntu 24.04 LTS), with the eleven containers, Caddy as the HTTPS entry point, and the Android app served under */app*. With every container running it uses about 3.3 GB of RAM, so the production size of Table 5 is still comfortable. The full procedure is in the Deployment Document (folder 07).
+**Follow-up as of October 17, 2026.** For the academic demonstration, the system was deployed on a Microsoft Azure virtual machine (*Azure for Students* subscription, B2as_v2 size: 2 vCPU, 7.7 GB of RAM, and a 64 GB SSD, Ubuntu 24.04 LTS), with the eleven containers, Caddy as the HTTPS entry point, and the Android app served under */app*. With every container running it uses about 3.3 GB of RAM, so the production size of Table 5 is still comfortable. The full procedure is in the Deployment Document (folder 07). In the academic project, continuous integration was not done with Jenkins but with GitHub Actions: the 10 code repositories build and run their tests on every change, and `lavarapido-infra` also has a manual workflow that updates the server.
 
 ### 4.4 End user
 

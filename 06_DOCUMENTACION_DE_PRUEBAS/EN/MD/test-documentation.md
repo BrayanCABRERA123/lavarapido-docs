@@ -12,12 +12,12 @@
 | Deliverable | Test documentation (section 2.5.4) |
 | Program | Software Analysis and Development Technologist (ADSO) |
 | Group (ficha) | 3145556 |
-| Apprentices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano |
+| Apprentices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano Quintero |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 19, 2026 |
+| Date | October 20, 2026 |
 
-This document gathers the test plan, the inventory of automated tests in the repositories, their actual results when run on October 19, 2026 (including the end-to-end, performance, and responsive design tests against the complete system), and the 42 functional test cases, run the same day, traced to the SRS v7.4 requirements (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`). Its structure follows the ISO/IEC/IEEE 29119-3 standard for test documentation (International Organization for Standardization [ISO], 2021). No result in this document is assumed.
+This document gathers the test plan, the inventory of automated tests in the repositories, their actual results when run on October 19, 2026 (including the end-to-end, performance, and responsive design tests against the complete system), and the 42 functional test cases, run the same day, traced to the SRS v7.6 requirements (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`). On October 20, 2026, the inventory, case CP-42 and the traceability matrix were adjusted because the role change of an account was reverted in the code that day, and the wording of CP-10 because the customer cancels without writing a reason. Its structure follows the ISO/IEC/IEEE 29119-3 standard for test documentation (International Organization for Standardization [ISO], 2021). No result in this document is assumed.
 
 ## 1. Test Plan
 
@@ -39,7 +39,7 @@ The web application, the mobile application, and the seven backend services on t
 | Gateway route integration | Each public route reaches its service | Spring Boot Test | `GatewayRoutesTest.java` |
 | Persistence integration | EF Core mapping against a real SQL Server | xUnit + `DatabaseFixture` | `PaymentService.Infrastructure.IntegrationTests` (requires a database) |
 | Web UI unit tests | Angular components, guards, and services | Vitest 4 + jsdom (`@angular/build:unit-test`) | `Web/src/**/*.spec.ts` |
-| Functional / acceptance | End-to-end flows per role against the deployed system | Manual, with Postman or Swagger UI for the API and a browser / Expo Go for the UI | Cases CP-01 to CP-33 (section 4) |
+| Functional / acceptance | End-to-end flows per role against the deployed system | Manual, with Postman or Swagger UI for the API and a browser / Expo Go for the UI | Cases CP-01 to CP-42 (section 4) |
 | Cross-service (end-to-end) and RNF | Booking with operator choice and automatic assignment, complete flow of the three roles, inspection report, access rules per role; 95th percentile response time (RNF-001); web screens at 360 px (RNF-008) | Node 24 (`node:test` and `fetch`) and Playwright Core with headless Edge | `lavarapido-infra/e2e` |
 
 > *Note.* Tools documented in JUnit (n.d.), xUnit.net (n.d.), and Vitest (n.d.).
@@ -68,7 +68,7 @@ The web application, the mobile application, and the seven backend services on t
 
 ## 2. Automated Test Inventory
 
-The repositories have 550 test methods: 507 in the backend and 43 in the web. The mobile app has no automated tests; it is checked with the TypeScript build and the screen walk-through (section 3.2).
+As of October 20, 2026, the repositories have 548 test methods: 505 in the backend and 43 in the web. The mobile app has no automated tests; it is checked with the TypeScript build and the screen walk-through (section 3.2).
 
 **Table 4**
 
@@ -77,7 +77,7 @@ The repositories have 550 test methods: 507 in the backend and 43 in the web. Th
 | Artifact | Files | Methods | What they cover |
 | --- | --- | --- | --- |
 | api-gateway | 1 | 8 | Routing of each `/api/v1/**` prefix to its service, and that `/internal/**` is not exposed by the gateway (`GatewayRoutesTest`) |
-| security-service | 17 | 135 | Registration, sign-in with lockout after failed attempts, password recovery, profile and address, user administration and role change, roles and permissions, preferences, value objects, password policy, JWT issuing and HTTP security by role (`ApiSecurityWebTest`) |
+| security-service | 17 | 133 | Registration, sign-in with lockout after failed attempts, password recovery, profile and address, user administration (including the rule that an administrator account cannot be deactivated), roles and permissions, preferences, value objects, password policy, JWT issuing and HTTP security by role (`ApiSecurityWebTest`) |
 | customer-service | 6 | 50 | Customer account, license plates, vehicle CRUD, `security.user_registered` listener and web API |
 | booking-service | 7 | 43 | Booking life cycle, availability and the reason a time is not available, bays (`ServiceBayTest`), catalog, business data (`EstablishmentTest`), preferred operator in the event and web API |
 | operations-service | 11 | 55 | Manual and automatic assignment, free operators, start window, execution, rating, absences, operator metrics, team summary, operator profile, inspection report and web API |
@@ -92,7 +92,7 @@ Backend tests are domain and application tests with in-memory doubles, plus cont
 
 ## 3. Execution Results
 
-On October 19, 2026, with the *develop* branch of the ten repositories updated that day, the eight automated suites were run: 655 tests, all passed and none skipped. This time the 7 payment persistence tests also ran, against the isolated `LavaRapidoPaymentIT` database.
+On October 19, 2026, with the *develop* branch of the ten repositories updated that day, the eight automated suites were run: 655 tests, all passed and none skipped. This time the 7 payment persistence tests also ran, against the isolated `LavaRapidoPaymentIT` database. When the role change was reverted on October 20, 2 tests left security-service (`changingTheRoleReplacesItAndClosesTheSessions` and `nobodyChangesTheirOwnRole`), so that suite now has 2 tests fewer than the 151 in Table 5; Table 5 keeps the real numbers of the October 19 run.
 
 **Table 5**
 
@@ -209,7 +209,7 @@ For responsive design (NFR-008), Playwright (headless Edge) went through the scr
 
 ## 4. Functional Test Cases
 
-Cases CP-01 to CP-33 were defined on SRS v4 and first run on October 9, 2026; cases CP-34 to CP-42 cover the requirements implemented afterwards (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037, and RF-038) and the role change of RF-028. All 42 were run on October 19, 2026, against the full system through the API Gateway (the same calls the web and mobile clients make), with a script that creates its own accounts and data and deletes them at the end. All 42 passed (Figure 7).
+Cases CP-01 to CP-33 were defined on SRS v4 and first run on October 9, 2026; cases CP-34 to CP-42 cover the requirements implemented afterwards (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037, and RF-038) and the administrator accounts of RF-028. All 42 were run on October 19, 2026, against the full system through the API Gateway (the same calls the web and mobile clients make), with a script that creates its own accounts and data and deletes them at the end. All 42 passed (Figure 7).
 
 **Table 6**
 
@@ -226,7 +226,7 @@ Cases CP-01 to CP-33 were defined on SRS v4 and first run on October 9, 2026; ca
 | CP-07 | RF-004 | Password change with a wrong current password | Logged in | Change the password with the wrong current one | Wrong current password | "Incorrect current password" error; nothing changes | 400 `INCORRECT_CURRENT_PASSWORD`; the previous password still works | Passed |
 | CP-08 | RF-005 | Create a booking | Customer with an SUV | Choose vehicle, Basic service, a free date and time | SUV, Basic | Booking created; price COP 23,000 (seed price of Basic for SUV) | Booking created (201) with a total of $23,000, the seed price of Basic for SUV | Passed |
 | CP-09 | RF-006 | Time slot taken | Active bays of a slot booked | Book the same slot until it is full | Several customer vehicles | The booking is not saved; up to five alternative times on the same day are offered | Three bookings took the three active bays; the fourth: 409 `SLOT_UNAVAILABLE` (`NO_FREE_BAY`) with 5 alternative times | Passed |
-| CP-10 | RF-007 | Cancel a booking before it starts | Booking CONFIRMED | Cancel with a reason | Reason `CUSTOMER_REQUEST` | Booking is CANCELLED with the reason stored | 200, booking CANCELLED with the reason `CUSTOMER_REQUEST` stored | Passed |
+| CP-10 | RF-007 | Cancel a booking before it starts | Booking CONFIRMED | Cancel as the customer (the customer writes no reason) | — | Booking is CANCELLED with the reason `CUSTOMER_REQUEST` set by the system | 200, booking CANCELLED with the reason `CUSTOMER_REQUEST` stored | Passed |
 | CP-11 | RF-007 | Change a booking in progress | Booking IN_PROGRESS | Try to cancel | — | Action blocked with a message | 409 `BOOKING_NOT_CHANGEABLE` | Passed |
 | CP-12 | RF-009 | Assign an unavailable operator | Operator with an absence at the booking time | Check candidates and try to assign them; then assign an available one | Absent operator | The operator is not allowed; available operators are listed first | The operator without a shift shows `OPERATOR_NOT_ON_SHIFT` and assigning them returns 409; the available ones come first; assigning the available one: 200 | Passed |
 | CP-13 | RF-011 | Operator sees their services | Booking assigned to the operator | Check assigned services | — | List with customer and vehicle data | 200; the service carries the customer name, plate, vehicle, and services | Passed |
@@ -258,7 +258,9 @@ Cases CP-01 to CP-33 were defined on SRS v4 and first run on October 9, 2026; ca
 | CP-39 | RF-037 | Business data to be completed | System with migration 111 applied | Read the data, save an invalid phone, and then a valid support line | 3-digit phone | The real business data is empty; the invalid phone is rejected; the valid change shows on the public page | The tax data and channels were empty; the invalid phone returns 400 `ESTABLISHMENT_INVALID_PHONE`; the valid change (200) shows on the public page | Passed |
 | CP-40 | RF-038 | Operator profile | Operator created | Save a specialty and a skill | EXPERT skill | The profile is saved | 200; profile saved with its specialty and one skill | Passed |
 | CP-41 | RF-036 | Inspection report | Confirmed booking of a 200-minute service | Start the report, finish a phase, publish, share, and open the public link | Temporary 200-minute service | The customer gets the notice and the link opens without a session with the plate masked | Report started (200), published (200), and shared (204); the customer got INSPECTION_REPORT and the link opens without a session and without the full plate | Passed |
-| CP-42 | RF-028 | Role change and administrator accounts | Test administrator and operator | Try to change one's own role, disable an administrator, and turn an operator into a customer | Roles | The first two are rejected; the role change closes the user's sessions | Changing their own role: 403 `CANNOT_CHANGE_OWN_ROLE`; disabling an administrator: 403 `ADMIN_CANNOT_BE_DISABLED`; the operator becomes a customer (200) and their sessions are closed | Passed |
+| CP-42 | RF-028 | An administrator account cannot be deactivated | Administrator session | Try to deactivate an administrator account | — | Rejected: an administrator account cannot be deactivated | 403 `ADMIN_CANNOT_BE_DISABLED` | Passed |
+
+> *Note.* On October 19, CP-42 also tested the role change of an account (403 `CANNOT_CHANGE_OWN_ROLE` when changing one's own role, and an operator turned into a customer with 200). That part was removed from the case on October 20, 2026, when the feature was reverted in the backend, the web and the app.
 
 > *Note.* The prices in the test data come from the seed changelogs (`103-seed-catalog.sql`, `104-seed-booking-catalogs.sql`). The script creates a test customer, two operators, and an administrator, with emails of the `prueba.lavarapido.test` domain, and its own vehicles and bookings. At the end it deletes everything it created and restores the Basic price, the permission matrix, the bay, the payment account, and the business data; the database was checked to have nothing left. The recovery emails were read in Mailpit. Evidence: execution log with the HTTP code and the error code of each step (Figure 7).
 
@@ -270,7 +272,7 @@ Cases CP-01 to CP-33 were defined on SRS v4 and first run on October 9, 2026; ca
 
 ## 5. Traceability Matrix
 
-Of the 41 requirements in SRS v7.4, 38 have a functional case and 39 a related automated test; RF-032 and RF-034 only have a functional case, and RF-017, RF-023, and RF-025 only an automated test.
+Of the 41 requirements in SRS v7.6, 38 have a functional case and 39 a related automated test; RF-032 and RF-034 only have a functional case, and RF-017, RF-023, and RF-025 only an automated test.
 
 **Table 7**
 
@@ -284,7 +286,7 @@ Of the 41 requirements in SRS v7.4, 38 have a functional case and 39 a related a
 | RF-004 | Implemented | `PUT /users/me/password` | `/client/profile` | CP-07 | `UserProfileAndAdministrationTest`, `PasswordPolicyTest` |
 | RF-004b | Implemented | `POST /auth/login` (423 `ACCOUNT_LOCKED`) | `/auth` | CP-34 | `AuthenticationServiceTest` (lockout and window), `PasswordRecoveryServiceTest` (a reset lifts it), `ApiSecurityWebTest` (423) |
 | RF-027 | Implemented | `GET/PATCH /users/me`, `GET/PUT /users/me/address`, `PUT /users/me/email`, `POST /auth/logout`, `POST /users/me/deactivate` | `/client/profile` | CP-25 | `UserProfileAndAdministrationTest`, `PersonAddressServiceTest`, `AuthenticationServiceTest` |
-| RF-028 | Implemented | `GET/POST /admin/users`, `PATCH /admin/users/{id}/status`, `PATCH /admin/users/{id}/role` | `/admin/management`, `/admin/operators` | CP-26, CP-42 | `UserProfileAndAdministrationTest`, `ApiSecurityWebTest` |
+| RF-028 | Implemented | `GET/POST /admin/users`, `PATCH /admin/users/{id}/status` | `/admin/management`, `/admin/operators` | CP-26, CP-42 | `UserProfileAndAdministrationTest`, `ApiSecurityWebTest` |
 | RF-029 | Implemented | `GET /admin/roles-permissions`, `PUT /admin/roles-permissions/{role}` | `/admin/management` | CP-27 | `RolePermissionAdministrationServiceTest` |
 | RF-030 | Implemented | `/vehicles`, `GET /vehicle-types`, `GET /admin/vehicles` | `/client/vehicles` | CP-28 | `CustomerVehicleServiceTest`, `LicensePlateTest`, `CustomerApiWebTest` |
 | RF-031 | Implemented | `GET /catalog/services`, `/admin/catalog/services` | `/admin/management` | CP-29 | `CatalogServiceTest` |

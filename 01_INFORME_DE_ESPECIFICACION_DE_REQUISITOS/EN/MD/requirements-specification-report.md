@@ -10,7 +10,7 @@ Software Analysis and Development Technologist program (ADSO), group (ficha) 314
 
 Instructor: Karol Daniela Correa
 
-Version 7.1, October 17, 2026
+Version 7.6, October 20, 2026
 
 ---
 
@@ -32,12 +32,13 @@ Version 7.1, October 17, 2026
 | V7.3 | 2026-10-19 | Development team | The administrator can change the role of an account (RF-028, CU27); an administrator account cannot be deactivated and an administrator cannot close their own account (RF-027). |
 | V7.4 | 2026-10-19 | Development team | New use cases CU31 (manage own account, RF-027) and CU32 (automatic processes: first administrator, notifications per event, reminders, alert of a booking without an operator and new version notice). There are now 32 use cases. |
 | V7.5 | 2026-10-19 | Development team | Tests of October 19, 2026 (655 automated, 19 end-to-end, and 42 functional cases, Table 58) and system screenshots taken again that day. |
+| V7.6 | 2026-10-20 | Development team | The role change of an account is removed, because the team reverted it in the code (RF-028, CU27): the role is set when the account is created and the system does not offer to change it. An administrator account still cannot be deactivated and an administrator cannot close their own account. The domain events table (only events with a consumer travel through RabbitMQ), the notification types of RF-018 and the detail with a "Go to…" button of CU17, the service execution state diagram (Figure 6: no pause or issue, which are not used) and constraint RT-05 (public server on Azure) are corrected. RF-007 and CU07: the customer only cancels, without writing a reason, and rescheduling is done by the administrator (RF-033, CU29). |
 
 ---
 
 ## Abstract
 
-This document specifies the requirements of LavaRápido, a web and mobile platform that organizes the operation of a single-site car wash: customer and vehicle registration, booking of time slots with opening-hours and bay validation, automatic or manual operator assignment, service execution and rating, vehicle inspection report, payment by QR code or bank transfer with receipt review, promotions, loyalty points and notifications. The specification follows the structure of IEEE 830 (IEEE, 1998) and ISO/IEC/IEEE 29148 (ISO/IEC/IEEE, 2018), and is based on the project's technical documentation (`vehicle-w-docs` repository) and on the code of its seven server components, reviewed on October 16, 2026. It defines 41 functional requirements with verifiable acceptance criteria, 12 non-functional requirements with their verification metric, 32 use cases, the business rules, the life cycles of the booking, the payment and the service execution, the data requirements, and the technical, data, operational and regulatory constraints. As of October 16, 2026, 40 functional requirements are implemented and 1 is partially implemented.
+This document specifies the requirements of LavaRápido, a web and mobile platform that organizes the operation of a single-site car wash: customer and vehicle registration, booking of time slots with opening-hours and bay validation, automatic or manual operator assignment, service execution and rating, vehicle inspection report, payment by QR code or bank transfer with receipt review, promotions, loyalty points and notifications. The specification follows the structure of IEEE 830 (IEEE, 1998) and ISO/IEC/IEEE 29148 (ISO/IEC/IEEE, 2018), and is based on the project's technical documentation (`vehicle-w-docs` repository) and on the code of its seven server components, reviewed on October 20, 2026. It defines 41 functional requirements with verifiable acceptance criteria, 12 non-functional requirements with their verification metric, 32 use cases, the business rules, the life cycles of the booking, the payment and the service execution, the data requirements, and the technical, data, operational and regulatory constraints. As of October 20, 2026, 40 functional requirements are implemented and 1 is partially implemented.
 
 **Keywords:** requirements specification, car wash, bookings, microservices, use cases.
 
@@ -83,7 +84,7 @@ The system consists of a web application, an Android mobile application and a RE
 - Promotions with a percentage discount and a loyalty points program.
 - Notifications in an inbox, by push and by email; a dashboard per role; visual theme and language per account; operational reports.
 
-Out of scope for this version: the iOS application, home service, electronic invoicing with the Colombian tax authority (DIAN), supplies inventory control, online payment gateways, and deployment to pre-production and production environments.
+Out of scope for this version: the iOS application, home service, electronic invoicing with the Colombian tax authority (DIAN), supplies inventory control, online payment gateways, and a pre-production environment. The system is published on a single server (an Azure virtual machine with Docker Compose) for the academic review, not for the real operation of a car wash.
 
 ### 1.3 Definitions, Acronyms and Abbreviations
 
@@ -221,76 +222,42 @@ LavaRápido is a new product that replaces the manual coordination of a car wash
 
 ```mermaid
 flowchart TB
-    client([Customer]):::person
-    operator([Operator]):::person
-    admin([Administrator]):::person
+    people(["Client · Operator · Administrator"]):::person
+    web["Web app<br/>Angular 21"]
+    mobile["Android app<br/>React Native / Expo"]
+    gateway["API Gateway · :8080<br/>Spring Cloud Gateway<br/>routing + CORS"]
 
-    subgraph frontends["Front ends"]
-        web["Web app<br/>Angular 21 · :4200"]
-        mobile["Android app<br/>React Native / Expo"]
-    end
-
-    gateway["API Gateway<br/>Spring Cloud Gateway · :8080<br/>routing + CORS"]
-
-    subgraph services["Spring Boot 4 · Java 21 · hexagonal (payment: .NET 8)"]
+    subgraph services["Microservices"]
+        direction LR
         security["security-service :3001<br/>accounts, roles, JWT, preferences"]
         customer["customer-service :3002<br/>customers, vehicles"]
-        booking["booking-service :3003<br/>catalog, hours, bays, bookings, business data"]
-        notification["notification-service :3006<br/>inbox, push, email, reminders, alerts"]
-        operations["operations-service :3004<br/>operators, assignment, execution, ratings, inspection"]
-        payment["payment-service :3005 · .NET 8<br/>payment accounts, payments, receipts, promotions"]
+        booking["booking-service :3003<br/>catalog, schedule, bays, bookings"]
+        operations["operations-service :3004<br/>operators, assignment, execution, inspection"]
+        payment["payment-service :3005 · .NET 8<br/>payments, receipts, promotions, points"]
+        notification["notification-service :3006<br/>inbox, push, email, reminders"]
+        booking ~~~ notification
+        customer ~~~ payment
+        security ~~~ operations
     end
 
-    sql[("SQL Server 2022 · :1433<br/>LavaRapido database<br/>one schema per service")]
-    rabbit[["RabbitMQ · :5672<br/>exchange carwash.events"]]
-    smtp["SMTP<br/>Gmail / Mailpit"]:::ext
-    expo["Expo Push API"]:::ext
+    sql[("SQL Server 2022<br/>database LavaRapido<br/>one schema per service")]
+    rabbit[["RabbitMQ<br/>exchange carwash.events"]]
+    ext["Gmail SMTP / Mailpit<br/>Expo Push API"]:::ext
 
-    client --> web
-    client --> mobile
-    operator --> mobile
-    admin --> web
-    admin --> mobile
+    people --> web
+    people --> mobile
     web -- "REST + JWT" --> gateway
     mobile -- "REST + JWT" --> gateway
-    gateway --> security
-    gateway --> customer
-    gateway --> booking
-    gateway --> operations
-    gateway --> payment
-    gateway --> notification
-
-    booking -- "REST (user JWT)<br/>validates vehicle" --> customer
-    customer -- "REST (user JWT)<br/>/users/me" --> security
-    notification -- "REST (X-Internal-Key)<br/>/internal/v1/users" --> security
-    operations -- "REST (user JWT or X-Internal-Key)<br/>bookings, status" --> booking
-    operations -- "REST (admin JWT or X-Internal-Key)<br/>accounts and contact" --> security
-    payment -- "REST (user JWT)<br/>booking total" --> booking
-
-    security -- user_registered --> rabbit
-    booking -- "booking.confirmed / cancelled" --> rabbit
-    operations -- "execution.*" --> rabbit
-    payment -- "payment.* / promotion_redeemed" --> rabbit
-    rabbit -- user_registered --> customer
-    rabbit -- "booking.confirmed<br/>(automatic assignment)" --> operations
-    rabbit -- "user, booking and execution events" --> notification
-
-    security --> sql
-    customer --> sql
-    booking --> sql
-    operations --> sql
-    payment --> sql
-    notification --> sql
-
-    security -- "recovery code" --> smtp
-    notification -- "welcome, booking, reminder" --> smtp
-    notification --> expo
+    gateway -- "/api/v1/**" --> services
+    services -- "each one its schemas" --> sql
+    services -- "events" --> rabbit
+    services -- "email and push" --> ext
 
     classDef person fill:#08427b,color:#fff,stroke:#052e56
     classDef ext fill:#999,color:#fff
 ```
 
-*Note.* All services share one SQL Server instance, but each one owns its schemas and there are no foreign keys between services (ADR-003). Diagram by the authors, based on `lavarapido-infra/docker-compose.yml`.
+*Note.* All services share one SQL Server instance, but each one owns its schemas and there are no foreign keys between services (ADR-003). Table 55 links each event to its effect and section 3.3 of the *Software Design Documentation* details the REST calls between services. Diagram by the authors, based on `lavarapido-infra/docker-compose.yml`.
 
 **Table 6**
 *System Components and Their Responsibility*
@@ -337,7 +304,7 @@ The system has three fixed roles and one non-human actor (see Table 8). No role 
 
 | Actor | Description | Main activities |
 |---|---|---|
-| Customer | Person who brings their vehicle to the car wash. Uses the Android app or the web. | Registers vehicles, books (and may choose the operator), reschedules or cancels, pays, applies promotions, checks their history, rates the service and receives the inspection report. |
+| Customer | Person who brings their vehicle to the car wash. Uses the Android app or the web. | Registers vehicles, books (and may choose the operator), cancels, pays, applies promotions, checks their history, rates the service and receives the inspection report. |
 | Operator | Employee who washes the vehicles. Uses the app or the web at the site. | Checks their assigned services, schedule and ratings, and indicates when each service starts and ends. |
 | Administrator | Person in charge of the car wash operation. | Sets up the catalog, prices, opening hours, bays, payment accounts and business data; manages users, operators and bookings; assigns or reassigns services; records the inspection report; reviews payments; manages promotions; checks reports and metrics. |
 | System | Automatic processes (timers and event consumers). | Validates availability, assigns operators when the booking is confirmed, sends reminders, alerts and notifications, and credits points. |
@@ -353,7 +320,7 @@ The system has three fixed roles and one non-human actor (see Table 8). No role 
 | RT-02 | Technical | Every external request enters through the API Gateway (port 8080). The `/internal/**` routes can only be reached between services, with a shared key. |
 | RT-03 | Technical | The services use a single SQL Server 2022 instance, with one schema per service and no foreign keys between services (ADR-003). |
 | RT-04 | Technical | Business rules are implemented in the domain, with no dependency on frameworks or on the database (hexagonal architecture, ADR-007). |
-| RT-05 | Technical | In this version, the whole solution runs in Docker containers with Docker Compose, without cloud infrastructure. |
+| RT-05 | Technical | The whole solution runs in Docker containers with Docker Compose, locally and on an Azure virtual machine behind Caddy (HTTPS); no managed cloud services are used. |
 | RD-01 | Data | Statuses are stored as English codes and translated in the interface (ADR-010). |
 | RD-02 | Data | Records with history (users, vehicles, services, bays) are deactivated, not deleted. |
 | RD-03 | Data | The receipt is stored in the database as a data URL and the inspection report photos as binary data, until file storage is available; the server limits the request body to 8 MB. |
@@ -448,7 +415,7 @@ The system does not control any hardware devices. Users need a computer with a b
 
 Each requirement has a unique identifier that is kept across versions. Each requirement is written as a verifiable capability and comes with measurable acceptance criteria (Wiegers & Beatty, 2013).
 
-Priority follows the MoSCoW technique: Essential (must have), Desirable (should have) and Optional (could have). The status of each requirement was verified against the code and the automated tests on October 16, 2026: Implemented (built and tested), Partial (partly built; what is missing is stated) and Pending (not built).
+Priority follows the MoSCoW technique: Essential (must have), Desirable (should have) and Optional (could have). The status of each requirement was verified against the code and the automated tests on October 20, 2026: Implemented (built and tested), Partial (partly built; what is missing is stated) and Pending (not built).
 
 ### 5.2 Authentication and Accounts
 
@@ -463,7 +430,7 @@ Priority follows the MoSCoW technique: Essential (must have), Desirable (should 
 | RF-004 | **Password change.** The system must allow the authenticated user to change their password after validating the current one. | • If the current password does not match, the change is rejected and the password stays the same.<br>• The new password meets the policy in RNF-004. | Desirable | Implemented |
 | RF-004b | **Lockout after failed attempts.** The system must lock the account for 15 minutes after 5 failed sign-in attempts within 15 minutes. | • During the lockout, sign-in is rejected with a 423 response (`ACCOUNT_LOCKED`) and a message explaining the lockout, even if the password is correct.<br>• A correct sign-in before the fifth failure clears the count.<br>• A successful password reset (RF-003) lifts the lockout. | Essential | Implemented |
 | RF-027 | **Own account management.** The system must allow the user to view and update their profile data and contact address, change their email, sign out and deactivate their account. | • Signing out revokes the session on the server.<br>• Deactivating the account asks for the current password and closes every session; an administrator cannot close their own account.<br>• The address is optional, has up to 200 characters and is stored on the server, so it is the same on the web and in the app; saving it empty deletes it.<br>• Accounts are deactivated, not deleted, to keep bookings, payments and ratings. | Desirable | Implemented |
-| RF-028 | **User administration.** The system must allow the administrator to list users with their registration date, create operator and administrator accounts, change the role of an account, and activate or deactivate accounts. | • A deactivated account cannot sign in and keeps its history.<br>• Each account has one role: the new one replaces the previous one and closes the user's sessions. Nobody changes their own role.<br>• An administrator account cannot be deactivated; its role is changed first.<br>• Only the administrator role can use this function (403 response for the other roles). | Desirable | Implemented |
+| RF-028 | **User administration.** The system must allow the administrator to list users with their registration date, create operator and administrator accounts, and activate or deactivate accounts. | • A deactivated account cannot sign in, all its sessions are closed and it keeps its history.<br>• The role is set when the account is created (customer through public registration; operator or administrator when an administrator creates it) and the system does not offer to change it afterwards.<br>• An administrator account cannot be deactivated (`ADMIN_CANNOT_BE_DISABLED`) and the administrator cannot deactivate their own account.<br>• Only the administrator role can use this function (403 response for the other roles). | Desirable | Implemented |
 | RF-029 | **Roles and permissions.** The system must handle three fixed roles (administrator, operator and customer) and allow the administrator to view and edit the permission matrix of each role. | • Roles cannot be created or deleted.<br>• In this version the matrix is informational: effective authorization is based on the role in the JWT token (ADR-015). | Optional | Implemented |
 
 **Evidence in the system (authentication and accounts module)**
@@ -515,15 +482,15 @@ Priority follows the MoSCoW technique: Essential (must have), Desirable (should 
 |---|---|---|---|---|
 | RF-005 | **Booking request.** The system must allow the customer to book one or more services for one of their vehicles, choosing the date and start time. | • The price of each service matches the selected vehicle type.<br>• Times are offered in 30-minute slots and up to 60 days ahead (configurable values).<br>• Only the customer's own vehicles are accepted. | Essential | Implemented |
 | RF-006 | **Availability check.** Before confirming, the system must validate the site's opening hours, their exceptions and the existence of an active bay without overlapping bookings. | • With a free bay, the booking is confirmed immediately with the bay assigned.<br>• With no free bay, nothing is saved and up to 5 alternative times on the same day are offered.<br>• When two requests arrive at the same time for the same bay and time, only one is confirmed (RNF-003). | Essential | Implemented |
-| RF-007 | **Rescheduling and cancellation.** The system must allow the customer to reschedule or cancel their booking while it is in the Scheduled or Confirmed status. | • Rescheduling assigns a new time and bay, and keeps the prices.<br>• Cancellation requires a reason from the list of reasons and frees the bay.<br>• Once the service is in progress or finished, both actions are blocked with an explanatory message. | Essential | Implemented |
-| RF-033 | **Administrative booking management.** The system must allow the administrator to view all bookings within a date range and change their status (confirm, cancel with a reason, mark as "no-show"), following the life cycle in Figure 4. | • A transition that the life cycle does not allow is rejected. | Desirable | Implemented |
+| RF-007 | **Rescheduling and cancellation.** The system must allow the customer to cancel their booking while it is in the Scheduled or Confirmed status and before its start time, and the administrator to reschedule it (RF-033). | • The customer cancels from their history by confirming a dialog, without writing a reason: the system stores the reason `CUSTOMER_REQUEST` and frees the bay.<br>• Rescheduling, done by the administrator, assigns a new time and bay, and keeps the prices.<br>• Once the service is in progress or finished, or, for the customer, once the start time has passed, the action is blocked (`BOOKING_NOT_CHANGEABLE`).<br>• The API also lets the customer reschedule (`PUT /bookings/{id}`), but the web and the app do not offer that screen (improvement action AM-03). | Essential | Implemented |
+| RF-033 | **Administrative booking management.** The system must allow the administrator to view all bookings within a date range and change their status (confirm, cancel with a reason, mark as "no-show") or reschedule them, following the life cycle in Figure 4. | • A transition that the life cycle does not allow is rejected. | Desirable | Implemented |
 
 **Evidence:**
 
 | RF | Screen |
 |---|---|
 | RF-005, RF-006 (booking request) | ![Book a wash](capturas/19_client_reservar.png) |
-| RF-007 (history / reschedule / cancel) | ![Booking history](capturas/20_client_historial.png) |
+| RF-007 (history and cancellation) | ![Booking history](capturas/20_client_historial.png) |
 | RF-033, RF-009 (administrative management and assignment) | ![Booking management](capturas/11_admin_reservas.png) |
 
 ### 5.6 Operations
@@ -585,7 +552,7 @@ Priority follows the MoSCoW technique: Essential (must have), Desirable (should 
 | ID | Requirement | Acceptance criteria | Priority | Status |
 |---|---|---|---|---|
 | RF-017 | **Dashboard per role.** The system must show each role a dashboard with summary metrics and shortcuts. | • With no data, a message says so instead of an empty screen.<br>• The administrator dashboard compares today's bookings with the previous day's, counted by booking-service in the car wash's time zone.<br>• The customer dashboard shows their next service with the name of the assigned operator. | Desirable | Implemented |
-| RF-018 | **Notifications.** The system must notify users about relevant events in an inbox with read/unread status, by push in the mobile app and by email for booking events. | • Types: welcome, booking created, confirmed and cancelled, reminder, operator assigned, service started and finished, payment confirmed and rejected, promotion available and redeemed, inspection report shared, and system message.<br>• Reminders are sent 24 hours and 1 hour before the booking and are cancelled when the service starts or finishes.<br>• The administrators get an alert when a booking starts in less than 2 hours and still has no operator.<br>• Each notification is written in the language of the account that receives it.<br>• Opening a notification marks it as read. | Desirable | Implemented |
+| RF-018 | **Notifications.** The system must notify users about relevant events in an inbox with read/unread status, by push in the mobile app and by email for booking events. | • Types: welcome, booking created, confirmed and cancelled, reminder, operator assigned, service started and finished, payment confirmed, rejected and refunded, points earned, promotion available and redeemed, inspection report shared, new app version notice, and system message; staff also get notices of a service cancelled, rescheduled or taken away (operator) and of a booking created, rescheduled, cancelled or without an operator (administrator).<br>• Reminders are sent 24 hours and 1 hour before the booking and are cancelled when the service starts or finishes.<br>• The administrators get an alert when a booking starts in less than 2 hours and still has no operator.<br>• Each notification is written in the language of the account that receives it.<br>• Opening a notification marks it as read. | Desirable | Implemented |
 | RF-019 | **Visual theme per account.** The system must allow choosing between four color palettes and keep the choice in the user's account. | • When another account signs in on the same device, that account's theme is applied. | Optional | Implemented |
 | RF-020 | **Language per account.** The system must allow switching the interface language between Spanish, English, French and Portuguese, and keep it in the account. | • Without a session, the chosen language is remembered in the browser. | Optional | Implemented |
 | RF-023 | **Operational reports.** The system must generate reports on services performed, revenue, average rating and performance per operator for a chosen period. | • With no data in the period, a message says so. | Desirable | **Partial.** The web reads real bookings and payments, and operations-service computes each operator's weekly metrics (services, punctuality, revenue and worked hours) and the team summary; consolidated reports for a chosen period are missing. |
@@ -630,7 +597,7 @@ Business rules are conditions that the system must always keep, regardless of th
 | INV-BOOK-003 | A booking has at least one service line; the same rate is not repeated within a booking. | RF-005 |
 | INV-BOOK-004 | The booking end time is later than the start time. | RF-005 |
 | INV-BOOK-005/006 | A booking is only confirmed within opening hours and with an active bay without overlapping bookings. | RF-006 |
-| INV-BOOK-007 | Only Scheduled or Confirmed bookings can be rescheduled or cancelled. | RF-007 |
+| INV-BOOK-007 | Only Scheduled or Confirmed bookings can be rescheduled or cancelled; the customer can only cancel before the start time. | RF-007 |
 | INV-BOOK-008 | Each line keeps the price in force when the booking was made, even if the catalog changes later. | RF-031 |
 | INV-EXEC-001/002 | Each service line has at most one execution and one responsible operator. | RF-009 |
 | INV-EXEC-003 | An operator cannot have overlapping services. | RF-009 |
@@ -652,7 +619,7 @@ Business rules are conditions that the system must always keep, regardless of th
 
 ## 6. Non-Functional Requirements
 
-Non-functional requirements are classified according to the product quality characteristics of ISO/IEC 25010 (ISO/IEC, 2023). Each one has a metric or criterion that can be verified in the local Docker environment (see Table 21). The requirements of 1,000 concurrent users in the cloud and 99% availability from earlier versions were withdrawn, because the project is not deployed to production.
+Non-functional requirements are classified according to the product quality characteristics of ISO/IEC 25010 (ISO/IEC, 2023). Each one has a metric or criterion that can be verified in the local Docker environment (see Table 21). The requirements of 1,000 concurrent users in the cloud and 99% availability from earlier versions were withdrawn, because the system is only published on a server for the academic review and does not serve the real operation of a car wash.
 
 **Table 21**
 *Non-Functional Requirements*
@@ -932,9 +899,9 @@ Each use case is specified with the Cockburn (2001) format: actors, precondition
 |---|---|
 | Actors | Customer. |
 | Precondition | The booking is in the Scheduled or Confirmed status. |
-| Main flow | 1. The customer opens the booking from their history. 2. They change the date and time, or cancel it giving a reason. 3. The system saves the change and sends a notification. |
-| Alternative flows | • Service in progress or finished: the action is blocked with an explanatory message. • New time without availability: alternatives are offered. |
-| Postcondition | The booking is rescheduled or cancelled; if cancelled, the bay is freed. |
+| Main flow | 1. The customer opens the booking from their history. 2. They choose to cancel it and confirm in the dialog (no reason is written). 3. The system cancels it with the reason `CUSTOMER_REQUEST`, frees the bay and sends a notification. |
+| Alternative flows | • Service in progress or finished, or the start time has passed: the cancellation is blocked with an explanatory message. • To change the date or time, the customer cancels and books again, or asks the car wash: rescheduling is done by the administrator (CU29). |
+| Postcondition | The booking is cancelled and the bay is freed. |
 | Requirements | RF-007 |
 | Status | Implemented |
 
@@ -1062,7 +1029,7 @@ Each use case is specified with the Cockburn (2001) format: actors, precondition
 |---|---|
 | Actors | Customer, operator, administrator. |
 | Precondition | The user is authenticated. |
-| Main flow | 1. The user opens the inbox. 2. They see the notifications with their status. 3. They open one and it is marked as read. |
+| Main flow | 1. The user opens the inbox, sorted from newest to oldest. 2. They see the notifications with their status. 3. Clicking one opens its detail and marks it as read. 4. If the notification refers to a section (for example, a booking or a payment), the "Go to…" button takes them to that screen. |
 | Alternative flows | • No notifications: the inbox shows a message saying so. |
 | Postcondition | The user is informed about the relevant events. |
 | Requirements | RF-018 |
@@ -1192,8 +1159,8 @@ Each use case is specified with the Cockburn (2001) format: actors, precondition
 |---|---|
 | Actors | Administrator. |
 | Precondition | The administrator is authenticated. |
-| Main flow | 1. They list the users. 2. They create operator or administrator accounts. 3. They change the role of an account. 4. They activate or deactivate accounts. 5. They edit a role's permission matrix. |
-| Alternative flows | • Email already registered: the account is not created.<br>• They try to change their own role: the system prevents it.<br>• They try to deactivate an administrator account or their own: the system prevents it and says to change the role first. |
+| Main flow | 1. They list the users. 2. They create operator or administrator accounts. 3. They activate or deactivate accounts. 4. They edit a role's permission matrix. |
+| Alternative flows | • Email already registered: the account is not created.<br>• They try to deactivate an administrator account or their own: the system prevents it and explains why. |
 | Postcondition | The accounts and the permission matrix are updated. |
 | Requirements | RF-028, RF-029 |
 | Status | Implemented |
@@ -1218,7 +1185,7 @@ Each use case is specified with the Cockburn (2001) format: actors, precondition
 |---|---|
 | Actors | Administrator. |
 | Precondition | The administrator is authenticated. |
-| Main flow | 1. They view the bookings within a date range. 2. They change the status of a booking (cancel with a reason, mark as "no-show"). |
+| Main flow | 1. They view the bookings within a date range. 2. They change the status of a booking (cancel with a reason, mark as "no-show"). 3. If needed, they reschedule it to another date and time, with a new bay and the same prices. |
 | Alternative flows | • Transition not allowed by the life cycle: it is rejected. |
 | Postcondition | The booking is in the new status and the customer is notified. |
 | Requirements | RF-033 |
@@ -1294,10 +1261,10 @@ stateDiagram-v2
     [*] --> CONFIRMED : create (a free bay is assigned immediately, RF-006)
     SCHEDULED --> CONFIRMED : confirm (needs a bay)
     SCHEDULED --> CANCELLED : cancel
-    CONFIRMED --> CONFIRMED : reschedule (new time/bay, prices are kept)
+    CONFIRMED --> CONFIRMED : reschedule (admin, new time and bay, prices are kept)
     CONFIRMED --> IN_PROGRESS : start
     CONFIRMED --> NO_SHOW : the customer did not show up
-    CONFIRMED --> CANCELLED : cancel (customer or admin, with a reason)
+    CONFIRMED --> CANCELLED : cancel (customer before the time, or admin with a reason)
     IN_PROGRESS --> COMPLETED : finish
     COMPLETED --> [*]
     CANCELLED --> [*]
@@ -1331,17 +1298,14 @@ stateDiagram-v2
 
 ```mermaid
 stateDiagram-v2
-    [*] --> PENDING : assign operator (RF-009)
+    [*] --> PENDING : assign operator (RF-008, RF-009)
+    PENDING --> PENDING : reassign operator (RF-009)
     PENDING --> IN_PROGRESS : start service (RF-012b)
-    IN_PROGRESS --> PAUSED : pause
-    PAUSED --> IN_PROGRESS : resume
     IN_PROGRESS --> COMPLETED : finish service (RF-012b)
-    IN_PROGRESS --> WITH_ISSUE : report an issue
     COMPLETED --> [*]
-    WITH_ISSUE --> [*]
 ```
 
-*Note.* `COMPLETED` enables the customer's rating (RF-012). Source: `operations-service` (statuses: Pending, In progress, Paused, Completed, With issue).
+*Note.* `COMPLETED` enables the customer's rating (RF-012). The status catalog also has `PAUSED` (Paused) and `WITH_ISSUE` (With issue), but no operation of the system moves an execution to those states. Source: `operations-service`, `ServiceExecution` (`reassign`, `start`, `finish`) and `ExecutionStatus`.
 
 ### 8.4 Domain Events and Notifications
 
@@ -1353,18 +1317,17 @@ The services publish events to RabbitMQ to notify other services without blockin
 | Event | Producer | Effect |
 |---|---|---|
 | `security.user_registered` | security-service | customer-service creates the profile (`customer.provisioned`); welcome notification. |
-| `security.user.deactivated` | security-service | Consumer services stop offering the account. |
-| `customer.vehicle.registered/updated/removed` | customer-service | Vehicle data is synchronized for bookings. |
-| `booking.created`, `booking.confirmed` | booking-service | Booking notifications and reminder scheduling; operations-service assigns the operator automatically, with the customer's preference if there is one. |
+| `booking.confirmed` | booking-service | Published when a booking is created and when it is rescheduled. Booking notification and reminder scheduling; operations-service assigns the operator automatically, with the customer's preference if there is one. |
 | `booking.cancelled` | booking-service | Cancellation notice and cancellation of the reminders. |
 | `payment.confirmed`, `payment.rejected` | payment-service | Notification of the payment review result. |
-| `payment.refunded` | payment-service | Refund record. |
+| `payment.refunded` | payment-service | Refund notification to the customer. |
 | `payment.promotion_redeemed` | payment-service | Notification of the redemption in the inbox and by email. |
+| `payment.loyalty_points_earned` | payment-service | Notification of the points earned and, for each promotion those points unlock, a notice with its code. |
 | `execution.operator_assigned` | operations-service | Notification to the customer and the operator; the booking no longer counts as unassigned. |
 | `execution.service_started`, `execution.service_completed` | operations-service | Notification to the customer and cancellation of the pending reminders. |
 | `execution.inspection_shared` | operations-service | Notification to the customer with the inspection report link. |
 
-*Note.* Each notification is written in the language of the account that receives it. The alert for bookings without an operator does not depend on an event: notification-service periodically checks the confirmed bookings that start in less than 2 hours without an operator.
+*Note.* Each notification is written in the language of the account that receives it. The `security.user.deactivated`, `customer.provisioned` and `customer.vehicle.registered/updated/removed` events exist in the domain, but today they are only written to the service log: they are not published to RabbitMQ because no service consumes them. notification-service also listens to `booking.created`, which booking-service does not publish. The alert for bookings without an operator does not depend on an event: notification-service periodically checks the confirmed bookings that start in less than 2 hours without an operator.
 
 ---
 
@@ -1458,7 +1421,7 @@ Table 57 links each functional requirement to its user story, its use cases, the
 
 ### 11.1 Progress Summary
 
-Of the 41 functional requirements, 40 are implemented and 1 is partially implemented (RF-023, consolidated reports). The seven server components are built; on October 9, 2026 the six services and the gateway were started, and each one answered `200 OK` on its health endpoint. The web and the Android app are connected to the six services through the gateway. Table 58 summarizes the automated tests of the services and the web, run on October 16, 2026.
+Of the 41 functional requirements, 40 are implemented and 1 is partially implemented (RF-023, consolidated reports). The seven server components are built; on October 9, 2026 the six services and the gateway were started, and each one answered `200 OK` on its health endpoint. The web and the Android app are connected to the six services through the gateway. Table 58 summarizes the automated tests of the services and the web, run on October 19, 2026.
 
 **Table 58**
 *Automated Tests by Component*

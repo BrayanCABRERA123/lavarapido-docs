@@ -6,7 +6,7 @@ Sistema de Gestión de Lavado Vehicular (Vehicle Washing)
 
 Requisitos, Configuración, Despliegue con Docker, Base de Datos SQL Server y Verificación de los Servicios
 
-Brayan Estiven Patiño Cabrera (líder de proyecto), Juan Camilo Guilombo Osorio (líder de frontend) y Merari Urbano (líder de backend)
+Brayan Estiven Patiño Cabrera (líder de proyecto), Juan Camilo Guilombo Osorio (líder de frontend) y Merari Urbano Quintero (líder de backend)
 
 Tecnólogo en Análisis y Desarrollo de Software (ADSO), Servicio Nacional de Aprendizaje (SENA), Centro de Formación: Industria
 
@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-17 de octubre de 2026
+20 de octubre de 2026
 
-Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.1
+Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.3
 
 ## Control de Versiones
 
@@ -34,6 +34,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026. Las figuras pasaron de marcadores a capturas reales de la instalación. Se actualizaron: 57 tablas en los nueve esquemas (comprobado con la consulta de la sección 11.5), bloqueo de la cuenta por intentos fallidos, endpoint de salud de payment-service que ahora comprueba la base de datos, referencia al Documento de Despliegue para el servidor de Azure y el APK, y temas del Anexo B que quedaron resueltos. | Equipo de desarrollo |
 | 4.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se agregaron la variable opcional *EXPO_PUBLIC_WEB_URL* de la aplicación móvil (sección 10.5) y las dependencias nativas *expo-image-picker* y *expo-image-manipulator*, que exigen *npm install* y un APK nuevo (sección 13.2). | Equipo de desarrollo |
 | 4.2 | 2026-10-19 | Integración continua con GitHub Actions: se actualizó el alcance y se retiró del Anexo B. | Equipo de desarrollo |
+| 4.3 | 2026-10-20 | Revisión contra el código del 20 de octubre de 2026: el catálogo *notification.notification_type* tiene 24 filas (las migraciones 031 y 038 agregaron la alerta de reserva sin operario y el aviso de versión nueva de la app). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -575,7 +576,7 @@ SELECT payment_status_id, code FROM payment.payment_status WHERE payment_status_
 | payment.payment_status | 5 filas; el identificador 3 corresponde a APPROVED. |
 | payment.payment_method_type | 4 filas: EFECTIVO, NEQUI, DAVIPLATA y TRANSFERENCIA. |
 | payment.loyalty_movement_type | 5 filas: EARNED, REDEEMED, EXPIRED, ADJUSTED y REVERSED. |
-| notification.notification_type | 22 filas. |
+| notification.notification_type | 24 filas. |
 
 *Nota.* Si una tabla de catálogo está vacía, el servicio dueño todavía no ha arrancado o su changeset de semilla no se ejecutó.
 

@@ -6,7 +6,7 @@ Sistema de Gestión de Lavado Vehicular (Vehicle Washing)
 
 Arquitectura de Microservicios, Modelo de Datos, Contratos de Integración, Seguridad y Lógica de Negocio
 
-Brayan Estiven Patiño Cabrera (líder de proyecto), Juan Camilo Guilombo Osorio (líder de frontend) y Merari Urbano (líder de backend)
+Brayan Estiven Patiño Cabrera (líder de proyecto), Juan Camilo Guilombo Osorio (líder de frontend) y Merari Urbano Quintero (líder de backend)
 
 Tecnólogo en Análisis y Desarrollo de Software (ADSO), Servicio Nacional de Aprendizaje (SENA), Centro de Formación: Industria
 
@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-17 de octubre de 2026
+20 de octubre de 2026
 
-Tipo de manual: Manual técnico (desarrolladores y arquitectos de software) · Versión 4.1
+Tipo de manual: Manual técnico (desarrolladores y arquitectos de software) · Versión 4.4
 
 ## Control de Versiones
 
@@ -36,6 +36,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada modificació
 | 4.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se documentó el informe de inspección de la aplicación móvil (sección 10.5), el cliente HTTP móvil con formularios multipart y la variable *EXPO_PUBLIC_WEB_URL* (sección 12.7), las dependencias *expo-image-picker* y *expo-image-manipulator* (Tabla 3) y la regla que ignora un 401 tardío después de cerrar sesión. | Equipo de desarrollo |
 | 4.2 | 2026-10-19 | Integración continua con GitHub Actions en los 10 repositorios (Tabla 6) y cierre de TD-006. | Equipo de desarrollo |
 | 4.3 | 2026-10-19 | Resultados de las pruebas del 19 de octubre de 2026 (655 automatizadas, 19 de punta a punta y 42 casos funcionales). | Equipo de desarrollo |
+| 4.4 | 2026-10-20 | Revisión contra el código del 20 de octubre de 2026: el cambio de rol de una cuenta se revirtió en el código y el manual no lo documenta; se agregó la regla de que una cuenta de administrador no se desactiva (*ADMIN_CANNOT_BE_DISABLED*) y sus códigos de error 403; se aclara que la web y la app no usan la reprogramación del cliente ni el envío manual de notificaciones. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -178,7 +179,42 @@ Es un sistema distribuido cliente-servidor con un backend de microservicios (Fig
 
 *Diagrama de Contenedores del Sistema*
 
-![Diagrama de contenedores del sistema Vehicle Washing](capturas/architecture.svg)
+```mermaid
+flowchart TB
+    people(["Cliente · Operario · Administrador"]):::person
+    web["App web<br/>Angular 21"]
+    mobile["App Android<br/>React Native / Expo"]
+    gateway["API Gateway · :8080<br/>Spring Cloud Gateway<br/>enrutamiento + CORS"]
+
+    subgraph services["Microservicios"]
+        direction LR
+        security["security-service :3001<br/>cuentas, roles, JWT, preferencias"]
+        customer["customer-service :3002<br/>clientes, vehículos"]
+        booking["booking-service :3003<br/>catálogo, horario, bahías, reservas"]
+        operations["operations-service :3004<br/>operarios, asignación, ejecución, inspección"]
+        payment["payment-service :3005 · .NET 8<br/>pagos, comprobantes, promociones, puntos"]
+        notification["notification-service :3006<br/>bandeja, push, correo, recordatorios"]
+        booking ~~~ notification
+        customer ~~~ payment
+        security ~~~ operations
+    end
+
+    sql[("SQL Server 2022<br/>base LavaRapido<br/>un esquema por servicio")]
+    rabbit[["RabbitMQ<br/>exchange carwash.events"]]
+    ext["Gmail SMTP / Mailpit<br/>Expo Push API"]:::ext
+
+    people --> web
+    people --> mobile
+    web -- "REST + JWT" --> gateway
+    mobile -- "REST + JWT" --> gateway
+    gateway -- "/api/v1/**" --> services
+    services -- "cada uno sus esquemas" --> sql
+    services -- "eventos" --> rabbit
+    services -- "correo y push" --> ext
+
+    classDef person fill:#08427b,color:#fff,stroke:#052e56
+    classDef ext fill:#999,color:#fff
+```
 
 *Nota.* Elaborado por los autores a partir de *docker-compose.yml* y del catálogo de servicios. En desarrollo, la aplicación web llega al gateway mediante *proxy.conf.json*.
 
@@ -374,7 +410,7 @@ Los errores siguen el RFC 9457, *Problem Details for HTTP APIs* (Nottingham et a
 |---|---|---|
 | 400 | Solicitud o entrada no válida. | VALIDATION_ERROR, INVALID_PLATE, UNKNOWN_PERMISSION, NOTIFICATION_TYPE_NOT_ALLOWED |
 | 401 | Autenticación ausente, no válida o vencida. | UNAUTHORIZED, INVALID_CREDENTIALS |
-| 403 | Autenticado, pero no autorizado. | FORBIDDEN, ACCOUNT_DISABLED |
+| 403 | Autenticado, pero no autorizado. | FORBIDDEN, ACCOUNT_DISABLED, CANNOT_DISABLE_OWN_ACCOUNT, ADMIN_CANNOT_BE_DISABLED |
 | 404 | Recurso no encontrado o de otro usuario. | VEHICLE_NOT_FOUND, BOOKING_NOT_FOUND |
 | 409 | Conflicto con el estado actual. | EMAIL_ALREADY_REGISTERED, SLOT_UNAVAILABLE, OPERATOR_BUSY, PAYMENT_ALREADY_REPORTED, TRANSACTION_REFERENCE_REUSED, PROMOTION_ALREADY_REDEEMED |
 | 503 | Dependencia no disponible. | CUSTOMER_SERVICE_UNAVAILABLE, BOOKING_SERVICE_UNAVAILABLE |
@@ -777,7 +813,7 @@ Cada servicio es dueño del changelog de Liquibase de sus esquemas y lo aplica a
 
 **Tablas:** esquemas security y audit.
 
-**Reglas:** contraseñas con BCrypt (costo 12); política de contraseñas de 8 a 72 caracteres con una mayúscula, un dígito y un carácter especial, sin espacios; el código de recuperación tiene 6 dígitos, dura 15 minutos, es de un solo uso y cinco intentos fallidos lo invalidan (contador en memoria); solicitar un código nuevo invalida el anterior; el correo de una cuenta inexistente produce la misma respuesta; el cambio de correo y la desactivación requieren la contraseña actual; un administrador no puede desactivar su propia cuenta; los identificadores de permisos desconocidos se rechazan con 400 UNKNOWN_PERMISSION; cinco intentos fallidos en 15 minutos bloquean la cuenta durante 15 minutos (*LoginLockout*, 423 ACCOUNT_LOCKED) y un ingreso correcto o el restablecimiento de la contraseña limpian el contador; el registro guarda la fecha de aceptación de los documentos legales cuando llegan *acceptsTerms* y *acceptsDataPolicy*.
+**Reglas:** contraseñas con BCrypt (costo 12); política de contraseñas de 8 a 72 caracteres con una mayúscula, un dígito y un carácter especial, sin espacios; el código de recuperación tiene 6 dígitos, dura 15 minutos, es de un solo uso y cinco intentos fallidos lo invalidan (contador en memoria); solicitar un código nuevo invalida el anterior; el correo de una cuenta inexistente produce la misma respuesta; el cambio de correo y la desactivación requieren la contraseña actual; un administrador no puede desactivar su propia cuenta (403 CANNOT_DISABLE_OWN_ACCOUNT) y una cuenta de administrador no se desactiva desde la administración de usuarios (403 ADMIN_CANNOT_BE_DISABLED); el rol se asigna al crear la cuenta y no hay un endpoint para cambiarlo; los identificadores de permisos desconocidos se rechazan con 400 UNKNOWN_PERMISSION; cinco intentos fallidos en 15 minutos bloquean la cuenta durante 15 minutos (*LoginLockout*, 423 ACCOUNT_LOCKED) y un ingreso correcto o el restablecimiento de la contraseña limpian el contador; el registro guarda la fecha de aceptación de los documentos legales cuando llegan *acceptsTerms* y *acceptsDataPolicy*.
 
 **Eventos:** publica UserRegistered (*security.user_registered*), que lleva *createdByAdmin* para que el mensaje de bienvenida explique cómo ingresar; PasswordChanged, EmailChanged y AccountDeactivated los levanta el dominio. **Rutas internas:** contacto de un usuario con sus interruptores y lista de los administradores activos.
 
@@ -838,7 +874,21 @@ La aplicación web consume el gateway mediante los servicios de *core/services*;
 
 *Diagrama de Estados de la Reserva*
 
-![Diagrama de estados de la reserva](capturas/booking-states.svg)
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> CONFIRMED : reservar con bahía libre
+    SCHEDULED --> CONFIRMED : confirmar (admin)
+    SCHEDULED --> CANCELLED : cancelar
+    CONFIRMED --> CONFIRMED : reprogramar (admin)
+    CONFIRMED --> IN_PROGRESS : iniciar (operario, desde 15 min antes)
+    CONFIRMED --> CANCELLED : cancelar (cliente antes de la hora, o admin)
+    CONFIRMED --> NO_SHOW : no asistió (admin)
+    IN_PROGRESS --> COMPLETED : finalizar (operario)
+    COMPLETED --> [*]
+    CANCELLED --> [*]
+    NO_SHOW --> [*]
+```
 
 *Nota.* Los estados en gris son finales. El administrador también puede cambiar el estado de una reserva directamente desde el panel (*PATCH /api/v1/admin/bookings/{id}/status*).
 
@@ -891,7 +941,7 @@ security-service emite un JWT firmado con HS256 (secreto JWT_SECRET de al menos 
 | GET | /api/v1/bookings/availability?date=&vehicleTypeId=&serviceIds= | Token | Horas de inicio libres de un día. |
 | POST | /api/v1/bookings | CLIENT | Crea una reserva. |
 | GET | /api/v1/bookings/me, /api/v1/bookings/{id}, /api/v1/bookings/cancellation-reasons | CLIENT | Reservas propias y catálogo de motivos. |
-| PUT, POST | /api/v1/bookings/{id}, /api/v1/bookings/{id}/cancel | CLIENT | Reprogramar o cancelar antes del inicio. |
+| PUT, POST | /api/v1/bookings/{id}, /api/v1/bookings/{id}/cancel | CLIENT | Reprogramar o cancelar antes del inicio. La web y la app solo usan la cancelación (sin motivo: se guarda CUSTOMER_REQUEST); la reprogramación la hace el administrador. |
 | GET, POST | /api/v1/admin/bookings (?from=&to=&status=) | ADMIN | Lista y crea reservas para cualquier cliente. |
 | GET | /api/v1/admin/bookings/day-summary?date= | ADMIN | Indicadores del día para el panel. |
 | GET, PUT | /api/v1/admin/bookings/{id} | ADMIN | Detalle y reprogramación. |
@@ -930,7 +980,7 @@ security-service emite un JWT firmado con HS256 (secreto JWT_SECRET de al menos 
 | GET | /api/v1/notifications, /api/v1/notifications/unread-count | Token | Bandeja (filtros y paginación) y contador. |
 | PATCH, POST, DELETE | /api/v1/notifications/{id}/read, /unread, /read-all, /{id} | Token | Estado de lectura y borrado. |
 | PUT, POST | /api/v1/notifications/devices, /devices/unregister | Token | Tokens push de Expo. |
-| POST | /api/v1/admin/notifications | ADMIN | Notificación manual; solo SYSTEM_MESSAGE o INSPECTION_REPORT (400 NOTIFICATION_TYPE_NOT_ALLOWED). |
+| POST | /api/v1/admin/notifications | ADMIN | Notificación manual; solo SYSTEM_MESSAGE o INSPECTION_REPORT (400 NOTIFICATION_TYPE_NOT_ALLOWED). Ninguna pantalla de la web ni de la app la usa. |
 | GET | /internal/v1/users/{userId}/contact | Llave interna | Contacto e interruptores de notificación de un usuario para notification-service. |
 | GET | /internal/v1/users/admins | Llave interna | Identificadores de los administradores activos. |
 | GET | /internal/v1/bookings?from=&to=, /internal/v1/bookings/{id} | Llave interna | Reservas para la asignación automática de operations-service. |

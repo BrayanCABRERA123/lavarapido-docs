@@ -6,7 +6,7 @@ Vehicle Washing Management System (Vehicle Washing)
 
 Microservices Architecture, Data Model, Integration Contracts, Security, and Business Logic
 
-Brayan Estiven Patiño Cabrera (Project Leader), Juan Camilo Guilombo Osorio (Frontend Leader), and Merari Urbano (Backend Leader)
+Brayan Estiven Patiño Cabrera (Project Leader), Juan Camilo Guilombo Osorio (Frontend Leader), and Merari Urbano Quintero (Backend Leader)
 
 Technologist in Software Analysis and Development (ADSO), Servicio Nacional de Aprendizaje (SENA), Training Center: Industria
 
@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 17, 2026
+October 20, 2026
 
-Manual Type: Technical Manual (Developers and Software Architects) · Version 4.1
+Manual Type: Technical Manual (Developers and Software Architects) · Version 4.4
 
 ## Version Control
 
@@ -36,6 +36,7 @@ Table 1 records the change history of this document. Each modification must add 
 | 4.1 | 2026-10-17 | Review against the code of October 17, 2026. Documented the inspection report of the mobile app (section 10.5), the mobile HTTP client with multipart forms and the *EXPO_PUBLIC_WEB_URL* variable (section 12.7), the *expo-image-picker* and *expo-image-manipulator* dependencies (Table 3), and the rule that ignores a late 401 after logging out. | Development team |
 | 4.2 | 2026-10-19 | Continuous integration with GitHub Actions in the 10 repositories (Table 6) and closure of TD-006. | Development team |
 | 4.3 | 2026-10-19 | Test results of October 19, 2026 (655 automated, 19 end-to-end, and 42 functional cases). | Development team |
+| 4.4 | 2026-10-20 | Review against the code of October 20, 2026: the role change of an account was reverted in the code and the manual does not document it; the rule that an administrator account cannot be deactivated (*ADMIN_CANNOT_BE_DISABLED*) and its 403 error codes were added; it is now stated that the web and the app use neither the customer's rescheduling nor the manual sending of notifications. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -178,7 +179,42 @@ It is a distributed client-server system with a microservices backend (Figure 1 
 
 *Container Diagram of the System*
 
-![Container diagram of the Vehicle Washing system](capturas/architecture.svg)
+```mermaid
+flowchart TB
+    people(["Client · Operator · Administrator"]):::person
+    web["Web app<br/>Angular 21"]
+    mobile["Android app<br/>React Native / Expo"]
+    gateway["API Gateway · :8080<br/>Spring Cloud Gateway<br/>routing + CORS"]
+
+    subgraph services["Microservices"]
+        direction LR
+        security["security-service :3001<br/>accounts, roles, JWT, preferences"]
+        customer["customer-service :3002<br/>customers, vehicles"]
+        booking["booking-service :3003<br/>catalog, schedule, bays, bookings"]
+        operations["operations-service :3004<br/>operators, assignment, execution, inspection"]
+        payment["payment-service :3005 · .NET 8<br/>payments, receipts, promotions, points"]
+        notification["notification-service :3006<br/>inbox, push, email, reminders"]
+        booking ~~~ notification
+        customer ~~~ payment
+        security ~~~ operations
+    end
+
+    sql[("SQL Server 2022<br/>database LavaRapido<br/>one schema per service")]
+    rabbit[["RabbitMQ<br/>exchange carwash.events"]]
+    ext["Gmail SMTP / Mailpit<br/>Expo Push API"]:::ext
+
+    people --> web
+    people --> mobile
+    web -- "REST + JWT" --> gateway
+    mobile -- "REST + JWT" --> gateway
+    gateway -- "/api/v1/**" --> services
+    services -- "each one its schemas" --> sql
+    services -- "events" --> rabbit
+    services -- "email and push" --> ext
+
+    classDef person fill:#08427b,color:#fff,stroke:#052e56
+    classDef ext fill:#999,color:#fff
+```
 
 *Note.* Prepared by the authors from *docker-compose.yml* and the service catalog. The web application reaches the gateway through *proxy.conf.json* in development.
 
@@ -374,7 +410,7 @@ Errors follow RFC 9457, *Problem Details for HTTP APIs* (Nottingham et al., 2023
 |---|---|---|
 | 400 | Invalid request or input. | VALIDATION_ERROR, INVALID_PLATE, UNKNOWN_PERMISSION, NOTIFICATION_TYPE_NOT_ALLOWED |
 | 401 | Authentication absent, invalid, or expired. | UNAUTHORIZED, INVALID_CREDENTIALS |
-| 403 | Authenticated but not authorized. | FORBIDDEN, ACCOUNT_DISABLED |
+| 403 | Authenticated but not authorized. | FORBIDDEN, ACCOUNT_DISABLED, CANNOT_DISABLE_OWN_ACCOUNT, ADMIN_CANNOT_BE_DISABLED |
 | 404 | Resource not found or belonging to another user. | VEHICLE_NOT_FOUND, BOOKING_NOT_FOUND |
 | 409 | Conflict with the current state. | EMAIL_ALREADY_REGISTERED, SLOT_UNAVAILABLE, OPERATOR_BUSY, PAYMENT_ALREADY_REPORTED, TRANSACTION_REFERENCE_REUSED, PROMOTION_ALREADY_REDEEMED |
 | 503 | Dependency unavailable. | CUSTOMER_SERVICE_UNAVAILABLE, BOOKING_SERVICE_UNAVAILABLE |
@@ -777,7 +813,7 @@ Each service owns the Liquibase changelog of its schemas and applies it at start
 
 **Tables:** schemas security and audit.
 
-**Rules:** passwords with BCrypt (cost 12); password policy of 8 to 72 characters with an uppercase letter, a digit, and a special character, without spaces; the recovery code has 6 digits, lasts 15 minutes, is single use, and five failed attempts invalidate it (counter in memory); requesting a new code invalidates the previous one; the email of a nonexistent account produces the same response; email change and deactivation require the current password; an administrator cannot deactivate their own account; five failed attempts within 15 minutes lock the account for 15 minutes (*LoginLockout*, 423 ACCOUNT_LOCKED), and a successful login or a password reset clears the counter; registration stores the acceptance date of the legal documents when *acceptsTerms* and *acceptsDataPolicy* arrive.
+**Rules:** passwords with BCrypt (cost 12); password policy of 8 to 72 characters with an uppercase letter, a digit, and a special character, without spaces; the recovery code has 6 digits, lasts 15 minutes, is single use, and five failed attempts invalidate it (counter in memory); requesting a new code invalidates the previous one; the email of a nonexistent account produces the same response; email change and deactivation require the current password; an administrator cannot deactivate their own account (403 CANNOT_DISABLE_OWN_ACCOUNT) and an administrator account cannot be deactivated from user administration (403 ADMIN_CANNOT_BE_DISABLED); the role is set when the account is created and there is no endpoint to change it; five failed attempts within 15 minutes lock the account for 15 minutes (*LoginLockout*, 423 ACCOUNT_LOCKED), and a successful login or a password reset clears the counter; registration stores the acceptance date of the legal documents when *acceptsTerms* and *acceptsDataPolicy* arrive.
 
 **Events:** publishes UserRegistered (*security.user_registered*), which carries *createdByAdmin* so that the welcome message explains how to log in; PasswordChanged, EmailChanged, and AccountDeactivated are raised by the domain. **Internal routes:** contact of a user with its switches, and list of active administrators.
 
@@ -838,7 +874,21 @@ The web application consumes the gateway through the services of *core/services*
 
 *Booking State Diagram*
 
-![State diagram of the booking](capturas/booking-states.svg)
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> CONFIRMED : book with a free bay
+    SCHEDULED --> CONFIRMED : confirm (admin)
+    SCHEDULED --> CANCELLED : cancel
+    CONFIRMED --> CONFIRMED : reschedule (admin)
+    CONFIRMED --> IN_PROGRESS : start (operator, from 15 min before)
+    CONFIRMED --> CANCELLED : cancel (client before the time, or admin)
+    CONFIRMED --> NO_SHOW : no show (admin)
+    IN_PROGRESS --> COMPLETED : finish (operator)
+    COMPLETED --> [*]
+    CANCELLED --> [*]
+    NO_SHOW --> [*]
+```
 
 *Note.* Gray states are final. The administrator can also change the status of a booking directly from the panel (*PATCH /api/v1/admin/bookings/{id}/status*).
 
@@ -891,7 +941,7 @@ security-service issues a JWT signed with HS256 (secret JWT_SECRET of at least 3
 | GET | /api/v1/bookings/availability?date=&vehicleTypeId=&serviceIds= | Token | Free start times of a day. |
 | POST | /api/v1/bookings | CLIENT | Creates a booking. |
 | GET | /api/v1/bookings/me, /api/v1/bookings/{id}, /api/v1/bookings/cancellation-reasons | CLIENT | Own bookings and catalog of reasons. |
-| PUT, POST | /api/v1/bookings/{id}, /api/v1/bookings/{id}/cancel | CLIENT | Reschedule or cancel before the start. |
+| PUT, POST | /api/v1/bookings/{id}, /api/v1/bookings/{id}/cancel | CLIENT | Reschedule or cancel before the start. The web and the app only use the cancellation (without a reason: CUSTOMER_REQUEST is stored); rescheduling is done by the administrator. |
 | GET, POST | /api/v1/admin/bookings (?from=&to=&status=) | ADMIN | Lists and creates bookings for any customer. |
 | GET | /api/v1/admin/bookings/day-summary?date= | ADMIN | Indicators of the day for the dashboard. |
 | GET, PUT | /api/v1/admin/bookings/{id} | ADMIN | Detail and rescheduling. |
@@ -930,7 +980,7 @@ security-service issues a JWT signed with HS256 (secret JWT_SECRET of at least 3
 | GET | /api/v1/notifications, /api/v1/notifications/unread-count | Token | Inbox (filters and pagination) and counter. |
 | PATCH, POST, DELETE | /api/v1/notifications/{id}/read, /unread, /read-all, /{id} | Token | Read status and deletion. |
 | PUT, POST | /api/v1/notifications/devices, /devices/unregister | Token | Expo push tokens. |
-| POST | /api/v1/admin/notifications | ADMIN | Manual notification; only SYSTEM_MESSAGE or INSPECTION_REPORT (400 NOTIFICATION_TYPE_NOT_ALLOWED). |
+| POST | /api/v1/admin/notifications | ADMIN | Manual notification; only SYSTEM_MESSAGE or INSPECTION_REPORT (400 NOTIFICATION_TYPE_NOT_ALLOWED). No screen of the web or the app uses it. |
 | GET | /internal/v1/users/{userId}/contact | Internal key | Contact and notification switches of a user for notification-service. |
 | GET | /internal/v1/users/admins | Internal key | Identifiers of the active administrators. |
 | GET | /internal/v1/bookings?from=&to=, /internal/v1/bookings/{id} | Internal key | Bookings for the automatic assignment of operations-service. |

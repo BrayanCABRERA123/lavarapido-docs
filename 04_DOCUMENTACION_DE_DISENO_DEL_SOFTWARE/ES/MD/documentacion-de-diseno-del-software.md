@@ -15,8 +15,8 @@
 | Aprendices | Brayan Estiven Patiño Cabrera (líder de proyecto), Juan Camilo Guilombo Osorio (líder de frontend), Merari Urbano (líder de backend) |
 | Instructora | Karol Daniela Correa |
 | Centro de formación | Industria |
-| Fecha | 19 de octubre de 2026 |
-| Versión | 1.3 |
+| Fecha | 20 de octubre de 2026 |
+| Versión | 1.4 |
 
 
 
@@ -68,29 +68,29 @@ La web tiene 35 pantallas enrutadas y la app móvil 31 pantallas; ambas separan 
 | `**` | Página no encontrada | Público | Avisar que la dirección no existe y volver al inicio | Ninguno |
 | `/client` | Inicio del cliente | CLIENT | Resumen, próxima reserva con su operario y puntos | `GET /bookings/me`, `/vehicles`, `/loyalty/balance`, `/operators/my-bookings` |
 | `/client/reserve` | Reservar | CLIENT | Elegir vehículo, servicio, fecha, hora y, si quiere, operario | `GET /catalog/services`, `/bookings/availability`, `/operators/available`; `POST /bookings` |
-| `/client/payment` | Pagos | CLIENT | Pagar una reserva y subir comprobante | `GET /payment-accounts`, `/payments/me/bookings`; `POST /payments`; `/loyalty/*` |
-| `/client/history` | Historial | CLIENT | Reservas pasadas, pagos y calificación | `/bookings/me`, `/payments/me`, `POST /ratings/{bookingId}` |
+| `/client/payment` | Pagos | CLIENT | Pagar una reserva y subir comprobante; con el pago aprobado solo queda el resumen | `GET /payment-accounts`, `/payments/me/bookings`; `POST /payments`; `/loyalty/*` |
+| `/client/history` | Historial | CLIENT | Reservas de la más reciente a la más antigua, pagos, cancelación y calificación; al hacer clic se abre el detalle con **Ir al pago** | `/bookings/me`, `POST /bookings/{id}/cancel`, `/payments/me`, `POST /ratings/{bookingId}` |
 | `/client/vehicles` | Mis vehículos | CLIENT | CRUD de vehículos | `GET/POST/PUT/DELETE /vehicles`, `GET /vehicle-types` |
-| `/client/notifications` | Notificaciones | CLIENT | Bandeja de avisos | `/notifications/*` |
+| `/client/notifications` | Notificaciones | CLIENT | Bandeja de avisos; al hacer clic se abre el detalle con **Ir a...** | `/notifications/*` |
 | `/client/profile` | Perfil | CLIENT | Datos personales, dirección, correo y contraseña | `/users/me`, `/users/me/address`, `/users/me/password`, `/users/me/email` |
 | `/client/configuration` | Configuración | CLIENT | Tema, idioma y canales de aviso | `/users/me/preferences` |
 | `/admin` | Dashboard | ADMIN | Indicadores del día y alertas | `GET /admin/bookings/day-summary` y stores de reservas, pagos, operarios y horario |
 | `/admin/reservations` | Reservas | ADMIN | Crear, reprogramar, cambiar estado y asignar operario | `/admin/bookings/*`, `/admin/assignments/*` |
 | `/admin/reservations/:id/inspection` | Inspección | ADMIN | Recorrer las fases, registrar hallazgos con fotos, publicar y compartir | `/admin/inspections/{bookingId}/**` |
 | `/admin/payments` | Pagos | ADMIN | Revisar, aprobar, rechazar y reembolsar | `/admin/payments/*` |
-| `/admin/management` | Gestión | ADMIN | Usuarios, roles y permisos, servicios, promociones | `/admin/users`, `/admin/roles-permissions`, `/admin/catalog/services`, `/admin/promotions` |
+| `/admin/management` | Gestión | ADMIN | Usuarios (crear, activar o desactivar; filtros Habilitados e Inhabilitados), roles y permisos, servicios, promociones | `/admin/users`, `/admin/roles-permissions`, `/admin/catalog/services`, `/admin/promotions` |
 | `/admin/schedule` | Horario y bahías | ADMIN | Horario semanal, excepciones y bahías | `/admin/schedule/*`, `/admin/bays/*` |
 | `/admin/operators` | Operarios | ADMIN | Lista, resumen del equipo y alta de operarios | `/admin/operators`, `/admin/operators/summary`, `POST /admin/users` |
 | `/admin/operators/:id` | Detalle de operario | ADMIN | Disponibilidad, ausencias, ficha y métricas de la semana | `/admin/operators/{id}/availability`, `/absences`, `/metrics`, `/admin/operators/profiles`, `PUT /admin/operators/{id}/profile` |
 | `/admin/operators/:id/calendar` | Calendario del operario | ADMIN | Agenda del operario | `/admin/assignments` |
 | `/admin/reports` | Reportes | ADMIN | Ingresos y servicios; exportar PDF/Excel | Stores de pagos y reservas (jsPDF, xlsx) |
-| `/admin/notifications` | Notificaciones | ADMIN | Bandeja y envío de avisos | `/notifications/*`, `POST /admin/notifications` |
+| `/admin/notifications` | Notificaciones | ADMIN | Bandeja de avisos; el detalle lleva a Reservas o al inicio | `/notifications/*` |
 | `/admin/profile` | Perfil | ADMIN | Datos de la cuenta | `/users/me` |
 | `/admin/settings` | Ajustes | ADMIN | Datos del negocio y medios de pago | `/admin/payment-accounts`, `GET/PUT /admin/establishment` |
 | `/operator` | Inicio del operario | OPERATOR | Servicios pendientes y estadísticas | `/operator/services`, `/notifications` |
 | `/operator/assigned-services` | Servicios asignados | OPERATOR | Iniciar y finalizar servicios | `POST /operator/services/{id}/start`, `/finish` |
 | `/operator/schedule` | Agenda | OPERATOR | Calendario de servicios | `GET /operator/services` |
-| `/operator/service-history` | Historial | OPERATOR | Servicios terminados | `GET /operator/services` |
+| `/operator/service-history` | Historial | OPERATOR | Servicios terminados, del más reciente al más antiguo; el detalle lleva a Calificaciones si el servicio fue calificado | `GET /operator/services` |
 | `/operator/qualifications` | Calificaciones | OPERATOR | Notas y comentarios recibidos | `GET /operator/ratings` |
 | `/operator/notifications`, `/profile`, `/settings` | Comunes | OPERATOR | Avisos, perfil y preferencias | `/notifications/*`, `/users/me/*` |
 
@@ -129,6 +129,7 @@ flowchart LR
   A -->|rol ADMIN| D["Dashboard admin"]
   C --> C1["Reservar"] --> C2["Pagos"]
   C --> C3["Historial"] --> C4["Calificar"]
+  C3 -->|detalle e Ir al pago| C2
   C --> C5["Vehículos"]
   C --> CN["Notificaciones / Perfil / Configuración"]
   O --> O1["Servicios asignados"] --> O2["Iniciar / Finalizar"]
@@ -147,7 +148,7 @@ El diagrama muestra la navegación web; el móvil sigue el mismo recorrido por r
 
 ### 2.4 Capturas de pantalla
 
-Las capturas se tomaron el 9 de octubre de 2026 con el sistema completo en ejecución: la web en Chrome a 1366 × 768 y la app móvil en su versión web (Expo) con tamaño de celular (390 × 844). Los datos visibles son de la base de desarrollo y de las pruebas funcionales.
+Las capturas se tomaron de nuevo el 19 de octubre de 2026 con el sistema completo en ejecución: la web en Chrome a 1366 × 768 y la app móvil en su versión web (Expo) con tamaño de celular (390 × 844). Los datos visibles son cuentas y reservas de demostración. La Figura 12 se tomó de nuevo el 20 de octubre, después de quitar el cambio de tipo de usuario y el filtro Registrados.
 
 **Figura 2**
 
@@ -237,18 +238,30 @@ El sistema sigue una arquitectura de microservicios (Newman, 2021): un API Gatew
 
 ```mermaid
 flowchart TB
-  WEB["Web Angular 21<br/>navegador :4200"] -->|HTTP + JWT Bearer| GW
-  MOV["Móvil React Native / Expo<br/>Android :8081"] -->|HTTP + JWT Bearer| GW
+  WEB["Web Angular 21<br/>navegador :4200"]
+  MOV["Móvil React Native / Expo<br/>Android :8081"]
   GW["API Gateway Spring Cloud :8080<br/>enruta /api/v1/** y responde CORS"]
-  GW --> SEC["security :3001<br/>Java"]
-  GW --> CUS["customer :3002<br/>Java"]
-  GW --> BOK["booking :3003<br/>Java"]
-  GW --> OPS["operations :3004<br/>Java"]
-  GW --> PAY["payment :3005<br/>.NET 8"]
-  GW --> NOT["notification :3006<br/>Java"]
-  SEC & CUS & BOK & OPS & PAY & NOT -.->|eventos| MQ[["RabbitMQ :5672<br/>topic exchange carwash.events"]]
-  SEC & CUS & BOK & OPS & PAY & NOT --> DB[("SQL Server 2022 :1433<br/>base LavaRapido, un esquema por servicio")]
-  NOT --> EXT["SMTP y Expo Push"]
+    subgraph SVC["Microservicios (cada uno valida el JWT)"]
+      direction LR
+      SEC["security :3001<br/>Java"]
+      CUS["customer :3002<br/>Java"]
+      BOK["booking :3003<br/>Java"]
+      OPS["operations :3004<br/>Java"]
+      PAY["payment :3005<br/>.NET 8"]
+      NOT["notification :3006<br/>Java"]
+      BOK ~~~ NOT
+      CUS ~~~ PAY
+      SEC ~~~ OPS
+    end
+  MQ[["RabbitMQ :5672<br/>topic exchange carwash.events"]]
+  DB[("SQL Server 2022 :1433<br/>base LavaRapido, un esquema por servicio")]
+  EXT["SMTP y Expo Push"]
+  WEB -->|HTTP + JWT Bearer| GW
+  MOV -->|HTTP + JWT Bearer| GW
+  GW --> SVC
+  SVC --> DB
+  SVC -.->|eventos| MQ
+  SVC -->|"correo: security y notification<br/>push: notification"| EXT
 ```
 
 > *Nota.* Notación basada en el modelo C4 (Brown, s.f.). Los clientes solo hablan con el gateway; cada servicio valida el JWT y guarda en su propio esquema.
@@ -299,6 +312,7 @@ Hay dos estilos. Las consultas que necesitan respuesta inmediata van por REST s�
 | --- | --- | --- |
 | `security.user_registered` | security | customer (crea el perfil del cliente), notification (bienvenida) |
 | `customer.provisioned` | customer (solo lo escribe en el log) | Ninguno |
+| `security.user.email-changed`, `security.user.password-changed`, `security.user.deactivated` | security (solo los escribe en el log) | Ninguno |
 | `booking.confirmed` | booking | notification (aviso y recordatorios), operations (asignación automática, con el operario que eligió el cliente) |
 | `booking.cancelled` | booking | notification |
 | `execution.operator_assigned`, `execution.service_started`, `execution.service_completed`, `execution.inspection_shared` | operations | notification |
@@ -352,29 +366,39 @@ La arquitectura hexagonal separa el núcleo de dominio de la infraestructura med
 
 ```mermaid
 flowchart TB
-  subgraph PC["Equipo de desarrollo / servidor (Docker Compose, proyecto lavarapido)"]
+  NAV["Navegador: web :4200"]
+  CEL["Celular: Expo :8081"]
+  subgraph PC["Docker Compose · proyecto lavarapido"]
     GW["api-gateway :8080"]
-    SEC["security-service :3001"]
-    CUS["customer-service :3002"]
-    BOK["booking-service :3003"]
-    OPS["operations-service :3004"]
-    PAY["payment-service :3005"]
-    NOT["notification-service :3006"]
+    subgraph SVC["Servicios"]
+      direction LR
+      SEC["security :3001<br/>Java"]
+      CUS["customer :3002<br/>Java"]
+      BOK["booking :3003<br/>Java"]
+      OPS["operations :3004<br/>Java"]
+      PAY["payment :3005<br/>.NET 8"]
+      NOT["notification :3006<br/>Java"]
+      BOK ~~~ NOT
+      CUS ~~~ PAY
+      SEC ~~~ OPS
+    end
     DB[("sqlserver :1433<br/>volumen sqlserver-data")]
     MQ[["rabbitmq :5672 / :15672"]]
     MAIL["mailpit :1025 / :8025 (solo desarrollo)"]
     INIT["db-init y payment-migrate<br/>(se ejecutan una vez)"]
   end
-  NAV["Navegador: web :4200"] --> GW
-  CEL["Celular: Expo :8081"] --> GW
-  GW --> SEC & CUS & BOK & OPS & PAY & NOT
-  SEC & CUS & BOK & OPS & PAY & NOT --> DB
-  SEC & CUS & BOK & OPS & PAY & NOT --> MQ
-  SEC & NOT --> MAIL
+  NAV --> GW
+  CEL --> GW
+  GW --> SVC
+  SVC --> DB
+  SVC -->|eventos| MQ
+  SVC -->|"correo: security y notification"| MAIL
   INIT --> DB
 ```
 
 `docker compose up -d` levanta solo SQL Server, Mailpit y RabbitMQ, y los servicios se corren desde el IDE. `docker compose --profile app up -d --build` levanta además los siete servicios en contenedores (`Backend/lavarapido-infra/docker-compose.yml:1-6`). Los servicios Java crean sus tablas con Liquibase al arrancar; payment-service las crea con el contenedor `payment-migrate`.
+
+En producción el mismo archivo de compose corre en una máquina virtual de Azure con `docker-compose.prod.yml` encima: se agregan dos contenedores, `web` (nginx con el build de Angular) y `caddy`, que es el único con puertos publicados (80 y 443, con el certificado HTTPS que gestiona Caddy). Caddy envía `/api/*` al gateway, `/app/*` a la descarga del APK y su `version.json`, y todo lo demás a la web. Ningún servicio publica puertos en el servidor, Mailpit no se levanta (los correos salen por Gmail SMTP) y el servidor se actualiza con `deploy/update-server.sh`, por un integrante del equipo por SSH o desde el flujo manual de GitHub Actions "Desplegar en Azure" (`deploy/ci-deploy.sh`). Fuente: `lavarapido-infra/docker-compose.prod.yml`, `deploy/Caddyfile`, `.github/workflows/deploy.yml`; diagrama en `vehicle-w-docs/08-uml/diagrams/source/deployment-production.md`.
 
 ## 4. Patrones de diseño
 
@@ -473,7 +497,7 @@ La base `LavaRapido` (SQL Server 2022) tiene 57 tablas en 9 esquemas, creadas po
 
 | Esquema | Servicio dueño | Tablas | Changelog |
 | --- | --- | --- | --- |
-| `security` | security-service | 11 | `001`–`036` en `security-service/src/main/resources/db/changelog` |
+| `security` | security-service | 11 | `001`–`039` en `security-service/src/main/resources/db/changelog` |
 | `audit` | security-service | 1 | `002-create-security-and-audit-core.sql` |
 | `customer` | customer-service | 3 | `004`, `014`, `015` |
 | `catalog` | booking-service | 3 | `005`, `022` |
@@ -481,15 +505,15 @@ La base `LavaRapido` (SQL Server 2022) tiene 57 tablas en 9 esquemas, creadas po
 | `execution` | operations-service | 11 | `007`, `033`, `037` |
 | `payment` | payment-service | 7 | `lavarapido-payment-service/db/changelog/changes/008`–`020` |
 | `promotion` | payment-service | 5 | `003`–`007`, `017`, `018` |
-| `notification` | notification-service | 6 | `010`–`031` |
+| `notification` | notification-service | 6 | `010`–`038` |
 
-
+> *Nota.* La tabla `security.custom_role` se creó en `023` y se eliminó en `026`; no se cuenta. Documentos anteriores (`MODELO-DE-DATOS.md`) hablan de 43 tablas: los changelogs agregaron después `bay_status`, `schedule_history`, `device_token`, `processed_event`, `booking_reminder` y `booking_tracking`.
 
 ### 5.1 Convenciones comunes
 
 - **Bloque de auditoría.** Casi todas las tablas de dominio terminan con `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by` y `row_version`. No lo tienen las tablas base de `security` (`person`, `app_user`, `role`, `permission`, `role_permission`, `user_role`, `user_session`, `password_reset_token`), `audit.audit_log`, `booking.schedule_history` ni `notification.booking_tracking`. Tampoco lo tienen completo las tablas que se agregaron en octubre (`security.login_lockout`, `security.person_address`, `execution.operator_profile`, `execution.operator_skill` y las cuatro del informe de inspección): solo guardan las columnas de fecha y autor que usan.
 - **Borrado lógico.** `deleted_at` no nulo indica fila eliminada; varios índices únicos son filtrados con `WHERE deleted_at IS NULL`.
-- **Concurrencia optimista.** Un trigger `tr_touch_<tabla>` actualiza `updated_at` y suma 1 a `row_version` en cada UPDATE.
+- **Concurrencia optimista.** Un trigger `tr_touch_<tabla>` actualiza `updated_at` y suma 1 a `row_version` en cada UPDATE de las tablas que se editan (16 triggers); en payment, `EfUnitOfWork` lo hace antes de guardar. Solo payment-service compara `row_version` al actualizar (token de concurrencia de EF Core); los servicios Java todavía no lo revisan.
 - **Fechas en UTC.** Todos los valores por defecto usan `SYSUTCDATETIME()`.
 - **Catálogos con código.** Los estados y tipos son tablas con `code` único (`booking_status`, `payment_status`, `execution_status`, etc.) cargadas por changelogs semilla.
 
@@ -653,7 +677,7 @@ erDiagram
   PROMOTION ||--o{ PROMOTION_CUSTOMER : "dirigida a"
   PROMOTION ||--o{ BOOKING_PROMOTION : "canjeada en"
   BOOKING ||..o{ PAYMENT : "booking_id (lógica)"
-  CUSTOMER ||..o{ LOYALTY_TRANSACTION : "customer_id (lógica)"
+  APP_USER ||..o{ LOYALTY_TRANSACTION : "customer_id = user_id (lógica)"
   PAYMENT { bigint payment_id PK
     bigint booking_id
     smallint payment_account_id FK
@@ -680,7 +704,7 @@ erDiagram
 Notación: PK = llave primaria, UK = valor único, → = llave foránea, ⇢ = referencia lógica a otro servicio (sin FK). Se omite el bloque de auditoría.
 
 - `security.person(person_id PK, document_number UK, first_name, last_name, phone, email)`
-- `security.app_user(user_id PK, person_id → person UK, username UK, password_hash, is_active, last_login, created_at)`
+- `security.app_user(user_id PK, person_id → person UK, username UK, password_hash, is_active, last_login, created_at, terms_accepted_at, data_policy_accepted_at)`
 - `security.login_lockout(user_id PK → app_user, failed_count, first_failed_at, locked_until, updated_at)` · `security.person_address(person_id PK → person, address, updated_at)`
 - `security.role(role_id PK, code UK, name)` · `security.permission(permission_id PK, code UK, name, resource, action)`
 - `security.role_permission(role_permission_id PK, role_id → role, permission_id → permission)` · `security.user_role(user_role_id PK, user_id → app_user, role_id → role)`
@@ -716,7 +740,7 @@ Notación: PK = llave primaria, UK = valor único, → = llave foránea, ⇢ = r
 - `payment.payment(payment_id PK, booking_id ⇢ booking.booking, payment_account_id → payment_account, payment_status_id → payment_status, amount, processed_at, approved_by, rejection_reason)`
 - `payment.payment_receipt(payment_receipt_id PK, payment_id → payment, file_url, transaction_reference, reported_amount, uploaded_at, uploaded_by, reviewed_at, reviewed_by, review_comment)`
 - `payment.loyalty_movement_type(loyalty_movement_type_id PK, code UK, name, sign, display_order, is_active)`
-- `payment.loyalty_transaction(loyalty_transaction_id PK, customer_id ⇢ customer.customer, loyalty_movement_type_id → loyalty_movement_type, booking_id ⇢ booking.booking, points, balance_after, sequence_no, expires_on, description)`
+- `payment.loyalty_transaction(loyalty_transaction_id PK, customer_id ⇢ security.app_user (guarda el user_id del cliente, ADR-015), loyalty_movement_type_id → loyalty_movement_type, booking_id ⇢ booking.booking, points, balance_after, sequence_no, expires_on, description)`
 - `promotion.discount_type(discount_type_id PK, code UK, name, display_order, is_active)`
 - `promotion.promotion(promotion_id PK, code UK, name, description, discount_type_id → discount_type, discount_value, max_discount_amount, min_purchase_amount, is_public, min_completed_booking, valid_from, valid_to, max_redemptions, max_redemptions_per_customer, is_active, price, duration_minutes, icon, featured, benefits, required_points)`
 - `promotion.promotion_service(promotion_service_id PK, promotion_id → promotion, service_id ⇢ catalog.service)`
@@ -763,6 +787,8 @@ Cuentas, roles, permisos, sesiones y preferencias. Dueño: security-service.
 | is_active | BIT | No |  | Cuenta habilitada (por defecto 1) |
 | last_login | DATETIME2(3) | Sí |  | Último inicio de sesión |
 | created_at | DATETIME2(3) | No |  | Fecha de registro de la cuenta (migración `036`) |
+| terms_accepted_at | DATETIME2(3) | Sí |  | Cuándo aceptó la persona los Términos al registrarse (migración `039`) |
+| data_policy_accepted_at | DATETIME2(3) | Sí |  | Cuándo aceptó la persona la Política de Tratamiento de Datos al registrarse (migración `039`, Ley 1581 de 2012) |
 
 **Tabla 12**
 
@@ -891,6 +917,8 @@ Bitácora de cambios. Dueño: security-service.
 | changed_by | BIGINT | Sí |  | Usuario que hizo el cambio |
 | changed_at | DATETIME2(3) | No |  | Fecha del cambio (UTC) |
 
+> *Nota.* La tabla existe, pero todavía ningún trigger ni servicio escribe en ella; quién cambió cada fila y cuándo lo guarda el bloque de auditoría de cada tabla (sección 5.1).
+
 #### Esquema `customer`
 
 Clientes y vehículos. Dueño: customer-service.
@@ -918,7 +946,7 @@ Clientes y vehículos. Dueño: customer-service.
 | customer_id | BIGINT IDENTITY | No | PK | Identificador del cliente |
 | person_id | BIGINT | No | UK, ⇢ security.person | Persona del cliente |
 | user_id | BIGINT | Sí | UK filtrada, ⇢ security.app_user | Cuenta del cliente |
-| loyalty_points | INT | No |  | Copia de visualización del saldo de puntos (≥ 0) |
+| loyalty_points | INT | No |  | Copia prevista del saldo de puntos (≥ 0); ningún flujo la actualiza, el saldo se lee de `payment.loyalty_transaction` |
 | customer_since | DATE | No |  | Fecha de alta |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Bloque de auditoría (sección 5.1) |
 
@@ -967,7 +995,7 @@ Catálogo de servicios y precios. Dueño: booking-service.
 | description | NVARCHAR(MAX) | Sí |  | Descripción |
 | service_category_id | SMALLINT | No | FK → service_category | Categoría |
 | is_active | BIT | No |  | Disponible para reservar |
-| loyalty_points | INT | No |  | Puntos que otorga al completarse (changelog `022`) |
+| loyalty_points | INT | No |  | Puntos que da el servicio cuando se aprueba el pago de la reserva (changelog `022`) |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Bloque de auditoría (sección 5.1) |
 
 **Tabla 27**
@@ -1401,7 +1429,7 @@ Pagos, cuentas de pago y puntos. Dueño: payment-service.
 | Campo | Tipo | Nulo | Llave | Descripción |
 | --- | --- | --- | --- | --- |
 | loyalty_transaction_id | BIGINT IDENTITY | No | PK | Identificador del movimiento |
-| customer_id | BIGINT | No | ⇢ customer.customer; UK con sequence_no | Cliente |
+| customer_id | BIGINT | No | ⇢ security.app_user; UK con sequence_no | user_id del cliente (el nombre viene de la primera migración, ADR-015) |
 | loyalty_movement_type_id | SMALLINT | No | FK → loyalty_movement_type | Tipo de movimiento |
 | booking_id | BIGINT | Sí | ⇢ booking.booking | Reserva que originó el movimiento |
 | points | INT | No |  | Puntos del movimiento (≠ 0) |
@@ -1442,7 +1470,7 @@ Promociones y cupones. Dueño: payment-service.
 | discount_value | DECIMAL(12,2) | No |  | Valor del descuento (> 0) |
 | max_discount_amount | DECIMAL(12,2) | Sí |  | Tope del descuento |
 | min_purchase_amount | DECIMAL(12,2) | No |  | Compra mínima |
-| is_public | BIT | No |  | Visible para todos los clientes |
+| is_public | BIT | No |  | Visible para todos los clientes (el código todavía no lo lee: se ofrece toda promoción activa) |
 | min_completed_booking | INT | No |  | Reservas completadas exigidas (≥ 0) |
 | valid_from | DATE | No |  | Inicio de vigencia |
 | valid_to | DATE | No |  | Fin de vigencia |
@@ -1780,6 +1808,7 @@ classDiagram
 
 ```mermaid
 classDiagram
+  %% grid: 2+3
   direction LR
   class AuthenticationService {
     <<application service>>
@@ -1912,36 +1941,22 @@ classDiagram
     +save(personId, address)
     +delete(personId)
   }
-  AuthenticationService --> UserAccountRepository
-  AuthenticationService --> LoginLockoutRepository
-  PasswordRecoveryService --> LoginLockoutRepository
-  PersonAddressService --> UserAccountRepository
-  PersonAddressService --> PersonAddressRepository
-  AuthenticationService --> UserSessionRepository
-  AuthenticationService --> PasswordHasher
-  AuthenticationService --> TokenIssuer
-  AccountRegistrationService --> UserAccountRepository
-  AccountRegistrationService --> PasswordHasher
-  AccountRegistrationService --> DomainEventPublisher
-  PasswordRecoveryService --> UserAccountRepository
-  PasswordRecoveryService --> PasswordResetTokenRepository
-  PasswordRecoveryService --> ResetCodeGenerator
-  PasswordRecoveryService --> ResetCodeNotifier
-  PasswordRecoveryService --> ResetAttemptCounter
-  PasswordRecoveryService --> PasswordHasher
-  UserProfileService --> UserAccountRepository
-  UserProfileService --> PasswordHasher
-  EmailChangeService --> UserAccountRepository
-  EmailChangeService --> DomainEventPublisher
-  AccountDeactivationService --> UserAccountRepository
-  AccountDeactivationService --> UserSessionRepository
-  UserAdministrationService --> UserAccountRepository
-  UserAdministrationService --> UserSessionRepository
-  UserPreferenceService --> UserPreferenceRepository
-  RolePermissionAdministrationService --> RolePermissionRepository
 ```
 
 > *Nota.* Adaptadores de salida: `UserAccountPersistenceAdapter`, `UserSessionPersistenceAdapter`, `PasswordResetTokenPersistenceAdapter`, `UserPreferencePersistenceAdapter`, `RolePermissionPersistenceAdapter`, `LoginLockoutPersistenceAdapter` y `PersonAddressPersistenceAdapter` (JPA); `BCryptPasswordHasher`; `JwtTokenIssuer`; `SecureRandomResetCodeGenerator`; `EmailResetCodeNotifier`, `LoggingResetCodeNotifier` y `UndeliveredResetCodeNotifier`; `InMemoryResetAttemptCounter`; `RabbitDomainEventPublisher` y `LoggingDomainEventPublisher`. Adaptadores de entrada: `AuthController`, `UserProfileController`, `UserAdministrationController`, `RolePermissionController`, `UserAddressController` e `InternalUserController`. Fuente: `security-service/src/main/java/com/lavarapido/security/`.
+
+*Puertos que usa cada servicio.*
+
+- `AuthenticationService`: `UserAccountRepository`, `LoginLockoutRepository`, `UserSessionRepository`, `PasswordHasher`, `TokenIssuer`.
+- `AccountRegistrationService`: `UserAccountRepository`, `PasswordHasher`, `DomainEventPublisher`.
+- `PasswordRecoveryService`: `LoginLockoutRepository`, `UserAccountRepository`, `PasswordResetTokenRepository`, `ResetCodeGenerator`, `ResetCodeNotifier`, `ResetAttemptCounter`, `PasswordHasher`.
+- `UserProfileService`: `UserAccountRepository`, `PasswordHasher`.
+- `EmailChangeService`: `UserAccountRepository`, `DomainEventPublisher`.
+- `AccountDeactivationService`: `UserAccountRepository`, `UserSessionRepository`, `PasswordHasher`, `DomainEventPublisher`.
+- `UserAdministrationService`: `UserAccountRepository`, `UserSessionRepository`, `DomainEventPublisher`.
+- `UserPreferenceService`: `UserPreferenceRepository`.
+- `RolePermissionAdministrationService`: `RolePermissionRepository`.
+- `PersonAddressService`: `UserAccountRepository`, `PersonAddressRepository`.
 
 ### 6.2 customer-service
 
@@ -2289,6 +2304,7 @@ classDiagram
 
 ```mermaid
 classDiagram
+  %% grid: 1+2
   direction LR
   class BookingService {
     <<application service>>
@@ -2381,22 +2397,15 @@ classDiagram
   class AvailabilityPolicy {
     <<domain service>>
   }
-  BookingService --> BookingRepository
-  BookingService --> CatalogRepository
-  BookingService --> ScheduleRepository
-  BookingService --> BayRepository
-  BookingService --> CustomerDirectory
-  BookingService --> DomainEventPublisher
-  BookingService --> BookingSettings
-  BookingService ..> AvailabilityPolicy
-  CatalogService --> CatalogRepository
-  CatalogService --> BookingSettings
-  ScheduleService --> ScheduleRepository
-  ScheduleService --> BayRepository
-  ScheduleService --> BookingRepository
 ```
 
 > *Nota.* Adaptadores de salida: `BookingPersistenceAdapter`, `CatalogPersistenceAdapter`, `SchedulePersistenceAdapter` y `BayPersistenceAdapter` (JPA); `CustomerServiceDirectory` (REST a customer-service); `RabbitDomainEventPublisher` y `LoggingDomainEventPublisher`. Adaptadores de entrada: `BookingController`, `AdminBookingController`, `OperatorBookingController`, `CatalogController`, `ScheduleController` e `InternalBookingController` (`/internal/v1/bookings`, con `X-Internal-Key`). Fuente: `lavarapido-booking-service/src/main/java/com/lavarapido/booking/`.
+
+*Puertos que usa cada servicio.*
+
+- `BookingService`: `BookingRepository`, `CatalogRepository`, `ScheduleRepository`, `BayRepository`, `CustomerDirectory`, `DomainEventPublisher`, `BookingSettings`. También usa la política de dominio `AvailabilityPolicy`.
+- `CatalogService`: `CatalogRepository`, `BookingSettings`.
+- `ScheduleService`: `ScheduleRepository`, `BayRepository`, `BookingRepository`.
 
 ### 6.4 operations-service
 
@@ -2853,6 +2862,7 @@ classDiagram
 
 ```mermaid
 classDiagram
+  %% grid: 2+3
   direction LR
   class PaymentCommandService {
     <<application service>>
@@ -2962,38 +2972,21 @@ classDiagram
     <<interface>>
     +CommitAsync(ct)
   }
-  PaymentCommandService --> IPaymentRepository
-  PaymentCommandService --> IBookingDirectory
-  PaymentCommandService --> IIntegrationEventPublisher
-  PaymentCommandService --> IUnitOfWork
-  PaymentCommandService --> BookingPaymentGuard
-  PaymentCommandService --> AmountDueCalculator
-  PaymentCommandService --> LoyaltyRewardService
-  PaymentQueryService --> IPaymentRepository
-  PaymentQueryService --> IBookingDirectory
-  PaymentQueryService --> AmountDueCalculator
-  PaymentAccountService --> IPaymentAccountRepository
-  PaymentAccountService --> IUnitOfWork
-  PromotionAdminService --> IPromotionRepository
-  PromotionAdminService --> IPromotionRedemptionRepository
-  PromotionAdminService --> IUnitOfWork
-  CustomerPromotionService --> IPromotionRepository
-  CustomerPromotionService --> IPromotionRedemptionRepository
-  CustomerPromotionService --> ILoyaltyLedgerRepository
-  CustomerPromotionService --> IBookingDirectory
-  CustomerPromotionService --> BookingPaymentGuard
-  CustomerPromotionService --> AmountDueCalculator
-  CustomerPromotionService --> IUnitOfWork
-  CustomerPromotionService --> IIntegrationEventPublisher
-  LoyaltyService --> ILoyaltyLedgerRepository
-  LoyaltyRewardService --> ILoyaltyLedgerRepository
-  LoyaltyRewardService --> IPromotionRepository
-  BookingPaymentGuard --> IPaymentRepository
-  BookingPaymentGuard --> IPaymentAccountRepository
-  AmountDueCalculator --> IPromotionRedemptionRepository
 ```
 
 > *Nota.* En .NET los atributos son propiedades públicas de solo lectura y los métodos de aplicación son asíncronos (`Async`) con un `CancellationToken ct`. Adaptadores de salida: `PaymentRepository`, `PaymentAccountRepository`, `PromotionRepository`, `PromotionRedemptionRepository`, `LoyaltyLedgerRepository` y `EfUnitOfWork` (Entity Framework Core); `BookingServiceDirectory` (REST a booking-service); `RabbitMqIntegrationEventPublisher` y `NullIntegrationEventPublisher`. Adaptadores de entrada: `PaymentsController`, `AdminPaymentsController`, `AdminPaymentAccountsController`, `PromotionsController` y `LoyaltyController`. Fuente: `lavarapido-payment-service/src/PaymentService.Domain` y `PaymentService.Application`.
+
+*Puertos que usa cada servicio.*
+
+- `PaymentCommandService`: `IPaymentRepository`, `IBookingDirectory`, `IIntegrationEventPublisher`, `IUnitOfWork`, `BookingPaymentGuard`, `AmountDueCalculator`, `LoyaltyRewardService`.
+- `PaymentQueryService`: `IPaymentRepository`, `IBookingDirectory`, `AmountDueCalculator`.
+- `PaymentAccountService`: `IPaymentAccountRepository`, `IUnitOfWork`.
+- `PromotionAdminService`: `IPromotionRepository`, `IPromotionRedemptionRepository`, `IUnitOfWork`.
+- `CustomerPromotionService`: `IPromotionRepository`, `IPromotionRedemptionRepository`, `ILoyaltyLedgerRepository`, `IBookingDirectory`, `BookingPaymentGuard`, `AmountDueCalculator`, `IUnitOfWork`, `IIntegrationEventPublisher`.
+- `LoyaltyService`: `ILoyaltyLedgerRepository`.
+- `LoyaltyRewardService`: `ILoyaltyLedgerRepository`, `IPromotionRepository`.
+- `BookingPaymentGuard`: `IPaymentRepository`, `IPaymentAccountRepository`.
+- `AmountDueCalculator`: `IPromotionRedemptionRepository`.
 
 ### 6.6 notification-service
 
@@ -3256,7 +3249,7 @@ classDiagram
   EmailRecipients --> UserContactDirectory
 ```
 
-> *Nota.* Entre servicios de aplicación la dependencia real es el puerto de entrada: por ejemplo, `DomainEventConsumerService` recibe un `SendNotificationUseCase`, que implementa `NotificationSendingService`. `NotificationTypeCode` tiene 23 códigos; el diagrama muestra solo algunos. Adaptadores de salida: `NotificationPersistenceAdapter`, `DeviceTokenPersistenceAdapter`, `BookingReminderPersistenceAdapter`, `BookingTrackingPersistenceAdapter` y `ProcessedEventPersistenceAdapter` (JPA); `SmtpEmailSender` y `LoggingEmailSender`; `ExpoPushSender` y `LoggingPushSender`; `SecurityServiceUserContactDirectory` (REST interna a security-service). Adaptadores de entrada: `NotificationController`, `AdminNotificationController`, `DeviceController`, `DomainEventListener` (RabbitMQ) y `ReminderScheduler` (tarea programada). Fuente: `lavarapido-notification-service/src/main/java/com/lavarapido/notification/`.
+> *Nota.* Entre servicios de aplicación la dependencia real es el puerto de entrada: por ejemplo, `DomainEventConsumerService` recibe un `SendNotificationUseCase`, que implementa `NotificationSendingService`. `NotificationTypeCode` tiene 24 códigos; el diagrama muestra solo algunos. Adaptadores de salida: `NotificationPersistenceAdapter`, `DeviceTokenPersistenceAdapter`, `BookingReminderPersistenceAdapter`, `BookingTrackingPersistenceAdapter` y `ProcessedEventPersistenceAdapter` (JPA); `SmtpEmailSender` y `LoggingEmailSender`; `ExpoPushSender` y `LoggingPushSender`; `SecurityServiceUserContactDirectory` (REST interna a security-service). Adaptadores de entrada: `NotificationController`, `AdminNotificationController`, `DeviceController`, `DomainEventListener` (RabbitMQ) y `ReminderScheduler` (tarea programada). Fuente: `lavarapido-notification-service/src/main/java/com/lavarapido/notification/`.
 
 ### 6.7 Estados de las entidades principales
 
@@ -3298,7 +3291,7 @@ classDiagram
 | 10 | En "Servicios asignados" del operario (web) la columna Cliente muestra la placa | `operator/pages/assigned-services/assigned-services.ts:141` |
 | 11 | El nombre de la marca no es uniforme entre clientes ("AquaWash", "Car Wash", "Lavado Vehicular", "Express Car Wash") y la landing anuncia "servicio móvil… donde estés", aunque el SRS v4 define un único local | Figuras 2 y 7 |
 
-> *Nota.* Revisión del código del 15 de octubre de 2026: el hallazgo 5 está corregido (el informe de inspección, su enlace público y los datos del negocio se guardan en operations-service y booking-service; en el móvil `settingsMock.ts` solo conserva las preferencias de aviso iniciales) y el 7 también (`bin/` quedó en el `.gitignore` de booking-service). Los hallazgos 3, 4, 8, 9, 10 y 11 siguen en el código.
+> *Nota.* Revisión del código del 15 de octubre de 2026: el hallazgo 5 está corregido (el informe de inspección, su enlace público y los datos del negocio se guardan en operations-service y booking-service; en el móvil `settingsMock.ts` solo conserva las preferencias de aviso iniciales) y el 7 también (`bin/` quedó en el `.gitignore` de booking-service). Los hallazgos 3, 4, 8, 9, 10 y 11 siguen en el código. Revisión del 20 de octubre de 2026: el 6 ya no aplica (las carpetas locales tienen los nombres reales de los repositorios), el 9 no aparece en el código y el 10 está corregido (la columna Cliente muestra `clientName`); los hallazgos 3, 4 y 8 siguen igual.
 
 ## Referencias
 

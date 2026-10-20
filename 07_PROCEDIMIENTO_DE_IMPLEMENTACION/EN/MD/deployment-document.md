@@ -73,6 +73,7 @@
 | 1.1 | 2026-10-16 | Brayan Cabrera | Portainer CE installed, real evidence (5.4) and correction of Liquibase schemas and tables |
 | 1.2 | 2026-10-16 | Juan Camilo Guilombo | Table count corrected (57) and first administrator created with the environment variables |
 | 1.3 | 2026-10-19 | Juan Camilo Guilombo | Update of 2026-10-19 (migration 039 and app 1.1.0), SSH access with a personal key per member, deployment from GitHub Actions, continuous integration in the 10 repositories, and new terminal and web evidence |
+| 1.4 | 2026-10-20 | Development team | Topology diagram: customer-service also connects to RabbitMQ (it consumes `security.user_registered` to create the customer profile) |
 
 ### 1.3 Change Summary (Release Notes)
 
@@ -203,25 +204,41 @@ The changes pushed afterwards are left for the next update: the error messages w
 #### 2.2.1 VPS server topology
 
 ```mermaid
-flowchart LR
-    U[Web browser] -->|HTTPS 443| C
-    M[Android app] -->|HTTPS 443| C
+flowchart TB
+    U[Web browser]
+    M[Android app]
     subgraph VM["vehiclecarwash-vm · Ubuntu 24.04 · 2 vCPU · 8 GB"]
       C[Caddy :80/:443]
-      C -->|/api/*| G[api-gateway :8080]
-      C -->|/app/*| D[(deploy/downloads<br/>APK + version.json)]
-      C -->|rest| W[web nginx :80]
-      G --> S1[security :3001]
-      G --> S2[customer :3002]
-      G --> S3[booking :3003]
-      G --> S4[operations :3004]
-      G --> S5[payment :3005]
-      G --> S6[notification :3006]
-      S1 & S2 & S3 & S4 & S5 & S6 --> DB[(SQL Server :1433)]
-      S1 & S3 & S4 & S5 & S6 <--> MQ[[RabbitMQ :5672]]
+      W[web nginx :80]
+      D[(deploy/downloads<br/>APK + version.json)]
+      G[api-gateway :8080]
+      subgraph SVC["Microservices"]
+        direction LR
+        S1[security :3001]
+        S2[customer :3002]
+        S3[booking :3003]
+        S4[operations :3004]
+        S5[payment :3005]
+        S6[notification :3006]
+        S3 ~~~ S6
+        S2 ~~~ S5
+        S1 ~~~ S4
+      end
+      DB[(SQL Server :1433)]
+      MQ[[RabbitMQ :5672]]
     end
-    S6 -->|push| EX[Expo Push → Firebase]
-    S1 & S6 -->|SMTP 587| GM[Gmail]
+    GM[Gmail]
+    EX[Expo Push → Firebase]
+    U -->|HTTPS 443| C
+    M -->|HTTPS 443| C
+    C -->|rest| W
+    C -->|/app/*| D
+    C -->|/api/*| G
+    G --> SVC
+    SVC --> DB
+    SVC <-->|events| MQ
+    SVC -->|"SMTP 587: security and notification"| GM
+    SVC -->|"push: notification"| EX
 ```
 
 #### 2.2.2 Internal container network (Docker Bridge Network)
