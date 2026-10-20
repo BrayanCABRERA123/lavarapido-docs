@@ -8,7 +8,7 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 1.2, 17 de octubre de 2026
+Versión 1.3, 20 de octubre de 2026
 
 ---
 
@@ -27,74 +27,42 @@ LavaRápido está formado por **seis microservicios** detrás de un API Gateway,
 
 ```mermaid
 flowchart TB
-    client([Cliente]):::person
-    operator([Operario]):::person
-    admin([Administrador]):::person
+    people(["Cliente · Operario · Administrador"]):::person
+    web["App web<br/>Angular 21"]
+    mobile["App Android<br/>React Native / Expo"]
+    gateway["API Gateway · :8080<br/>Spring Cloud Gateway<br/>enrutamiento + CORS"]
 
-    subgraph frontends["Front ends"]
-        web["App web<br/>Angular 21 · :4200"]
-        mobile["App Android<br/>React Native / Expo"]
-    end
-
-    gateway["API Gateway<br/>Spring Cloud Gateway · :8080<br/>enrutamiento + CORS"]
-
-    subgraph services["Spring Boot 4 · Java 21 · hexagonal — payment: .NET 8"]
-        security["security-service :3001<br/>cuentas, roles, JWT, bloqueo, preferencias"]
+    subgraph services["Microservicios"]
+        direction LR
+        security["security-service :3001<br/>cuentas, roles, JWT, preferencias"]
         customer["customer-service :3002<br/>clientes, vehículos"]
-        booking["booking-service :3003<br/>catálogo, horario, bahías, reservas, datos del negocio"]
-        notification["notification-service :3006<br/>bandeja, push, correo, recordatorios, alertas"]
-        operations["operations-service :3004<br/>operarios, asignación, ejecución, calificaciones, inspección"]
-        payment["payment-service :3005 · .NET 8<br/>cuentas de pago, pagos, comprobantes, promociones"]
+        booking["booking-service :3003<br/>catálogo, horario, bahías, reservas"]
+        operations["operations-service :3004<br/>operarios, asignación, ejecución, inspección"]
+        payment["payment-service :3005 · .NET 8<br/>pagos, comprobantes, promociones, puntos"]
+        notification["notification-service :3006<br/>bandeja, push, correo, recordatorios"]
+        booking ~~~ notification
+        customer ~~~ payment
+        security ~~~ operations
     end
 
-    sql[("SQL Server 2022 · :1433<br/>base de datos LavaRapido<br/>un esquema por servicio")]
-    rabbit[["RabbitMQ · :5672<br/>exchange carwash.events"]]
-    smtp["SMTP<br/>Gmail / Mailpit"]:::ext
-    expo["Expo Push API"]:::ext
+    sql[("SQL Server 2022<br/>base LavaRapido<br/>un esquema por servicio")]
+    rabbit[["RabbitMQ<br/>exchange carwash.events"]]
+    ext["Gmail SMTP / Mailpit<br/>Expo Push API"]:::ext
 
-    client --> web
-    client --> mobile
-    operator --> mobile
-    admin --> web
-    admin --> mobile
+    people --> web
+    people --> mobile
     web -- "REST + JWT" --> gateway
     mobile -- "REST + JWT" --> gateway
-    gateway --> security
-    gateway --> customer
-    gateway --> booking
-    gateway --> operations
-    gateway --> payment
-    gateway --> notification
-
-    booking -- "REST (JWT usuario)<br/>valida vehículo" --> customer
-    customer -- "REST (JWT usuario)<br/>/users/me" --> security
-    notification -- "REST (X-Internal-Key)<br/>/internal/v1/users" --> security
-    operations -- "REST (JWT usuario o X-Internal-Key)<br/>reservas, estado" --> booking
-    operations -- "REST (JWT admin o X-Internal-Key)<br/>cuentas y contacto" --> security
-    payment -- "REST (JWT usuario)<br/>total de la reserva" --> booking
-
-    security -- user_registered --> rabbit
-    booking -- "booking.confirmed / cancelled" --> rabbit
-    operations -- "execution.*" --> rabbit
-    payment -- "payment.* / promotion_redeemed" --> rabbit
-    rabbit -- user_registered --> customer
-    rabbit -- "booking.confirmed<br/>(asignación automática)" --> operations
-    rabbit -- "eventos de usuario, reserva y ejecución" --> notification
-
-    security --> sql
-    customer --> sql
-    booking --> sql
-    operations --> sql
-    payment --> sql
-    notification --> sql
-
-    security -- "código de recuperación" --> smtp
-    notification -- "bienvenida, reserva, recordatorio" --> smtp
-    notification --> expo
+    gateway -- "/api/v1/**" --> services
+    services -- "cada uno sus esquemas" --> sql
+    services -- "eventos" --> rabbit
+    services -- "correo y push" --> ext
 
     classDef person fill:#08427b,color:#fff,stroke:#052e56
     classDef ext fill:#999,color:#fff
 ```
+
+Las llamadas REST entre servicios y los eventos de RabbitMQ se detallan en la sección 3.3 del *Documento de diseño del software*.
 
 Dentro de cada servicio se sigue **arquitectura hexagonal** (dominio → aplicación → infraestructura): las reglas de negocio no dependen de Spring, de JPA ni de la base de datos, así que se pueden probar solas. `payment-service` sigue la misma idea en .NET (Clean Architecture con cuatro proyectos), porque se construyó en un stack distinto; el porqué está en la sección 3.
 
@@ -185,7 +153,7 @@ Cada decisión importante quedó registrada como ADR (Architecture Decision Reco
 
 *Nota.* Ambientes previstos en la propuesta; los costos de la sección 8.2 se calcularon con estas especificaciones.
 
-**Seguimiento al 17 de octubre de 2026.** Para la demostración académica, el sistema se desplegó en una máquina virtual de Microsoft Azure (suscripción *Azure for Students*, tamaño B2as_v2: 2 vCPU, 7,7 GB de RAM y 64 GB de disco SSD, Ubuntu 24.04 LTS), con los once contenedores, Caddy como entrada HTTPS y la aplicación Android servida en */app*. Con todos los contenedores activos usa unos 3,3 GB de RAM, por lo que el tamaño de producción de la Tabla 5 sigue siendo holgado. El procedimiento completo está en el Documento de Despliegue (carpeta 07).
+**Seguimiento al 17 de octubre de 2026.** Para la demostración académica, el sistema se desplegó en una máquina virtual de Microsoft Azure (suscripción *Azure for Students*, tamaño B2as_v2: 2 vCPU, 7,7 GB de RAM y 64 GB de disco SSD, Ubuntu 24.04 LTS), con los once contenedores, Caddy como entrada HTTPS y la aplicación Android servida en */app*. Con todos los contenedores activos usa unos 3,3 GB de RAM, por lo que el tamaño de producción de la Tabla 5 sigue siendo holgado. El procedimiento completo está en el Documento de Despliegue (carpeta 07). En el proyecto académico la integración continua no se hizo con Jenkins sino con GitHub Actions: los 10 repositorios de código compilan y corren sus pruebas en cada cambio, y `lavarapido-infra` tiene además un flujo manual que actualiza el servidor.
 
 ### 4.4 Usuario final
 
