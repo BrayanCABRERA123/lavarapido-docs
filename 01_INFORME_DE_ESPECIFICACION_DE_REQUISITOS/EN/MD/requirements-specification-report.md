@@ -1280,7 +1280,7 @@ stateDiagram-v2
 
 ```mermaid
 stateDiagram-v2
-    [*] --> PENDING : create (amount = booking total)
+    [*] --> PENDING : create (amount = booking total minus coupons)
     PENDING --> PENDING : attach receipt
     PENDING --> IN_REVIEW : send for review (requires at least one receipt)
     IN_REVIEW --> APPROVED : approve (admin)
