@@ -6,7 +6,7 @@ Sistema de Gestión de Lavado Vehicular (Vehicle Washing)
 
 Planificación, Preparación del Entorno, Despliegue, Carga de Datos Iniciales, Pruebas de Aceptación, Capacitación, Puesta en Marcha y Reversión
 
-Brayan Estiven Patiño Cabrera (líder de proyecto), Juan Camilo Guilombo Osorio (líder de frontend) y Merari Urbano (líder de backend)
+Brayan Estiven Patiño Cabrera (líder de proyecto), Juan Camilo Guilombo Osorio (líder de frontend) y Merari Urbano Quintero (líder de backend)
 
 Tecnólogo en Análisis y Desarrollo de Software (ADSO), Servicio Nacional de Aprendizaje (SENA), Centro de Formación: Industria
 
@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-17 de octubre de 2026
+20 de octubre de 2026
 
-Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.1
+Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.3
 
 ## Control de Versiones
 
@@ -32,6 +32,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 2.0 | 2026-10-16 | Revisión contra el código del 16 de octubre de 2026 y el servidor público ya montado. Se actualizaron: servidor público en Azure con Caddy, HTTPS y la web servida con nginx, distribución del APK, primer administrador por variables de entorno, 57 tablas, cola de operations-service, salud de payment-service, pruebas web y de punta a punta en los criterios de entrada, asignación automática en las pruebas de humo, datos del negocio en la carga inicial y riesgos de la implementación. | Equipo de desarrollo |
 | 2.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se indicó que la aplicación móvil necesita un APK nuevo por los módulos nativos del informe de inspección (sección 11.7, Fase 6). | Equipo de desarrollo |
 | 2.2 | 2026-10-19 | Integración continua con GitHub Actions en los 10 repositorios y despliegue desde GitHub: se actualizaron el alcance (6.2) y el riesgo R-I09. | Equipo de desarrollo |
+| 2.3 | 2026-10-20 | Revisión contra el código del 20 de octubre de 2026: criterio E2 con las pruebas del 19 de octubre (655 automatizadas y 19 de punta a punta) y colas de RabbitMQ corregidas (la cola de operations-service no tiene cola de mensajes muertos) y plan de comunicación (el panel no envía avisos generales). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -138,7 +139,7 @@ La Tabla 2 asigna las responsabilidades con la convención RACI: R (responsable 
 
 *Matriz RACI de la Implementación*
 
-| Actividad | Líder de proyecto (Brayan Estiven Patiño Cabrera) | Líder de backend (Merari Urbano) | Líder de frontend (Juan Camilo Guilombo Osorio) | Administrador de TI | Responsable del negocio o instructora |
+| Actividad | Líder de proyecto (Brayan Estiven Patiño Cabrera) | Líder de backend (Merari Urbano Quintero) | Líder de frontend (Juan Camilo Guilombo Osorio) | Administrador de TI | Responsable del negocio o instructora |
 |---|---|---|---|---|---|
 | Planificación y aprobación de la ventana | A | C | C | C | I |
 | Preparación del entorno | I | C | I | R | — |
@@ -232,7 +233,7 @@ La implementación **no comienza** hasta que se cumplan todos los criterios de l
 | N.° | Criterio | Evidencia |
 |---|---|---|
 | E1 | El código de la versión está integrado en *develop* (o en *main*) de los once repositorios, sin trabajo sin confirmar. | *git status* limpio y *git log* con el último commit de cada repositorio. |
-| E2 | Las pruebas automáticas pasan: *./mvnw -B verify* en los servicios Java y en el gateway, *dotnet test* en payment-service, *ng test* en la web y la suite de punta a punta de *lavarapido-infra/e2e* contra los contenedores. | Resúmenes sin fallos (el 16 de octubre de 2026: 639 pruebas unitarias y 19 de punta a punta). |
+| E2 | Las pruebas automáticas pasan: *./mvnw -B verify* en los servicios Java y en el gateway, *dotnet test* en payment-service, *ng test* en la web y la suite de punta a punta de *lavarapido-infra/e2e* contra los contenedores. | Resúmenes sin fallos (el 19 de octubre de 2026: 655 pruebas automatizadas y 19 de punta a punta). |
 | E3 | La aplicación web compila en modo producción (*npx ng build*). | Carpeta *dist/* generada sin errores. |
 | E4 | La versión está etiquetada en cada repositorio (por ejemplo, *v1.0.0*) (sección 13). | *git tag* en cada repositorio. |
 | E5 | Los manuales de instalación, administrador y usuario corresponden a la versión (versión 4.0 o posterior). | Control de versiones de los manuales. |
@@ -388,7 +389,7 @@ for port in 3001 3002 3003 3004 3005 3006 8080; do
 done
 ```
 
-4. Verificar que la base tiene 57 tablas en los nueve esquemas (Manual de Instalación, sección 11.5) y que la topología de RabbitMQ existe (exchange *carwash.events* y las colas *customer-service.events*, *notification-service.events* y *operations-service.events* con sus *.dlq*).
+4. Verificar que la base tiene 57 tablas en los nueve esquemas (Manual de Instalación, sección 11.5) y que la topología de RabbitMQ existe (exchange *carwash.events* y las colas *customer-service.events* y *notification-service.events*, cada una con su *.dlq*, y *operations-service.events*, que no tiene cola de mensajes muertos).
 
 **Criterio para continuar:** las siete respuestas son *UP* y el número de tablas es el esperado. Todos los servicios, incluido payment-service, comprueban la base de datos en su endpoint de salud y responden *DOWN* (503) si no está disponible.
 
@@ -459,7 +460,7 @@ Las pruebas de humo confirman que la versión funciona de punta a punta antes de
 | H6 | Reserva sin elegir operario y reserva eligiendo uno libre. | El sistema asigna un operario en ambos casos (el elegido en la segunda); notificación al operario. |
 | H7 | Inicio y finalización del servicio por el operario. | Reserva COMPLETED; notificaciones al cliente. |
 | H8 | Reporte de pago con comprobante de prueba y aprobación por el administrador. | Pago aprobado; correo de pago confirmado y puntos acreditados. |
-| H9 | Colas de mensajes muertos. | *notification-service.events.dlq*, *customer-service.events.dlq* y *operations-service.events.dlq* en cero. |
+| H9 | Colas de mensajes muertos. | *notification-service.events.dlq* y *customer-service.events.dlq* en cero. |
 
 *Nota.* Elaborado por los autores a partir de la lista de verificación previa a una revisión del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a).
 
@@ -610,7 +611,7 @@ Para llevar el sistema a un entorno de producción real, además de lo anterior 
 | Inicio de la ventana | Inicio de la implementación. | Equipo | Chat del equipo | Líder de proyecto |
 | Fin de cada fase | Resultado y evidencia. | Equipo | Chat del equipo y bitácora | Responsable de la fase |
 | Decisión de reversión | Motivo y tiempo estimado. | Equipo y responsable del negocio | Chat del equipo | Líder de proyecto |
-| Puesta en marcha | Sistema disponible, dirección de acceso y canal de soporte. | Personal del lavadero y clientes del piloto | Aviso del administrador desde el panel (*SYSTEM_MESSAGE*) y mensaje directo | Administrador del negocio |
+| Puesta en marcha | Sistema disponible, dirección de acceso y canal de soporte. | Personal del lavadero y clientes del piloto | Mensaje directo y aviso en el lavadero (la web y la app no tienen una pantalla para enviar avisos generales; acción de mejora AM-13) | Administrador del negocio |
 | Cierre | Resultado, lecciones aprendidas y pendientes. | Equipo, responsable del negocio e instructora | Reunión de cierre | Líder de proyecto |
 
 *Nota.* Elaborado por los autores a partir de la gestión de incidentes del proyecto.

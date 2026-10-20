@@ -6,7 +6,7 @@ Vehicle Washing Management System (Vehicle Washing)
 
 Planning, Environment Preparation, Deployment, Initial Data Load, Acceptance Testing, Training, Go-Live, and Rollback
 
-Brayan Estiven Patiño Cabrera (Project Leader), Juan Camilo Guilombo Osorio (Frontend Leader), and Merari Urbano (Backend Leader)
+Brayan Estiven Patiño Cabrera (Project Leader), Juan Camilo Guilombo Osorio (Frontend Leader), and Merari Urbano Quintero (Backend Leader)
 
 Technologist in Software Analysis and Development (ADSO), Servicio Nacional de Aprendizaje (SENA), Training Center: Industria
 
@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 17, 2026
+October 20, 2026
 
-Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.1
+Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.3
 
 ## Version Control
 
@@ -32,6 +32,7 @@ Table 1 records the change history of this document. Each time the implementatio
 | 2.0 | 2026-10-16 | Review against the code of October 16, 2026, and the public server already set up. Updated: public server on Azure with Caddy, HTTPS, and the web served with nginx, APK distribution, first administrator through environment variables, 57 tables, operations-service queue, payment-service health, web and end-to-end tests in the entry criteria, automatic assignment in the smoke tests, business data in the initial load, and implementation risks. | Development team |
 | 2.1 | 2026-10-17 | Review against the code of October 17, 2026. Stated that the mobile app needs a new APK because of the native modules of the inspection report (section 11.7, Phase 6). | Development team |
 | 2.2 | 2026-10-19 | Continuous integration with GitHub Actions in the 10 repositories and deployment from GitHub: the scope (6.2) and risk R-I09 were updated. | Development team |
+| 2.3 | 2026-10-20 | Review against the code of October 20, 2026: criterion E2 with the tests of October 19 (655 automated and 19 end-to-end) and RabbitMQ queues corrected (the operations-service queue has no dead-letter queue) and communication plan (the panel does not send general announcements). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -138,7 +139,7 @@ Table 2 assigns the responsibilities with the RACI convention: R (responsible fo
 
 *RACI Matrix of the Implementation*
 
-| Activity | Project leader (Brayan Estiven Patiño Cabrera) | Backend leader (Merari Urbano) | Frontend leader (Juan Camilo Guilombo Osorio) | IT administrator | Business owner or instructor |
+| Activity | Project leader (Brayan Estiven Patiño Cabrera) | Backend leader (Merari Urbano Quintero) | Frontend leader (Juan Camilo Guilombo Osorio) | IT administrator | Business owner or instructor |
 |---|---|---|---|---|---|
 | Planning and approval of the window | A | C | C | C | I |
 | Environment preparation | I | C | I | R | — |
@@ -232,7 +233,7 @@ The implementation **does not start** until all the criteria of Table 5 are met.
 | No. | Criterion | Evidence |
 |---|---|---|
 | E1 | The code of the release is merged into *develop* (or *main*) of the eleven repositories, with no uncommitted work. | Clean *git status* and *git log* with the last commit of each repository. |
-| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, and the end-to-end suite of *lavarapido-infra/e2e* against the containers. | Summaries without failures (on October 16, 2026: 639 unit tests and 19 end-to-end tests). |
+| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, and the end-to-end suite of *lavarapido-infra/e2e* against the containers. | Summaries without failures (on October 19, 2026: 655 automated tests and 19 end-to-end tests). |
 | E3 | The web application builds in production mode (*npx ng build*). | Folder *dist/* generated without errors. |
 | E4 | The release is tagged in each repository (for example, *v1.0.0*) (section 13). | *git tag* in each repository. |
 | E5 | The installation, administrator, and user manuals correspond to the release (version 4.0 or later). | Version control of the manuals. |
@@ -388,7 +389,7 @@ for port in 3001 3002 3003 3004 3005 3006 8080; do
 done
 ```
 
-4. Check that the database has 57 tables in the nine schemas (Installation Manual, section 11.5) and that the RabbitMQ topology exists (exchange *carwash.events* and the queues *customer-service.events*, *notification-service.events*, and *operations-service.events* with their *.dlq*).
+4. Check that the database has 57 tables in the nine schemas (Installation Manual, section 11.5) and that the RabbitMQ topology exists (exchange *carwash.events* and the queues *customer-service.events* and *notification-service.events*, each with its *.dlq*, and *operations-service.events*, which has no dead-letter queue).
 
 **Criterion to continue:** the seven responses are *UP* and the number of tables is the expected one. Every service, including payment-service, checks the database in its health endpoint and answers *DOWN* (503) if it is not available.
 
@@ -459,7 +460,7 @@ The smoke tests confirm that the release works end to end before handing it over
 | H6 | Booking without choosing an operator and booking choosing a free one. | The system assigns an operator in both cases (the chosen one in the second); notice to the operator. |
 | H7 | Start and finish of the service by the operator. | Booking COMPLETED; notifications to the customer. |
 | H8 | Payment report with a test receipt and approval by the administrator. | Payment approved; payment confirmed email and points credited. |
-| H9 | Dead-letter queues. | *notification-service.events.dlq*, *customer-service.events.dlq*, and *operations-service.events.dlq* at zero. |
+| H9 | Dead-letter queues. | *notification-service.events.dlq* and *customer-service.events.dlq* at zero. |
 
 *Note.* Prepared by the authors from the checklist before a review session of the project (Vehicle Washing Development Team, 2026a).
 
@@ -610,7 +611,7 @@ To take the system to a real production environment, in addition to the above, t
 | Start of the window | Start of the implementation. | Team | Team chat | Project leader |
 | End of each phase | Result and evidence. | Team | Team chat and log | Person responsible for the phase |
 | Rollback decision | Reason and estimated time. | Team and business owner | Team chat | Project leader |
-| Go-live | System available, access address, and support channel. | Car wash staff and pilot customers | Administrator announcement from the panel (*SYSTEM_MESSAGE*) and direct message | Business administrator |
+| Go-live | System available, access address, and support channel. | Car wash staff and pilot customers | Direct message and notice at the car wash (the web and the app have no screen to send general announcements; improvement action AM-13) | Business administrator |
 | Closure | Result, lessons learned, and pending items. | Team, business owner, and instructor | Closing meeting | Project leader |
 
 *Note.* Prepared by the authors from the incident management of the project.
