@@ -346,14 +346,11 @@ flowchart LR
     R["Publicador RabbitMQ<br/>adapter/out/messaging"]
     H["Clientes REST / correo / push"]
   end
-  W --> PI
-  M --> PI
-  S --> PI
-  PI --> UC --> D
+  IN --> PI
+  PI --> UC
+  UC --> D
   UC --> PO
-  P -.implementa.-> PO
-  R -.implementa.-> PO
-  H -.implementa.-> PO
+  PO -. "implementados por" .-> OUT
 ```
 
 La arquitectura hexagonal separa el núcleo de dominio de la infraestructura mediante puertos y adaptadores (Cockburn, 2005); el modelado del dominio sigue a Evans (2004). Los servicios Java siguen los paquetes `domain`, `application` e `infrastructure` (por ejemplo `security-service/src/main/java/com/lavarapido/security/`). payment-service aplica la misma idea con cuatro proyectos .NET: `PaymentService.Domain`, `.Application` (con `Ports/In` y `Ports/Out`), `.Infrastructure` y `.Api`.
@@ -527,46 +524,46 @@ Las líneas continuas son FK reales; las punteadas son referencias lógicas a ot
 
 ```mermaid
 erDiagram
-  PERSON ||--|| APP_USER : "tiene"
-  APP_USER ||--o{ USER_ROLE : "recibe"
-  ROLE ||--o{ USER_ROLE : "asignado en"
-  ROLE ||--o{ ROLE_PERMISSION : "otorga"
-  PERMISSION ||--o{ ROLE_PERMISSION : "incluido en"
-  APP_USER ||--o{ USER_SESSION : "abre"
-  APP_USER ||--o{ PASSWORD_RESET_TOKEN : "solicita"
-  APP_USER ||--o| USER_PREFERENCE : "configura"
-  CUSTOMER ||--o{ CUSTOMER_VEHICLE : "posee"
-  VEHICLE_TYPE ||--o{ CUSTOMER_VEHICLE : "clasifica"
-  PERSON ||..o| CUSTOMER : "person_id (lógica)"
-  APP_USER ||..o| CUSTOMER : "user_id (lógica)"
-  APP_USER ||--o| LOGIN_LOCKOUT : "acumula fallos"
-  PERSON ||--o| PERSON_ADDRESS : "tiene"
-  LOGIN_LOCKOUT { bigint user_id PK
-    int failed_count
-    datetime2 locked_until }
   PERSON { bigint person_id PK
     nvarchar document_number UK
     nvarchar first_name
     nvarchar last_name }
-  APP_USER { bigint user_id PK
-    bigint person_id FK
-    nvarchar username UK
-    nvarchar password_hash }
-  ROLE { smallint role_id PK
-    nvarchar code UK }
-  PERMISSION { smallint permission_id PK
-    nvarchar code UK }
-  CUSTOMER { bigint customer_id PK
-    bigint person_id UK
-    bigint user_id
-    int loyalty_points }
   CUSTOMER_VEHICLE { bigint customer_vehicle_id PK
     bigint customer_id FK
     nvarchar license_plate
     smallint vehicle_type_id FK }
+  PERMISSION { smallint permission_id PK
+    nvarchar code UK }
   VEHICLE_TYPE { smallint vehicle_type_id PK
     nvarchar code UK
     decimal size_factor }
+  LOGIN_LOCKOUT { bigint user_id PK
+    int failed_count
+    datetime2 locked_until }
+  APP_USER { bigint user_id PK
+    bigint person_id FK
+    nvarchar username UK
+    nvarchar password_hash }
+  CUSTOMER { bigint customer_id PK
+    bigint person_id UK
+    bigint user_id
+    int loyalty_points }
+  ROLE { smallint role_id PK
+    nvarchar code UK }
+  APP_USER ||--o| USER_PREFERENCE : "configura"
+  VEHICLE_TYPE ||--o{ CUSTOMER_VEHICLE : "clasifica"
+  PERSON ||--|| APP_USER : "tiene"
+  CUSTOMER ||--o{ CUSTOMER_VEHICLE : "posee"
+  CUSTOMER |o..|| PERSON : "person_id (lógica)"
+  ROLE ||--o{ ROLE_PERMISSION : "otorga"
+  PERMISSION ||--o{ ROLE_PERMISSION : "incluido en"
+  APP_USER ||--o{ USER_ROLE : "recibe"
+  CUSTOMER |o..|| APP_USER : "user_id (lógica)"
+  APP_USER ||--o{ USER_SESSION : "abre"
+  APP_USER ||--o{ PASSWORD_RESET_TOKEN : "solicita"
+  APP_USER ||--o| LOGIN_LOCKOUT : "acumula fallos"
+  PERSON ||--o| PERSON_ADDRESS : "tiene"
+  ROLE ||--o{ USER_ROLE : "asignado en"
 ```
 
 **Figura 17**
@@ -1966,6 +1963,7 @@ classDiagram
 
 ```mermaid
 classDiagram
+  %% grid: 1+2 ports
   direction LR
   class CustomerAccount {
     <<aggregate root>>
@@ -2090,21 +2088,16 @@ classDiagram
   CustomerVehicle --> VehicleType
   VehicleType --> VehicleTypeCode
   LicensePlatePolicy ..> LicensePlate
-  CustomerVehicleService ..> CustomerAccount
-  CustomerVehicleService --> CustomerAccountRepository
-  CustomerVehicleService --> CustomerVehicleRepository
-  CustomerVehicleService --> VehicleTypeRepository
-  CustomerVehicleService --> IdentityDirectory
-  CustomerVehicleService --> LicensePlatePolicy
-  CustomerVehicleService --> DomainEventPublisher
-  CustomerRegistrationService --> CustomerAccountRepository
-  CustomerRegistrationService --> DomainEventPublisher
-  VehicleLookupService --> CustomerAccountRepository
-  VehicleLookupService --> CustomerVehicleRepository
-  VehicleTypeQueryService --> VehicleTypeRepository
 ```
 
 > *Nota.* `Register/Update/Remove/List/GetCustomerVehicleUseCase` abrevia los cinco puertos de entrada de vehículos. Adaptadores de salida: `CustomerAccountPersistenceAdapter`, `CustomerVehiclePersistenceAdapter` y `VehicleTypePersistenceAdapter` (JPA); `SecurityServiceIdentityDirectory` (REST a security-service); `LoggingDomainEventPublisher`, que solo escribe los eventos en el log. Adaptadores de entrada: `CustomerVehicleController`, `AdminVehicleController`, `VehicleTypeController` y `UserRegisteredListener` (RabbitMQ). Fuente: `lavarapido-customer-service/src/main/java/com/lavarapido/customer/`.
+
+*Lo que usa cada servicio de aplicación.*
+
+- `CustomerVehicleService`: `CustomerAccount`, `CustomerAccountRepository`, `CustomerVehicleRepository`, `VehicleTypeRepository`, `IdentityDirectory`, `LicensePlatePolicy`, `DomainEventPublisher`.
+- `CustomerRegistrationService`: `CustomerAccountRepository`, `DomainEventPublisher`.
+- `VehicleLookupService`: `CustomerAccountRepository`, `CustomerVehicleRepository`.
+- `VehicleTypeQueryService`: `VehicleTypeRepository`.
 
 ### 6.3 booking-service
 
@@ -2415,6 +2408,7 @@ classDiagram
 
 ```mermaid
 classDiagram
+  %% grid: 1+2 ports
   direction LR
   class Operator {
     <<aggregate root>>
@@ -2578,21 +2572,15 @@ classDiagram
   AssignmentPolicy ..> Operator
   AssignmentPolicy ..> BookingSnapshot
   StartPolicy ..> BookingSnapshot
-  OperationsService --> OperatorRepository
-  OperationsService --> ExecutionRepository
-  OperationsService --> BookingDirectory
-  OperationsService --> UserDirectory
-  OperationsService --> DomainEventPublisher
-  OperationsService ..> AssignmentPolicy
-  OperationsService ..> StartPolicy
-  OperationsService ..> AutoAssignmentPolicy
-  OperatorProfileService --> OperatorProfileRepository
-  OperatorProfileService --> OperatorRepository
   OperatorProfileRepository ..> OperatorProfile
-  OperationsService ..> ExecutionEvent
 ```
 
 > *Nota.* Adaptadores de salida: `OperatorPersistenceAdapter`, `ExecutionPersistenceAdapter`, `OperatorProfilePersistenceAdapter` e `InspectionPersistenceAdapter` (JPA); `BookingServiceDirectory` (REST a booking-service, con el token del usuario o con la llave interna); `SecurityUserDirectory` (REST a security-service); `RabbitDomainEventPublisher` y `LoggingDomainEventPublisher`. Adaptadores de entrada: `OperationsControllers` (rutas de administrador, operario y calificaciones), `AvailableOperatorsController`, `OperatorProfileController`, `InspectionControllers` y `BookingConfirmedListener` (RabbitMQ, asignación automática). Fuente: `lavarapido-operations-service/src/main/java/com/lavarapido/operations/`.
+
+*Lo que usa cada servicio de aplicación.*
+
+- `OperationsService`: `OperatorRepository`, `ExecutionRepository`, `BookingDirectory`, `UserDirectory`, `DomainEventPublisher`, `AssignmentPolicy`, `StartPolicy`, `AutoAssignmentPolicy`, `ExecutionEvent`.
+- `OperatorProfileService`: `OperatorProfileRepository`, `OperatorRepository`.
 
 **Figura 26**
 
@@ -2691,6 +2679,8 @@ classDiagram
 
 *Modelo de dominio de payment-service*
 
+*a) Pagos*
+
 ```mermaid
 classDiagram
   direction TB
@@ -2760,6 +2750,19 @@ classDiagram
     +bool RequiresAccount
     +bool RequiresReceipt
   }
+  AggregateRoot~TId~ --|> Entity~TId~
+  Payment --|> AggregateRoot~TId~
+  PaymentAccount --|> Entity~TId~
+  Payment --> PaymentStatus
+  Payment ..> PaymentAccount : PaymentAccountId
+  PaymentAccount --> PaymentMethodType
+```
+
+*b) Promociones y fidelización (Promotion también hereda de `AggregateRoot<TId>`)*
+
+```mermaid
+classDiagram
+  direction TB
   class Promotion {
     <<aggregate root>>
     +string Code
@@ -2836,14 +2839,6 @@ classDiagram
     Adjusted
     Reversed
   }
-  AggregateRoot~TId~ --|> Entity~TId~
-  Payment --|> AggregateRoot~TId~
-  PaymentAccount --|> Entity~TId~
-  Promotion --|> AggregateRoot~TId~
-  Payment "1" *-- "0..*" PaymentReceipt
-  Payment --> PaymentStatus
-  Payment ..> PaymentAccount : PaymentAccountId
-  PaymentAccount --> PaymentMethodType
   Promotion --> DiscountType
   Promotion ..> PromotionDefinition
   Promotion ..> RedemptionRequest
@@ -3124,6 +3119,7 @@ classDiagram
 
 ```mermaid
 classDiagram
+  %% grid: 2+3
   direction LR
   class DomainEventConsumerService {
     <<application service>>
@@ -3224,32 +3220,20 @@ classDiagram
   class StaffNotificationFactory {
     <<domain service>>
   }
-  DomainEventConsumerService --> ProcessedEventRepository
-  DomainEventConsumerService --> NotificationSendingService
-  DomainEventConsumerService --> EventNotificationFactory
-  DomainEventConsumerService --> BookingReminderService
-  DomainEventConsumerService --> StaffNotificationService
-  DomainEventConsumerService --> EmailRecipients
-  NotificationSendingService --> NotificationRepository
-  NotificationSendingService --> DeviceTokenRepository
-  NotificationSendingService --> PushSender
-  NotificationSendingService --> EmailSender
-  NotificationSendingService --> UserContactDirectory
-  NotificationInboxService --> NotificationRepository
-  BookingReminderService --> BookingReminderRepository
-  BookingReminderService --> NotificationSendingService
-  StaffNotificationService --> BookingTrackingRepository
-  StaffNotificationService --> UserContactDirectory
-  StaffNotificationService --> StaffNotificationFactory
-  StaffNotificationService --> NotificationSendingService
-  UnassignedBookingAlertService --> BookingTrackingRepository
-  UnassignedBookingAlertService --> UserContactDirectory
-  UnassignedBookingAlertService --> NotificationSendingService
-  DeviceRegistrationService --> DeviceTokenRepository
-  EmailRecipients --> UserContactDirectory
 ```
 
 > *Nota.* Entre servicios de aplicación la dependencia real es el puerto de entrada: por ejemplo, `DomainEventConsumerService` recibe un `SendNotificationUseCase`, que implementa `NotificationSendingService`. `NotificationTypeCode` tiene 24 códigos; el diagrama muestra solo algunos. Adaptadores de salida: `NotificationPersistenceAdapter`, `DeviceTokenPersistenceAdapter`, `BookingReminderPersistenceAdapter`, `BookingTrackingPersistenceAdapter` y `ProcessedEventPersistenceAdapter` (JPA); `SmtpEmailSender` y `LoggingEmailSender`; `ExpoPushSender` y `LoggingPushSender`; `SecurityServiceUserContactDirectory` (REST interna a security-service). Adaptadores de entrada: `NotificationController`, `AdminNotificationController`, `DeviceController`, `DomainEventListener` (RabbitMQ) y `ReminderScheduler` (tarea programada). Fuente: `lavarapido-notification-service/src/main/java/com/lavarapido/notification/`.
+
+*Lo que usa cada servicio de aplicación.*
+
+- `DomainEventConsumerService`: `ProcessedEventRepository`, `NotificationSendingService`, `EventNotificationFactory`, `BookingReminderService`, `StaffNotificationService`, `EmailRecipients`.
+- `NotificationSendingService`: `NotificationRepository`, `DeviceTokenRepository`, `PushSender`, `EmailSender`, `UserContactDirectory`.
+- `NotificationInboxService`: `NotificationRepository`.
+- `BookingReminderService`: `BookingReminderRepository`, `NotificationSendingService`.
+- `StaffNotificationService`: `BookingTrackingRepository`, `UserContactDirectory`, `StaffNotificationFactory`, `NotificationSendingService`.
+- `UnassignedBookingAlertService`: `BookingTrackingRepository`, `UserContactDirectory`, `NotificationSendingService`.
+- `DeviceRegistrationService`: `DeviceTokenRepository`.
+- `EmailRecipients`: `UserContactDirectory`.
 
 ### 6.7 Estados de las entidades principales
 

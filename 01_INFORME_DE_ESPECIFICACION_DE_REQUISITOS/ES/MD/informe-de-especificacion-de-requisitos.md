@@ -1280,7 +1280,7 @@ stateDiagram-v2
 
 ```mermaid
 stateDiagram-v2
-    [*] --> PENDING : crear (monto = total de la reserva)
+    [*] --> PENDING : crear (monto = total de la reserva menos cupones)
     PENDING --> PENDING : adjuntar comprobante
     PENDING --> IN_REVIEW : enviar a revisión (requiere al menos un comprobante)
     IN_REVIEW --> APPROVED : aprobar (admin)

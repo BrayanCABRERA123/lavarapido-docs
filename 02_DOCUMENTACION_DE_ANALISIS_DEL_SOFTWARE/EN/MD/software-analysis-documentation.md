@@ -398,7 +398,7 @@ sequenceDiagram
     P->>B: GET /bookings/{id} (customer JWT)
     B-->>P: status, total, owner
     alt booking can be paid, has no open or approved payment and the reference was not used on another booking
-        P->>DB: PENDING payment (amount = booking total minus the coupons applied) + receipt → IN_REVIEW
+        P->>DB: PENDING payment (amount = booking total minus<br/>the coupons applied) + receipt → IN_REVIEW
         P-->>W: 201 payment IN_REVIEW
     else not payable / already reported / already approved / reference reused
         P-->>W: 409 BOOKING_NOT_PAYABLE | PAYMENT_ALREADY_REPORTED | PAYMENT_ALREADY_APPROVED | TRANSACTION_REFERENCE_REUSED
@@ -527,7 +527,7 @@ sequenceDiagram
         W-->>U: Locked account message (in the app, with the option to recover the password)
     else wrong password
         S->>DB: adds the failure (15-min window) and on the fifth one sets locked_until to now + 15 min
-        S-->>W: 401 INVALID_CREDENTIALS (or 423 if this failure locked it)
+        S-->>W: 401 INVALID_CREDENTIALS<br/>(or 423 if this failure locked it)
     else correct password and deactivated account
         S-->>W: 403 ACCOUNT_DISABLED
     else correct password
@@ -698,9 +698,9 @@ flowchart TD
     alt --> date
     avail -->|Yes| confirm[Confirm booking: assign bay, freeze prices]
     confirm --> notif["Send confirmation, schedule 24h/1h reminders<br/>and assign an operator (section 3.3)"]
-    notif --> stop1([End: booking Confirmed])
+    notif --> conf([Booking Confirmed])
 
-    stop1 -.-> manage{Any change<br/>before the start?}
+    conf --> manage{Any change<br/>before the start?}
     manage -->|The customer cancels| state{Is the booking Scheduled<br/>or Confirmed?}
     state -->|No - in progress/finished| block[Block the action with an explanatory message]
     block --> stop2([End])
@@ -715,13 +715,14 @@ flowchart TD
 
 ```mermaid
 flowchart TD
+    start0((Start)) --> start
     start([Confirmed booking without an operator]) --> auto{"Does automatic assignment<br/>find an eligible operator?<br/>(RF-008)"}
     auto -->|Yes| pref{"Did the customer choose an operator<br/>who is still free? (RF-010)"}
     pref -->|Yes| chosen[Assign the chosen operator]
     pref -->|No| pick[Pick the one with the fewest bookings that day<br/>tie: lowest identifier]
     chosen --> notifyop[Notify the customer and the operator]
     pick --> notifyop
-    notifyop --> stopA([End])
+    notifyop --> wait([Wait for the booking time])
     auto -->|No eligible operators| manual["Booking without an operator; alert to the administrator<br/>when less than 2 h remain"]
     manual --> list[Admin sees candidates: available first, with rating]
     list --> chooseop[Admin picks an operator]
@@ -729,10 +730,9 @@ flowchart TD
     valid -->|No| blockop[Block assignment, show reason]
     blockop --> list
     valid -->|Yes| assign[Create PENDING execution, notify the operator]
-    assign --> stopB([End])
+    assign --> wait
 
-    stopA -.-> today{"Are 15 minutes or less left<br/>before the booking time?"}
-    stopB -.-> today
+    wait --> today{"Are 15 minutes or less left<br/>before the booking time?"}
     today -->|No| blockday[Button disabled: SERVICE_TOO_EARLY]
     blockday --> stopC([End])
     today -->|Yes| startsvc[Operator marks Start service]
@@ -747,6 +747,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
+    start0((Start)) --> start
     start([Confirmed booking without an approved payment]) --> method{Which payment method?}
 
     method -->|QR / Transfer / Nequi / Daviplata| showqr[Show the QR of the active account and instructions]
@@ -756,7 +757,7 @@ flowchart TD
     dup -->|Yes| rejectref[Reject: TRANSACTION_REFERENCE_REUSED]
     rejectref --> stop1([End])
     dup -->|No| inreview["Payment → Under review (linked to the booking)"]
-    inreview --> stop2([End: waiting for the admin])
+    inreview --> waitadm([Waits for the admin review])
 
     method -->|Cash| cash[Customer pays at the site]
     cash --> register[Admin records the payment manually]
@@ -764,7 +765,7 @@ flowchart TD
     approved1 --> points1["Credit loyalty points (RF-026)"]
     points1 --> lockui
 
-    stop2 -.-> review[Admin opens pending payments]
+    waitadm --> review[Admin opens pending payments]
     review --> compare{Declared amount =<br/>amount due and receipt readable?}
     compare -->|No| reject[Reject with a reason, customer can resend]
     reject --> stop4([End])
@@ -779,6 +780,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
+    start0((Start)) --> start
     start([Customer on the payment screen]) --> has{Do they have promotions<br/>unlocked by their points?}
     has -->|No| noshow[No coupon is offered]
     noshow --> stop1([End])
@@ -792,13 +794,15 @@ flowchart TD
     limit -->|Yes| calc[Calculate the discount on the subtotal<br/>without exceeding it]
     calc --> apply[Apply the discount to the total to pay]
     apply --> notify[Notify the redemption in the inbox and by email]
-    notify --> stop4([End: payment continues for the discounted amount])
+    notify --> stop4([Payment continues for the discounted amount])
+    stop4 --> stop4x((End))
 ```
 
 ### 3.6 Managing roles and permissions (RF-029)
 
 ```mermaid
 flowchart TD
+    start0((Start)) --> start
     start([Admin opens Management → Roles]) --> load[Load the 3 fixed roles + permission catalog]
     load --> view[View the current permissions of each role: Administrator, Operator, Customer]
     view --> edit[Admin checks or unchecks permissions of a role]
@@ -807,7 +811,8 @@ flowchart TD
     valid -->|No| reject[Reject the save explicitly]
     reject --> edit
     valid -->|Yes| replace[Replace exactly those permissions for the role]
-    replace --> stop([End: roles cannot be created or deleted])
+    replace --> stop([Permissions saved; roles are not created or deleted])
+    stop --> stopx((End))
 ```
 
 ---
@@ -884,8 +889,7 @@ stateDiagram-v2
     [*] --> DRAFT : create (booking of 180 min or more, Confirmed or In progress)
     DRAFT --> DRAFT : mark phases and record findings
     DRAFT --> PUBLISHED : publish (the link starts showing it)
-    PUBLISHED --> PUBLISHED : edit while the booking is still Confirmed or In progress
-    PUBLISHED --> PUBLISHED : share (notifies the customer)
+    PUBLISHED --> PUBLISHED : edit or share (notifies the customer)
     PUBLISHED --> [*] : the booking is completed (phases and findings read only)
 
     state "Each phase" as fase {
@@ -897,7 +901,7 @@ stateDiagram-v2
     }
 ```
 
-*Source:* `operations-service`, `InspectionReport` (`publish`, `requirePublished`, `setPhaseStatus`, `addFinding`). The phases are reception, exterior, interior, engine and delivery; only a published report can be shared.
+*Source:* `operations-service`, `InspectionReport` (`publish`, `requirePublished`, `setPhaseStatus`, `addFinding`). The phases are reception, exterior, interior, engine and delivery; only a published report can be shared, and it is edited while the booking is still Confirmed or In progress.
 
 ### 4.6 User account (RF-002, RF-004b, RF-027, RF-028)
 
@@ -908,14 +912,12 @@ stateDiagram-v2
         [*] --> UNLOCKED
         UNLOCKED --> LOCKED : fifth failed attempt within 15 min
         LOCKED --> UNLOCKED : 15 min pass or the password is recovered
-        UNLOCKED --> UNLOCKED : successful sign-in (clears the count)
     }
-    ACTIVE --> INACTIVE : the administrator deactivates it (not if it is an administrator)
-    ACTIVE --> INACTIVE : the user closes their account with the password (not if administrator)
+    ACTIVE --> INACTIVE : the administrator deactivates it or the user closes it
     INACTIVE --> ACTIVE : the administrator activates it
 ```
 
-*Source:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus`, `AccountDeactivationService`). A locked account answers 423 even with the right password; an inactive one answers 403 after the password is checked. No administrator account can be deactivated (403 `ADMIN_CANNOT_BE_DISABLED`), and an administrator cannot deactivate or close their own account (403 `CANNOT_DISABLE_OWN_ACCOUNT`). Each account has one role, set when it is created: there is no role change.
+*Source:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus`, `AccountDeactivationService`). A successful sign-in before the fifth attempt clears the failure count. The user closes their account with the password. A locked account answers 423 even with the right password; an inactive one answers 403 after the password is checked. No administrator account can be deactivated (403 `ADMIN_CANNOT_BE_DISABLED`), and an administrator cannot deactivate or close their own account (403 `CANNOT_DISABLE_OWN_ACCOUNT`). Each account has one role, set when it is created: there is no role change.
 
 ---
 
