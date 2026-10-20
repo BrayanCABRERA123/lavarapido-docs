@@ -14,6 +14,7 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 - 02 Análisis 2.3 y 04 Diseño 1.4: secuencias, estados y modelo de datos corregidos contra el código; las figuras de servicios y puertos muestran las clases ordenadas y las dependencias en una lista.
 - 03 Propuesta 1.3, 05 Artefactos, 07 Procedimiento 2.3 y Despliegue 1.4, 08 Acciones 2.4, 09 Manual de instalación 4.3 y de usuario 4.4, 10 Artículos y 11 Evidencias: cifras, fechas y textos al día.
 - Diagramas: todos se dibujan con líneas rectas y codos de 90°; donde dos líneas no pueden dejar de cruzarse llevan un puente. Los casos de uso tienen la figura del actor y los óvalos alineados, y las actividades usan los símbolos UML de inicio y fin. La arquitectura y los estados de la reserva del manual técnico y de los artículos dejaron de ser imágenes SVG y pasaron a diagramas que se mantienen con el resto.
+- Segunda revisión visual de los 116 diagramas de los documentos, uno por uno: ya no queda ningún cruce de líneas; los diagramas de actividades del 02 tienen un solo inicio y fines que no continúan; los mensajes largos de las secuencias van en dos líneas; las figuras 14, 16, 22, 25, 27 y 30 del 04 se reorganizaron (la 27 quedó en dos partes: pagos, y promociones y fidelización).
 - Capturas de la lista de usuarios tomadas de nuevo el 20 de octubre (01, 02, 04 y manual de administrador).
 - PDF y Word regenerados para todos los documentos.
 
