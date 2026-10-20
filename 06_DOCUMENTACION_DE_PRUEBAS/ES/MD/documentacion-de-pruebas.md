@@ -12,12 +12,12 @@
 | Producto | Documentación de pruebas (sección 2.5.4) |
 | Programa | Tecnólogo en Análisis y Desarrollo de Software (ADSO) |
 | Ficha | 3145556 |
-| Aprendices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano |
+| Aprendices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano Quintero |
 | Instructora | Karol Daniela Correa |
 | Centro de formación | Industria |
-| Fecha | 19 de octubre de 2026 |
+| Fecha | 20 de octubre de 2026 |
 
-Este documento reúne el plan de pruebas, el inventario de pruebas automatizadas que existen en los repositorios, sus resultados reales al ejecutarlas el 19 de octubre de 2026 (incluidas las pruebas de punta a punta, de rendimiento y de diseño adaptable contra el sistema completo) y los 42 casos de prueba funcionales, ejecutados el mismo día, trazados a los requisitos del SRS v7.4 (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`). La estructura sigue la norma ISO/IEC/IEEE 29119-3 de documentación de pruebas (International Organization for Standardization [ISO], 2021). Ningún resultado de este documento es supuesto.
+Este documento reúne el plan de pruebas, el inventario de pruebas automatizadas que existen en los repositorios, sus resultados reales al ejecutarlas el 19 de octubre de 2026 (incluidas las pruebas de punta a punta, de rendimiento y de diseño adaptable contra el sistema completo) y los 42 casos de prueba funcionales, ejecutados el mismo día, trazados a los requisitos del SRS v7.6 (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`). El 20 de octubre de 2026 se ajustaron el inventario, el caso CP-42 y la matriz de trazabilidad porque el cambio de rol de una cuenta se revirtió en el código ese día, y la redacción de CP-10 porque el cliente cancela sin escribir motivo. La estructura sigue la norma ISO/IEC/IEEE 29119-3 de documentación de pruebas (International Organization for Standardization [ISO], 2021). Ningún resultado de este documento es supuesto.
 
 ## 1. Plan de pruebas
 
@@ -39,7 +39,7 @@ Se prueban la aplicación web, la aplicación móvil y los siete servicios de ba
 | Integración de rutas del gateway | Que cada ruta pública llegue a su servicio | Spring Boot Test | `GatewayRoutesTest.java` |
 | Integración de persistencia | Mapeo EF Core contra SQL Server real | xUnit + `DatabaseFixture` | `PaymentService.Infrastructure.IntegrationTests` (requiere base de datos) |
 | Unitarias de interfaz web | Componentes, guards y servicios de Angular | Vitest 4 + jsdom (`@angular/build:unit-test`) | `Web/src/**/*.spec.ts` |
-| Funcionales / aceptación | Recorridos completos por rol contra el sistema desplegado | Manual, con Postman o Swagger UI para la API y navegador / Expo Go para la interfaz | Casos CP-01 a CP-33 (sección 4) |
+| Funcionales / aceptación | Recorridos completos por rol contra el sistema desplegado | Manual, con Postman o Swagger UI para la API y navegador / Expo Go para la interfaz | Casos CP-01 a CP-42 (sección 4) |
 | Entre servicios (punta a punta) y RNF | Reserva con elección de operario y asignación automática, flujo completo de los tres roles, informe de inspección, reglas de acceso por rol; percentil 95 del tiempo de respuesta (RNF-001); pantallas web a 360 px (RNF-008) | Node 24 (`node:test` y `fetch`) y Playwright Core con Edge sin ventana | `lavarapido-infra/e2e` |
 
 > *Nota.* Herramientas documentadas en JUnit (s.f.), xUnit.net (s.f.) y Vitest (s.f.).
@@ -68,7 +68,7 @@ Se prueban la aplicación web, la aplicación móvil y los siete servicios de ba
 
 ## 2. Inventario de pruebas automatizadas
 
-Los repositorios tienen 550 métodos de prueba: 507 en el backend y 43 en la web. La app móvil no tiene pruebas automatizadas; se revisa con la compilación de TypeScript y el recorrido de pantallas (sección 3.2).
+Al 20 de octubre de 2026 los repositorios tienen 548 métodos de prueba: 505 en el backend y 43 en la web. La app móvil no tiene pruebas automatizadas; se revisa con la compilación de TypeScript y el recorrido de pantallas (sección 3.2).
 
 **Tabla 4**
 
@@ -77,7 +77,7 @@ Los repositorios tienen 550 métodos de prueba: 507 en el backend y 43 en la web
 | Artefacto | Archivos | Métodos | Qué cubren |
 | --- | --- | --- | --- |
 | api-gateway | 1 | 8 | Ruteo de cada prefijo `/api/v1/**` a su servicio y que `/internal/**` no salga por el gateway (`GatewayRoutesTest`) |
-| security-service | 17 | 135 | Registro, login con bloqueo por intentos fallidos, recuperación de contraseña, perfil y dirección, administración de usuarios y cambio de rol, roles y permisos, preferencias, objetos valor, política de contraseñas, emisión de JWT y seguridad HTTP por rol (`ApiSecurityWebTest`) |
+| security-service | 17 | 133 | Registro, login con bloqueo por intentos fallidos, recuperación de contraseña, perfil y dirección, administración de usuarios (incluida la regla de que una cuenta de administrador no se desactiva), roles y permisos, preferencias, objetos valor, política de contraseñas, emisión de JWT y seguridad HTTP por rol (`ApiSecurityWebTest`) |
 | customer-service | 6 | 50 | Cuenta del cliente, placas, CRUD de vehículos, listener de `security.user_registered` y API web |
 | booking-service | 7 | 43 | Ciclo de vida de la reserva, disponibilidad y motivo de una hora no disponible, bahías (`ServiceBayTest`), catálogo, datos del negocio (`EstablishmentTest`), operario preferido en el evento y API web |
 | operations-service | 11 | 55 | Asignación manual y automática, operarios libres, ventana de inicio, ejecución, calificación, ausencias, métricas del operario, resumen del equipo, ficha del operario, informe de inspección y API web |
@@ -92,7 +92,7 @@ Las pruebas del backend son de dominio y de aplicación con dobles en memoria, m
 
 ## 3. Resultados de ejecución
 
-El 19 de octubre de 2026, con la rama *develop* de los diez repositorios actualizada ese día, se ejecutaron las ocho suites automatizadas: 655 pruebas, todas aprobadas y ninguna omitida. Esta vez las 7 pruebas de persistencia de payment también corrieron, contra la base aislada `LavaRapidoPaymentIT`.
+El 19 de octubre de 2026, con la rama *develop* de los diez repositorios actualizada ese día, se ejecutaron las ocho suites automatizadas: 655 pruebas, todas aprobadas y ninguna omitida. Esta vez las 7 pruebas de persistencia de payment también corrieron, contra la base aislada `LavaRapidoPaymentIT`. Al revertirse el cambio de rol el 20 de octubre salieron de security-service 2 pruebas (`changingTheRoleReplacesItAndClosesTheSessions` y `nobodyChangesTheirOwnRole`), así que hoy esa suite tiene 2 pruebas menos que las 151 de la Tabla 5; la Tabla 5 conserva los números reales de la ejecución del 19 de octubre.
 
 **Tabla 5**
 
@@ -209,7 +209,7 @@ Para el diseño adaptable (RNF-008) se recorrieron con Playwright (Edge sin vent
 
 ## 4. Casos de prueba funcionales
 
-Los casos CP-01 a CP-33 se definieron sobre el SRS v4 y se ejecutaron por primera vez el 9 de octubre de 2026; los casos CP-34 a CP-42 cubren los requisitos implementados después (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037 y RF-038) y el cambio de rol de RF-028. Los 42 se ejecutaron el 19 de octubre de 2026 contra el sistema completo, a través del API Gateway (las mismas llamadas que hacen la web y el móvil), con un script que crea sus propias cuentas y datos y los borra al terminar. Los 42 resultaron aprobados (Figura 7). Los requisitos que quedaron implementados después (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037 y RF-038) están cubiertos por pruebas automatizadas (sección 5), y el flujo de reserva con elección de operario y asignación automática lo recorre además `lavarapido-infra/e2e/booking-flow.test.js`.
+Los casos CP-01 a CP-33 se definieron sobre el SRS v4 y se ejecutaron por primera vez el 9 de octubre de 2026; los casos CP-34 a CP-42 cubren los requisitos implementados después (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037 y RF-038) y las cuentas de administrador de RF-028. Los 42 se ejecutaron el 19 de octubre de 2026 contra el sistema completo, a través del API Gateway (las mismas llamadas que hacen la web y el móvil), con un script que crea sus propias cuentas y datos y los borra al terminar. Los 42 resultaron aprobados (Figura 7). Los requisitos que quedaron implementados después (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037 y RF-038) están cubiertos por pruebas automatizadas (sección 5), y el flujo de reserva con elección de operario y asignación automática lo recorre además `lavarapido-infra/e2e/booking-flow.test.js`.
 
 **Tabla 6**
 
@@ -226,7 +226,7 @@ Los casos CP-01 a CP-33 se definieron sobre el SRS v4 y se ejecutaron por primer
 | CP-07 | RF-004 | Cambio de contraseña con actual incorrecta | Sesión iniciada | Cambiar contraseña con la actual equivocada | Contraseña actual errónea | Error de contraseña actual incorrecta; no cambia | 400 `INCORRECT_CURRENT_PASSWORD`; la contraseña anterior sigue funcionando | Aprobado |
 | CP-08 | RF-005 | Crear reserva | Cliente con vehículo SUV | Elegir vehículo, servicio Básico, fecha y hora libre | SUV, Básico | Reserva creada; precio $23.000 (precio semilla de Básico para SUV) | Reserva creada (201) con total $23.000, el precio semilla de Básico para SUV | Aprobado |
 | CP-09 | RF-006 | Horario ocupado | Bahías activas de una franja ocupadas | Reservar en la misma franja hasta llenarla | Varios vehículos del cliente | No se guarda la reserva; se ofrecen hasta cinco horas alternativas del mismo día | Tres reservas ocuparon las tres bahías activas; la cuarta: 409 `SLOT_UNAVAILABLE` (`NO_FREE_BAY`) con 5 horas alternativas | Aprobado |
-| CP-10 | RF-007 | Cancelar reserva antes de iniciar | Reserva CONFIRMED | Cancelar con motivo | Motivo `CUSTOMER_REQUEST` | Reserva en CANCELLED con el motivo guardado | 200, reserva en CANCELLED con el motivo `CUSTOMER_REQUEST` guardado | Aprobado |
+| CP-10 | RF-007 | Cancelar reserva antes de iniciar | Reserva CONFIRMED | Cancelar como cliente (el cliente no escribe motivo) | — | Reserva en CANCELLED con el motivo `CUSTOMER_REQUEST` que pone el sistema | 200, reserva en CANCELLED con el motivo `CUSTOMER_REQUEST` guardado | Aprobado |
 | CP-11 | RF-007 | Modificar reserva en proceso | Reserva IN_PROGRESS | Intentar cancelar | — | Acción bloqueada con mensaje | 409 `BOOKING_NOT_CHANGEABLE` | Aprobado |
 | CP-12 | RF-009 | Asignar operario no disponible | Operario con ausencia a la hora de la reserva | Consultar candidatos e intentar asignarlo; luego asignar uno disponible | Operario ausente | El operario no se permite; los disponibles aparecen primero | El operario sin turno aparece con `OPERATOR_NOT_ON_SHIFT` y asignarlo responde 409; los disponibles salen primero; asignar al disponible: 200 | Aprobado |
 | CP-13 | RF-011 | Operario ve sus servicios | Reserva asignada al operario | Consultar servicios asignados | — | Lista con datos del cliente y del vehículo | 200; el servicio trae nombre del cliente, placa, vehículo y servicios | Aprobado |
@@ -258,7 +258,9 @@ Los casos CP-01 a CP-33 se definieron sobre el SRS v4 y se ejecutaron por primer
 | CP-39 | RF-037 | Datos del negocio por completar | Sistema con la migración 111 aplicada | Consultar los datos, guardar un teléfono inválido y luego una línea de atención válida | Teléfono de 3 dígitos | Los datos del negocio real están vacíos; el teléfono inválido se rechaza; el cambio válido se ve en la página pública | Los datos tributarios y los canales estaban vacíos; el teléfono inválido responde 400 `ESTABLISHMENT_INVALID_PHONE`; el cambio válido (200) se ve en la página pública | Aprobado |
 | CP-40 | RF-038 | Ficha del operario | Operario creado | Guardar una especialidad y una habilidad | Habilidad de nivel EXPERT | La ficha queda guardada | 200; ficha guardada con su especialidad y una habilidad | Aprobado |
 | CP-41 | RF-036 | Informe de inspección | Reserva confirmada de un servicio de 200 minutos | Iniciar el informe, terminar una fase, publicar, compartir y abrir el enlace público | Servicio temporal de 200 minutos | El cliente recibe el aviso y el enlace abre sin sesión con la placa enmascarada | Informe iniciado (200), publicado (200) y compartido (204); el cliente recibió INSPECTION_REPORT y el enlace abre sin sesión sin mostrar la placa completa | Aprobado |
-| CP-42 | RF-028 | Cambio de rol y cuentas de administrador | Administrador y operario de prueba | Intentar cambiar el propio rol, desactivar un administrador y pasar un operario a cliente | Roles | Se rechazan los dos primeros; el cambio de rol cierra las sesiones del usuario | Cambiar su propio rol: 403 `CANNOT_CHANGE_OWN_ROLE`; desactivar un administrador: 403 `ADMIN_CANNOT_BE_DISABLED`; el operario pasa a cliente (200) y sus sesiones se cierran | Aprobado |
+| CP-42 | RF-028 | Una cuenta de administrador no se desactiva | Sesión de administrador | Intentar desactivar una cuenta de administrador | — | Se rechaza: una cuenta de administrador no se desactiva | 403 `ADMIN_CANNOT_BE_DISABLED` | Aprobado |
+
+> *Nota.* El 19 de octubre CP-42 también probó el cambio de rol de una cuenta (403 `CANNOT_CHANGE_OWN_ROLE` al cambiar el propio rol y un operario pasado a cliente con 200). Esa parte se retiró del caso el 20 de octubre de 2026, cuando la función se revirtió en el backend, la web y la app.
 
 > *Nota.* Los precios de los datos de prueba salen de los changelogs semilla (`103-seed-catalog.sql`, `104-seed-booking-catalogs.sql`). El script crea un cliente, dos operarios y un administrador de prueba, con correos del dominio `prueba.lavarapido.test`, y sus propios vehículos y reservas. Al terminar borra todo lo que creó y restaura el precio de Básico, la matriz de permisos, la bahía, la cuenta de pago y los datos del negocio; se comprobó en la base que no quedó nada. Los correos de recuperación se leyeron en Mailpit. Evidencia: registro de ejecución con el código HTTP y el código de error de cada paso (Figura 7).
 
@@ -270,7 +272,7 @@ Los casos CP-01 a CP-33 se definieron sobre el SRS v4 y se ejecutaron por primer
 
 ## 5. Matriz de trazabilidad
 
-De los 41 requisitos del SRS v7.4, 38 tienen caso funcional y 39 una prueba automatizada relacionada; RF-032 y RF-034 solo tienen caso funcional, y RF-017, RF-023 y RF-025 solo prueba automatizada.
+De los 41 requisitos del SRS v7.6, 38 tienen caso funcional y 39 una prueba automatizada relacionada; RF-032 y RF-034 solo tienen caso funcional, y RF-017, RF-023 y RF-025 solo prueba automatizada.
 
 **Tabla 7**
 
@@ -284,7 +286,7 @@ De los 41 requisitos del SRS v7.4, 38 tienen caso funcional y 39 una prueba auto
 | RF-004 | Implementado | `PUT /users/me/password` | `/client/profile` | CP-07 | `UserProfileAndAdministrationTest`, `PasswordPolicyTest` |
 | RF-004b | Implementado | `POST /auth/login` (423 `ACCOUNT_LOCKED`) | `/auth` | CP-34 | `AuthenticationServiceTest` (bloqueo y ventana), `PasswordRecoveryServiceTest` (el restablecimiento lo levanta), `ApiSecurityWebTest` (423) |
 | RF-027 | Implementado | `GET/PATCH /users/me`, `GET/PUT /users/me/address`, `PUT /users/me/email`, `POST /auth/logout`, `POST /users/me/deactivate` | `/client/profile` | CP-25 | `UserProfileAndAdministrationTest`, `PersonAddressServiceTest`, `AuthenticationServiceTest` |
-| RF-028 | Implementado | `GET/POST /admin/users`, `PATCH /admin/users/{id}/status`, `PATCH /admin/users/{id}/role` | `/admin/management`, `/admin/operators` | CP-26, CP-42 | `UserProfileAndAdministrationTest`, `ApiSecurityWebTest` |
+| RF-028 | Implementado | `GET/POST /admin/users`, `PATCH /admin/users/{id}/status` | `/admin/management`, `/admin/operators` | CP-26, CP-42 | `UserProfileAndAdministrationTest`, `ApiSecurityWebTest` |
 | RF-029 | Implementado | `GET /admin/roles-permissions`, `PUT /admin/roles-permissions/{role}` | `/admin/management` | CP-27 | `RolePermissionAdministrationServiceTest` |
 | RF-030 | Implementado | `/vehicles`, `GET /vehicle-types`, `GET /admin/vehicles` | `/client/vehicles` | CP-28 | `CustomerVehicleServiceTest`, `LicensePlateTest`, `CustomerApiWebTest` |
 | RF-031 | Implementado | `GET /catalog/services`, `/admin/catalog/services` | `/admin/management` | CP-29 | `CatalogServiceTest` |
