@@ -398,7 +398,7 @@ sequenceDiagram
     P->>B: GET /bookings/{id} (JWT cliente)
     B-->>P: estado, total, dueño
     alt reserva pagable, sin pago abierto/aprobado y referencia no usada en otra reserva
-        P->>DB: pago PENDING (monto = total de la reserva menos los cupones aplicados) + comprobante → IN_REVIEW
+        P->>DB: pago PENDING (monto = total de la reserva menos<br/>los cupones aplicados) + comprobante → IN_REVIEW
         P-->>W: 201 pago IN_REVIEW
     else no pagable / ya reportado / ya aprobado / referencia repetida
         P-->>W: 409 BOOKING_NOT_PAYABLE | PAYMENT_ALREADY_REPORTED | PAYMENT_ALREADY_APPROVED | TRANSACTION_REFERENCE_REUSED
@@ -450,7 +450,7 @@ sequenceDiagram
     P-->>W: 201 promoción
 
     Note over C,P: --- Acreditación de puntos (al aprobar un pago, flujo 2.5) ---
-    P->>DB: INSERT loyalty_transaction EARNED (+puntos de las líneas de la reserva, sequence_no único por cliente)
+    P->>DB: INSERT loyalty_transaction EARNED (+puntos de las<br/>líneas de la reserva, sequence_no único por cliente)
     Note over P: El saldo nunca se guarda aparte: se calcula siempre<br/>desde la última fila del libro de movimientos (INV-LOY-001)
 
     C->>W: Dashboard → ve sus puntos y promociones desbloqueadas
@@ -527,7 +527,7 @@ sequenceDiagram
         W-->>U: Mensaje de cuenta bloqueada (en la app, con la opción de recuperar la contraseña)
     else contraseña incorrecta
         S->>DB: suma el fallo (ventana de 15 min) y al quinto pone locked_until en ahora + 15 min
-        S-->>W: 401 INVALID_CREDENTIALS (o 423 si este fallo la bloqueó)
+        S-->>W: 401 INVALID_CREDENTIALS<br/>(o 423 si este fallo la bloqueó)
     else contraseña correcta y cuenta desactivada
         S-->>W: 403 ACCOUNT_DISABLED
     else contraseña correcta
@@ -698,9 +698,9 @@ flowchart TD
     alt --> date
     avail -->|Sí| confirm[Confirmar reserva: asignar bahía, congelar precios]
     confirm --> notif["Notificar confirmación, programar recordatorios 24h/1h<br/>y asignar operario (sección 3.3)"]
-    notif --> stop1([Fin: reserva Confirmada])
+    notif --> conf([Reserva Confirmada])
 
-    stop1 -.-> manage{¿Hay un cambio<br/>antes de iniciar?}
+    conf --> manage{¿Hay un cambio<br/>antes de iniciar?}
     manage -->|El cliente cancela| state{¿Reserva Programada<br/>o Confirmada?}
     state -->|No - en proceso/terminada| block[Bloquear la acción con mensaje explicativo]
     block --> stop2([Fin])
@@ -715,13 +715,14 @@ flowchart TD
 
 ```mermaid
 flowchart TD
+    start0((Inicio)) --> start
     start([Reserva Confirmada sin operario]) --> auto{"¿Asignación automática<br/>encuentra un elegible?<br/>(RF-008)"}
     auto -->|Sí| pref{"¿El cliente eligió un operario<br/>y sigue libre? (RF-010)"}
     pref -->|Sí| chosen[Asignar al operario elegido]
     pref -->|No| pick[Elegir el de menos reservas ese día<br/>empate: menor identificador]
     chosen --> notifyop[Notificar al cliente y al operario]
     pick --> notifyop
-    notifyop --> stopA([Fin])
+    notifyop --> wait([Esperar la hora de la reserva])
     auto -->|No hay elegibles| manual["Reserva sin operario; alerta al administrador<br/>cuando faltan menos de 2 h"]
     manual --> list[Admin ve candidatos: disponibles primero, con calificación]
     list --> chooseop[Admin elige un operario]
@@ -729,10 +730,9 @@ flowchart TD
     valid -->|No| blockop[Bloquear asignación, mostrar motivo]
     blockop --> list
     valid -->|Sí| assign[Crear ejecución PENDING, notificar al operario]
-    assign --> stopB([Fin])
+    assign --> wait
 
-    stopA -.-> today{"¿Faltan 15 minutos o menos<br/>para la hora de la reserva?"}
-    stopB -.-> today
+    wait --> today{"¿Faltan 15 minutos o menos<br/>para la hora de la reserva?"}
     today -->|No| blockday[Botón deshabilitado: SERVICE_TOO_EARLY]
     blockday --> stopC([Fin])
     today -->|Sí| startsvc[Operario marca Iniciar servicio]
@@ -747,6 +747,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
+    start0((Inicio)) --> start
     start([Reserva Confirmada sin pago aprobado]) --> method{¿Qué método de pago?}
 
     method -->|QR / Transferencia / Nequi / Daviplata| showqr[Mostrar QR de la cuenta activa e instrucciones]
@@ -756,7 +757,7 @@ flowchart TD
     dup -->|Sí| rejectref[Rechazar: TRANSACTION_REFERENCE_REUSED]
     rejectref --> stop1([Fin])
     dup -->|No| inreview["Pago → En revisión (ligado a la reserva)"]
-    inreview --> stop2([Fin: esperando al admin])
+    inreview --> waitadm([Espera la revisión del admin])
 
     method -->|Efectivo| cash[Cliente paga en el local]
     cash --> register[Admin registra el pago manualmente]
@@ -764,7 +765,7 @@ flowchart TD
     approved1 --> points1["Acreditar puntos de fidelización (RF-026)"]
     points1 --> lockui
 
-    stop2 -.-> review[Admin abre pagos pendientes]
+    waitadm --> review[Admin abre pagos pendientes]
     review --> compare{¿Valor declarado =<br/>valor a pagar y comprobante legible?}
     compare -->|No| reject[Rechazar con motivo; cliente puede reenviar]
     reject --> stop4([Fin])
@@ -779,6 +780,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
+    start0((Inicio)) --> start
     start([Cliente en la pantalla de pago]) --> has{¿Tiene promociones<br/>desbloqueadas por sus puntos?}
     has -->|No| noshow[No se ofrece ningún cupón]
     noshow --> stop1([Fin])
@@ -792,13 +794,15 @@ flowchart TD
     limit -->|Sí| calc[Calcular descuento sobre el subtotal<br/>sin superarlo]
     calc --> apply[Aplicar descuento al total a pagar]
     apply --> notify[Notificar el canje en la bandeja y por correo]
-    notify --> stop4([Fin: continúa el pago por el valor con descuento])
+    notify --> stop4([Continúa el pago por el valor con descuento])
+    stop4 --> stop4x((Fin))
 ```
 
 ### 3.6 Gestionar roles y permisos (RF-029)
 
 ```mermaid
 flowchart TD
+    start0((Inicio)) --> start
     start([Admin abre Gestión → Roles]) --> load[Cargar los 3 roles fijos + catálogo de permisos]
     load --> view[Ver permisos actuales de cada rol: Administrador, Operario, Cliente]
     view --> edit[Admin marca/desmarca permisos de un rol]
@@ -807,7 +811,8 @@ flowchart TD
     valid -->|No| reject[Rechazar explícitamente el guardado]
     reject --> edit
     valid -->|Sí| replace[Reemplazar exactamente esos permisos para el rol]
-    replace --> stop([Fin: no se pueden crear ni borrar roles])
+    replace --> stop([Permisos guardados; los roles no se crean ni se borran])
+    stop --> stopx((Fin))
 ```
 
 ---
@@ -884,8 +889,7 @@ stateDiagram-v2
     [*] --> BORRADOR : crear (reserva de 180 min o más, Confirmada o En proceso)
     BORRADOR --> BORRADOR : marcar fases y registrar hallazgos
     BORRADOR --> PUBLICADO : publicar (el enlace empieza a mostrarlo)
-    PUBLICADO --> PUBLICADO : editar mientras la reserva siga Confirmada o En proceso
-    PUBLICADO --> PUBLICADO : compartir (notifica al cliente)
+    PUBLICADO --> PUBLICADO : editar o compartir (notifica al cliente)
     PUBLICADO --> [*] : la reserva se completa (fases y hallazgos de solo lectura)
 
     state "Cada fase" as fase {
@@ -897,7 +901,7 @@ stateDiagram-v2
     }
 ```
 
-*Fuente:* `operations-service`, `InspectionReport` (`publish`, `requirePublished`, `setPhaseStatus`, `addFinding`). Las fases son recepción, exterior, interior, motor y entrega; solo se puede compartir un informe publicado.
+*Fuente:* `operations-service`, `InspectionReport` (`publish`, `requirePublished`, `setPhaseStatus`, `addFinding`). Las fases son recepción, exterior, interior, motor y entrega; solo se puede compartir un informe publicado, y se edita mientras la reserva siga Confirmada o En proceso.
 
 ### 4.6 Cuenta de usuario (RF-002, RF-004b, RF-027, RF-028)
 
@@ -908,14 +912,12 @@ stateDiagram-v2
         [*] --> DESBLOQUEADA
         DESBLOQUEADA --> BLOQUEADA : quinto intento fallido en 15 min
         BLOQUEADA --> DESBLOQUEADA : pasan 15 min o recupera la contraseña
-        DESBLOQUEADA --> DESBLOQUEADA : ingreso correcto (borra el conteo)
     }
-    ACTIVA --> INACTIVA : el administrador la desactiva (no si es administrador)
-    ACTIVA --> INACTIVA : el usuario cierra su cuenta con la contraseña (no si es administrador)
+    ACTIVA --> INACTIVA : el administrador la desactiva o el usuario la cierra
     INACTIVA --> ACTIVA : el administrador la activa
 ```
 
-*Fuente:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus`, `AccountDeactivationService`). Una cuenta bloqueada responde 423 aun con la contraseña correcta; una inactiva responde 403 después de validar la contraseña. Ninguna cuenta de administrador se puede desactivar (403 `ADMIN_CANNOT_BE_DISABLED`) y un administrador no puede desactivar ni cerrar su propia cuenta (403 `CANNOT_DISABLE_OWN_ACCOUNT`). Cada cuenta tiene un solo rol, fijado al crearla: no hay cambio de rol.
+*Fuente:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus`, `AccountDeactivationService`). Un ingreso correcto antes del quinto intento borra el conteo de fallos. El usuario cierra su cuenta con la contraseña. Una cuenta bloqueada responde 423 aun con la contraseña correcta; una inactiva responde 403 después de validar la contraseña. Ninguna cuenta de administrador se puede desactivar (403 `ADMIN_CANNOT_BE_DISABLED`) y un administrador no puede desactivar ni cerrar su propia cuenta (403 `CANNOT_DISABLE_OWN_ACCOUNT`). Cada cuenta tiene un solo rol, fijado al crearla: no hay cambio de rol.
 
 ---
 
