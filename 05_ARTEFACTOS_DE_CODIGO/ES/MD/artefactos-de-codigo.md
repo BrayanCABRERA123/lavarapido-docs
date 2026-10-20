@@ -12,31 +12,31 @@
 | Producto | Artefactos de código (sección 2.5.4) |
 | Programa | Tecnólogo en Análisis y Desarrollo de Software (ADSO) |
 | Ficha | 3145556 |
-| Aprendices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano |
+| Aprendices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano Quintero |
 | Instructora | Karol Daniela Correa |
 | Centro de formación | Industria |
-| Fecha | 17 de octubre de 2026 |
+| Fecha | 20 de octubre de 2026 |
 
-El código del sistema está en 10 repositorios de GitHub: la aplicación web, la aplicación móvil y 8 del backend. Este documento inventaría los dos clientes y explica cómo compilarlos y ejecutarlos; el backend se describe solo en lo necesario para que los clientes funcionen. No se reproduce el código fuente.
+El código del sistema está en 10 repositorios de GitHub: la aplicación web, la aplicación móvil y 8 del backend. Cada uno tiene un flujo de GitHub Actions (`.github/workflows/ci.yml`) que compila y corre sus pruebas en cada cambio (en `lavarapido-infra` valida los scripts de despliegue, los archivos de Docker Compose y la sintaxis de las pruebas de punta a punta); `lavarapido-infra` tiene además `deploy.yml`, un flujo que se lanza a mano para actualizar el servidor. Este documento inventaría los dos clientes y explica cómo compilarlos y ejecutarlos; el backend se describe solo en lo necesario para que los clientes funcionen. No se reproduce el código fuente.
 
 ## 1. Inventario de repositorios
 
 **Tabla 2**
 
-*Repositorios del sistema (rama `develop`, corte 16 de octubre de 2026)*
+*Repositorios del sistema (rama `develop`, corte 20 de octubre de 2026)*
 
 | Artefacto | Repositorio | Tecnología | Commits | Último commit |
 | --- | --- | --- | --- | --- |
-| Aplicación web | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 409 | 2026-10-17 |
-| Aplicación móvil | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 181 | 2026-10-17 |
-| Infraestructura | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 59 | 2026-10-17 |
-| API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 12 | 2026-10-17 |
-| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 50 | 2026-10-17 |
-| customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 18 | 2026-10-17 |
-| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 46 | 2026-10-17 |
-| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 36 | 2026-10-17 |
-| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 40 | 2026-10-17 |
-| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 35 | 2026-10-17 |
+| Aplicación web | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 449 | 2026-10-20 |
+| Aplicación móvil | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 221 | 2026-10-20 |
+| Infraestructura | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 68 | 2026-10-19 |
+| API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 16 | 2026-10-19 |
+| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 60 | 2026-10-20 |
+| customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 22 | 2026-10-19 |
+| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 54 | 2026-10-19 |
+| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 42 | 2026-10-19 |
+| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 46 | 2026-10-19 |
+| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 39 | 2026-10-19 |
 
 **Tabla 3**
 
@@ -44,10 +44,10 @@ El código del sistema está en 10 repositorios de GitHub: la aplicación web, l
 
 | Artefacto | Archivos fuente (`.ts`, `.tsx`, `.html`, `.scss`) | Líneas | Pantallas |
 | --- | --- | --- | --- |
-| Web (`Web/src`) | 433 | 46 308 | 35 rutas |
-| Móvil (`LavadoVehicular-Movil/src`) | 291 | 34 318 | 31 pantallas |
+| Web (`Web/src`) | 442 | 47 100 | 35 rutas |
+| Móvil (`LavadoVehicular-Movil/src`) | 293 | 34 884 | 31 pantallas |
 
-> *Nota.* Conteo del 17 de octubre de 2026 con `git ls-files` y `wc -l` sobre `src`; incluye pruebas y comentarios.
+> *Nota.* Conteo del 20 de octubre de 2026 con `git ls-files` y `wc -l` sobre `src`; incluye pruebas y comentarios.
 
 ## 2. Aplicación web
 
@@ -64,7 +64,7 @@ La web es una SPA de Angular 21 (Angular, s.f.) con componentes standalone, carg
 | `core/constants` | `API_BASE_URL = '/api/v1'` (`core/constants/api.ts:4`) |
 | `core/guards` | `authGuard` (sesión y rol) y `guestGuard` (oculta login a quien ya tiene sesión) |
 | `core/interceptors` | `authInterceptor`: agrega el JWT y cierra la sesión ante un 401 mientras la sesión sigue abierta (ignora un 401 tardío después de cerrar sesión) |
-| `core/services` | 16 servicios HTTP y de estado: `auth`, `booking-api`, `vehicles`, `operations-api`, `payments-api`, `promotions-api`, `loyalty-api`, `notifications`, `preferences`, `role-permissions-api`, `user-admin`, `user-session`, `inspection-api`, `inspection-photos`, `local-storage`, `api` |
+| `core/services` | 17 servicios HTTP y de estado: `auth`, `booking-api`, `vehicles`, `operations-api`, `payments-api`, `promotions-api`, `loyalty-api`, `notifications`, `preferences`, `role-permissions-api`, `user-admin`, `user-session`, `inspection-api`, `inspection-photos`, `local-storage`, `notification-watcher`, `api` |
 | `core/models`, `core/utils` | Interfaces de los DTO y utilidades (por ejemplo traducción de errores de la API) |
 | `features/landing` | Página pública: navbar, hero, quiénes somos, características, servicios, descarga, contacto, preguntas frecuentes y pie |
 | `features/auth` | Login, registro y recuperación de contraseña en tres pasos |
@@ -202,11 +202,11 @@ Para correr un servicio Java desde la consola se usa su Maven Wrapper (`./mvnw s
 | --- | --- |
 | API Gateway | `http://localhost:8080/actuator/health` |
 | Servicios Java | `http://localhost:300X/actuator/health` (X = 1, 2, 3, 4, 6) y Swagger en `/swagger-ui.html` |
-| payment-service | `http://localhost:3005/actuator/health` y `/health` (los dos revisan SQL Server y responden 503 si no contesta); Swagger en `/swagger` solo en entorno Development (`Program.cs:50-55`) |
+| payment-service | `http://localhost:3005/actuator/health` y `/health` (los dos revisan SQL Server y responden 503 si no contesta); Swagger en `/swagger` solo en entorno Development (`Program.cs:53-57`) |
 | RabbitMQ | Panel en `http://localhost:15672` |
 | Mailpit | Bandeja en `http://localhost:8025` |
 
-Con todo arriba, `lavarapido-infra/e2e` tiene tres scripts de Node 22: el flujo de reserva entre servicios (`node --test "e2e/*.test.js"`), la medición de tiempos de respuesta (`node e2e/performance.js`) y la revisión de la web a 360 px de ancho (`node e2e/width-360.js`, después de `npm install --prefix e2e`). Necesitan `MESSAGING_ENABLED=true` e `INTERNAL_API_KEY` en el `.env`.
+Con todo arriba, `lavarapido-infra/e2e` tiene tres tipos de scripts de Node 22: las 19 pruebas de punta a punta (`node --test "e2e/*.test.js"`: flujo de reserva entre servicios, flujo completo de los tres roles, informe de inspección y reglas de acceso), la medición de tiempos de respuesta (`node e2e/performance.js`) y la revisión de la web a 360 px de ancho (`node e2e/width-360.js`, después de `npm install --prefix e2e`). Necesitan `MESSAGING_ENABLED=true` e `INTERNAL_API_KEY` en el `.env`.
 
 ## Referencias
 
