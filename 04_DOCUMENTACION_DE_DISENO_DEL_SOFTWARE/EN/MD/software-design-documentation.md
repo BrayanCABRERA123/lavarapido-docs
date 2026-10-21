@@ -15,8 +15,8 @@
 | Apprentices | Brayan Estiven Patiño Cabrera (project lead), Juan Camilo Guilombo Osorio (frontend lead), Merari Urbano (backend lead) |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 20, 2026 |
-| Version | 1.4 |
+| Date | October 21, 2026 |
+| Version | 1.5 |
 
 > *Note.* Cover data was taken from the project's Technical Manual v2.0. All design content was derived from the source code in the `Sistema Lavado Vehicular` repository (Backend, Web, and LavadoVehicular-Movil) and must be validated with the instructor.
 
@@ -68,7 +68,7 @@ The web client has 35 routed screens and the mobile app has 31; both split the a
 | `**` | Page not found | Public | Tell that the address does not exist and go back home | None |
 | `/client` | Customer home | CLIENT | Summary, next booking with its operator, and points | `GET /bookings/me`, `/vehicles`, `/loyalty/balance`, `/operators/my-bookings` |
 | `/client/reserve` | Book | CLIENT | Choose vehicle, service, date, and time | `GET /catalog/services`, `/bookings/availability`, `/operators/available`; `POST /bookings` |
-| `/client/payment` | Payments | CLIENT | Pay for a booking and upload a receipt; once the payment is approved only the summary is left | `GET /payment-accounts`, `/payments/me/bookings`; `POST /payments`; `/loyalty/*` |
+| `/client/payment` | Payments | CLIENT | Pay for a booking and upload a receipt (compressed to at most 2 MB before sending; the QR can be enlarged with a magnifier); Cash only appears while its account is active; once the payment is approved only the summary is left | `GET /payment-accounts`, `/payments/me/bookings`; `POST /payments`; `/loyalty/*` |
 | `/client/history` | History | CLIENT | Bookings from newest to oldest, payments, cancellation, and rating; clicking one opens its detail with **Go to payment** | `/bookings/me`, `POST /bookings/{id}/cancel`, `/payments/me`, `POST /ratings/{bookingId}` |
 | `/client/vehicles` | My vehicles | CLIENT | Vehicle CRUD | `GET/POST/PUT/DELETE /vehicles`, `GET /vehicle-types` |
 | `/client/notifications` | Notifications | CLIENT | Notification inbox; clicking one opens its detail with **Go to...** | `/notifications/*` |
@@ -78,12 +78,12 @@ The web client has 35 routed screens and the mobile app has 31; both split the a
 | `/admin/reservations` | Bookings | ADMIN | Create, reschedule, change status, and assign an operator | `/admin/bookings/*`, `/admin/assignments/*` |
 | `/admin/reservations/:id/inspection` | Inspection | ADMIN | Go through the phases, record findings with photos, publish and share | `/admin/inspections/{bookingId}/**` |
 | `/admin/payments` | Payments | ADMIN | Review, approve, reject, and refund | `/admin/payments/*` |
-| `/admin/management` | Management | ADMIN | Users (create, activate or deactivate; Enabled and Disabled filters), roles and permissions, services, promotions | `/admin/users`, `/admin/roles-permissions`, `/admin/catalog/services`, `/admin/promotions` |
+| `/admin/management` | Management | ADMIN | Users (create, activate or deactivate; Enabled and Disabled filters), fixed roles and permission matrix (for reference: the role decides the access), services, promotions | `/admin/users`, `/admin/roles-permissions`, `/admin/catalog/services`, `/admin/promotions` |
 | `/admin/schedule` | Schedule and bays | ADMIN | Weekly hours, exceptions, and bays | `/admin/schedule/*`, `/admin/bays/*` |
 | `/admin/operators` | Operators | ADMIN | Operator list, team summary, and creation | `/admin/operators`, `/admin/operators/summary`, `POST /admin/users` |
 | `/admin/operators/:id` | Operator detail | ADMIN | Availability, absences, profile, and weekly metrics | `/admin/operators/{id}/availability`, `/absences`, `/metrics`, `/admin/operators/profiles`, `PUT /admin/operators/{id}/profile` |
 | `/admin/operators/:id/calendar` | Operator calendar | ADMIN | Operator agenda | `/admin/assignments` |
-| `/admin/reports` | Reports | ADMIN | Revenue and services; export PDF/Excel | Payment and booking stores (jsPDF, xlsx) |
+| `/admin/reports` | Reports | ADMIN | Revenue and services done (only completed bookings count); export PDF/Excel | Payment and booking stores (jsPDF, xlsx) |
 | `/admin/notifications` | Notifications | ADMIN | Notification inbox; the detail goes to Bookings or home | `/notifications/*` |
 | `/admin/profile` | Profile | ADMIN | Account data | `/users/me` |
 | `/admin/settings` | Settings | ADMIN | Business data and payment methods | `/admin/payment-accounts`, `GET/PUT /admin/establishment` |
@@ -111,7 +111,7 @@ The mobile app mirrors the web areas with its own React Native screens. It has n
 | OPERATOR | `OperatorHome`, `OperatorAssigned`, `OperatorSchedule`, `OperatorHistory`, `OperatorRatings`, `OperatorNotifications`, `OperatorProfile`, `OperatorSettings` | `/operator/*` |
 | ADMIN | `AdminDashboard`, `AdminReservations`, `AdminPayments`, `AdminManagement`, `AdminSchedule`, `AdminOperators`, `AdminOperatorCalendar`, `AdminReports`, `AdminNotifications`, `AdminProfile`, `AdminSettings`, `AdminInspection` | `/admin/*` (`AdminInspection` = `/admin/reservations/:id/inspection`) |
 
-> *Note.* If a user has several roles, the mobile app opens the most privileged one: ADMIN, then OPERATOR, then CLIENT (`RootNavigator.tsx:42-46`). The session is stored in the system keychain with `expo-secure-store` (`src/core/storage/sessionStorage.ts:15-20`).
+> *Note.* If a user has several roles, the mobile app opens the most privileged one: ADMIN, then OPERATOR, then CLIENT (`RootNavigator.tsx:42-46`). The session is stored in the system keychain with `expo-secure-store` (`src/core/storage/sessionStorage.ts:15-20`). Since October 21, 2026, when the installed APK opens, `AppUpdatesCheck` reads `/app/version.json` from the server; if it has a higher `versionCode` than the installed one, it shows a screen on top of everything that cannot be closed and only lets the user download the new APK. If the server does not answer, the app goes on as usual (`src/app/providers/AppUpdatesCheck.tsx`). It is not a routed screen, so the count of 31 does not change.
 
 ### 2.3 Navigation Diagram
 
@@ -240,7 +240,7 @@ The system follows a microservices architecture (Newman, 2021): an API Gateway a
 flowchart TB
   WEB["Web Angular 21<br/>browser :4200"]
   MOV["Mobile React Native / Expo<br/>Android :8081"]
-  GW["API Gateway Spring Cloud :8080<br/>routes /api/v1/** and answers CORS"]
+  GW["API Gateway Spring Cloud :8080<br/>routes /api/v1/**, answers CORS<br/>and cuts tokens of closed sessions"]
     subgraph SVC["Microservices (each one validates the JWT)"]
       direction LR
       SEC["security :3001<br/>Java"]
@@ -264,9 +264,9 @@ flowchart TB
   SVC -->|"email: security and notification<br/>push: notification"| EXT
 ```
 
-> *Note.* Notation based on the C4 model (Brown, n.d.). Clients talk only to the gateway; each service validates the JWT and stores data in its own schema.
+> *Note.* Notation based on the C4 model (Brown, n.d.). Clients talk only to the gateway; each service validates the JWT and stores data in its own schema. Since October 21, 2026 the gateway also rejects the tokens of closed sessions.
 
-The web and mobile clients only call port 8080. The gateway forwards the `Authorization` header without validating it; each service validates the JWT on its own (`Backend/lavarapido-api-gateway/src/main/resources/application.yml`, route comments, ADR-006). The service-to-service `/internal/**` routes have no gateway route and return 404 from outside.
+The web and mobile clients only call port 8080. The gateway does not check the JWT signature: it forwards the `Authorization` header and each service validates the token on its own (`Backend/lavarapido-api-gateway/src/main/resources/application.yml`, route comments, ADR-006). Since October 21, 2026 it does confirm that the session of the token is still open: `SessionCheckFilter`, which runs right after CORS, asks security-service with `GET /api/v1/auth/session` (204 if the session is still open, 401 if it was closed by a logout or because the account was deactivated) and keeps the answer for 30 seconds per SHA-256 fingerprint of the token, so an open session costs one extra call every half minute. If security-service does not answer within 3 seconds, the request goes through, and on logout the kept answer of that token is dropped. security-service makes the same check with the `sid` claim of the token (`ActiveSessionValidator`). It is configured with `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL`, and `SESSION_CHECK_TIMEOUT`, which `docker-compose.yml` does not pass to the container: in Docker the defaults apply (`SessionCheckFilter.java`, `SessionCheckConfig.java`). The service-to-service `/internal/**` routes have no gateway route and return 404 from outside.
 
 ### 3.2 Responsibility of Each Container
 
@@ -301,8 +301,9 @@ There are two styles. Queries that need an immediate answer use synchronous REST
 | operations | security | Operator and customer names, and whether the account is still active (internal route with a shared key) | `SECURITY_SERVICE_URL`, `SECURITY_INTERNAL_URL`, `INTERNAL_API_KEY` |
 | payment | booking | Look up the booking and the amount due | `BOOKING_SERVICE_URL` |
 | notification | security | Email and language of each account and administrator list (`/internal/v1/users`) | `SECURITY_SERVICE_URL`, `INTERNAL_API_KEY` |
+| gateway | security | Confirm that the session of the token is still open (`GET /api/v1/auth/session`; the answer is kept 30 seconds per token) | `ROUTE_SECURITY_URL` |
 
-> *Note.* Source: `Backend/lavarapido-infra/docker-compose.yml`.
+> *Note.* Source: `Backend/lavarapido-infra/docker-compose.yml` and, for the gateway, `SessionCheckConfig.java`.
 
 **Table 7**
 
@@ -314,13 +315,15 @@ There are two styles. Queries that need an immediate answer use synchronous REST
 | `customer.provisioned` | customer (only written to the log) | None |
 | `security.user.email-changed`, `security.user.password-changed`, `security.user.deactivated` | security (only written to the log) | None |
 | `booking.confirmed` | booking | notification (notice and reminders), operations (automatic assignment, with the operator the customer chose) |
-| `booking.cancelled` | booking | notification |
+| `booking.cancelled` | booking (also when the system cancels a scheduled booking that expired) | notification |
 | `execution.operator_assigned`, `execution.service_started`, `execution.service_completed`, `execution.inspection_shared` | operations | notification |
 | `payment.confirmed`, `payment.rejected`, `payment.refunded`, `payment.promotion_redeemed`, `payment.loyalty_points_earned` | payment | notification |
 
-> *Note.* Source: `BookingEvent.java:17-18`, `ExecutionEvent.java:14-16`, `InspectionSharedEvent.java:15`, `PaymentIntegrationEvents.cs`, `CustomerProvisioned.java:15`, and the `ROUTING_KEYS` list in `notification-service/.../RabbitMessagingConfig.java`. notification also listens to `booking.created`, but no service publishes that key.
+> *Note.* Source: `BookingEvent.java:17-18`, `ExecutionEvent.java:14-16`, `InspectionSharedEvent.java:15`, `PaymentIntegrationEvents.cs`, `CustomerProvisioned.java:15`, and the `ROUTING_KEYS` list in `notification-service/.../RabbitMessagingConfig.java`. notification also listens to `booking.created`, but no service publishes that key. The automatic close of an expired confirmed booking (it becomes NO_SHOW) publishes no event.
 
 The notification and customer queues have their own dead-letter queue. The operations queue (`operations-service.events`, only `booking.confirmed`) does not: if automatic assignment fails, it is logged and the booking is left for the unassigned-booking alert and manual assignment (`BookingConfirmedListener.java`). notification stores the `event_id` of each event in `notification.processed_event` to ignore duplicates, because delivery is "at least once" (`DomainEventConsumerService.java:61-72`). Messaging is enabled with `MESSAGING_ENABLED`; when it is off, the Java services use a publisher that only writes to the log (`LoggingDomainEventPublisher.java:16`).
+
+Since October 21, 2026 booking-service also has a scheduled job, `ExpiredBookingsJob`, that every 5 minutes closes the bookings nobody started one hour after their end time: a confirmed one becomes NO_SHOW and a scheduled one is cancelled with the reason `EXPIRED`. This frees the operator and the bay. It is configured with `BOOKING_EXPIRY_CHECK_ENABLED`, `BOOKING_EXPIRY_CHECK_INTERVAL`, and `BOOKING_EXPIRY_GRACE_MINUTES`, which do not go through the compose either, so in Docker the job runs with its defaults (`ExpiredBookingsJob.java`, `BookingService.closeExpired`).
 
 ### 3.4 Internal Layers of Each Service (Hexagonal)
 
@@ -395,7 +398,7 @@ flowchart TB
 
 `docker compose up -d` starts only SQL Server, Mailpit, and RabbitMQ, and the services run from the IDE. `docker compose --profile app up -d --build` also starts the seven services in containers (`Backend/lavarapido-infra/docker-compose.yml:1-6`). The Java services create their tables with Liquibase on startup; payment-service creates them with the `payment-migrate` container.
 
-In production the same compose file runs on an Azure virtual machine with `docker-compose.prod.yml` on top: two more containers are added, `web` (nginx with the Angular build) and `caddy`, which is the only one with published ports (80 and 443, HTTPS certificate managed by Caddy). Caddy sends `/api/*` to the gateway, `/app/*` to the APK download and its `version.json`, and everything else to the web. No service publishes ports on the host, Mailpit is not started (emails go out through Gmail SMTP), and the server is updated with `deploy/update-server.sh`, by a team member over SSH or from the manual GitHub Actions workflow "Desplegar en Azure" (`deploy/ci-deploy.sh`). Source: `lavarapido-infra/docker-compose.prod.yml`, `deploy/Caddyfile`, `.github/workflows/deploy.yml`; diagram in `vehicle-w-docs/08-uml/diagrams/source/deployment-production.md`.
+In production the same compose file runs on an Azure virtual machine with `docker-compose.prod.yml` on top: two more containers are added, `web` (nginx with the Angular build) and `caddy`, which is the only one with published ports (80 and 443, HTTPS certificate managed by Caddy). Caddy sends `/api/*` to the gateway, `/app/*` to the APK download and its `version.json`, and everything else to the web. No service publishes ports on the host, Mailpit is not started (emails go out through Gmail SMTP), and the server is updated with `deploy/update-server.sh`, by a team member over SSH or from the manual GitHub Actions workflow "Desplegar en Azure" (`deploy/ci-deploy.sh`). Since October 20 and 21, 2026: Caddy sends security headers and a content security policy (CSP); every container has a health check every 30 seconds and its logs are capped at 3 files of 10 MB; the database is backed up every day and before every update (`deploy/backup-db.sh`), each backup is checked by restoring it under another name (`deploy/verify-backup.sh`), and the last 14 are kept (`deploy/restore-db.sh` restores one). Source: `lavarapido-infra/docker-compose.prod.yml`, `deploy/Caddyfile`, `deploy/backup-db.sh`, `.github/workflows/deploy.yml`; diagram in `vehicle-w-docs/08-uml/diagrams/source/deployment-production.md`.
 
 ## 4. Design Patterns
 
@@ -425,7 +428,7 @@ The code applies 17 verifiable patterns: 5 architectural, 8 backend design patte
 | 16 | Guard + Interceptor (chain of responsibility) | `Web/src/app/core/guards/auth-guard.ts:10-34`, `core/interceptors/auth-interceptor.ts:14-38` | Control access by role and attach the token only to the system's own API |
 | 17 | Domain policy (Specification) | `AssignmentPolicy.java`, `AutoAssignmentPolicy.java`, `StartPolicy.java` (operations); `LoginLockout.java` (security) | Each business rule (who can take a booking, who gets it automatically, when it can start, when an account is locked) lives in a pure domain class that is tested without a database |
 
-> *Note.* Other mechanisms present: the `X-Correlation-Id` correlation filter (`CorrelationIdFilter.java:23-39`), Angular signal-based stores for admin state (`features/admin/services/*-store.ts`), and lazy loading of modules per role (`loadChildren` in `app.routes.ts`).
+> *Note.* Other mechanisms present: the `X-Correlation-Id` correlation filter (`CorrelationIdFilter.java:23-39`), the gateway session filter with the answer kept 30 seconds per token (`SessionCheckFilter.java`), the scheduled job that closes expired bookings (`ExpiredBookingsJob.java`), Angular signal-based stores for admin state (`features/admin/services/*-store.ts`), and lazy loading of modules per role (`loadChildren` in `app.routes.ts`).
 
 ### 4.1 Representative Snippets
 
@@ -511,6 +514,7 @@ The `LavaRapido` database (SQL Server 2022) has 57 tables in 9 schemas, created 
 - **Audit block.** Almost every domain table ends with `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, and `row_version`. It is absent from the base `security` tables (`person`, `app_user`, `role`, `permission`, `role_permission`, `user_role`, `user_session`, `password_reset_token`), `audit.audit_log`, `booking.schedule_history`, and `notification.booking_tracking`. The tables added in October (`security.login_lockout`, `security.person_address`, `execution.operator_profile`, `execution.operator_skill`, and the four inspection report tables) do not have the full block either: they only keep the date and author columns they use.
 - **Soft delete.** A non-null `deleted_at` marks a deleted row; several unique indexes are filtered with `WHERE deleted_at IS NULL`.
 - **Optimistic concurrency.** A `tr_touch_<table>` trigger updates `updated_at` and adds 1 to `row_version` on every UPDATE of the tables that are edited (16 triggers); in payment, `EfUnitOfWork` does it before saving. Only payment-service compares `row_version` when updating (EF Core concurrency token); the Java services do not check it yet.
+- **Application locks.** Where two operations at the same time could clash, the Java services take a SQL Server lock (`sp_getapplock`) that is released when the transaction ends: booking-service uses `booking-schedule` when it creates or reschedules a booking and when it closes the expired ones, and operations-service uses `operations-assignment` (since October 21, 2026) in manual and automatic assignment, so an operator does not end up with two services at the same time (`BookingPersistenceAdapter.lockSchedule`, `ExecutionPersistenceAdapter.lockAssignments`).
 - **UTC dates.** All default values use `SYSUTCDATETIME()`.
 - **Coded catalogs.** States and types are tables with a unique `code` (`booking_status`, `payment_status`, `execution_status`, etc.) loaded by seed changelogs.
 
@@ -1120,7 +1124,7 @@ Establishment, business hours, bays, and bookings. Owner: booking-service.
 | Field | Type | Null | Key | Description |
 | --- | --- | --- | --- | --- |
 | cancellation_reason_id | SMALLINT IDENTITY | No | PK | Identifier |
-| code | NVARCHAR(30) | No | UK | Code (six seed reasons) |
+| code | NVARCHAR(30) | No | UK | Code (seven seed reasons; `EXPIRED`, from seed `112`, is only used by the system when it cancels an expired scheduled booking and is not offered when cancelling by hand) |
 | name | NVARCHAR(60) | No |  | Display name |
 | is_customer_fault | BIT | No |  | Whether the customer is at fault |
 | display_order | SMALLINT | No |  | Display order |
@@ -1529,7 +1533,7 @@ Notifications, devices, and reminders. Owner: notification-service.
 | Field | Type | Null | Key | Description |
 | --- | --- | --- | --- | --- |
 | notification_type_id | SMALLINT IDENTITY | No | PK | Identifier |
-| code | NVARCHAR(40) | No | UK | One of the 23 codes, from `USER_WELCOME` to `ADMIN_BOOKING_UNASSIGNED` |
+| code | NVARCHAR(40) | No | UK | One of the 24 codes, from `USER_WELCOME` to `APP_UPDATE_AVAILABLE` (changelog `038`) |
 | name | NVARCHAR(80) | No |  | Display name |
 | display_order | SMALLINT | No |  | Display order |
 | is_active | BIT | No |  | Type in use |
@@ -1809,9 +1813,10 @@ classDiagram
   direction LR
   class AuthenticationService {
     <<application service>>
-    implements AuthenticateUserUseCase, LogoutUseCase
+    implements AuthenticateUserUseCase, LogoutUseCase, SessionStatusUseCase
     +login(command) AuthenticationResult
     +logout(userId, sessionId)
+    +isActive(userId, sessionId) boolean
   }
   class AccountRegistrationService {
     <<application service>>
@@ -1876,6 +1881,7 @@ classDiagram
     +open(userId, startedAt, expiresAt, ipAddress, userAgent) long
     +revoke(sessionId, userId, revokedAt)
     +revokeAll(userId, revokedAt)
+    +isActive(sessionId, userId, now) boolean
   }
   class PasswordResetTokenRepository {
     <<interface>>
@@ -1940,7 +1946,7 @@ classDiagram
   }
 ```
 
-> *Note.* Outbound adapters: `UserAccountPersistenceAdapter`, `UserSessionPersistenceAdapter`, `PasswordResetTokenPersistenceAdapter`, `UserPreferencePersistenceAdapter`, `RolePermissionPersistenceAdapter`, `LoginLockoutPersistenceAdapter`, and `PersonAddressPersistenceAdapter` (JPA); `BCryptPasswordHasher`; `JwtTokenIssuer`; `SecureRandomResetCodeGenerator`; `EmailResetCodeNotifier`, `LoggingResetCodeNotifier`, and `UndeliveredResetCodeNotifier`; `InMemoryResetAttemptCounter`; `RabbitDomainEventPublisher` and `LoggingDomainEventPublisher`. Inbound adapters: `AuthController`, `UserProfileController`, `UserAdministrationController`, `RolePermissionController`, `UserAddressController`, and `InternalUserController`. Source: `security-service/src/main/java/com/lavarapido/security/`.
+> *Note.* Outbound adapters: `UserAccountPersistenceAdapter`, `UserSessionPersistenceAdapter`, `PasswordResetTokenPersistenceAdapter`, `UserPreferencePersistenceAdapter`, `RolePermissionPersistenceAdapter`, `LoginLockoutPersistenceAdapter`, and `PersonAddressPersistenceAdapter` (JPA); `BCryptPasswordHasher`; `JwtTokenIssuer`; `SecureRandomResetCodeGenerator`; `EmailResetCodeNotifier`, `LoggingResetCodeNotifier`, and `UndeliveredResetCodeNotifier`; `InMemoryResetAttemptCounter`; `RabbitDomainEventPublisher` and `LoggingDomainEventPublisher`. Inbound adapters: `AuthController` (includes `GET /auth/session` for the gateway), `ActiveSessionValidator` (rejects the JWT of a closed session), `UserProfileController`, `UserAdministrationController`, `RolePermissionController`, `UserAddressController`, and `InternalUserController`. Source: `security-service/src/main/java/com/lavarapido/security/`.
 
 *Ports used by each service.*
 
@@ -2127,6 +2133,8 @@ classDiagram
     +cancel(reason)
     +moveTo(target)
     +changeableByCustomer(now) boolean
+    +isExpired(now, grace) boolean
+    +expire(systemReason)
     +subtotal() BigDecimal
     +total() BigDecimal
     +durationMinutes() int
@@ -2315,6 +2323,7 @@ classDiagram
     +daySummary(date, caller) DaySummary
     +getForService(bookingId) BookingView
     +listForService(from, to) List~BookingView~
+    +closeExpired() int
   }
   class CatalogService {
     <<application service>>
@@ -2346,6 +2355,7 @@ classDiagram
     +int slotMinutes
     +int maxDaysAhead
     +int alternatives
+    +Duration expiryGrace
   }
   class BookingRepository {
     <<interface>>
@@ -2355,6 +2365,7 @@ classDiagram
     +findById(bookingId) Optional~Booking~
     +findForCustomer(userId, vehicleIds) List~Booking~
     +findStartingBetween(from, to, status) List~Booking~
+    +findNotStartedEndingBefore(before) List~Booking~
     +findCancellationReason(code) Optional~CancellationReason~
   }
   class CatalogRepository {
@@ -2392,7 +2403,7 @@ classDiagram
   }
 ```
 
-> *Note.* Outbound adapters: `BookingPersistenceAdapter`, `CatalogPersistenceAdapter`, `SchedulePersistenceAdapter`, and `BayPersistenceAdapter` (JPA); `CustomerServiceDirectory` (REST to customer-service); `RabbitDomainEventPublisher` and `LoggingDomainEventPublisher`. Inbound adapters: `BookingController`, `AdminBookingController`, `OperatorBookingController`, `CatalogController`, `ScheduleController`, and `InternalBookingController` (`/internal/v1/bookings`, with `X-Internal-Key`). Source: `lavarapido-booking-service/src/main/java/com/lavarapido/booking/`.
+> *Note.* Outbound adapters: `BookingPersistenceAdapter`, `CatalogPersistenceAdapter`, `SchedulePersistenceAdapter`, and `BayPersistenceAdapter` (JPA); `CustomerServiceDirectory` (REST to customer-service); `RabbitDomainEventPublisher` and `LoggingDomainEventPublisher`. Inbound adapters: `BookingController`, `AdminBookingController`, `OperatorBookingController`, `CatalogController`, `ScheduleController`, and `InternalBookingController` (`/internal/v1/bookings`, with `X-Internal-Key`); `ExpiredBookingsJob` (scheduled job that calls `closeExpired`). Source: `lavarapido-booking-service/src/main/java/com/lavarapido/booking/`.
 
 *Ports used by each service.*
 
@@ -2507,6 +2518,7 @@ classDiagram
     +metrics(operatorId, weekOf) OperatorWeekMetrics
     +teamSummary(weekOf) TeamSummary
     +myBookingOperators() List~BookingOperatorView~
+    +unassigned(from, to) UnassignedView
   }
   class AutoAssignmentPolicy {
     <<domain service>>
@@ -2541,6 +2553,7 @@ classDiagram
   }
   class ExecutionRepository {
     <<interface>>
+    +lockAssignments()
     +findByLineIds(bookingServiceIds) List~ServiceExecution~
     +findByOperator(operatorId) List~ServiceExecution~
     +findRated(operatorId) List~ServiceExecution~
@@ -3243,13 +3256,14 @@ classDiagram
 
 | Entity | Transition | Condition (code) |
 | --- | --- | --- |
-| Booking | SCHEDULED → CONFIRMED | Has a bay assigned (`Booking.java:110`) |
-| Booking | CONFIRMED → IN_PROGRESS or NO_SHOW | `Booking.java:111` |
-| Booking | IN_PROGRESS → COMPLETED | `Booking.java:112` |
-| Booking | → CANCELLED | Only through `cancel(reason)`, not `moveTo` (`Booking.java:95, 113`) |
+| Booking | SCHEDULED → CONFIRMED | Has a bay assigned (`Booking.java:111`) |
+| Booking | CONFIRMED → IN_PROGRESS or NO_SHOW | `Booking.java:112` |
+| Booking | IN_PROGRESS → COMPLETED | `Booking.java:113` |
+| Booking | → CANCELLED | Only through `cancel(reason)`, not `moveTo` (`Booking.java:96, 114`) |
+| Booking | Expired: CONFIRMED → NO_SHOW, SCHEDULED → CANCELLED (reason `EXPIRED`) | One hour after its end time without being started; the system closes it (`Booking.java:127-141`, `ExpiredBookingsJob.java`) |
 | Execution | PENDING → IN_PROGRESS → COMPLETED | `start()` and `finish()` (`ServiceExecution.java:65-80`) |
 | Execution | Rating | Only when COMPLETED and only once (`ServiceExecution.java:82-90`) |
-| Payment | Created → in review → approved, rejected, or refunded | Methods `SubmitForReview`, `Approve`, `Reject`, `Refund` (`Payment.cs:116-157`) |
+| Payment | Created → in review → approved, rejected, or refunded | Methods `SubmitForReview`, `Approve`, `Reject`, `Refund` (`Payment.cs:121-162`) |
 | Execution | Start | Only from 15 minutes before the booking time (`StartPolicy.java`) |
 | Account | Locked for 15 minutes | On the fifth failure within 15 minutes; a correct sign-in or a password reset clears it (`LoginLockout.java`) |
 | Inspection report | Draft → published | `publish()`; only a published report can be shared (`InspectionReport.java`) |
@@ -3275,7 +3289,7 @@ classDiagram
 | 10 | In the operator's "Assigned services" (web), the Customer column shows the license plate | `operator/pages/assigned-services/assigned-services.ts:141` |
 | 11 | The brand name is inconsistent across clients ("AquaWash", "Car Wash", "Lavado Vehicular", "Express Car Wash") and the landing page advertises a "mobile service… wherever you are", although SRS v4 defines a single location | Figures 2 and 7 |
 
-> *Note.* Code review of October 15, 2026: finding 5 is fixed (the inspection report, its public link, and the business data are stored in operations-service and booking-service; on mobile, `settingsMock.ts` only keeps the initial notification preferences) and so is finding 7 (`bin/` is now in booking-service's `.gitignore`). Findings 3, 4, 8, 9, 10, and 11 are still in the code. Review of October 20, 2026: finding 6 no longer applies (the local folders have the real repository names), finding 9 is no longer in the code, and finding 10 is fixed (the Customer column shows `clientName`); findings 3, 4, and 8 are unchanged.
+> *Note.* Code review of October 15, 2026: finding 5 is fixed (the inspection report, its public link, and the business data are stored in operations-service and booking-service; on mobile, `settingsMock.ts` only keeps the initial notification preferences) and so is finding 7 (`bin/` is now in booking-service's `.gitignore`). Findings 3, 4, 8, 9, 10, and 11 are still in the code. Review of October 20, 2026: finding 6 no longer applies (the local folders have the real repository names), finding 9 is no longer in the code, and finding 10 is fixed (the Customer column shows `clientName`); findings 3, 4, and 8 are unchanged. Review of October 21, 2026: finding 8 is fixed (`GET /payment-accounts` also returns the cash account while it is active, `PaymentAccountService.cs:27`, and the web and mobile apps show Cash only if it comes in that list); findings 3 and 4 are unchanged.
 
 ## References
 
