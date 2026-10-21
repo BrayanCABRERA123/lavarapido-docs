@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 21, 2026
 
-Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.4
+Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.5
 
 ## Version Control
 
@@ -34,6 +34,7 @@ Table 1 records the change history of this document. Each time the implementatio
 | 2.2 | 2026-10-19 | Continuous integration with GitHub Actions in the 10 repositories and deployment from GitHub: the scope (6.2) and risk R-I09 were updated. | Development team |
 | 2.3 | 2026-10-20 | Review against the code of October 20, 2026: criterion E2 with the tests of October 19 (655 automated and 19 end-to-end) and RabbitMQ queues corrected (the operations-service queue has no dead-letter queue) and communication plan (the panel does not send general announcements). | Development team |
 | 2.4 | 2026-10-21 | Review against the code and the server of October 21, 2026: criterion E2 with the tests of that day (689 automated and 19 end-to-end), automatic pre-implementation backup on the public server (phase 3, monitoring, and rollback), smoke test H10 (the token of a closed session stops working), new variables with defaults, app updates without a new APK, and risk R-I11. | Development team |
+| 2.5 | 2026-10-21 | Review against the code of the evening of October 21, 2026: criterion E2 with the final run of that day (707 automated tests and 19 end-to-end), operations-service *FOLLOW_UP_\** variables, smoke test H11 (the administrator's "To close" list), and updated configuration rule. Confirmed bookings with an operator that nobody registered are no longer closed as "No-show" on their own: the administrator resolves them. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -234,7 +235,7 @@ The implementation **does not start** until all the criteria of Table 5 are met.
 | No. | Criterion | Evidence |
 |---|---|---|
 | E1 | The code of the release is merged into *develop* (or *main*) of the eleven repositories, with no uncommitted work. | Clean *git status* and *git log* with the last commit of each repository. |
-| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, and the end-to-end suite of *lavarapido-infra/e2e* against the containers. | Summaries without failures (on October 21, 2026: 689 automated tests and 19 end-to-end tests). |
+| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, and the end-to-end suite of *lavarapido-infra/e2e* against the containers. | Summaries without failures (final run of October 21, 2026: 707 automated tests and 19 end-to-end tests). |
 | E3 | The web application builds in production mode (*npx ng build*). | Folder *dist/* generated without errors. |
 | E4 | The release is tagged in each repository (for example, *v1.0.0*) (section 13). | *git tag* in each repository. |
 | E5 | The installation, administrator, and user manuals correspond to the release (version 4.0 or later). | Version control of the manuals. |
@@ -310,7 +311,7 @@ git check-ignore -v .env      # must show the .gitignore rule
 | ADMIN_EMAIL, ADMIN_PASSWORD | Email and password of the first administrator (only the first time). | security-service creates the account at startup if there is still no administrator. |
 | PUSH_ENABLED | *true* when the installed mobile application is the APK built with EAS. | Expo Go does not receive remote push notifications. |
 | BOOKING_ZONE | *America/Bogota* | Time zone of the car wash; the system stores UTC. |
-| SESSION_CHECK_\*, BOOKING_EXPIRY_\* | Not set. | They have defaults (gateway session check on with 30 s and 3 s; close of expired bookings every 5 minutes with a 60-minute grace) and the Compose file does not pass them to the containers. |
+| SESSION_CHECK_\*, BOOKING_EXPIRY_\*, FOLLOW_UP_\* | Not set. | They have defaults (gateway session check on with 30 s and 3 s; cancellation of scheduled bookings that expired without confirmation every 5 minutes, with a 60-minute grace after the end; operations-service follow-up every 5 minutes for bookings that ended and nobody closed, which uses the same grace and *INTERNAL_API_KEY*) and the Compose file does not pass them to the containers. |
 
 *Note.* Prepared by the authors from *.env.example* and *docker-compose.yml*. Secret values are written only in the *.env* file; never in a message, a shared document, or a repository.
 
@@ -466,10 +467,11 @@ The smoke tests confirm that the release works end to end before handing it over
 | H8 | Payment report with a test receipt and approval by the administrator. | Payment approved; payment confirmed email and points credited. |
 | H9 | Dead-letter queues. | *notification-service.events.dlq* and *customer-service.events.dlq* at zero. |
 | H10 | Sign out and repeat a call with the same token (*curl -i -H "Authorization: Bearer \<token\>" https://\<domain\>/api/v1/bookings/me*). | 401: the gateway cuts the token of the closed session (version of October 21, 2026 or later). |
+| H11 | With the administrator's token, query the bookings to close (*GET /api/v1/admin/assignments/to-close*) and open the administrator's home. | 200 with the list (it may be empty); the "To close" card only appears when something is pending (version of the evening of October 21, 2026 or later). |
 
 *Note.* Prepared by the authors from the checklist before a review session of the project (Vehicle Washing Development Team, 2026a).
 
-**Criterion to continue:** the ten tests pass. A failure in H1 to H8 or in H10 triggers the rollback evaluation (section 12).
+**Criterion to continue:** the eleven tests pass. A failure in H1 to H8, H10, or H11 triggers the rollback evaluation (section 12).
 
 ### 11.10 Phase 9: Acceptance Testing
 
@@ -547,7 +549,7 @@ The rollback returns the environment to the previous release when the new one ca
 | Situation | Decision |
 |---|---|
 | *payment-migrate* or a Liquibase migration of a Java service fails | Roll back immediately. |
-| A smoke test H1 to H8 or H10 fails and is not fixed within 30 minutes | Roll back. |
+| A smoke test H1 to H8, H10, or H11 fails and is not fixed within 30 minutes | Roll back. |
 | P0 incident in the first 24 hours of operation | Roll back. |
 | P1 incident without a fix or a workaround on the same day | Evaluate with the project leader; roll back if it affects bookings or payments. |
 | P2 or P3 remarks | Do not roll back; fix in a later release. |
@@ -579,7 +581,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
 - **Branches.** Releases are implemented from *develop* or *main* (conventions of *00-governance/git-conventions.md*); never from a *feature/\** branch.
 - **Images.** The Compose file builds *lavarapido/\<service\>:local* images. To keep the previous release, each image can be tagged with the current release before rebuilding (*docker tag lavarapido/booking-service:local lavarapido/booking-service:v0.9.0*).
 - **Database.** The schema is versioned with Liquibase; each service keeps its history in *DATABASECHANGELOG_\<SERVICE\>* (payments in *DATABASECHANGELOG_PAYMENT*). An executed changeset is never edited.
-- **Configuration.** *.env.example* is versioned; *.env* is not. Every new variable is added to *.env.example* with a comment and to the *environment* block of the service in *docker-compose.yml*. Those of October 21, 2026 (*SESSION_CHECK_\** and *BOOKING_EXPIRY_\**) do not follow this rule yet (action ACO-14).
+- **Configuration.** *.env.example* is versioned; *.env* is not. Every new variable is added to *.env.example* with a comment and to the *environment* block of the service in *docker-compose.yml*. Those of October 21, 2026 (*SESSION_CHECK_\**, *BOOKING_EXPIRY_\**, and *FOLLOW_UP_\**) do not follow this rule yet (action ACO-14).
 - **Documentation.** The version control of each manual records the software release it corresponds to.
 
 ## 14. Implementation Risks
