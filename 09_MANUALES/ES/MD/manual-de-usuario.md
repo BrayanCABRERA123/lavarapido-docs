@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 21 de octubre de 2026
 
-Tipo de manual: Manual de usuario (roles Cliente y Operario) · Versión 4.5
+Tipo de manual: Manual de usuario (roles Cliente y Operario) · Versión 4.6
 
 ## Control de Versiones
 
@@ -38,6 +38,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 4.3 | 2026-10-19 | Capturas tomadas de nuevo el 19 de octubre de 2026 (fecha en los paneles, calendarios sin días pasados y resumen de la reserva). | Equipo de desarrollo |
 | 4.4 | 2026-10-20 | El historial del cliente y el del operario van de la reserva más reciente a la más antigua y abren el detalle al hacer clic, con los botones **Ir al pago** e **Ir a calificaciones**. Las notificaciones abren su detalle al hacer clic, con un botón para ir al apartado de donde viene el aviso. Con el pago aprobado, la pantalla de pago solo muestra el resumen. | Equipo de desarrollo |
 | 4.5 | 2026-10-21 | Revisión contra el código del 21 de octubre de 2026: el comprobante se reduce a menos de 2 MB antes de enviarlo y el QR se amplía con **Ampliar QR** (sección 10.1.5); Efectivo solo aparece si el lavadero tiene activa esa cuenta; las reservas que nadie inicia se cierran solas una hora después de su hora de fin (Tabla 7, sección 10.2.3 y preguntas frecuentes); al cerrar sesión, las demás pestañas también salen (sección 12); la aplicación móvil pide instalar el APK nuevo cuando se publica (sección 6.2). Se corrigieron la fecha y la versión de la portada. | Equipo de desarrollo |
+| 4.6 | 2026-10-21 | Cambio de la regla de las reservas que terminan sin registrarse, revisada por el equipo la noche del 21 de octubre: solo la reserva confirmada que nunca tuvo operario pasa sola a No asistió; si tenía operario, el operario recibe el aviso "¿Atendiste este servicio?" y el administrador la cierra (Tabla 7, secciones 10.2.3 y 10.2.4 y preguntas frecuentes). La agenda y los servicios asignados ya no muestran reservas canceladas ni en No asistió. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -529,8 +530,8 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 | Confirmada | La reserva tiene turno y bahía de lavado. Las reservas que hace el cliente se crean con este estado. | Sí, antes de la hora de inicio. |
 | En progreso | El operario inició el lavado. | No. |
 | Completada | El servicio terminó; desde este estado se puede calificar. | No. |
-| Cancelada | La reserva fue anulada por el cliente o por el lavadero, o el sistema la cerró porque llegó su hora sin confirmarse. | No aplica. |
-| No asistió | El cliente no llegó al turno reservado. Si nadie inicia el servicio, el sistema marca así la reserva una hora después de su hora de fin. | No aplica. |
+| Cancelada | La reserva fue anulada por el cliente o por el lavadero, o el sistema la cerró porque pasó una hora de su fin sin confirmarse. | No aplica. |
+| No asistió | El cliente no llegó al turno reservado y el lavadero lo registró así. Si la reserva confirmada nunca tuvo operario, el sistema la marca así una hora después de su hora de fin. | No aplica. |
 
 *Nota.* Códigos SCHEDULED, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED y NO_SHOW en la base de datos; la interfaz los traduce.
 
@@ -821,7 +822,7 @@ El operario recibe la cuenta del administrador del negocio. El operario solo pue
 
 **Resultado esperado:** El estado cambia a En progreso y luego a Completado ("¡Servicio finalizado!"). El cliente recibe los avisos y puede calificar el servicio.
 
-**Observaciones o restricciones:** El servicio se puede iniciar desde 15 minutos antes de la hora reservada. El operario solo puede actualizar los servicios que tiene asignados. Si un servicio asignado no se inicia, una hora después de su hora de fin el sistema cierra la reserva como No asistió y el servicio deja de aparecer como pendiente.
+**Observaciones o restricciones:** El servicio se puede iniciar desde 15 minutos antes de la hora reservada. El operario solo puede actualizar los servicios que tiene asignados. Cada servicio se debe registrar con **Iniciar** y **Finalizar**, aunque se haga tarde: si la hora del servicio ya pasó, todavía se puede iniciar y finalizar ese mismo día, y cuentan las horas reales. Si un servicio asignado no se inició cuando terminó su hora, o se inició y no se finalizó una hora después de su hora de fin, el operario recibe el aviso "¿Atendiste este servicio?" y el administrador ve la reserva en su lista de reservas por cerrar; si ya no es posible registrarlo, el operario le informa al administrador si atendió o no el vehículo, y el administrador lo cierra. La agenda y la lista de servicios asignados no muestran las reservas canceladas ni las que quedaron en No asistió.
 
 **Tabla 10**
 
@@ -849,7 +850,7 @@ El operario recibe la cuenta del administrador del negocio. El operario solo pue
 
 #### 10.2.4 Notificaciones del Operario
 
-Las notificaciones del operario funcionan como las del cliente (sección 10.1.7). Los avisos más frecuentes son un nuevo servicio asignado, un servicio movido a otra hora, un servicio cancelado y un servicio reasignado a otro operario. Estos avisos al personal llegan a la bandeja y como notificación push, nunca por correo. El operario los abre con **Notificaciones** en el menú lateral y usa las pestañas, los filtros y los botones **Marcar leído** y **Marcar todo como leído**. Al hacer clic en uno de estos avisos se abre su detalle con el botón **Ir a servicios asignados**.
+Las notificaciones del operario funcionan como las del cliente (sección 10.1.7). Los avisos más frecuentes son un nuevo servicio asignado, un servicio movido a otra hora, un servicio cancelado y un servicio reasignado a otro operario. Desde el 21 de octubre de 2026 también llega el aviso "¿Atendiste este servicio?" cuando un servicio terminó su hora y no se inició o no se finalizó (una sola vez por reserva; sección 10.2.3). Estos avisos al personal llegan a la bandeja y como notificación push, nunca por correo. El operario los abre con **Notificaciones** en el menú lateral y usa las pestañas, los filtros y los botones **Marcar leído** y **Marcar todo como leído**. Al hacer clic en uno de estos avisos se abre su detalle con el botón **Ir a servicios asignados**.
 
 **Figura 29**
 
@@ -1028,7 +1029,7 @@ La aplicación web no permite cambiar la fecha ni la hora. Cancele la reserva an
 
 ##### ¿Qué pasa si no llego a mi reserva?
 
-Si nadie inicia el servicio, una hora después de la hora de fin el sistema marca la reserva como No asistió y libera el turno. Si ya había pagado, contacte al lavadero: el reembolso lo decide el administrador.
+El lavadero registra la reserva como No asistió. Si la reserva no tenía operario asignado, el sistema la marca así una hora después de la hora de fin. Si ya había pagado, contacte al lavadero: el reembolso lo decide el administrador.
 
 ##### ¿Cómo pago mi servicio?
 
@@ -1065,6 +1066,10 @@ La opción **Desactivar mi cuenta** desactiva la cuenta, no la borra: no podrá 
 ##### Soy operario y no puedo iniciar un servicio. ¿Por qué?
 
 Un servicio solo se puede iniciar el día de la reserva, solo si está asignado a usted y solo cuando no tiene otro servicio en curso. Si el servicio es suyo y el problema continúa, informe al administrador.
+
+##### Atendí un vehículo y olvidé marcar Iniciar. ¿Qué hago?
+
+Si todavía es el mismo día, abra el servicio y márquelo con **Iniciar** y luego con **Finalizar**; el sistema lo acepta aunque sea tarde. Si ya no puede hacerlo, informe al administrador que el vehículo sí se atendió, para que cierre la reserva como atendida y no como No asistió.
 
 ## 14. Glosario
 
