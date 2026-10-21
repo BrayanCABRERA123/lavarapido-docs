@@ -40,7 +40,7 @@
 | Actual duration | ~2 h 30 min (provisioning, image builds, HTTPS setup and testing) |
 | User downtime | Not applicable: first deployment (no users in production yet) |
 | Window for future updates | Outside the car wash's business hours (before 07:00 or after 18:00) |
-| Latest update | 2026-10-19, 03:20 (server time), with `update-server.sh`: `develop` code up to October 17 and 18 and migration 039 |
+| Latest update | 2026-10-21, 05:21 (server time): images rebuilt with the `develop` code of October 20 and the new infrastructure (backups, security headers, health checks, and capped logs); see 1.3.6. The code changes of October 21 are not on the server yet (1.3.7) |
 
 #### 1.1.3 Target environment (VPS / Staging / Production)
 
@@ -50,7 +50,7 @@
 | Provider | Microsoft Azure (*Azure for Students* subscription) |
 | Type | Linux virtual machine (IaaS), equivalent to a VPS |
 | Region | North Central US |
-| Alternate environment | Hostinger KVM 2 VPS (purchased, pending payment activation) |
+| Alternate environment | None: the Hostinger VPS was dropped on 2026-10-21 because the payment was not approved; production stays on Azure only |
 
 #### 1.1.4 Roles and responsibilities matrix (DevOps, Tech Lead, QA, DBA)
 
@@ -74,6 +74,7 @@
 | 1.2 | 2026-10-16 | Juan Camilo Guilombo | Table count corrected (57) and first administrator created with the environment variables |
 | 1.3 | 2026-10-19 | Juan Camilo Guilombo | Update of 2026-10-19 (migration 039 and app 1.1.0), SSH access with a personal key per member, deployment from GitHub Actions, continuous integration in the 10 repositories, and new terminal and web evidence |
 | 1.4 | 2026-10-20 | Development team | Topology diagram: customer-service also connects to RabbitMQ (it consumes `security.user_registered` to create the customer profile) |
+| 1.5 | 2026-10-21 | Brayan Cabrera | Verified automatic backups (3.2), security headers and CSP (2.2.3 and 5.2.4), health checks and capped logs in every container, `SIMPLE` recovery model, update of 2026-10-21 (1.3.6), code changes of 2026-10-21 pending deployment (1.3.7), and removal of the Hostinger VPS |
 
 ### 1.3 Change Summary (Release Notes)
 
@@ -132,6 +133,7 @@
 | Web dependencies | `qrcode` 1.5.4 |
 | Mobile dependencies | `expo-notifications`, `expo-device`, `expo-build-properties`, `expo-updates`, `expo-application` |
 | External services | Expo Push + Firebase Cloud Messaging (push), Gmail SMTP (email), EAS (app builds and updates) |
+| Server operation (2026-10-20 and 21) | Automatic backups with verification (`backup-db.sh`, `verify-backup.sh`, `restore-db.sh`), database in the `SIMPLE` recovery model, health check every 30 s in the 11 containers, logs of each container capped at 3 files of 10 MB, and security headers with a CSP in Caddy |
 
 #### 1.3.4 Breaking changes
 
@@ -152,6 +154,26 @@ On 2026-10-19 at 03:20 (server time), `update-server.sh` was run. The `develop` 
 - **Mobile app:** version 1.1.0 (versionCode 5), published on 2026-10-19 at 05:03, with the version shown in Settings.
 
 The changes pushed afterwards are left for the next update: the error messages with `spring.web.error` in the Java services and the latest web and app fixes.
+
+#### 1.3.6 Update of 2026-10-21
+
+On 2026-10-21 at 05:21 (server time), the images were rebuilt with the `develop` code of October 20 and the new `lavarapido-infra` infrastructure. A database backup was taken first.
+
+- **Infrastructure:** verified automatic backups (3.2); database in the `SIMPLE` recovery model; health check every 30 seconds in the 11 containers, Caddy included (`docker compose ps` shows them `healthy`); logs capped at 3 files of 10 MB per container; security headers and a content security policy (CSP) in Caddy (5.2.4).
+- **Backend and web:** the changes left pending on 2026-10-19 (error messages with `spring.web.error` and web fixes) and those of October 19 and 20: the role change of an account was removed, the example business data is cleared so the real business fills it in (booking-service seed 111), and the web opens the detail of each booking and notification.
+
+#### 1.3.7 Changes of 2026-10-21 pending deployment
+
+They are in `develop` since 2026-10-21 and go in with the next run of `update-server.sh` or of the "Desplegar en Azure" workflow:
+
+- **security-service and api-gateway:** the token of a closed session (logout, disabled or deactivated account) stops working; the gateway confirms it with `GET /api/v1/auth/session` and keeps the answer 30 seconds per token.
+- **booking-service:** every 5 minutes the bookings nobody started are closed one hour after their end; seed 112 adds the `EXPIRED` reason, and booking-service applies it on startup.
+- **operations-service:** manual and automatic assignment use the same lock, and `GET /api/v1/admin/assignments/unassigned` gives the single count of bookings without an operator.
+- **payment-service:** receipts of at most 2 MB (`RECEIPT_TOO_LARGE`) and the cash account in the customer list only while it is active.
+- **Web:** session in step across tabs, compressed receipt, QR magnifier, reports that count only completed bookings, and the roles tab texts.
+- **Mobile app:** compressed receipt, QR magnifier, and mandatory APK update screen. They add no native dependencies, so they arrive with `npm run publish:update`.
+
+The new variables (`SESSION_CHECK_*` and `BOOKING_EXPIRY_*`) have defaults and the compose file does not pass them: they are not added to `.env.production`.
 
 ---
 
@@ -198,6 +220,7 @@ The changes pushed afterwards are left for the next update: the error messages w
 | Database | `LavaRapido`: 9 schemas and 57 tables — `security` (11), `customer` (3), `booking` (10), `catalog` (3), `execution` (11), `notification` (6), `payment` (7), `promotion` (5), `audit` (1) |
 | Migrations | **Liquibase**: the Java services apply them on startup; payment-service applies them with the `payment-migrate` container. Each service keeps its history in `dbo.DATABASECHANGELOG_<SERVICE>` |
 | Persistent volumes | `sqlserver-data` (database), `rabbitmq-data` (queues), `caddy-data` (certificates) |
+| Backups | `~/lavarapido/backups/` on the VM disk, outside Docker: the last 14 and the `backup.log` record (3.2) |
 
 ### 2.2 Network and Infrastructure Architecture Diagram
 
@@ -259,6 +282,7 @@ flowchart TB
 
 - **Certificate:** Let's Encrypt, issued and renewed automatically by Caddy (expires on 2027-01-14 and is renewed before). It is stored in the `caddy-data` volume.
 - **Domain:** Azure DNS label on the public IP: `lavarapidovehicular.northcentralus.cloudapp.azure.com`.
+- **Security headers:** since 2026-10-20 Caddy adds HSTS, `nosniff`, `X-Frame-Options`, `Referrer-Policy`, and `Permissions-Policy` to every response, removes the `Server` header, and sends a content security policy (CSP) with the web (5.2.4).
 - **Configuration:** `lavarapido-infra/deploy/Caddyfile`.
 
 ### 2.3 Environments, IP Addressing and Ports Matrix
@@ -267,7 +291,6 @@ flowchart TB
 |---|---|---|---|
 | Development | Each member's PC | `localhost` (web 4200, mobile 8081, gateway 8080) | Programming and local testing (Mailpit catches the emails) |
 | Academic production | Azure VM `vehiclecarwash-vm` | Static IP `64.236.160.129` · https://lavarapidovehicular.northcentralus.cloudapp.azure.com | Presentation, team testing, installed app |
-| Alternate production (pending) | Hostinger KVM 2 VPS | To be assigned | Migration once the payment is activated |
 
 | Port | Service | Exposed to the internet? |
 |---|---|---|
@@ -309,19 +332,28 @@ ls -l /var/run/docker.sock         # local engine socket
 
 ### 3.2 Backup Strategy and Execution
 
-> **Status:** procedure defined; **periodic automation is pending**. It is run manually before every deployment that includes migrations.
+> **Status: automated since 2026-10-21.** Backups, their check and restoring were tested in production (see 3.2.4).
 
 #### 3.2.1 Logical database backup (Dump / Snapshot)
 
-```bash
-cd ~/lavarapido/lavarapido-infra
-P=$(grep '^DB_PASSWORD=' .env.production | cut -d= -f2-)
-sudo docker exec -e SQLCMDPASSWORD="$P" lavarapido-sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -C -Q "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/backup/LavaRapido_$(date +%F).bak' WITH COMPRESSION, INIT"
-sudo docker cp lavarapido-sqlserver:/var/opt/mssql/backup/LavaRapido_$(date +%F).bak ~/backups/
-```
+`deploy/backup-db.sh` takes a full backup of `LavaRapido` (`BACKUP DATABASE … WITH CHECKSUM`), checks that it can be restored (`RESTORE VERIFYONLY`), copies it out of the container and compresses it with gzip, because SQL Server Express does not compress its backups. It is stored as `~/lavarapido/backups/LavaRapido-YYYYMMDD-HHMMSS.bak.gz`, with `600` permissions, and the **last 14** are kept.
 
-Infrastructure-level complement: **disk snapshot** of the VM from the Azure portal (Disks → Create snapshot).
+| When it runs | Triggered by |
+|---|---|
+| Before every update | `update-server.sh` (if the backup fails, **nothing is updated**) |
+| 5 minutes after the VM starts | `azureuser` crontab (`@reboot`) |
+| Every day at 23:00 UTC (6 p.m. in Colombia), if the VM is on | `azureuser` crontab |
+| Manually | `bash ~/lavarapido/lavarapido-infra/deploy/backup-db.sh` |
+
+The VM is started on demand; that is why, besides the daily job, a backup is taken at start-up and before updating. The database uses the **`SIMPLE`** recovery model (set by `db-init`): with full backups no transaction log backups are needed, and the log does not grow without limit.
+
+Measured on 2026-10-21: the database takes 72 MB and the compressed backup **1.4 MB**; it takes **under 2 seconds**.
+
+Infrastructure-level complement: **disk snapshot** of the VM from the Azure portal (Disks → Create snapshot). Backups live on the VM's own disk: they protect against a human error or a bad migration, not against losing the VM. To keep a copy elsewhere, download them to a PC:
+
+```bash
+scp -i ~/.ssh/lavarapido_azure "azureuser@64.236.160.129:~/lavarapido/backups/*.bak.gz" .
+```
 
 #### 3.2.2 Backup of Docker persistent volumes
 
@@ -345,6 +377,39 @@ git -C ~/lavarapido/lavarapido-infra rev-parse HEAD > ~/backups/infra-commit_$(d
 ```
 
 The stack configuration (`docker-compose.yml`, `docker-compose.prod.yml`, `deploy/Caddyfile`) is versioned on GitHub (`lavarapido-infra`). To go back, a `git checkout <commit>` and a new `up -d` are enough.
+
+#### 3.2.4 Automatic check and restore
+
+**Automatic check.** After every scheduled backup, `deploy/verify-backup.sh` runs: it restores the latest backup under another name (`LavaRapido_verificacion`), checks that it has the tables of the real database and can be read, and drops it. This proves every day that the backups work, **without touching the real database**.
+
+**Restore.** It is never automatic: going back to a backup erases what happened afterwards, so a person always decides it.
+
+```bash
+bash ~/lavarapido/lavarapido-infra/deploy/restore-db.sh <file.bak.gz> --as LavaRapido_prueba   # inspect a backup without touching the database
+bash ~/lavarapido/lavarapido-infra/deploy/restore-db.sh <file.bak.gz>     # roll the database back to that backup
+```
+
+In the second case the script asks to type `RESTAURAR`, first backs up the current database, stops the 7 services, restores and starts them again (2 to 3 minutes of downtime). If the restore fails, the database stays open as it was and the services start again.
+
+**Log.** Every backup, check and restore, including cancelled or failed ones, is written to `~/lavarapido/backups/backup.log`:
+
+```
+2026-10-21 06:11:16 UTC | RESTAURACIÓN | CANCELADA | LavaRapido-20261021-061111.bak.gz -> LavaRapido | azureuser
+2026-10-21 06:12:05 UTC | RESPALDO | OK | LavaRapido-20261021-061204.bak.gz (1.4M) | azureuser
+2026-10-21 06:12:08 UTC | VERIFICACIÓN | OK | LavaRapido-20261021-061204.bak.gz: 69 tablas, 4 usuarios, 2 reservas | azureuser
+```
+
+Read it with `tail -20 ~/lavarapido/backups/backup.log`; only problems with `grep FALLÓ ~/lavarapido/backups/backup.log`.
+
+**Tests run in production (2026-10-21):**
+
+| Test | Result |
+|---|---|
+| Manual backup and backup before updating | ✅ 1.4 MB, verified |
+| Restore under another name and compare with the real database | ✅ Same records in users, bookings, payments, notifications and operators; 69 tables |
+| Restore over the real database | ✅ Identical data; the 11 containers went back to `healthy`; database `MULTI_USER / ONLINE / SIMPLE` |
+| Check with a deliberately corrupted backup | ✅ Detected and logged as `FALLÓ`, leaving no test database or temporary files |
+| Cancelled restore | ✅ Logged as `CANCELADA` |
 
 ### 3.3 Environment Variables and Secrets Management
 
@@ -374,6 +439,8 @@ The stack configuration (`docker-compose.yml`, `docker-compose.prod.yml`, `deplo
 | `PUBLIC_URL` / `SITE_ADDRESS` | Public address (CORS, email links) and Caddy domain |
 | `PUSH_ENABLED` / `MESSAGING_ENABLED` | `true`: push with Expo and events with RabbitMQ |
 
+The variables of 2026-10-21 do not go in `.env.production`: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL`, and `SESSION_CHECK_TIMEOUT` (gateway session check: on, 30 s, and 3 s) and `BOOKING_EXPIRY_CHECK_ENABLED`, `BOOKING_EXPIRY_CHECK_INTERVAL`, and `BOOKING_EXPIRY_GRACE_MINUTES` (close of expired bookings: on, every 5 minutes, and a 60-minute grace) keep their defaults, because the compose file does not pass them to the containers.
+
 #### 3.3.3 Memory and runtime limits (JVM -Xmx, ASPNETCORE_ENVIRONMENT)
 
 | Container | Limit (`mem_limit`) | Runtime |
@@ -383,15 +450,16 @@ The stack configuration (`docker-compose.yml`, `docker-compose.prod.yml`, `deplo
 | SQL Server | `MSSQL_MEMORY_LIMIT_MB=1536` | `MSSQL_PID=Express` |
 | web / caddy | 64 MB each | nginx / Caddy |
 | All | `restart: unless-stopped` | They restart by themselves on failure and when the machine boots |
+| All (since 2026-10-20) | Logs: 3 files of 10 MB (`json-file`) · health check every 30 s | The Java services get 150 s to start before failures count. Docker does not restart an `unhealthy` container by itself: the status shows in `docker compose ps`, Portainer, and `update-server.sh` |
 
 ### 3.4 Communication Protocol and Maintenance Window
 
 1. **Advance notice (24 h):** the DevOps informs the team through the project group about the date, the window and the changes (release notes).
 2. **Freeze:** no changes are pushed to the branch being deployed during the window.
-3. **Start:** "deployment started" is announced and the backup is taken (section 3.2).
+3. **Start:** "deployment started" is announced. `update-server.sh` backs up the database before updating (section 3.2).
 4. **Execution:** runbook in section 4.
 5. **Verification:** smoke tests in section 5. QA confirms each role.
-6. **Closing:** "deployment finished" is announced with the version and the evidence. If it fails, **rollback**: `git checkout` of the previous commit in `lavarapido-infra` and in the services, `update-server.sh`, and if the migration damaged data, restore the `.bak`.
+6. **Closing:** "deployment finished" is announced with the version and the evidence. If it fails, **rollback**: `git checkout` of the previous commit in `lavarapido-infra` and in the services, `update-server.sh`, and if the migration damaged data, restore the backup with `restore-db.sh` (section 3.2.4).
 7. **Standard window:** outside the car wash's business hours (before 07:00 or after 18:00, Colombia time).
 
 ---
@@ -441,7 +509,7 @@ ssh -i ~/.ssh/lavarapido_azure -L 9443:localhost:9443 azureuser@64.236.160.129
 
 Migrations are **automatic**:
 
-1. The `db-init` container creates the `LavaRapido` database if it does not exist.
+1. The `db-init` container creates the `LavaRapido` database if it does not exist and sets it to the `SIMPLE` recovery model.
 2. The `payment-migrate` container (Liquibase 4.29) applies the payment-service changelogs (`db/changelog/db.changelog-master.yaml`) and exits.
 3. Each Java service applies its own changelogs on startup. Numbering is global: 001–039 plus the 1xx catalog seeds.
 4. Hibernate only validates that the model matches the tables (`ddl-auto: validate`); it never alters tables.
@@ -508,7 +576,7 @@ sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml \
   --env-file .env.production --profile app up -d --build
 ```
 
-**Later updates**: first push the changes to GitHub and then:
+**Later updates**: first push the changes to GitHub and then (the script backs up the database before touching anything and, if the backup fails, does not update):
 
 ```bash
 bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh                 # everything
@@ -587,7 +655,7 @@ done
 sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production --profile app ps
 ```
 
-Expected: `{"status":"UP"}` in each Java service, and every container `Up`. `db-init` and `payment-migrate` must end in `Exited (0)`.
+Expected: `{"status":"UP"}` in each Java service, and every container `Up (healthy)`. `db-init` and `payment-migrate` must end in `Exited (0)`.
 
 #### 5.1.4 Interactive API documentation (Swagger UI / OpenAPI)
 
@@ -643,6 +711,21 @@ nc -zv 64.236.160.129 1433    # from outside: must FAIL (port closed)
   - real email delivery (recovery code through Gmail);
   - real push to the phone;
   - the push switch (off → inbox only; on → push).
+
+#### 5.2.4 Security headers check
+
+Since 2026-10-20 Caddy adds the security headers to every response (web, API and downloads), and to the web a content security policy (CSP) that only allows the project's own code plus Google Fonts and the jsDelivr flags.
+
+```bash
+curl -s -I https://lavarapidovehicular.northcentralus.cloudapp.azure.com/ | grep -iE "strict|content-security|x-frame|x-content|referrer|permissions|server"
+```
+
+| Test | Expected | Result (2026-10-20) |
+|---|---|---|
+| Headers on the web, `/api` and `/app` | HSTS, `nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy`, `Permissions-Policy`; CSP on the web | ✅ No duplicated headers |
+| `Server` header | Not present (it used to show `nginx/1.27.5`) | ✅ |
+| Web with the CSP on (home, login, sign-up, password recovery) | Loads fully: styles, fonts, flags, QR | ✅ 0 blocks and 0 console errors |
+| Load an external script from the browser console (simulated attack) | The browser blocks it: *Refused to load the script … Content Security Policy* | ✅ Blocked |
 
 ### 5.3 Log Inspection and Resource Monitoring
 
