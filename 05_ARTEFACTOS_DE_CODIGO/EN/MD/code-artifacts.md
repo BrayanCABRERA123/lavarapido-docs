@@ -27,16 +27,16 @@ The system's code lives in 10 GitHub repositories: the web application, the mobi
 
 | Artifact | Repository | Technology | Commits | Last commit |
 | --- | --- | --- | --- | --- |
-| Web application | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 472 | 2026-10-21 |
-| Mobile application | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 224 | 2026-10-21 |
+| Web application | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 474 | 2026-10-21 |
+| Mobile application | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 236 | 2026-10-21 |
 | Infrastructure | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 86 | 2026-10-21 |
 | API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 21 | 2026-10-21 |
 | security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 63 | 2026-10-21 |
 | customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 22 | 2026-10-19 |
-| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 59 | 2026-10-21 |
-| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 47 | 2026-10-21 |
+| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 61 | 2026-10-21 |
+| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 50 | 2026-10-21 |
 | payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 49 | 2026-10-21 |
-| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 39 | 2026-10-19 |
+| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 42 | 2026-10-21 |
 
 **Table 3**
 
@@ -44,8 +44,8 @@ The system's code lives in 10 GitHub repositories: the web application, the mobi
 
 | Artifact | Source files (`.ts`, `.tsx`, `.html`, `.scss`) | Lines | Screens |
 | --- | --- | --- | --- |
-| Web (`Web/src`) | 449 | 48,002 | 35 routes |
-| Mobile (`LavadoVehicular-Movil/src`) | 295 | 35,164 | 31 screens |
+| Web (`Web/src`) | 449 | 48,202 | 35 routes |
+| Mobile (`LavadoVehicular-Movil/src`) | 296 | 35,540 | 31 screens |
 
 > *Note.* Count of October 21, 2026, with `git ls-files` and `wc -l` over `src`; includes tests and comments.
 
@@ -194,7 +194,7 @@ docker compose --profile app up -d --build   # the whole backend in containers
 | Messaging | `MESSAGING_ENABLED`, `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD`; `AUTO_ASSIGN_ENABLED=false` (optional) turns off only the automatic assignment |
 | Push | `PUSH_ENABLED` (and `EXPO_ACCESS_TOKEN` in the compose file) |
 
-> *Note.* The variables of October 21, 2026 are not in `.env.example` or in the compose file because they have defaults: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL`, and `SESSION_CHECK_TIMEOUT` (gateway session check: on, 30 s, and 3 s) and `BOOKING_EXPIRY_CHECK_ENABLED`, `BOOKING_EXPIRY_CHECK_INTERVAL`, and `BOOKING_EXPIRY_GRACE_MINUTES` (close of expired bookings in booking-service: on, every 5 minutes, and a 60-minute grace). They only change when the service runs from the IDE or when they are added to the service `environment` in the compose file.
+> *Note.* The variables of October 21, 2026 are not in `.env.example` or in the compose file because they have defaults: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL`, and `SESSION_CHECK_TIMEOUT` (gateway session check: on, 30 s, and 3 s); `BOOKING_EXPIRY_CHECK_ENABLED` and `BOOKING_EXPIRY_CHECK_INTERVAL` (cancellation of scheduled bookings that expired without confirmation, in booking-service: on and every 5 minutes); `BOOKING_EXPIRY_GRACE_MINUTES` (60-minute grace after the end of the booking, used by booking-service and operations-service); and `FOLLOW_UP_ENABLED` and `FOLLOW_UP_INTERVAL` (follow-up of the bookings that ended and nobody closed, in operations-service: on and every 5 minutes; it needs `INTERNAL_API_KEY`). They only change when the service runs from the IDE or when they are added to the service `environment` in the compose file.
 
 To run a Java service from the console, use its Maven Wrapper (`./mvnw spring-boot:run` inside the service folder) with Java 21 (Spring, n.d.). payment-service runs with `dotnet run --project src/PaymentService.Api` and requires the .NET 8 SDK (Microsoft, n.d.). When starting with `--profile app`, the folders must be named after their repositories (`lavarapido-security-service`, `lavarapido-operation-service`), because that is how the compose file references them.
 
