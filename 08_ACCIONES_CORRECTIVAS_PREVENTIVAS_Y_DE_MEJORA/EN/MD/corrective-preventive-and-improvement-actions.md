@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 21, 2026
 
-Document Type: Register of Corrective, Preventive, and Improvement Actions (Development Team and Instructor) · Version 2.5
+Document Type: Register of Corrective, Preventive, and Improvement Actions (Development Team and Instructor) · Version 2.6
 
 ## Version Control
 
@@ -35,6 +35,7 @@ Table 1 records the change history of this document. The action register (sectio
 | 2.3 | 2026-10-19 | Test indicator with the run of October 19 (655 automated, 19 end-to-end, and 42 functional cases). | Development team |
 | 2.4 | 2026-10-20 | Review against the code of October 20, 2026: the register is still current (AM-03, rescheduling from the web and the app, and AM-12, the pause and issue states, remain open); the backend leader's full name was completed. | Development team |
 | 2.5 | 2026-10-21 | Review against the code of October 21, 2026. Corrective actions AC-44 to AC-52 were recorded and closed (a token that kept working after logout, bookings nobody closed, an operator assigned twice, receipts with no size limit, cash visible although it was disabled, reports counting unfinished bookings, misleading roles screen text, tabs out of step with the session, and a database transaction log with no limit); preventive action AP-04 (verified daily backups) was closed, corrective action ACO-14 (new variables missing from *.env.example* and the compose file) was opened, AP-16 to AP-18 (container logs, security headers, and health checks) and improvement AM-16 (mandatory APK update) were added and closed; the improvements of October 17 that repeated the identifiers AM-07 and AM-08 become AM-14 (inspection report in the app) and AM-15 (frequently asked questions); indicators with the tests of October 21. | Development team |
+| 2.6 | 2026-10-21 | Review against the code of the evening of October 21, 2026. AC-45 was adjusted and corrective actions AC-53 (the first version of the automatic close could record as "No-show" a service that was actually done) and AC-54 (a `null` field in an event sent the message to notification-service's dead-letter queue) were recorded and closed; preventive action AP-19 and lesson L-16 were added; ACO-14 includes the operations-service *FOLLOW_UP_\** variables; indicators with the final run of October 21 (707 tests). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -265,7 +266,7 @@ Table 6 records the nonconformities already corrected, with their root cause and
 | AC-42 | In the app, the date and search inputs were squashed when placed in a column. | P3 | The box used *flex: 1*, which starts from a height of 0 in a column. | It grows only in width and keeps a minimum height of 46 px (*FilterInputs.tsx*). | History and Ratings show the full inputs. | Responsive design check | 2026-10-17 |
 | AC-43 | The next service progress showed 10% or 25% although the wash had not started. | P3 | The progress table gave a percentage to the Scheduled and Confirmed statuses. | Scheduled and Confirmed stay at 0% on the web and in the app. | The dashboard shows 0% until the operator starts the service. | Usage report | 2026-10-16 |
 | AC-44 | A token kept working up to an hour after logout or after the administrator disabled the account. | P2 | Each service only checked the JWT signature and expiry (ADR-006); nobody asked whether the session was still open. | security-service rejects the token of a closed session (*sid* claim, *ActiveSessionValidator*) and the gateway confirms it with *GET /api/v1/auth/session* before passing the request on, keeping the answer 30 seconds per token. | *SessionCheckFilterTest*, *ApiSecurityWebTest* (401 with the token of a closed session); 19 end-to-end tests with the check on. | TD-024 | 2026-10-21 |
-| AC-45 | Bookings nobody started stayed Scheduled or Confirmed forever, and each admin screen counted "without an operator" its own way. | P2 | There was no close for expired bookings and the "without an operator" rule was repeated in the screens. | *ExpiredBookingsJob* closes every 5 minutes the ones one hour past their end without being started (Confirmed → No-show; Scheduled → Cancelled with the *EXPIRED* reason), and *GET /api/v1/admin/assignments/unassigned* is the single count of bookings without an operator. | *BookingTest*, *BookingServiceTest*, *OperationsServiceTest*, *reservations-store.spec.ts*. | TD-025 | 2026-10-21 |
+| AC-45 | Bookings nobody started stayed Scheduled or Confirmed forever, and each admin screen counted "without an operator" its own way. | P2 | There was no close for expired bookings and the "without an operator" rule was repeated in the screens. | *ExpiredBookingsJob* cancels every 5 minutes, with the *EXPIRED* reason, a Scheduled booking one hour past its end without being confirmed; Confirmed ones are handled as AC-53 describes. *GET /api/v1/admin/assignments/unassigned* is the single count of bookings without an operator, on the web and in the mobile app. | *BookingTest*, *BookingServiceTest*, *OperationsServiceTest*, *reservations-store.spec.ts*. | TD-025 | 2026-10-21 |
 | AC-46 | A manual and an automatic assignment at the same time could give an operator two services at the same time. | P2 | Both assignments read the operator schedule and saved without coordinating. | Both take the same SQL Server lock (*sp_getapplock* on *operations-assignment*) before reading and saving. | *OperationsServiceTest* checks that the lock is taken before saving. | TD-026 | 2026-10-21 |
 | AC-47 | The server accepted payment receipts of any size, and a phone photo of several MB was stored as it was in the database. | P3 | The size limit was not in the payment domain. | payment-service rejects a receipt over 2 MB (*RECEIPT_TOO_LARGE*) and the web and the app compress it before sending it. | *PaymentTests* (over 2 MB and exactly 2 MB). | Review of 2026-10-21 | 2026-10-21 |
 | AC-48 | The customer saw the Cash option even when the administrator had disabled that account. | P3 | *GET /api/v1/payment-accounts* did not return the cash account and the web and the app always added it on their own. | The API returns the cash account while it is active and the clients show Cash only if it comes in the list. | Payment screen with the cash account active and disabled. | Software Design, finding 8 | 2026-10-21 |
@@ -273,6 +274,8 @@ Table 6 records the nonconformities already corrected, with their root cause and
 | AC-50 | The roles tab promised that the permissions define what each user can do. | P3 | Real authorization uses the role in the token and the permission matrix is for reference (ADR-015), but the text did not say so. | The tab and the dialog explain that the roles are fixed and that the role decides the access. | *management.spec.ts* (fixed roles). | ADR-015 | 2026-10-21 |
 | AC-51 | After signing out or signing in with another account in one tab, the other browser tabs kept showing the previous session. | P3 | Each tab read the session only when it opened. | The tabs listen to the *storage* event: if another one signs out they go back to sign-in, and if another account signs in they reload. | *auth.spec.ts* (tabs). | Review of 2026-10-21 | 2026-10-21 |
 | AC-52 | The transaction log of the server database grew with no limit. | P2 | The database used the full recovery model without transaction log backups. | The database moves to the simple recovery model and is backed up in full every day (AP-04). | *RECOVERY SIMPLE* on the server; *lavarapido-infra*, commit of 2026-10-21. | R-008 | 2026-10-21 |
+| AC-53 | The first version of AC-45 set to No-show every Confirmed booking nobody started one hour after its end. If the operator washed the car and forgot to press "Start", the history, reports, and metrics recorded that the customer did not come, and No-show is final. | P1 | The rule decided a final status on its own without knowing whether the service was done: the system cannot tell a no-show from a forgotten record when the booking has an operator. | The system only decides when it is sure: a Confirmed booking that never had an operator becomes No-show (operations-service asks booking through *POST /internal/v1/bookings/{id}/no-show*, which checks again that it expired); one with an operator that nobody started or finished goes to the administrator's "To close" list, on the web and in the mobile app, who closes it as "Attended" (without made-up times and without telling the customer to pick up the vehicle) or as "No-show"; the operator and the administrators get a single notice (migrations 040 and 041). | *FollowUpPolicyTest*, *FollowUpServiceTest*, *BookingServiceTest*, *BookingApiWebTest*, *reservations-store.spec.ts*; live test of October 21 on the web and in the mobile app. | Team review of 2026-10-21 | 2026-10-21 |
+| AC-54 | A `null` field in an event payload sent the whole message to notification-service's dead-letter queue (DLQ), and the notice was not created. | P2 | Reading the event envelope failed on a `null` value instead of ignoring it. | The `null` field is ignored and the rest of the message is processed. | *DomainEventEnvelopeTest*. | R-005 | 2026-10-21 |
 
 *Note.* Prepared by the authors from the Git history of the repositories, the risk register, and the ADRs of the project (Vehicle Washing Development Team, 2026a).
 
@@ -286,7 +289,7 @@ Table 6 records the nonconformities already corrected, with their root cause and
 |---|---|---|---|---|---|---|---|
 | ACO-04 | The table *audit.audit_log* exists but nothing writes to it. | P2 | The triggers were not created and *SESSION_CONTEXT(N'user_id')* is not set. | Audit triggers on the sensitive tables and session context in each service, or remove the table from the design through an ADR. | Backend leader | Medium | Changes of prices, payment accounts, and roles visible in the audit trail. |
 | ACO-13 | Entities edited by administrators do not use optimistic locking: in concurrent edits, the last write wins. | P3 | The *row_version* column exists but is not mapped with *@Version*. | Map *@Version* in booking, customer, and security and answer 409 on conflict. | Backend leader | Low | Test of two updates with the same version. (TD-008) |
-| ACO-14 | The variables of October 21, 2026 (*SESSION_CHECK_\** in the gateway and *BOOKING_EXPIRY_\** in booking-service) are not in *.env.example* or in the *environment* block of *docker-compose.yml*, as the Implementation Procedure requires (section 13); in Docker only their defaults can be used. | P3 | They were added with a default in the *application.yml* of each service without updating the *lavarapido-infra* files. | Add them, commented, to *.env.example* and to the *environment* of *api-gateway* and *booking-service*. | Project leader | Low | The six variables appear in both files and *docker compose config* shows them. |
+| ACO-14 | The variables of October 21, 2026 (*SESSION_CHECK_\** in the gateway, *BOOKING_EXPIRY_\** in booking-service and operations-service, and *FOLLOW_UP_\** in operations-service) are not in *.env.example* or in the *environment* block of *docker-compose.yml*, as the Implementation Procedure requires (section 13); in Docker only their defaults can be used. | P3 | They were added with a default in the *application.yml* of each service without updating the *lavarapido-infra* files. | Add them, commented, to *.env.example* and to the *environment* of *api-gateway*, *booking-service*, and *operations-service*. | Project leader | Low | The eight variables appear in both files and *docker compose config* shows them. |
 
 *Note.* Prepared by the authors from the technical backlog, Annex B of the Technical Manual, and the verification of the code as of October 16, 2026. Actions ACO-01 to ACO-03 and ACO-05 to ACO-12 were closed and moved to Table 6 (AC-24 to AC-34).
 
@@ -318,6 +321,7 @@ Preventive actions address the causes of risks that have not yet materialized or
 | AP-16 | Container logs filling the server disk. | Cap the logs of each container at 3 files of 10 MB. | Project leader | Medium | Closed (2026-10-20): *docker-compose.prod.yml* | Server review |
 | AP-17 | Browser-side attacks against the public site (embedding it in another page, loading scripts from other origins). | Security headers and a content security policy (CSP) in Caddy. | Project leader | Medium | Closed (2026-10-20): *deploy/Caddyfile* | OWASP A05 |
 | AP-18 | A container hanging without anyone noticing. | Health check every 30 seconds in every container, visible in *docker compose ps*. | Project leader | Medium | Closed (2026-10-20): *docker-compose.prod.yml* | Server review |
+| AP-19 | An automatic job recording a final status with incomplete data (cause of AC-53). | Every automatic rule that changes a final status only acts when there is no doubt; anything doubtful goes to a list for a person to decide, and the rule is reviewed by the team before merging it. | Whole team | High | In progress (permanent) | Lesson from AC-53 |
 
 *Note.* Prepared by the authors from the risk register, the technical backlog, and the security policy of the project.
 
@@ -361,9 +365,9 @@ Preventive actions address the causes of risks that have not yet materialized or
 | On-time closure | Actions closed within the time of their severity / closed actions × 100 | ≥ 90% | To be measured from version 1.0 |
 | Recurrence | Closed corrective actions whose problem reappears / closed corrective actions × 100 | 0% | 0% |
 | Escaped defects | Defects found in acceptance or operation / total defects of the period × 100 | Downward trend | To be measured from the first implementation |
-| Automated tests | Tests run and passed in every repository | Increasing | 689 unit and integration tests (web 60, gateway 40, Java services 439, and payment-service 150) and 19 end-to-end tests as of October 21, 2026, and 42 functional cases as of October 19 |
+| Automated tests | Tests run and passed in every repository | Increasing | 707 unit and integration tests (web 62, gateway 40, Java services 455, and payment-service 150) and 19 end-to-end tests in the final run of October 21, 2026, and 42 functional cases as of October 19 |
 
-*Note.* Prepared by the authors. The test count corresponds to the run of October 21, 2026; version 1.0 counted annotations (about 400).
+*Note.* Prepared by the authors. The test count corresponds to the evening run of October 21, 2026 (the early-morning run had 689); version 1.0 counted annotations (about 400).
 
 The project leader reviews the indicators at each retrospective and before each implementation. With AC-25 and AC-26 closed there are no open P0 or P1 corrective actions left, so entry criterion E6 of the Implementation Procedure is met. The three open corrective actions (ACO-04, ACO-13, and ACO-14) are P2 and P3 and have a recorded action.
 
@@ -390,6 +394,7 @@ The project leader reviews the indicators at each retrospective and before each 
 | L-13 | Signing out must void the token in every service, not just delete it from the browser. | AC-44 |
 | L-14 | What is done by hand and what the system does on its own over the same resource need the same lock. | AC-46 |
 | L-15 | A backup only counts once it has been shown that it can be restored. | AP-04, AC-52 |
+| L-16 | The system must not decide something final on its own with incomplete data: if the operator may have forgotten to register the service, the administrator decides. | AC-53, AP-19 |
 
 *Note.* Prepared by the authors from the register of closed risks and the actions of this document.
 
@@ -483,14 +488,14 @@ Vehicle Washing Development Team. (2026a). *Vehicle washing management system: P
 | R-002 Partial payment-service (closed as C-005) | TD-014, TD-015, TD-016, TD-017, TD-018 | AC-04 to AC-10, AC-27 |
 | R-003 Regressions without a safety net | TD-001, TD-006, TD-010, TD-027 | AC-24, AP-01, AP-07, AM-10 |
 | R-004 Secret leakage | — | AP-03 |
-| R-005 Lost event | TD-011 | AP-02 |
+| R-005 Lost event | TD-011 | AP-02, AC-54 |
 | R-007 Known requirement gaps (closed as C-006) | TD-002, TD-003, TD-009 | AC-16, AC-17, AC-25, AC-31 |
 | R-008 Data loss | — | AP-04, AC-52 |
 | R-010 Documentation drift | — | AC-23, AC-34, AC-38, AP-05 |
 | R-011 Public server off | — | Implementation Procedure, R-I04 |
 | API abuse | TD-022 | AP-11 |
 | Closed sessions that stay active | TD-024 | AC-44 |
-| Booking and operator schedule | TD-025, TD-026 | AC-45, AC-46 |
+| Booking and operator schedule | TD-025, TD-026 | AC-45, AC-46, AC-53, AP-19 |
 | Availability of the public server | — | AP-16, AP-17, AP-18 |
 | R-001 operations-service integration (closed as C-004) | TD-020 | AM-01 |
 | Law 1581 of 2012 | — | AC-26, AC-37 |
