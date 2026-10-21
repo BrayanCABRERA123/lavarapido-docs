@@ -5,7 +5,7 @@ Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano Quint
 
 *Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556. Instructora: Karol Daniela Correa. 21 de octubre de 2026.*
 
-***Resumen*—Este artículo describe el diseño, la implementación y la verificación de Vehicle Washing (LavaRapido), una plataforma web y Android para un lavadero vehicular de una sola sede, desarrollada como proyecto formativo del SENA. El problema documentado es que las reservas por llamada, los registros a mano, la asignación discrecional del trabajo y los pagos en efectivo sin registro no dejan trazabilidad sobre turnos, servicios ni pagos. El trabajo siguió un enfoque de documentación de diseño de software (SDD) con siete sprints inspirados en Scrum, y su alcance evolucionó desde un servicio móvil por zonas con pasarela de pagos hacia un lavadero de sede única con pagos por QR o transferencia con comprobante revisado por el administrador, o en efectivo. La solución integra seis microservicios (cinco en Java 21 con Spring Boot 4 y uno en .NET 8) detrás de un API Gateway, SQL Server 2022 con 57 tablas, RabbitMQ y clientes en Angular 21 y React Native. Al 21 de octubre de 2026, 40 de los 41 requisitos funcionales estaban implementados y 1 era parcial. Ese día se ejecutaron 689 pruebas automatizadas, todas aprobadas (incluidas 7 de persistencia contra una base aislada), y 19 pruebas de punta a punta contra el sistema completo, también aprobadas; los 42 casos funcionales pasaron el 19 de octubre de 2026. El sistema corre además en un servidor público en Azure. Desde el 19 de octubre de 2026, cada repositorio compila y corre sus pruebas con GitHub Actions en cada cambio. Quedan pendientes los reportes consolidados y un límite de solicitudes en el gateway. Los beneficios operativos siguen siendo una hipótesis, porque no se han medido con personas usuarias reales.**
+***Resumen*—Este artículo describe el diseño, la implementación y la verificación de Vehicle Washing (LavaRapido), una plataforma web y Android para un lavadero vehicular de una sola sede, desarrollada como proyecto formativo del SENA. El problema documentado es que las reservas por llamada, los registros a mano, la asignación discrecional del trabajo y los pagos en efectivo sin registro no dejan trazabilidad sobre turnos, servicios ni pagos. El trabajo siguió un enfoque de documentación de diseño de software (SDD) con siete sprints inspirados en Scrum, y su alcance evolucionó desde un servicio móvil por zonas con pasarela de pagos hacia un lavadero de sede única con pagos por QR o transferencia con comprobante revisado por el administrador, o en efectivo. La solución integra seis microservicios (cinco en Java 21 con Spring Boot 4 y uno en .NET 8) detrás de un API Gateway, SQL Server 2022 con 57 tablas, RabbitMQ y clientes en Angular 21 y React Native. Al 21 de octubre de 2026, 40 de los 41 requisitos funcionales estaban implementados y 1 era parcial. Ese día se ejecutaron 707 pruebas automatizadas, todas aprobadas (incluidas 7 de persistencia contra una base aislada), y 19 pruebas de punta a punta contra el sistema completo, también aprobadas; los 42 casos funcionales pasaron el 19 de octubre de 2026. El sistema corre además en un servidor público en Azure. Desde el 19 de octubre de 2026, cada repositorio compila y corre sus pruebas con GitHub Actions en cada cambio. Quedan pendientes los reportes consolidados y un límite de solicitudes en el gateway. Los beneficios operativos siguen siendo una hipótesis, porque no se han medido con personas usuarias reales.**
 
 ***Palabras clave*—microservicios, arquitectura hexagonal, sistema de reservas, lavado vehicular, pagos con código QR, documentación de diseño de software**
 
@@ -222,7 +222,7 @@ stateDiagram-v2
     CONFIRMED --> CONFIRMED : reprogramar (admin)
     CONFIRMED --> IN_PROGRESS : iniciar (operario, desde 15 min antes)
     CONFIRMED --> CANCELLED : cancelar (cliente antes de la hora, o admin)
-    CONFIRMED --> NO_SHOW : no asistió (admin) o vencida
+    CONFIRMED --> NO_SHOW : no asistió, o terminó sin operario
     IN_PROGRESS --> COMPLETED : finalizar (operario)
     COMPLETED --> [*]
     CANCELLED --> [*]
@@ -231,7 +231,7 @@ stateDiagram-v2
 
 **Fig. 2.** Diagrama de Estados de la Reserva
 
-*Nota.* Los estados en gris son finales. *Vencida*: el sistema cierra la reserva que nadie inició una hora después de su hora de fin. Tomado del manual técnico [22], con las etiquetas traducidas.
+*Nota.* Los estados en gris son finales. *Vencida*: el sistema cancela la reserva programada que nadie confirmó una hora después de su hora de fin; *terminó sin operario*: en el mismo plazo, la confirmada que nunca tuvo operario pasa a NO_SHOW. La confirmada con operario que nadie registró la cierra el administrador. Tomado del manual técnico [22], con las etiquetas traducidas.
 
 ### C. Cumplimiento de los Requisitos Funcionales
 
@@ -253,22 +253,22 @@ De los 12 requisitos no funcionales, 5 están implementados y 7 son parciales [1
 
 ### D. Resultados de las Pruebas
 
-El 21 de octubre de 2026 se ejecutaron todas las suites automatizadas: 689 pruebas aprobadas, ninguna fallida ni omitida; las 7 pruebas de persistencia de payment-service corrieron contra una base de pruebas aislada (Tabla V). Ese mismo día pasaron las 19 pruebas de punta a punta de *lavarapido-infra/e2e*, que recorren el sistema completo: reserva con elección de operario y asignación automática, flujo de los tres roles con pago, aprobación, puntos, ejecución y calificación, informe de inspección con fotos y enlace público, y reglas de acceso por rol, ya con el chequeo de sesión del gateway activo. La SRS registraba 347 pruebas el 6 de octubre [1]; la diferencia corresponde a las pruebas que se agregaron con cada función nueva.
+En la noche del 21 de octubre de 2026 se ejecutaron todas las suites automatizadas: 707 pruebas aprobadas, ninguna fallida ni omitida; las 7 pruebas de persistencia de payment-service corrieron contra una base de pruebas aislada (Tabla V). Ese mismo día pasaron las 19 pruebas de punta a punta de *lavarapido-infra/e2e*, que recorren el sistema completo: reserva con elección de operario y asignación automática, flujo de los tres roles con pago, aprobación, puntos, ejecución y calificación, informe de inspección con fotos y enlace público, y reglas de acceso por rol, ya con el chequeo de sesión del gateway activo. La SRS registraba 347 pruebas el 6 de octubre [1]; la diferencia corresponde a las pruebas que se agregaron con cada función nueva.
 
 **TABLA V**  
 *Resultados de la Ejecución de las Pruebas Automatizadas (21 de Octubre de 2026)*
 
 | Componente | Casos | Aprobados | Fallidos | Omitidos |
 |---|---|---|---|---|
-| Aplicación web (Angular) | 60 | 60 | 0 | 0 |
+| Aplicación web (Angular) | 62 | 62 | 0 | 0 |
 | api-gateway | 40 | 40 | 0 | 0 |
 | security-service | 155 | 155 | 0 | 0 |
 | customer-service | 69 | 69 | 0 | 0 |
-| booking-service | 47 | 47 | 0 | 0 |
-| operations-service | 56 | 56 | 0 | 0 |
-| notification-service | 112 | 112 | 0 | 0 |
+| booking-service | 50 | 50 | 0 | 0 |
+| operations-service | 67 | 67 | 0 | 0 |
+| notification-service | 114 | 114 | 0 | 0 |
 | payment-service (.NET) | 150 | 150 | 0 | 0 |
-| **Total** | **689** | **689** | **0** | **0** |
+| **Total** | **707** | **707** | **0** | **0** |
 
 *Nota.* Ejecución con *./mvnw test* en cada servicio Java, *dotnet test* en payment-service y *npx ng test --watch=false* en la web. Las 19 pruebas de punta a punta no se incluyen en la tabla.
 
@@ -328,9 +328,9 @@ La decisión de usar microservicios para un solo lavadero merece discusión. New
 
 La arquitectura también evolucionó respecto de lo planeado. La propuesta técnica eligió una arquitectura en N capas con MySQL para reducir el riesgo técnico y el costo inicial, y dejó la migración a microservicios como una ruta de evolución si la demanda crecía [4]. El equipo adoptó los microservicios desde la primera versión, primero con una descomposición más fina y luego con seis servicios (ADR-002, reemplazado por ADR-009), y cambió MySQL por SQL Server. De igual forma, el alcance pasó de un servicio móvil por zonas con pasarela de pagos a un lavadero de sede única con pagos por QR o transferencia con comprobante revisado por el administrador, o en efectivo. Estos cambios simplificaron el dominio (sin geolocalización, rutas ni integración con una pasarela externa) y evitaron recoger datos de tarjetas, pero dejaron sin cumplir, en su forma original, los objetivos de asignación automática por cercanía, pasarela en línea y reserva según la disponibilidad geográfica.
 
-Garantizar las reglas críticas en la base de datos, y no solo en el código, resultó adecuado para un dominio con concurrencia: dos clientes que reservan la misma bahía o dos administradores que aprueban el mismo pago no dependen de que el código de la aplicación sea correcto en todos sus caminos. Con el mismo criterio, desde el 21 de octubre de 2026 la asignación manual y la automática de un operario se hacen una a la vez con un candado de SQL Server. Las pruebas de persistencia de payment-service que cubren estos casos existen, pero necesitan una base de pruebas dedicada; la suite de punta a punta sí ejercita esas reglas contra el SQL Server real del entorno Docker.
+Garantizar las reglas críticas en la base de datos, y no solo en el código, resultó adecuado para un dominio con concurrencia: dos clientes que reservan la misma bahía o dos administradores que aprueban el mismo pago no dependen de que el código de la aplicación sea correcto en todos sus caminos. Con el mismo criterio, desde el 21 de octubre de 2026 la asignación manual y la automática de un operario se hacen una a la vez con un candado de SQL Server. La revisión del equipo encontró además un riesgo en la primera versión del cierre automático de reservas, del mismo día: marcaba como No asistió toda reserva confirmada que nadie iniciaba, de modo que un servicio atendido pero no registrado habría quedado como ausencia del cliente en el historial y en los reportes. El diseño se cambió para que el sistema decida solo cuando está seguro (la reserva que nunca tuvo operario) y deje las demás al administrador en una lista de reservas por cerrar. Las pruebas de persistencia de payment-service que cubren estos casos existen, pero necesitan una base de pruebas dedicada; la suite de punta a punta sí ejercita esas reglas contra el SQL Server real del entorno Docker.
 
-La aplicación de la arquitectura hexagonal [8] se refleja en la forma de las pruebas: 682 de las 689 pruebas automatizadas se ejecutan sin base de datos, porque prueban el dominio, los casos de uso y la capa web con dobles de prueba en lugar de la infraestructura real, lo que las hace rápidas y deterministas. Desde el 19 de octubre de 2026 esas pruebas corren solas en cada cambio con GitHub Actions; sin embargo, la ausencia de medición de cobertura limita la confianza que estas cifras pueden dar, y la suite de punta a punta, que prueba los servicios integrados, todavía se corre a mano. La investigación de Forsgren et al. [20] asocia la integración continua y la automatización de pruebas con un mejor desempeño en la entrega de software; por eso el proyecto cerró su deuda técnica TD-006 con GitHub Actions.
+La aplicación de la arquitectura hexagonal [8] se refleja en la forma de las pruebas: 700 de las 707 pruebas automatizadas se ejecutan sin base de datos, porque prueban el dominio, los casos de uso y la capa web con dobles de prueba en lugar de la infraestructura real, lo que las hace rápidas y deterministas. Desde el 19 de octubre de 2026 esas pruebas corren solas en cada cambio con GitHub Actions; sin embargo, la ausencia de medición de cobertura limita la confianza que estas cifras pueden dar, y la suite de punta a punta, que prueba los servicios integrados, todavía se corre a mano. La investigación de Forsgren et al. [20] asocia la integración continua y la automatización de pruebas con un mejor desempeño en la entrega de software; por eso el proyecto cerró su deuda técnica TD-006 con GitHub Actions.
 
 La verificación cruzada entre documentación y código fue uno de los aportes más útiles del proceso: las 19 discrepancias encontradas muestran que, incluso con un enfoque que pone el diseño antes del código, la documentación se desactualiza si no se modifica en el mismo cambio que el código, como recoge la lección aprendida L-09 del proyecto [21]. Los ADR [18] permitieron que los cambios de alcance, como la asignación manual de operarios, quedaran justificados en lugar de aparecer como incumplimientos silenciosos.
 
@@ -342,7 +342,7 @@ Este trabajo tiene limitaciones importantes. Primera, no hay evidencia con perso
 
 El proyecto diseñó e implementó una plataforma de microservicios para un lavadero vehicular de una sola sede que integra reservas con disponibilidad real, asignación automática y manual del trabajo, ejecución, pagos por QR o transferencia con comprobante revisado por el administrador o en efectivo, notificaciones, fidelización e informes de inspección. La arquitectura resultante, con seis servicios de dominio, un gateway, una base de datos de 57 tablas con un dueño por esquema y mensajería asíncrona, se documentó en quince ADR y se verificó contra el código. Frente a los seis objetivos específicos de la SRS, se cumplieron el registro de vehículos y la reserva desde la web y Android, la validación del horario y de las bahías con horas alternativas, la asignación de operarios sin cruces de horario, el registro de pagos con revisión del comprobante y la calificación con puntos que desbloquean promociones; el módulo administrativo está construido, salvo los reportes consolidados por periodo, que son la única brecha frente a los requisitos. Respecto de la propuesta original, el servicio móvil por zonas y la pasarela de pagos en línea se retiraron del alcance.
 
-El estado verificado es favorable en lo técnico: 40 de 41 requisitos funcionales implementados, 689 pruebas automatizadas, 19 pruebas de punta a punta y 42 casos funcionales aprobados sin fallos, y el sistema desplegado en un servidor público con HTTPS. Las reglas críticas del negocio se garantizan en la base de datos, lo que protege el sistema frente a la concurrencia en reservas, asignaciones, pagos y puntos.
+El estado verificado es favorable en lo técnico: 40 de 41 requisitos funcionales implementados, 707 pruebas automatizadas, 19 pruebas de punta a punta y 42 casos funcionales aprobados sin fallos, y el sistema desplegado en un servidor público con HTTPS. Las reglas críticas del negocio se garantizan en la base de datos, lo que protege el sistema frente a la concurrencia en reservas, asignaciones, pagos y puntos.
 
 Al mismo tiempo, falta lo más importante para operar con personas usuarias reales: la validación con el negocio. También falta un límite de solicitudes en el gateway. Por tanto, los beneficios operativos planteados en el problema siguen siendo una hipótesis que este trabajo no confirma ni refuta.
 
@@ -434,7 +434,7 @@ Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano Quint
 
 *Technologist in Software Analysis and Development (ADSO), Ficha 3145556. Instructor: Karol Daniela Correa. October 21, 2026.*
 
-***Abstract*—This article describes the design, implementation, and verification of Vehicle Washing (LavaRapido), a web and Android platform for a single-location car wash, developed as a training project in SENA's Technologist in Software Analysis and Development program. The documented problem is that bookings made by phone or in person, handwritten records, discretionary work assignment, and unrecorded cash payments leave no traceability over time slots, service execution, or payments. The work followed a software design documentation (SDD) approach with seven Scrum-inspired sprints. The scope evolved from a mobile, zone-based service with a payment gateway to a single-location car wash with payments by QR or transfer with a receipt reviewed by the administrator, or in cash. The solution consists of six domain microservices (five in Java 21 with Spring Boot 4 and one in .NET 8) behind an API gateway, a SQL Server 2022 database with nine schemas and 57 tables, RabbitMQ messaging, and Angular 21 and React Native clients. As of October 21, 2026, 40 of the 41 functional requirements were implemented and 1 was partial. That day 689 automated tests were run and all passed (including 7 persistence tests against an isolated database), and 19 end-to-end tests against the complete system also passed; the 42 functional cases passed on October 19, 2026. The system also runs on a public server on Azure. Since October 19, 2026, each repository builds and runs its tests with GitHub Actions on every change. The consolidated reports and a request rate limit in the gateway are still pending. The operational benefits for the business remain a hypothesis, because they have not yet been measured with real users.**
+***Abstract*—This article describes the design, implementation, and verification of Vehicle Washing (LavaRapido), a web and Android platform for a single-location car wash, developed as a training project in SENA's Technologist in Software Analysis and Development program. The documented problem is that bookings made by phone or in person, handwritten records, discretionary work assignment, and unrecorded cash payments leave no traceability over time slots, service execution, or payments. The work followed a software design documentation (SDD) approach with seven Scrum-inspired sprints. The scope evolved from a mobile, zone-based service with a payment gateway to a single-location car wash with payments by QR or transfer with a receipt reviewed by the administrator, or in cash. The solution consists of six domain microservices (five in Java 21 with Spring Boot 4 and one in .NET 8) behind an API gateway, a SQL Server 2022 database with nine schemas and 57 tables, RabbitMQ messaging, and Angular 21 and React Native clients. As of October 21, 2026, 40 of the 41 functional requirements were implemented and 1 was partial. That day 707 automated tests were run and all passed (including 7 persistence tests against an isolated database), and 19 end-to-end tests against the complete system also passed; the 42 functional cases passed on October 19, 2026. The system also runs on a public server on Azure. Since October 19, 2026, each repository builds and runs its tests with GitHub Actions on every change. The consolidated reports and a request rate limit in the gateway are still pending. The operational benefits for the business remain a hypothesis, because they have not yet been measured with real users.**
 
 ***Index Terms*—microservices, hexagonal architecture, booking system, car wash, QR code payments, software design documentation**
 
@@ -651,7 +651,7 @@ stateDiagram-v2
     CONFIRMED --> CONFIRMED : reschedule (admin)
     CONFIRMED --> IN_PROGRESS : start (operator, from 15 min before)
     CONFIRMED --> CANCELLED : cancel (client before the time, or admin)
-    CONFIRMED --> NO_SHOW : no show (admin) or expired
+    CONFIRMED --> NO_SHOW : no show, or ended without operator
     IN_PROGRESS --> COMPLETED : finish (operator)
     COMPLETED --> [*]
     CANCELLED --> [*]
@@ -660,7 +660,7 @@ stateDiagram-v2
 
 **Fig. 2.** Booking State Diagram
 
-*Note.* Gray states are final. *Expired*: the system closes a booking nobody started one hour after its end time. Taken from the technical manual [22].
+*Note.* Gray states are final. *Expired*: the system cancels a scheduled booking nobody confirmed one hour after its end time; *ended without operator*: in the same time, a confirmed booking that never had an operator becomes NO_SHOW. A confirmed booking with an operator that nobody recorded is closed by the administrator. Taken from the technical manual [22].
 
 ### C. Compliance With Functional Requirements
 
@@ -682,22 +682,22 @@ Of the 12 non-functional requirements, 5 are implemented and 7 are partial [1]. 
 
 ### D. Test Results
 
-On October 21, 2026, all the automated suites were run: 689 tests passed, none failed or skipped; the 7 payment-service persistence tests ran against an isolated test database (Table V). That same day the 19 end-to-end tests of *lavarapido-infra/e2e* passed; they run through the complete system: booking with operator choice and automatic assignment, the flow of the three roles with payment, approval, points, execution, and rating, the inspection report with photos and a public link, and access rules per role, with the gateway session check on. The SRS recorded 347 tests on October 6 [1]; the difference corresponds to the tests added with each new function.
+On the night of October 21, 2026, all the automated suites were run: 707 tests passed, none failed or skipped; the 7 payment-service persistence tests ran against an isolated test database (Table V). That same day the 19 end-to-end tests of *lavarapido-infra/e2e* passed; they run through the complete system: booking with operator choice and automatic assignment, the flow of the three roles with payment, approval, points, execution, and rating, the inspection report with photos and a public link, and access rules per role, with the gateway session check on. The SRS recorded 347 tests on October 6 [1]; the difference corresponds to the tests added with each new function.
 
 **TABLE V**  
 *Results of the Automated Test Run (October 21, 2026)*
 
 | Component | Cases | Passed | Failed | Skipped |
 |---|---|---|---|---|
-| Web application (Angular) | 60 | 60 | 0 | 0 |
+| Web application (Angular) | 62 | 62 | 0 | 0 |
 | api-gateway | 40 | 40 | 0 | 0 |
 | security-service | 155 | 155 | 0 | 0 |
 | customer-service | 69 | 69 | 0 | 0 |
-| booking-service | 47 | 47 | 0 | 0 |
-| operations-service | 56 | 56 | 0 | 0 |
-| notification-service | 112 | 112 | 0 | 0 |
+| booking-service | 50 | 50 | 0 | 0 |
+| operations-service | 67 | 67 | 0 | 0 |
+| notification-service | 114 | 114 | 0 | 0 |
 | payment-service (.NET) | 150 | 150 | 0 | 0 |
-| **Total** | **689** | **689** | **0** | **0** |
+| **Total** | **707** | **707** | **0** | **0** |
 
 *Note.* Run with *./mvnw test* in each Java service, *dotnet test* in payment-service, and *npx ng test --watch=false* in the web. The 19 end-to-end tests are not included in the table.
 
@@ -757,9 +757,9 @@ The decision to use microservices for a single car wash deserves discussion. New
 
 The architecture also evolved from what was planned. The technical proposal chose an N-layer architecture with MySQL to reduce technical risk and initial cost, and left the move to microservices as an evolution path if demand grew [4]. The team adopted microservices from the first version, first with a finer decomposition and then with six services (ADR-002, superseded by ADR-009), and replaced MySQL with SQL Server. Likewise, the scope moved from a mobile, zone-based service with a payment gateway to a single-location car wash with payments by QR or transfer with a receipt reviewed by the administrator, or in cash. These changes simplified the domain (no geolocation, routes, or integration with an external gateway) and avoided collecting card data, but they left the objectives of automatic assignment by proximity, an online gateway, and booking by geographic availability unmet in their original form.
 
-Enforcing the critical rules in the database, and not only in code, proved appropriate for a domain with concurrency: two customers booking the same bay or two administrators approving the same payment do not depend on the application code being correct on every path. With the same criterion, since October 21, 2026 the manual and the automatic assignment of an operator are made one at a time with a SQL Server lock. The payment-service persistence tests that cover these cases exist, but they need a dedicated test database; the end-to-end suite does exercise those rules against the real SQL Server of the Docker environment.
+Enforcing the critical rules in the database, and not only in code, proved appropriate for a domain with concurrency: two customers booking the same bay or two administrators approving the same payment do not depend on the application code being correct on every path. With the same criterion, since October 21, 2026 the manual and the automatic assignment of an operator are made one at a time with a SQL Server lock. The team review also found a risk in the first version of the automatic close of bookings, from the same day: it marked as No-show every confirmed booking nobody started, so a service done but not recorded would have appeared as a customer absence in the history and the reports. The design was changed so that the system decides on its own only when it is sure (a booking that never had an operator) and leaves the rest to the administrator in a list of bookings to close. The payment-service persistence tests that cover these cases exist, but they need a dedicated test database; the end-to-end suite does exercise those rules against the real SQL Server of the Docker environment.
 
-The application of hexagonal architecture [8] is reflected in the shape of the tests: 682 of the 689 automated tests run without a database, because they test the domain, the use cases, and the web layer with test doubles instead of the real infrastructure, which makes them fast and deterministic. Since October 19, 2026, these tests run automatically on every change with GitHub Actions; however, the lack of coverage measurement limits the confidence these figures can provide, and the end-to-end suite, which tests the integrated services, is still run by hand. Research by Forsgren et al. [20] associates continuous integration and test automation with better software delivery performance, which is why the project closed its technical debt TD-006 with GitHub Actions.
+The application of hexagonal architecture [8] is reflected in the shape of the tests: 700 of the 707 automated tests run without a database, because they test the domain, the use cases, and the web layer with test doubles instead of the real infrastructure, which makes them fast and deterministic. Since October 19, 2026, these tests run automatically on every change with GitHub Actions; however, the lack of coverage measurement limits the confidence these figures can provide, and the end-to-end suite, which tests the integrated services, is still run by hand. Research by Forsgren et al. [20] associates continuous integration and test automation with better software delivery performance, which is why the project closed its technical debt TD-006 with GitHub Actions.
 
 Cross-verification between documentation and code was one of the most useful contributions of the process: the 19 discrepancies found show that, even with an approach that puts design before code, documentation becomes outdated if it is not changed in the same change as the code, as captured in the project's lesson learned L-09 [21]. The ADRs [18] allowed scope changes, such as manual operator assignment, to be justified rather than appearing as silent non-compliance.
 
@@ -771,7 +771,7 @@ This work has important limitations. First, there is no evidence from users: the
 
 The project designed and implemented a microservices platform for a single-location car wash that integrates bookings with real availability, automatic and manual work assignment, execution, payments by QR or transfer with a receipt reviewed by the administrator or in cash, notifications, loyalty, and inspection reports. The resulting architecture, with six domain services, a gateway, a 57-table database with one owner per schema, and asynchronous messaging, was documented in fifteen ADRs and verified against the code. Against the six specific objectives of the SRS, vehicle registration and booking from the web and Android, schedule and bay validation with alternative times, operator assignment without schedule overlaps, payment recording with receipt review, and ratings with points that unlock promotions were achieved; the administrative module is built, except for the consolidated reports per period, which are the only gap against the requirements. Compared with the original proposal, the mobile, zone-based service and the online payment gateway were removed from scope.
 
-The verified status is favorable on the technical side: 40 of 41 functional requirements implemented, 689 automated tests, 19 end-to-end tests, and 42 functional cases passing with no failures, and the system deployed on a public server with HTTPS. The critical business rules are enforced in the database, which protects the system against concurrency in bookings, assignments, payments, and points.
+The verified status is favorable on the technical side: 40 of 41 functional requirements implemented, 707 automated tests, 19 end-to-end tests, and 42 functional cases passing with no failures, and the system deployed on a public server with HTTPS. The critical business rules are enforced in the database, which protects the system against concurrency in bookings, assignments, payments, and points.
 
 At the same time, the most important step to operate with real users is still missing: validation with the business. A request rate limit in the gateway is also missing. Therefore, the operational benefits stated in the problem remain a hypothesis that this work neither confirms nor refutes.
 

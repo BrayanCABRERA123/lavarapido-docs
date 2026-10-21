@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 21 de octubre de 2026
 
-Tipo de documento: Registro de acciones correctivas, preventivas y de mejoramiento (equipo de desarrollo e instructora) · Versión 2.5
+Tipo de documento: Registro de acciones correctivas, preventivas y de mejoramiento (equipo de desarrollo e instructora) · Versión 2.6
 
 ## Control de Versiones
 
@@ -35,6 +35,7 @@ La Tabla 1 registra el historial de cambios de este documento. El registro de ac
 | 2.3 | 2026-10-19 | Indicador de pruebas con la ejecución del 19 de octubre (655 automatizadas, 19 de punta a punta y 42 casos funcionales). | Equipo de desarrollo |
 | 2.4 | 2026-10-20 | Revisión contra el código del 20 de octubre de 2026: el registro sigue vigente (AM-03, la reprogramación desde la web y la app, y AM-12, los estados de pausa y novedad, siguen abiertas); se completó el nombre de la líder de backend. | Equipo de desarrollo |
 | 2.5 | 2026-10-21 | Revisión contra el código del 21 de octubre de 2026. Se registraron y cerraron las correctivas AC-44 a AC-52 (token que seguía sirviendo después de cerrar sesión, reservas que nadie cerraba, asignación doble de un operario, comprobantes sin límite de tamaño, efectivo visible aunque estuviera desactivado, reportes que contaban reservas no terminadas, texto engañoso de la pantalla de roles, pestañas con la sesión desfasada y registro de transacciones de la base sin límite); se cerró la preventiva AP-04 (respaldos diarios verificados), se abrió la correctiva ACO-14 (variables nuevas fuera de *.env.example* y del compose) y se agregaron y cerraron AP-16 a AP-18 (registros de contenedores, encabezados de seguridad y chequeos de salud) y la mejora AM-16 (actualización obligatoria del APK); las mejoras del 17 de octubre que repetían los identificadores AM-07 y AM-08 pasan a ser AM-14 (informe de inspección en la app) y AM-15 (preguntas frecuentes); indicadores con las pruebas del 21 de octubre. | Equipo de desarrollo |
+| 2.6 | 2026-10-21 | Revisión contra el código de la noche del 21 de octubre de 2026. Se ajustó AC-45 y se registraron y cerraron las correctivas AC-53 (la primera versión del cierre automático podía registrar como "No asistió" un servicio que sí se hizo) y AC-54 (un campo `null` en un evento mandaba el mensaje a la cola de errores de notification-service); se agregaron la preventiva AP-19 y la lección L-16; ACO-14 incluye las variables *FOLLOW_UP_\** de operations-service; indicadores con la ejecución final del 21 de octubre (707 pruebas). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -265,7 +266,7 @@ La Tabla 6 registra las no conformidades ya corregidas, con su causa raíz y la 
 | AC-42 | En la app, los campos de fecha y búsqueda se aplastaban cuando iban en columna. | P3 | La caja usaba *flex: 1*, que parte de alto 0 en una columna. | Crece solo a lo ancho y conserva un alto mínimo de 46 px (*FilterInputs.tsx*). | Historial y Calificaciones muestran los campos completos. | Revisión de diseño adaptable | 2026-10-17 |
 | AC-43 | El avance del próximo servicio mostraba 10 % o 25 % sin que el lavado hubiera empezado. | P3 | La tabla de avance daba un porcentaje a los estados Programada y Confirmada. | Programada y Confirmada quedan en 0 % en la web y en la app. | El panel muestra 0 % hasta que el operario inicia el servicio. | Reporte de uso | 2026-10-16 |
 | AC-44 | Un token seguía sirviendo hasta una hora después de cerrar sesión o de que el administrador inhabilitara la cuenta. | P2 | Cada servicio solo verificaba la firma y la vigencia del JWT (ADR-006); nadie preguntaba si la sesión seguía abierta. | security-service rechaza el token de una sesión cerrada (claim *sid*, *ActiveSessionValidator*) y el gateway lo confirma con *GET /api/v1/auth/session* antes de pasar a los demás servicios, con la respuesta guardada 30 segundos por token. | *SessionCheckFilterTest*, *ApiSecurityWebTest* (401 con el token de una sesión cerrada); 19 pruebas de punta a punta con el chequeo activo. | TD-024 | 2026-10-21 |
-| AC-45 | Las reservas que nadie iniciaba quedaban Programadas o Confirmadas para siempre, y cada pantalla del administrador contaba "sin operario" a su manera. | P2 | No había un cierre para las reservas vencidas y la regla de "sin operario" estaba repetida en las pantallas. | *ExpiredBookingsJob* cierra cada 5 minutos las que pasaron una hora de su fin sin iniciarse (Confirmada → No asistió; Programada → Cancelada con el motivo *EXPIRED*), y *GET /api/v1/admin/assignments/unassigned* es el único conteo de reservas sin operario. | *BookingTest*, *BookingServiceTest*, *OperationsServiceTest*, *reservations-store.spec.ts*. | TD-025 | 2026-10-21 |
+| AC-45 | Las reservas que nadie iniciaba quedaban Programadas o Confirmadas para siempre, y cada pantalla del administrador contaba "sin operario" a su manera. | P2 | No había un cierre para las reservas vencidas y la regla de "sin operario" estaba repetida en las pantallas. | *ExpiredBookingsJob* cancela cada 5 minutos, con el motivo *EXPIRED*, la reserva Programada que pasó una hora de su fin sin confirmarse; las Confirmadas se tratan como indica AC-53. *GET /api/v1/admin/assignments/unassigned* es el único conteo de reservas sin operario, en la web y en la app móvil. | *BookingTest*, *BookingServiceTest*, *OperationsServiceTest*, *reservations-store.spec.ts*. | TD-025 | 2026-10-21 |
 | AC-46 | Una asignación manual y una automática al mismo tiempo podían darle a un operario dos servicios a la misma hora. | P2 | Las dos asignaciones leían la agenda del operario y guardaban sin coordinarse. | Las dos toman el mismo candado de SQL Server (*sp_getapplock* sobre *operations-assignment*) antes de leer y guardar. | *OperationsServiceTest* comprueba que el candado se toma antes de guardar. | TD-026 | 2026-10-21 |
 | AC-47 | El servidor aceptaba comprobantes de pago de cualquier tamaño, y una foto del celular de varios MB se guardaba tal cual en la base. | P3 | El límite de tamaño no estaba en el dominio de pagos. | payment-service rechaza un comprobante de más de 2 MB (*RECEIPT_TOO_LARGE*) y la web y la app lo comprimen antes de enviarlo. | *PaymentTests* (más de 2 MB y 2 MB exactos). | Revisión del 2026-10-21 | 2026-10-21 |
 | AC-48 | El cliente veía la opción Efectivo aunque el administrador hubiera desactivado esa cuenta. | P3 | *GET /api/v1/payment-accounts* no devolvía la cuenta de efectivo y la web y la app la agregaban siempre por su cuenta. | La API devuelve la cuenta de efectivo mientras está activa y los clientes muestran Efectivo solo si viene en la lista. | Pantalla de pagos con la cuenta de efectivo activa y desactivada. | Diseño del Software, hallazgo 8 | 2026-10-21 |
@@ -273,6 +274,8 @@ La Tabla 6 registra las no conformidades ya corregidas, con su causa raíz y la 
 | AC-50 | La pestaña de roles prometía que los permisos definen lo que cada usuario puede hacer. | P3 | La autorización real usa el rol del token y la matriz de permisos es de referencia (ADR-015), pero el texto no lo decía. | La pestaña y el diálogo explican que los roles son fijos y que el acceso lo decide el rol. | *management.spec.ts* (roles fijos). | ADR-015 | 2026-10-21 |
 | AC-51 | Al cerrar sesión o entrar con otra cuenta en una pestaña, las otras pestañas del navegador seguían mostrando la sesión anterior. | P3 | Cada pestaña leía la sesión solo al abrirse. | Las pestañas escuchan el evento *storage*: si otra cierra sesión vuelven al inicio de sesión y si entra otra cuenta se recargan. | *auth.spec.ts* (pestañas). | Revisión del 2026-10-21 | 2026-10-21 |
 | AC-52 | El registro de transacciones de la base del servidor crecía sin límite. | P2 | La base estaba en modelo de recuperación completo sin respaldos del registro de transacciones. | La base pasa al modelo de recuperación simple y se respalda completa todos los días (AP-04). | *RECOVERY SIMPLE* en el servidor; *lavarapido-infra*, commit del 2026-10-21. | R-008 | 2026-10-21 |
+| AC-53 | La primera versión de AC-45 dejaba en No asistió toda reserva Confirmada que nadie inició una hora después de su fin. Si el operario lavó el carro y olvidó darle "Iniciar", el historial, los reportes y las métricas registraban que el cliente no vino, y No asistió es definitivo. | P1 | La regla decidía sola un estado definitivo sin saber si el servicio se hizo: el sistema no puede distinguir una inasistencia de un registro olvidado cuando la reserva tiene operario. | El sistema solo decide cuando está seguro: la Confirmada que nunca tuvo operario pasa a No asistió (operations-service la pide a booking por *POST /internal/v1/bookings/{id}/no-show*, que vuelve a comprobar que venció); la que tiene operario y nadie inició o finalizó pasa a la lista "Por cerrar" del administrador, en la web y en la app móvil, que la cierra como "Se atendió" (sin inventar horas y sin avisar al cliente que recoja el vehículo) o como "No asistió"; el operario y los administradores reciben un solo aviso (migraciones 040 y 041). | *FollowUpPolicyTest*, *FollowUpServiceTest*, *BookingServiceTest*, *BookingApiWebTest*, *reservations-store.spec.ts*; prueba en vivo del 21 de octubre en la web y en la app móvil. | Revisión del equipo del 2026-10-21 | 2026-10-21 |
+| AC-54 | Un campo `null` en el payload de un evento mandaba el mensaje completo a la cola de errores (DLQ) de notification-service, y el aviso no se creaba. | P2 | La lectura del sobre del evento fallaba con un valor `null` en lugar de ignorarlo. | El campo `null` se ignora y el resto del mensaje se procesa. | *DomainEventEnvelopeTest*. | R-005 | 2026-10-21 |
 
 *Nota.* Elaborado por los autores a partir del historial de Git de los repositorios, el registro de riesgos y los ADR del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a).
 
@@ -286,7 +289,7 @@ La Tabla 6 registra las no conformidades ya corregidas, con su causa raíz y la 
 |---|---|---|---|---|---|---|---|
 | ACO-04 | La tabla *audit.audit_log* existe pero nadie escribe en ella. | P2 | No se crearon los disparadores ni se fija *SESSION_CONTEXT(N'user_id')*. | Disparadores de auditoría en las tablas sensibles y contexto de sesión en cada servicio, o retirar la tabla del diseño mediante un ADR. | Líder de backend | Media | Cambios de precios, cuentas de pago y roles visibles en la auditoría. |
 | ACO-13 | Las entidades editadas por administradores no usan bloqueo optimista: en ediciones concurrentes gana la última escritura. | P3 | La columna *row_version* existe, pero no se mapea con *@Version*. | Mapear *@Version* en booking, customer y security y responder 409 ante conflicto. | Líder de backend | Baja | Prueba de dos actualizaciones con la misma versión. (TD-008) |
-| ACO-14 | Las variables del 21 de octubre de 2026 (*SESSION_CHECK_\** del gateway y *BOOKING_EXPIRY_\** de booking-service) no están en *.env.example* ni en el bloque *environment* de *docker-compose.yml*, como pide el Procedimiento de Implementación (sección 13); en Docker solo se pueden usar sus valores por defecto. | P3 | Se agregaron con valor por defecto en el *application.yml* de cada servicio sin actualizar los archivos de *lavarapido-infra*. | Agregarlas comentadas a *.env.example* y al *environment* de *api-gateway* y *booking-service*. | Líder de proyecto | Baja | Las seis variables aparecen en los dos archivos y *docker compose config* las muestra. |
+| ACO-14 | Las variables del 21 de octubre de 2026 (*SESSION_CHECK_\** del gateway, *BOOKING_EXPIRY_\** de booking-service y operations-service, y *FOLLOW_UP_\** de operations-service) no están en *.env.example* ni en el bloque *environment* de *docker-compose.yml*, como pide el Procedimiento de Implementación (sección 13); en Docker solo se pueden usar sus valores por defecto. | P3 | Se agregaron con valor por defecto en el *application.yml* de cada servicio sin actualizar los archivos de *lavarapido-infra*. | Agregarlas comentadas a *.env.example* y al *environment* de *api-gateway*, *booking-service* y *operations-service*. | Líder de proyecto | Baja | Las ocho variables aparecen en los dos archivos y *docker compose config* las muestra. |
 
 *Nota.* Elaborado por los autores a partir del backlog técnico, del anexo B del Manual Técnico y de la verificación del código al 16 de octubre de 2026. Las acciones ACO-01 a ACO-03 y ACO-05 a ACO-12 se cerraron y pasaron a la Tabla 6 (AC-24 a AC-34).
 
@@ -318,6 +321,7 @@ Las acciones preventivas atacan las causas de riesgos que todavía no se han mat
 | AP-16 | Que los registros de los contenedores llenen el disco del servidor. | Limitar los registros de cada contenedor a 3 archivos de 10 MB. | Líder de proyecto | Media | Cerrada (2026-10-20): *docker-compose.prod.yml* | Revisión del servidor |
 | AP-17 | Ataques desde el navegador contra el sitio público (incrustarlo en otra página, cargar scripts de otros orígenes). | Encabezados de seguridad y política de contenido (CSP) en Caddy. | Líder de proyecto | Media | Cerrada (2026-10-20): *deploy/Caddyfile* | OWASP A05 |
 | AP-18 | Que un contenedor quede colgado sin que nadie lo note. | Chequeo de salud cada 30 segundos en todos los contenedores, visible en *docker compose ps*. | Líder de proyecto | Media | Cerrada (2026-10-20): *docker-compose.prod.yml* | Revisión del servidor |
+| AP-19 | Que una tarea automática registre un estado definitivo con datos incompletos (causa de AC-53). | Toda regla automática que cambie un estado definitivo solo actúa cuando no hay duda; lo dudoso pasa a una lista para que lo decida una persona, y la regla se revisa en equipo antes de fusionarla. | Todo el equipo | Alta | En ejecución (permanente) | Lección de AC-53 |
 
 *Nota.* Elaborado por los autores a partir del registro de riesgos, el backlog técnico y la política de seguridad del proyecto.
 
@@ -361,9 +365,9 @@ Las acciones preventivas atacan las causas de riesgos que todavía no se han mat
 | Cierre en plazo | Acciones cerradas dentro del plazo de su severidad / acciones cerradas × 100 | ≥ 90 % | Por medir desde la versión 1.0 |
 | Reincidencia | Correctivas cerradas cuyo problema reaparece / correctivas cerradas × 100 | 0 % | 0 % |
 | Defectos escapados | Defectos encontrados en aceptación u operación / defectos totales del periodo × 100 | Tendencia a la baja | Por medir desde la primera implementación |
-| Pruebas automatizadas | Pruebas ejecutadas y aprobadas en todos los repositorios | Creciente | 689 unitarias y de integración (web 60, gateway 40, servicios Java 439 y payment-service 150) y 19 de punta a punta al 21 de octubre de 2026, y 42 casos funcionales al 19 de octubre |
+| Pruebas automatizadas | Pruebas ejecutadas y aprobadas en todos los repositorios | Creciente | 707 unitarias y de integración (web 62, gateway 40, servicios Java 455 y payment-service 150) y 19 de punta a punta en la ejecución final del 21 de octubre de 2026, y 42 casos funcionales al 19 de octubre |
 
-*Nota.* Elaborado por los autores. El conteo de pruebas corresponde a la ejecución del 21 de octubre de 2026; en la versión 1.0 se contaban anotaciones (unas 400).
+*Nota.* Elaborado por los autores. El conteo de pruebas corresponde a la ejecución de la noche del 21 de octubre de 2026 (en la de la madrugada fueron 689); en la versión 1.0 se contaban anotaciones (unas 400).
 
 El líder de proyecto revisa los indicadores en cada retrospectiva y antes de cada implementación. Con AC-25 y AC-26 cerradas ya no quedan correctivas P0 ni P1 abiertas, por lo que se cumple el criterio de entrada E6 del Procedimiento de Implementación. Las tres correctivas abiertas (ACO-04, ACO-13 y ACO-14) son P2 y P3 y tienen acción registrada.
 
@@ -390,6 +394,7 @@ El líder de proyecto revisa los indicadores en cada retrospectiva y antes de ca
 | L-13 | Cerrar sesión tiene que dejar sin efecto el token en todos los servicios, no solo borrarlo del navegador. | AC-44 |
 | L-14 | Lo que se hace a mano y lo que hace el sistema solo sobre el mismo recurso necesitan el mismo candado. | AC-46 |
 | L-15 | Un respaldo solo cuenta si se comprobó que se puede restaurar. | AP-04, AC-52 |
+| L-16 | El sistema no debe decidir solo algo definitivo con datos incompletos: si el operario pudo olvidar registrar el servicio, lo decide el administrador. | AC-53, AP-19 |
 
 *Nota.* Elaborado por los autores a partir del registro de riesgos cerrados y de las acciones de este documento.
 
@@ -483,14 +488,14 @@ Servicio Nacional de Aprendizaje. (2026). *Guía para elaborar manuales de softw
 | R-002 payment-service parcial (cerrado como C-005) | TD-014, TD-015, TD-016, TD-017, TD-018 | AC-04 a AC-10, AC-27 |
 | R-003 Regresiones sin red de seguridad | TD-001, TD-006, TD-010, TD-027 | AC-24, AP-01, AP-07, AM-10 |
 | R-004 Fuga de secretos | — | AP-03 |
-| R-005 Evento perdido | TD-011 | AP-02 |
+| R-005 Evento perdido | TD-011 | AP-02, AC-54 |
 | R-007 Brechas de requisitos conocidas (cerrado como C-006) | TD-002, TD-003, TD-009 | AC-16, AC-17, AC-25, AC-31 |
 | R-008 Pérdida de datos | — | AP-04, AC-52 |
 | R-010 Desactualización de la documentación | — | AC-23, AC-34, AC-38, AP-05 |
 | R-011 Servidor público apagado | — | Procedimiento de Implementación, R-I04 |
 | Abuso de la API | TD-022 | AP-11 |
 | Sesiones cerradas que siguen activas | TD-024 | AC-44 |
-| Agenda de reservas y operarios | TD-025, TD-026 | AC-45, AC-46 |
+| Agenda de reservas y operarios | TD-025, TD-026 | AC-45, AC-46, AC-53, AP-19 |
 | Disponibilidad del servidor público | — | AP-16, AP-17, AP-18 |
 | R-001 Integración de operations-service (cerrado como C-004) | TD-020 | AM-01 |
 | Ley 1581 de 2012 | — | AC-26, AC-37 |

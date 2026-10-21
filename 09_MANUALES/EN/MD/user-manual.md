@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 21, 2026
 
-Manual Type: User Manual (Customer and Operator Roles) · Version 4.5
+Manual Type: User Manual (Customer and Operator Roles) · Version 4.6
 
 ## Version Control
 
@@ -38,6 +38,7 @@ Table 1 records the change history of this document. Each time the development t
 | 4.3 | 2026-10-19 | Screenshots taken again on October 19, 2026 (date on the dashboards, calendars without past days, and booking summary). | Development team |
 | 4.4 | 2026-10-20 | The customer's and the operator's history go from the newest booking to the oldest and open the detail on click, with the **Go to payment** and **Go to ratings** buttons. Notifications open their detail on click, with a button to go to the section the notice comes from. Once the payment is approved, the payment screen only shows the summary. | Development team |
 | 4.5 | 2026-10-21 | Review against the code of October 21, 2026: the receipt is reduced below 2 MB before it is sent and the QR can be enlarged with **Enlarge QR** (section 10.1.5); Cash only appears if the business keeps that account active; bookings nobody starts close on their own one hour after their end time (Table 7, section 10.2.3, and frequently asked questions); when signing out, the other tabs sign out too (section 12); the mobile app asks to install the new APK when it is published (section 6.2). The date and the version of the cover were corrected. | Development team |
+| 4.6 | 2026-10-21 | Change of the rule for bookings that end without being recorded, reviewed by the team on the night of October 21: only a confirmed booking that never had an operator becomes No show on its own; if it had an operator, the operator receives the notice "¿Atendiste este servicio?" (did you serve this booking?) and the administrator closes it (Table 7, sections 10.2.3 and 10.2.4, and frequently asked questions). The schedule and the assigned services no longer show cancelled or No show bookings. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -529,8 +530,8 @@ Each module is documented with the same format: name, description, role that can
 | Confirmed | The booking has a slot and a washing bay. Bookings made by the customer are created with this status. | Yes, before the start time. |
 | In progress | The operator started the wash. | No. |
 | Completed | The service is finished; from this status it can be rated. | No. |
-| Cancelled | The booking was voided by the customer or by the business, or the system closed it because its time came without being confirmed. | Not applicable. |
-| No show | The customer did not arrive at the booked slot. If nobody starts the service, the system marks the booking this way one hour after its end time. | Not applicable. |
+| Cancelled | The booking was voided by the customer or by the business, or the system closed it because one hour passed after its end without being confirmed. | Not applicable. |
+| No show | The customer did not arrive at the booked slot and the business recorded it. If the confirmed booking never had an operator, the system marks it this way one hour after its end time. | Not applicable. |
 
 *Note.* The names are those displayed by the interface in English (codes SCHEDULED, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, and NO_SHOW in the database).
 
@@ -821,7 +822,7 @@ The operator receives the account from the business administrator. The operator 
 
 **Expected result:** The status changes to In progress and then to Completed ("Service finished!"). The customer receives the notices and can rate the service.
 
-**Notes or restrictions:** The service can be started from 15 minutes before the booked time. The operator can only update the services assigned to them. If an assigned service is not started, one hour after its end time the system closes the booking as No show and the service no longer appears as pending.
+**Notes or restrictions:** The service can be started from 15 minutes before the booked time. The operator can only update the services assigned to them. Every service must be recorded with **Start** and **Finish**, even if late: if the time of the service has already passed, it can still be started and finished on the same day, and the real hours count. If an assigned service was not started when its time ended, or was started and not finished one hour after its end time, the operator receives the notice "¿Atendiste este servicio?" (did you serve this booking?) and the administrator sees the booking in the list of bookings to close; if it can no longer be recorded, the operator tells the administrator whether the vehicle was served, and the administrator closes it. The schedule and the assigned services list do not show cancelled bookings or those left as No show.
 
 **Table 10**
 
@@ -849,7 +850,7 @@ The operator receives the account from the business administrator. The operator 
 
 #### 10.2.4 Operator Notifications
 
-The operator's notifications work like the customer's (section 10.1.7). The most frequent notices are a new service assigned, a service moved to another time, a service cancelled, and a service reassigned to another operator. These staff notices arrive in the inbox and as push notifications, never by email. The operator opens them with **Notifications** in the side menu and uses the tabs, the filters, and the **Mark as read** and **Mark all as read** buttons. Clicking one of these notices opens its detail with the **Go to assigned services** button.
+The operator's notifications work like the customer's (section 10.1.7). The most frequent notices are a new service assigned, a service moved to another time, a service cancelled, and a service reassigned to another operator. Since October 21, 2026 the notice "¿Atendiste este servicio?" (did you serve this booking?) also arrives when a service's time ended and it was not started or not finished (only once per booking, section 10.2.3). These staff notices arrive in the inbox and as push notifications, never by email. The operator opens them with **Notifications** in the side menu and uses the tabs, the filters, and the **Mark as read** and **Mark all as read** buttons. Clicking one of these notices opens its detail with the **Go to assigned services** button.
 
 **Figure 29**
 
@@ -1028,7 +1029,7 @@ The web application does not allow changing the date or the time. Cancel the boo
 
 ##### What happens if I do not arrive for my booking?
 
-If nobody starts the service, one hour after the end time the system marks the booking as No show and frees the slot. If you had already paid, contact the business: the administrator decides on the refund.
+The business records the booking as No show. If the booking had no operator assigned, the system marks it this way one hour after the end time. If you had already paid, contact the business: the administrator decides on the refund.
 
 ##### How do I pay for my service?
 
@@ -1065,6 +1066,10 @@ The **Deactivate my account** option deactivates the account, without erasing it
 ##### I am an operator and cannot start a service. Why?
 
 A service can only be started on the day of the booking, only if it is assigned to you, and only when you do not have another service in progress. If the service is yours and the problem continues, inform the administrator.
+
+##### I served a vehicle and forgot to press Start. What do I do?
+
+If it is still the same day, open the service and press **Start** and then **Finish**; the system accepts it even if it is late. If you can no longer do it, tell the administrator that the vehicle was served, so the booking is closed as attended and not as No show.
 
 ## 14. Glossary
 

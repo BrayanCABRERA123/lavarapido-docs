@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 21, 2026
 
-Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.5
+Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.6
 
 ## Version Control
 
@@ -37,6 +37,7 @@ Table 1 records the change history of this document. Each time an administrative
 | 4.3 | 2026-10-19 | Screenshots taken again on October 19, 2026, with demo data, and new Figure 5 of the business data to be completed (section 11.1). | Development team |
 | 4.4 | 2026-10-20 | The user type change from Management > Users was removed, since the team reverted it in the web, the app, and the server: the role is chosen when the account is created (section 10.3). The Registered filter was removed from the users list (section 9.2). Notifications open their detail with a button to go to Bookings or home (section 12.7). | Development team |
 | 4.5 | 2026-10-21 | Review against the code and the server of October 21, 2026: deactivating an account makes its session stop working (sections 9.4, 9.6, and 17.5); the roles tab says that the role decides the access (section 10.1); the cash account and its option for the customer (section 11.4); bookings that close on their own, single count of bookings without an operator, and the assignment lock (sections 12.3 and 12.4); receipt of at most 2 MB (section 12.6); reports with only completed bookings (section 13); automatic backups of the public server (sections 14.6 and 15.2) and security headers (section 17.4). The date and the version of the cover and the row of data that used to be stored only in the browser (Table 12) were corrected. | Development team |
+| 4.6 | 2026-10-21 | Change of the rule for bookings that end without being closed, reviewed by the team on the night of October 21: only a confirmed booking that never had an operator becomes No-show on its own; one that had an operator and nobody recorded goes to the **To close** card of the home screen (web and mobile app), where the administrator chooses **Attended** or **No-show** (sections 6.3, 8.3, 12.3, and 12.7). Bookings without an operator with a single rule in the mobile app too (sections 8.3 and 12.4); *FOLLOW_UP_\** variables (section 11.6); new incident and glossary term (Tables 18 and 20). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -190,6 +191,7 @@ Table 2 summarizes the real status of each function in the version of October 21
 | Payment methods (accounts and QR codes) | Settings > Payment methods | Complete. | 11.4 |
 | Operators, weekly availability, and absences | Operators | Complete. | 12.1 |
 | Bookings: create, reschedule, change status, and cancel | Bookings | Complete. | 12.3 |
+| Bookings to close (services that ended without being recorded) | Dashboard (web and mobile app) | Complete since October 21, 2026: **Attended** or **No-show**. | 12.3 |
 | Operator assignment | Bookings, Dashboard | Complete: the system assigns a free operator when the booking is confirmed (the one chosen by the customer, if still free), and the administrator changes it by hand or assigns the bookings left without an operator. | 12.4 |
 | Vehicle inspection report | Bookings > Inspection | Complete: the report and photos are saved in operations-service, and the customer receives the summary with the link to the report by notification and email (**Notify customer**). | 12.5 |
 | Payment review, approval, rejection, and refund; manual payments | Payments | Complete. | 12.6 |
@@ -288,7 +290,8 @@ The control panel (route */admin*, menu option **Dashboard**) summarizes what th
 | Revenue for the last 7 days | Chart with the week total and the projected busiest day. | **View detailed report**. |
 | Operators status | Available, busy, and absent operators. | **Manage shifts and bays**. |
 | Payments pending review | Last receipts submitted for validation. | **Review** each one. |
-| Bookings without an operator | Confirmed bookings waiting for a technician whose time has not ended; since October 21, 2026 it is the same count as the Bookings screen. | **Assign** (section 12.4). |
+| Bookings without an operator | Scheduled or confirmed bookings waiting for a technician whose time has not ended; since October 21, 2026 it is the same count as the Bookings screen, on the web and in the mobile app. | **Assign** (section 12.4). |
+| To close | Bookings with an operator that ended and nobody recorded (not started or not finished). It only appears when there is at least one, on the web and in the mobile app. | **Attended** or **No-show** (section 12.3). |
 
 *Note.* The names correspond to the panel when the interface is in English.
 
@@ -522,7 +525,7 @@ The QR images and the receipts are stored inside the database as images (data UR
 
 ### 11.6 Operating Environment Variables
 
-The variables that change the behavior of the platform are read from the file *lavarapido-infra/.env* and require restarting the affected services. The most relevant for the IT administrator are *MESSAGING_ENABLED* (RabbitMQ events), *MAIL_ENABLED* and *MAIL_\** (email), *PUSH_ENABLED* (push notifications), *REMINDER_LEADS* (reminders, by default 24 h and 1 h), *BOOKING_ZONE* (time zone of the business), *BOOKING_SLOT_MINUTES* and *BOOKING_MAX_DAYS_AHEAD* (booking grid and window), and *INTERNAL_API_KEY* (internal calls between services). Those of October 21, 2026, *SESSION_CHECK_\** (gateway session check) and *BOOKING_EXPIRY_\** (close of expired bookings), have defaults and do not go through the Compose file yet, so in Docker they are not changed from *.env*. Their values and the change procedure are described in the Installation Manual.
+The variables that change the behavior of the platform are read from the file *lavarapido-infra/.env* and require restarting the affected services. The most relevant for the IT administrator are *MESSAGING_ENABLED* (RabbitMQ events), *MAIL_ENABLED* and *MAIL_\** (email), *PUSH_ENABLED* (push notifications), *REMINDER_LEADS* (reminders, by default 24 h and 1 h), *BOOKING_ZONE* (time zone of the business), *BOOKING_SLOT_MINUTES* and *BOOKING_MAX_DAYS_AHEAD* (booking grid and window), and *INTERNAL_API_KEY* (internal calls between services). Those of October 21, 2026, *SESSION_CHECK_\** (gateway session check), *BOOKING_EXPIRY_\** (bookings that ended without being closed; *BOOKING_EXPIRY_GRACE_MINUTES* is used by booking-service and operations-service), and *FOLLOW_UP_\** (check of the **To close** list in operations-service), have defaults and do not go through the Compose file yet, so in Docker they are not changed from *.env*. Their values and the change procedure are described in the Installation Manual.
 
 ## 12. Management of Core Information
 
@@ -567,12 +570,26 @@ The **Bookings** screen (route */admin/reservations*) lists the bookings with **
 
 1. Use the search by client or plate, the date (**Today**), and the status and operator filters; **Clear** removes them.
 2. To create a booking on behalf of a customer, click **New Booking**, look up the vehicle by plate, choose the services, the date, and a free time, and confirm.
-3. Open a booking to see its detail. From there the administrator can reschedule it (another free date or time), change its status (confirm, start, complete, mark as **No show**), or cancel it by choosing a **Cancellation reason**. Each change asks for confirmation.
+3. Open a booking to see its detail. From there the administrator can reschedule it (another free date or time), change its status (confirm, start, complete, mark as **No-show**), or cancel it by choosing a **Cancellation reason**. Each change asks for confirmation.
 4. Click **Export** to download the list in Excel, PDF, or CSV.
 
 The life cycle rules are the same for everyone: a booking cannot fall outside the opening hours or occupy a bay that is already taken, and a booking that already started can no longer be canceled (Table 9).
 
-**Bookings nobody starts (since October 21, 2026).** One hour after the end time, the system closes the bookings that are still Scheduled or Confirmed: a Confirmed one becomes **No show** (even if it is paid; if a refund applies, the administrator makes it in **Payments**) and a Scheduled one is cancelled with the reason "Venció sin confirmarse" (expired without confirmation), which does not appear in the list of reasons for cancelling by hand. This frees the operator and the bay. **No show** is a final status: if an operator washed the vehicle but did not press **Start**, the booking is also closed this way and can no longer be moved to Completed; that is why every service must be started and finished in the system.
+**Bookings that ended without being closed (since October 21, 2026).** The system only closes a booking on its own when there is no doubt about what happened; in the other cases the administrator decides:
+
+- A **Scheduled** booking that was never confirmed is cancelled on its own one hour after its end time, with the reason "Venció sin confirmarse" (expired without confirmation), which does not appear in the list of reasons for cancelling by hand.
+- A **Confirmed** booking that never had an operator becomes **No-show** on its own one hour after its end, because nobody could serve it.
+- A **Confirmed booking with an operator** that nobody started when its time ended, or an **In progress** booking that nobody finished one hour after its end, is never marked on its own: it goes to the **To close** card of the home screen. The operator receives the notice "¿Atendiste este servicio?" (did you serve this booking?) and every active administrator the notice "Servicio sin registrar" (service not recorded) (section 12.7).
+
+This rule replaced the first version of the same day, which closed as No-show every booking that nobody started: if the operator washed the vehicle and forgot to press **Start**, the record said that the customer did not come. The system never makes refunds: if the booking was paid, the administrator reviews the payment in **Payments** (section 12.6).
+
+To close the pending bookings:
+
+1. Find the **To close** card on the web **Dashboard** or on the home screen of the mobile app. It only appears when there is a pending booking and shows those of the last week.
+2. Check with the operator whether the vehicle was served. If it is still the same day, the operator can record the service with **Start** and **Finish** even if it is late; this keeps the real hours and the booking leaves the list.
+3. If the vehicle was served, click **Attended**. The booking becomes Completed without made-up hours: without a start time it does not count toward the operator's punctuality and without an end time it does not add worked hours, but it does count as a service done and as income. The customer does not receive the notice that the vehicle is ready for pickup (it would arrive hours late), but can still rate the service.
+4. If the customer did not come, click **No-show**. This option only applies to a booking that was never started, and the status is final.
+5. If a message says that the booking is no longer to close, another administrator or the operator closed it first; just refresh the screen.
 
 **Table 9**
 
@@ -584,8 +601,8 @@ The life cycle rules are the same for everyone: a booking cannot fall outside th
 | CONFIRMED | With a slot and a bay. Bookings made by customers start here. | Assign or change the operator, reschedule, or cancel. |
 | IN_PROGRESS | The operator started the wash. | Supervise; it can no longer be canceled. |
 | COMPLETED | Service finished. | Verify or record the payment. |
-| CANCELLED | Voided by the customer or the business, or closed by the system because its time came without being confirmed. | Check the reason. |
-| NO_SHOW | The customer did not arrive, or nobody started the service until one hour after its end. | Record it, review patterns and, if the customer had paid, decide on the refund. |
+| CANCELLED | Voided by the customer or the business, or closed by the system because one hour passed after its end without being confirmed. | Check the reason. |
+| NO_SHOW | The customer did not arrive (marked by the administrator), or the confirmed booking ended one hour ago without an operator (marked by the system). | Record it, review patterns and, if the customer had paid, decide on the refund. |
 
 *Note.* Database codes according to ADR-010; the interface translates them.
 
@@ -597,7 +614,7 @@ The life cycle rules are the same for everyone: a booking cannot fall outside th
 
 ### 12.4 Assigning an Operator
 
-When a booking is confirmed, **the system assigns the operator automatically** (RF-008): if the customer chose one who is still free, that operator is assigned; otherwise, the free operator with the fewest bookings that day. An operator is free when the account is active, has a shift at that time, has no recorded absence, and is not serving another booking at that time. If nobody is free, the booking is left without an operator and appears in the **Bookings without an operator** block of the Dashboard. A rescheduled booking keeps its operator. The administrator assigns by hand in two cases: when the booking was left without an operator and when the assigned one must be changed.
+When a booking is confirmed, **the system assigns the operator automatically** (RF-008): if the customer chose one who is still free, that operator is assigned; otherwise, the free operator with the fewest bookings that day. An operator is free when the account is active, has a shift at that time, has no recorded absence, and is not serving another booking at that time. If nobody is free, the booking is left without an operator and appears in the **Bookings without an operator** block of the Dashboard. Since October 21, 2026 the Dashboard and the **Bookings** screen, on the web and in the mobile app, use the same count: scheduled or confirmed bookings, with no operator on any service, whose time has not ended yet. A rescheduled booking keeps its operator. The administrator assigns by hand in two cases: when the booking was left without an operator and when the assigned one must be changed.
 
 1. In the **Dashboard** (block **Bookings without an operator**) or in **Bookings**, click **Assign** on the booking.
 2. The window "Assign Operator to Booking [code]" shows the details of the appointment and the list of operators. The available operators appear first; the others show why they cannot take the booking: **Inactive**, **No shift at that time**, **Absent**, or **Busy at that time**.
@@ -679,7 +696,7 @@ The system does not integrate a payment gateway (ADR-008). The customer pays out
 
 ### 12.7 Notifications and Announcements
 
-The **Notifications** option of the administrator works like that of the other roles: it lists the notifications with filters and allows marking them as read or deleting them. Clicking a notification opens its detail and marks it as read; booking notices bring the **Go to bookings** button and the welcome notice **Go to home**. Every active administrator receives staff notices in the inbox and as push notifications (never by email): a new booking confirmed, a booking moved to another time, and a booking cancelled (with the reason).
+The **Notifications** option of the administrator works like that of the other roles: it lists the notifications with filters and allows marking them as read or deleting them. Clicking a notification opens its detail and marks it as read; booking notices bring the **Go to bookings** button and the welcome notice **Go to home**. Every active administrator receives staff notices in the inbox and as push notifications (never by email): a new booking confirmed, a booking moved to another time, a booking cancelled (with the reason) and, since October 21, 2026, the notice "Servicio sin registrar" (service not recorded) when a booking with an operator ended and nobody started or finished it. That notice arrives only once per booking and opens the home screen, where the booking appears in **To close** (section 12.3).
 
 Announcements are sent with *POST /api/v1/admin/notifications* (ADMIN role), which accepts only two types: *SYSTEM_MESSAGE* (free announcement, inbox and push only; available only through the API, because the panel does not have a screen for it) and *INSPECTION_REPORT* (sent from the inspection screen, also by email). Any other type is rejected with 400 *NOTIFICATION_TYPE_NOT_ALLOWED*, so that nobody can write by hand a notice that looks like an automatic one (for example, a false approved payment). The message is always saved in the inbox of the recipient; the push notification is additional (it requires *PUSH_ENABLED=true* and the mobile application) and respects the switches of each user.
 
@@ -1131,6 +1148,7 @@ docker compose logs --since 30m booking-service | grep -i error
 | Bookings cannot be created (503 CUSTOMER_SERVICE_UNAVAILABLE) | customer-service down or misconfigured. | Restart the service; review CUSTOMER_SERVICE_URL. |
 | Operators cannot start services (503 BOOKING_SERVICE_UNAVAILABLE) | booking-service down. | Restart booking-service. |
 | Bookings without an operator | No operator was free when the booking was confirmed (no shift, absent, or busy). | Assign by hand (section 12.4) and review the shifts and absences of the operators. |
+| Bookings in To close | The operator served the vehicle but did not press Start or Finish, or the customer did not come. | Ask the operator and close with Attended or No-show (section 12.3); remind the team to record every service. |
 | Payments fail through the gateway in Docker | The payment-service container is not running or payment-migrate failed. | Check *docker compose ps* and the log of payment-service (Installation Manual, section 17). |
 | A payment cannot be approved | There is already an approved payment for the booking. | Review the payments of the booking and reject the duplicate. |
 | Payment approved without the money | Fake or poorly verified receipt. | Review who approved it (approved_by); contact the customer; refund it from Payments (section 12.6). |
@@ -1188,6 +1206,7 @@ Every incident must be recorded with the date, who detected it, the description,
 | RPO | Maximum acceptable data loss, measured in time. |
 | RTO | Maximum acceptable time to recover the service. |
 | Severity | Level of seriousness of an incident. |
+| To close | Home screen card with the bookings with an operator that ended without being recorded; the administrator closes them with Attended or No-show. |
 
 *Note.* Prepared by the authors from the project documentation.
 

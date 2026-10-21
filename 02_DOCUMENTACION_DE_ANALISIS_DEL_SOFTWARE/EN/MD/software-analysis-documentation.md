@@ -21,7 +21,7 @@ This document shows how LavaRápido behaves when someone uses it: what happens, 
 3. **Activity diagrams** of the business processes.
 4. **State diagrams** of the entities that change status (booking, payment, service execution, promotion and inspection report).
 
-On October 21, 2026, the following were updated against the code of that day: the sign-out that voids the token (section 2.8), the lock on operator assignment (section 2.4), the receipt of at most 2 MB and the cash option that only appears while its account is active (sections 2.5 and 3.4), and the automatic close of bookings nobody started (section 4.1). On October 20, 2026, the content was checked again against the code: the client only cancels (the administrator reschedules), the role change of accounts was removed, the sequences and states that did not match were corrected, and the use case and other diagrams were redrawn with straight lines and no crossings. On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end.
+On October 21, 2026, the following were updated against the code of that day: the sign-out that voids the token (section 2.8), the lock on operator assignment (section 2.4), the receipt of at most 2 MB and the cash option that only appears while its account is active (sections 2.5 and 3.4), and the handling of bookings that ended without anyone closing them (sections 4.1 and 4.3): the system only changes the status when there is no doubt, and the rest goes to the administrator's "To close" list. On October 20, 2026, the content was checked again against the code: the client only cancels (the administrator reschedules), the role change of accounts was removed, the sequences and states that did not match were corrected, and the use case and other diagrams were redrawn with straight lines and no crossings. On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end.
 
 The full specification of each requirement and use case (actors, precondition, main flow, alternative flows and postcondition) is in the *Software Requirements Specification*, sections 5 and 7.3; here they are cited by their identifier (RF-XXX, CUXX).
 
@@ -393,7 +393,7 @@ sequenceDiagram
 
     C->>W: Pays for the service
     W->>P: GET /api/v1/payment-accounts
-    P-->>W: active accounts (QR and instructions; the cash one only while it is active)
+    P-->>W: active accounts (QR and instructions, the cash one only while it is active)
     C->>C: Pays from the bank app (outside the platform)
     C->>W: Account, reference code, receipt image
     W->>W: compresses the image to at most 2 MB
@@ -845,16 +845,16 @@ stateDiagram-v2
     SCHEDULED --> CONFIRMED : confirm (needs a bay)
     SCHEDULED --> CANCELLED : cancel or expired
     CONFIRMED --> CONFIRMED : reschedule (admin, new time/bay, prices are kept)
-    CONFIRMED --> IN_PROGRESS : start
-    CONFIRMED --> NO_SHOW : the customer did not show up or expired
+    CONFIRMED --> IN_PROGRESS : start or Attended (admin)
+    CONFIRMED --> NO_SHOW : no show, or ended without operator
     CONFIRMED --> CANCELLED : cancel (customer before the start, or admin)
-    IN_PROGRESS --> COMPLETED : finish
+    IN_PROGRESS --> COMPLETED : finish or Attended (admin)
     COMPLETED --> [*]
     CANCELLED --> [*]
     NO_SHOW --> [*]
 ```
 
-*Source:* `booking-service`, `Booking.moveTo`, `Booking.cancel`, `Booking.expire`, `BookingStatus`, `ExpiredBookingsJob`. *Expired:* every 5 minutes a job closes the bookings still `SCHEDULED` or `CONFIRMED` one hour after their end time; a `CONFIRMED` one becomes `NO_SHOW` (paid or not, nothing is refunded automatically) and a `SCHEDULED` one is cancelled with the system reason `EXPIRED`, which the administrator cannot pick by hand. This frees the operator and the bay, and only the cancelled ones publish `BookingCancelled`. Only `SCHEDULED` and `CONFIRMED` can be rescheduled or cancelled (RF-007). The customer only cancels, before the start time and without writing a reason (the booking stores `CUSTOMER_REQUEST`); the administrator reschedules (CU29) and may choose the cancellation reason. `SCHEDULED` exists in the model, but the current flow always creates the booking directly as `CONFIRMED`.
+*Source:* `booking-service` (`Booking.moveTo`, `Booking.cancel`, `Booking.expire`, `BookingStatus`, `ExpiredBookingsJob`) and `operations-service` (`FollowUpJob`, `FollowUpPolicy`). *Bookings that ended and nobody closed:* the system only decides on its own when there is no doubt. Every 5 minutes, `ExpiredBookingsJob` cancels a booking still `SCHEDULED` (never confirmed) one hour after its end time, with the system reason `EXPIRED` ("Expired without confirmation"), which the administrator cannot pick by hand, and publishes `BookingCancelled`. Also every 5 minutes, the operations `FollowUpJob` asks booking (`POST /internal/v1/bookings/{id}/no-show`) to set to `NO_SHOW` a `CONFIRMED` booking that never had an operator and ended more than an hour ago; booking checks again that it expired and, if not, answers 409 `BOOKING_NOT_EXPIRED`. A `CONFIRMED` booking with an operator that nobody started (`NOT_STARTED`) and an `IN_PROGRESS` one that nobody finished one hour after its end (`NOT_FINISHED`) **never** change status on their own: they go to the administrator's "To close" list, and the administrator resolves them with "Attended" (the booking goes through `IN_PROGRESS` and ends `COMPLETED`, without publishing `ServiceCompleted`) or with "No-show" (only if it was never started). This avoids recording as a no-show a service that was actually done and that the operator forgot to mark. There is never an automatic refund: payments are reviewed by the administrator. Only `SCHEDULED` and `CONFIRMED` can be rescheduled or cancelled (RF-007). The customer only cancels, before the start time and without writing a reason (the booking stores `CUSTOMER_REQUEST`); the administrator reschedules (CU29) and may choose the cancellation reason. `SCHEDULED` exists in the model, but the current flow always creates the booking directly as `CONFIRMED`.
 
 ### 4.2 Payment life cycle (RF-013b, RF-014, ADR-008)
 
@@ -880,12 +880,13 @@ stateDiagram-v2
     [*] --> PENDING : assign operator (automatic or admin, RF-008, RF-009)
     PENDING --> PENDING : reassign (admin, before the start)
     PENDING --> IN_PROGRESS : start service (from 15 min before, RF-012b)
-    IN_PROGRESS --> COMPLETED : finish service (RF-012b)
+    IN_PROGRESS --> COMPLETED : finish service (RF-012b) or Attended (admin)
+    PENDING --> COMPLETED : Attended (admin, no times)
     COMPLETED --> COMPLETED : rate 1 to 5 (customer, once)
     COMPLETED --> [*]
 ```
 
-*Source:* `operations-service` (`ServiceExecution`, `StartPolicy`). `COMPLETED` enables the customer's rating (RF-012). `PAUSED` and `WITH_ISSUE` exist in the `execution.execution_status` catalog, but no use case uses them today.
+*Source:* `operations-service` (`ServiceExecution`, `StartPolicy`, `FollowUpPolicy`). `COMPLETED` enables the customer's rating (RF-012). When the administrator closes a service from "To close" as "Attended", the lines end `COMPLETED` without made-up times: with no start time they do not count for punctuality and with no end time they add no worked hours, but they do count as a service done and as revenue. The operator can still start the same service late, because starting has no upper limit, and then the real times count. If a service with an operator is not started or not finished on time, operations notifies the operator and every active administrator once (inbox and push, migration 040). `PAUSED` and `WITH_ISSUE` exist in the `execution.execution_status` catalog, but no use case uses them today.
 
 ### 4.4 Promotion life cycle (RF-024)
 

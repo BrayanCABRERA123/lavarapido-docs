@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 21 de octubre de 2026
 
-Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.4
+Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.5
 
 ## Control de Versiones
 
@@ -34,6 +34,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 2.2 | 2026-10-19 | Integración continua con GitHub Actions en los 10 repositorios y despliegue desde GitHub: se actualizaron el alcance (6.2) y el riesgo R-I09. | Equipo de desarrollo |
 | 2.3 | 2026-10-20 | Revisión contra el código del 20 de octubre de 2026: criterio E2 con las pruebas del 19 de octubre (655 automatizadas y 19 de punta a punta) y colas de RabbitMQ corregidas (la cola de operations-service no tiene cola de mensajes muertos) y plan de comunicación (el panel no envía avisos generales). | Equipo de desarrollo |
 | 2.4 | 2026-10-21 | Revisión contra el código y el servidor del 21 de octubre de 2026: criterio E2 con las pruebas de ese día (689 automatizadas y 19 de punta a punta), respaldo previo automático en el servidor público (fase 3, monitoreo y reversión), prueba de humo H10 (el token de una sesión cerrada deja de servir), variables nuevas con valor por defecto, actualizaciones de la app sin APK nuevo y riesgo R-I11. | Equipo de desarrollo |
+| 2.5 | 2026-10-21 | Revisión contra el código de la noche del 21 de octubre de 2026: criterio E2 con la ejecución final de ese día (707 pruebas automatizadas y 19 de punta a punta), variables *FOLLOW_UP_\** de operations-service, prueba de humo H11 (lista "Por cerrar" del administrador) y regla de configuración actualizada. Las reservas confirmadas con operario que nadie registró ya no se cierran solas como "No asistió": las resuelve el administrador. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -234,7 +235,7 @@ La implementación **no comienza** hasta que se cumplan todos los criterios de l
 | N.° | Criterio | Evidencia |
 |---|---|---|
 | E1 | El código de la versión está integrado en *develop* (o en *main*) de los once repositorios, sin trabajo sin confirmar. | *git status* limpio y *git log* con el último commit de cada repositorio. |
-| E2 | Las pruebas automáticas pasan: *./mvnw -B verify* en los servicios Java y en el gateway, *dotnet test* en payment-service, *ng test* en la web y la suite de punta a punta de *lavarapido-infra/e2e* contra los contenedores. | Resúmenes sin fallos (el 21 de octubre de 2026: 689 pruebas automatizadas y 19 de punta a punta). |
+| E2 | Las pruebas automáticas pasan: *./mvnw -B verify* en los servicios Java y en el gateway, *dotnet test* en payment-service, *ng test* en la web y la suite de punta a punta de *lavarapido-infra/e2e* contra los contenedores. | Resúmenes sin fallos (ejecución final del 21 de octubre de 2026: 707 pruebas automatizadas y 19 de punta a punta). |
 | E3 | La aplicación web compila en modo producción (*npx ng build*). | Carpeta *dist/* generada sin errores. |
 | E4 | La versión está etiquetada en cada repositorio (por ejemplo, *v1.0.0*) (sección 13). | *git tag* en cada repositorio. |
 | E5 | Los manuales de instalación, administrador y usuario corresponden a la versión (versión 4.0 o posterior). | Control de versiones de los manuales. |
@@ -310,7 +311,7 @@ git check-ignore -v .env      # debe mostrar la regla de .gitignore
 | ADMIN_EMAIL, ADMIN_PASSWORD | Correo y contraseña del primer administrador (solo la primera vez). | security-service crea la cuenta al arrancar si todavía no hay ningún administrador. |
 | PUSH_ENABLED | *true* cuando la aplicación móvil instalada es el APK compilado con EAS. | Expo Go no recibe notificaciones push remotas. |
 | BOOKING_ZONE | *America/Bogota* | Zona horaria del lavadero; el sistema guarda UTC. |
-| SESSION_CHECK_\*, BOOKING_EXPIRY_\* | No se definen. | Tienen valor por defecto (chequeo de sesión del gateway activo con 30 s y 3 s; cierre de reservas vencidas cada 5 minutos con 60 minutos de margen) y el archivo de Compose no las pasa a los contenedores. |
+| SESSION_CHECK_\*, BOOKING_EXPIRY_\*, FOLLOW_UP_\* | No se definen. | Tienen valor por defecto (chequeo de sesión del gateway activo con 30 s y 3 s; cancelación de las reservas programadas que vencieron sin confirmarse cada 5 minutos, con 60 minutos de margen después del fin; seguimiento de operations-service cada 5 minutos para las reservas que terminaron y nadie cerró, que usa el mismo margen y *INTERNAL_API_KEY*) y el archivo de Compose no las pasa a los contenedores. |
 
 *Nota.* Elaborado por los autores a partir de *.env.example* y *docker-compose.yml*. Los valores secretos se escriben solo en el archivo *.env*; nunca en un mensaje, un documento compartido o un repositorio.
 
@@ -466,10 +467,11 @@ Las pruebas de humo confirman que la versión funciona de punta a punta antes de
 | H8 | Reporte de pago con comprobante de prueba y aprobación por el administrador. | Pago aprobado; correo de pago confirmado y puntos acreditados. |
 | H9 | Colas de mensajes muertos. | *notification-service.events.dlq* y *customer-service.events.dlq* en cero. |
 | H10 | Cerrar sesión y repetir una llamada con el mismo token (*curl -i -H "Authorization: Bearer \<token\>" https://\<dominio\>/api/v1/bookings/me*). | 401: el gateway corta el token de la sesión cerrada (versión del 21 de octubre de 2026 o posterior). |
+| H11 | Con el token del administrador, consultar las reservas por cerrar (*GET /api/v1/admin/assignments/to-close*) y abrir el inicio del administrador. | 200 con la lista (puede estar vacía); la tarjeta "Por cerrar" solo aparece si hay algo pendiente (versión de la noche del 21 de octubre de 2026 o posterior). |
 
 *Nota.* Elaborado por los autores a partir de la lista de verificación previa a una revisión del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a).
 
-**Criterio para continuar:** las diez pruebas pasan. Una falla en H1 a H8 o en H10 activa la evaluación de reversión (sección 12).
+**Criterio para continuar:** las once pruebas pasan. Una falla en H1 a H8, H10 o H11 activa la evaluación de reversión (sección 12).
 
 ### 11.10 Fase 9: Pruebas de Aceptación
 
@@ -547,7 +549,7 @@ La reversión devuelve el entorno a la versión anterior cuando la nueva no pued
 | Situación | Decisión |
 |---|---|
 | Falla *payment-migrate* o una migración Liquibase de un servicio Java | Revertir de inmediato. |
-| Una prueba de humo H1 a H8 o H10 falla y no se corrige en 30 minutos | Revertir. |
+| Una prueba de humo H1 a H8, H10 o H11 falla y no se corrige en 30 minutos | Revertir. |
 | Incidente P0 en las primeras 24 horas de operación | Revertir. |
 | Incidente P1 sin corrección ni alternativa en el mismo día | Evaluar con el líder de proyecto; revertir si afecta reservas o pagos. |
 | Observaciones P2 o P3 | No revertir; corregir en una versión posterior. |
@@ -579,7 +581,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
 - **Ramas.** Se implementa desde *develop* o *main* (convenciones de *00-governance/git-conventions.md*); nunca desde una rama *feature/\**.
 - **Imágenes.** El archivo de Compose construye imágenes *lavarapido/\<servicio\>:local*. Para conservar la versión anterior, antes de reconstruir se puede etiquetar cada imagen con la versión vigente (*docker tag lavarapido/booking-service:local lavarapido/booking-service:v0.9.0*).
 - **Base de datos.** El esquema se versiona con Liquibase; cada servicio guarda su historial en *DATABASECHANGELOG_\<SERVICIO\>* (pagos en *DATABASECHANGELOG_PAYMENT*). Un changeset ejecutado nunca se edita.
-- **Configuración.** *.env.example* se versiona; *.env* no. Toda variable nueva se agrega a *.env.example* con un comentario y al bloque *environment* del servicio en *docker-compose.yml*. Las del 21 de octubre de 2026 (*SESSION_CHECK_\** y *BOOKING_EXPIRY_\**) todavía no cumplen esta regla (acción ACO-14).
+- **Configuración.** *.env.example* se versiona; *.env* no. Toda variable nueva se agrega a *.env.example* con un comentario y al bloque *environment* del servicio en *docker-compose.yml*. Las del 21 de octubre de 2026 (*SESSION_CHECK_\**, *BOOKING_EXPIRY_\** y *FOLLOW_UP_\**) todavía no cumplen esta regla (acción ACO-14).
 - **Documentación.** El control de versiones de cada manual registra la versión del software a la que corresponde.
 
 ## 14. Riesgos de la Implementación
