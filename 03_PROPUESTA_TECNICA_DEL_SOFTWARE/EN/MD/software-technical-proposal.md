@@ -8,7 +8,7 @@ Software Analysis and Development Technologist program (ADSO), group (ficha) 314
 
 Instructor: Karol Daniela Correa
 
-Version 1.3, October 20, 2026
+Version 1.4, October 21, 2026
 
 ---
 
@@ -153,7 +153,7 @@ Every important decision was recorded as an ADR (Architecture Decision Record) i
 
 *Note.* Environments planned in the proposal; the costs of section 8.2 were calculated with these specifications.
 
-**Follow-up as of October 17, 2026.** For the academic demonstration, the system was deployed on a Microsoft Azure virtual machine (*Azure for Students* subscription, B2as_v2 size: 2 vCPU, 7.7 GB of RAM, and a 64 GB SSD, Ubuntu 24.04 LTS), with the eleven containers, Caddy as the HTTPS entry point, and the Android app served under */app*. With every container running it uses about 3.3 GB of RAM, so the production size of Table 5 is still comfortable. The full procedure is in the Deployment Document (folder 07). In the academic project, continuous integration was not done with Jenkins but with GitHub Actions: the 10 code repositories build and run their tests on every change, and `lavarapido-infra` also has a manual workflow that updates the server.
+**Follow-up as of October 21, 2026.** For the academic demonstration, the system was deployed on a Microsoft Azure virtual machine (*Azure for Students* subscription, B2as_v2 size: 2 vCPU, 7.7 GB of RAM, and a 64 GB SSD, Ubuntu 24.04 LTS), with the eleven containers, Caddy as the HTTPS entry point, and the Android app served under */app*. With every container running it uses about 3.3 GB of RAM, so the production size of Table 5 is still comfortable. The full procedure is in the Deployment Document (folder 07). In the academic project, continuous integration was not done with Jenkins but with GitHub Actions: the 10 code repositories build and run their tests on every change, and `lavarapido-infra` also has a manual workflow that updates the server. Since October 20 and 21 the server backs up the database every day and before every update, checks each backup with a test restore and keeps the last 14; Caddy sends security headers and a content security policy; Docker checks the health of every container and caps the size of their logs. Since October 21 the API Gateway also cuts the tokens of closed sessions by asking security-service, with the answer kept 30 seconds per token, without changing the decision to use JWT.
 
 ### 4.4 End user
 
