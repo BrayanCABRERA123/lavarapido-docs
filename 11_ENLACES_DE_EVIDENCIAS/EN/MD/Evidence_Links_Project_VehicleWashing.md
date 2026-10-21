@@ -121,7 +121,7 @@ Working branch: **`develop`** in every code repository. There are no release tag
 | Authentication | `POST http://localhost:8080/api/v1/auth/login` with a test user and check that it returns a JWT | 200 with `accessToken` (10/16/2026, test account of the *dev* profile) |
 | Read | With the JWT, query the service catalog or the customer's bookings | `GET /api/v1/catalog/services` and `GET /api/v1/bookings/me` answered 200 (10/16/2026) |
 | Write | Create a booking and check that it appears in the history and that the notification arrives | Covered by `full-flow.test.js`: booking created, automatically assigned to the chosen operator, payment approved, service started and finished, rating, and every notice in the customer inbox (10/16/2026) |
-| Automated E2E flow | `node --test "e2e/*.test.js"` in `lavarapido-infra` (with `E2E_OPERATOR_ID=2` in the local database) | 19 of 19 tests passed in 11.2 s (10/19/2026); on 10/21/2026 all 19 passed again, with the gateway session check on |
+| Automated E2E flow | `node --test "e2e/*.test.js"` in `lavarapido-infra` (with `E2E_OPERATOR_ID=2` in the local database) | 19 of 19 tests passed in 11.2 s (10/19/2026); on 10/21/2026 all 19 passed again in the early morning and in the evening, with the gateway session check on |
 
 ### 3.5 Evidence Screenshots
 
@@ -156,7 +156,7 @@ Working branch: **`develop`** in every code repository. There are no release tag
 | Completeness | The 12 evidences have a direct and verifiable link | The 12 evidences have a link. Evidence 11 links the application deployed on Azure since 10/16/2026. |
 | Accessibility | Every link opens for the instructor without asking for permissions | Partial: the links of `lavarapido-docs` and the code repositories are public (checked without logging in); those of `vehicle-w-docs` require giving the instructor read permission. |
 | Traceability | Requirements → user stories → modules → tests → versions related | There is a matrix in §10 of the SRS, another in §5 of the test document, and the source matrix in `vehicle-w-docs`. Release tags are missing. |
-| Consistency | The documentation matches the code and the running application | Tests of 10/21/2026: 689 automated and 19 end-to-end tests passed. Local environment verified on 10/19/2026: every service `UP`, 42 functional cases passed, responsive design verified on 66 web screens and 15 app screens, and the screenshots of the manuals, SRS, analysis, and design taken again that day. |
+| Consistency | The documentation matches the code and the running application | Tests of 10/21/2026 (final run, in the evening): 707 automated and 19 end-to-end tests passed; the early-morning run had 689. That day the administrator's "To close" list was also checked live on the web and in the mobile app. Local environment verified on 10/19/2026: every service `UP`, 42 functional cases passed, responsive design verified on 66 web screens and 15 app screens, and the screenshots of the manuals, SRS, analysis, and design taken again that day. |
 | Security | No secrets or personal data exposed | Reviewed on 10/16/2026: no repository has `.env` files in its history and the versioned files only contain sample values (`.env.example`). The screenshots use test data. |
 | Presentation | Navigable document, readable tables, and PDF with active links | [To complete after exporting the PDF] |
 
