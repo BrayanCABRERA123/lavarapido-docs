@@ -121,7 +121,7 @@ Rama de trabajo: **`develop`** en todos los repositorios de código. No hay rele
 | Autenticación | `POST http://localhost:8080/api/v1/auth/login` con un usuario de prueba y comprobar que devuelve un JWT | 200 con `accessToken` (16/10/2026, cuenta de prueba del perfil *dev*) |
 | Lectura | Con el JWT, consultar el catálogo de servicios o las reservas del cliente | `GET /api/v1/catalog/services` y `GET /api/v1/bookings/me` respondieron 200 (16/10/2026) |
 | Escritura | Crear una reserva y comprobar que aparece en el historial y que llega la notificación | Cubierta por `full-flow.test.js`: reserva creada, asignada sola al operario elegido, pago aprobado, servicio iniciado y terminado, calificación y cada aviso en la bandeja del cliente (16/10/2026) |
-| Flujo E2E automatizado | `node --test "e2e/*.test.js"` en `lavarapido-infra` (con `E2E_OPERATOR_ID=2` en la base local) | 19 de 19 pruebas aprobadas en 11,2 s (19/10/2026); el 21/10/2026 pasaron de nuevo las 19, con el chequeo de sesión del gateway activo |
+| Flujo E2E automatizado | `node --test "e2e/*.test.js"` en `lavarapido-infra` (con `E2E_OPERATOR_ID=2` en la base local) | 19 de 19 pruebas aprobadas en 11,2 s (19/10/2026); el 21/10/2026 pasaron de nuevo las 19 en la madrugada y en la noche, con el chequeo de sesión del gateway activo |
 
 ### 3.5 Capturas de evidencia
 
@@ -156,7 +156,7 @@ Rama de trabajo: **`develop`** en todos los repositorios de código. No hay rele
 | Completitud | Las 12 evidencias tienen un enlace directo y verificable | Las 12 evidencias tienen enlace. La evidencia 11 enlaza la aplicación desplegada en Azure desde el 16/10/2026. |
 | Accesibilidad | Todos los enlaces abren para el instructor sin solicitar permisos | Parcial: los enlaces de `lavarapido-docs` y de los repositorios de código son públicos (comprobado sin iniciar sesión); los de `vehicle-w-docs` requieren dar permiso de lectura al instructor. |
 | Trazabilidad | Requisitos → HU → módulos → pruebas → versiones relacionados | Existe una matriz en la §10 del SRS, otra en la §5 del documento de pruebas y la matriz fuente en `vehicle-w-docs`. Faltan release tags. |
-| Coherencia | La documentación coincide con el código y con la aplicación en ejecución | Pruebas del 21/10/2026: 689 automatizadas y 19 de punta a punta aprobadas. Entorno local verificado el 19/10/2026: todos los servicios `UP`, 42 casos funcionales aprobados, diseño adaptable verificado en 66 pantallas web y 15 de la app, y capturas de los manuales, del SRS, del análisis y del diseño tomadas de nuevo ese día. |
+| Coherencia | La documentación coincide con el código y con la aplicación en ejecución | Pruebas del 21/10/2026 (ejecución final, en la noche): 707 automatizadas y 19 de punta a punta aprobadas; en la madrugada fueron 689. Ese día también se comprobó en vivo la lista "Por cerrar" del administrador en la web y en la app móvil. Entorno local verificado el 19/10/2026: todos los servicios `UP`, 42 casos funcionales aprobados, diseño adaptable verificado en 66 pantallas web y 15 de la app, y capturas de los manuales, del SRS, del análisis y del diseño tomadas de nuevo ese día. |
 | Seguridad | Sin secretos ni datos personales expuestos | Revisado el 16/10/2026: ningún repositorio tiene archivos `.env` en su historial y los archivos versionados solo traen valores de ejemplo (`.env.example`). Las capturas usan datos de prueba. |
 | Presentación | Documento navegable, tablas legibles y PDF con enlaces activos | [Completar después de exportar el PDF] |
 
