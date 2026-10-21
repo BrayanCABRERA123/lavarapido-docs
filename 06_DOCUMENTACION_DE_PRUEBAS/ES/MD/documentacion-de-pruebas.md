@@ -17,7 +17,7 @@
 | Centro de formación | Industria |
 | Fecha | 21 de octubre de 2026 |
 
-Este documento reúne el plan de pruebas, el inventario de pruebas automatizadas que existen en los repositorios, sus resultados reales al ejecutarlas el 19 de octubre de 2026 (incluidas las pruebas de punta a punta, de rendimiento y de diseño adaptable contra el sistema completo) y otra vez el 21 de octubre, y los 42 casos de prueba funcionales, ejecutados el 19 de octubre, trazados a los requisitos del SRS v7.7 (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`). El 20 de octubre de 2026 se ajustaron el inventario, el caso CP-42 y la matriz de trazabilidad porque el cambio de rol de una cuenta se revirtió en el código ese día, y la redacción de CP-10 porque el cliente cancela sin escribir motivo. El 21 de octubre de 2026 se registró una nueva ejecución de las pruebas automatizadas (689, todas aprobadas) y de las 19 de punta a punta, con los cambios de ese día: el token de una sesión cerrada deja de servir, las reservas que nadie inició se cierran solas, la asignación de operarios usa un candado y el comprobante tiene un máximo de 2 MB. La estructura sigue la norma ISO/IEC/IEEE 29119-3 de documentación de pruebas (International Organization for Standardization [ISO], 2021). Ningún resultado de este documento es supuesto.
+Este documento reúne el plan de pruebas, el inventario de pruebas automatizadas que existen en los repositorios, sus resultados reales al ejecutarlas el 19 de octubre de 2026 (incluidas las pruebas de punta a punta, de rendimiento y de diseño adaptable contra el sistema completo) y otra vez el 21 de octubre, y los 42 casos de prueba funcionales, ejecutados el 19 de octubre, trazados a los requisitos del SRS v7.7 (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`). El 20 de octubre de 2026 se ajustaron el inventario, el caso CP-42 y la matriz de trazabilidad porque el cambio de rol de una cuenta se revirtió en el código ese día, y la redacción de CP-10 porque el cliente cancela sin escribir motivo. El 21 de octubre de 2026 se registraron dos ejecuciones de las pruebas automatizadas y de las 19 de punta a punta: la de la madrugada (689 pruebas, todas aprobadas) y la de la noche (707, todas aprobadas), que es la más reciente. Recogen los cambios de ese día: el token de una sesión cerrada deja de servir, la asignación de operarios usa un candado, el comprobante tiene un máximo de 2 MB y, para las reservas que terminaron y nadie cerró, el sistema solo cancela la programada que venció sin confirmarse y deja en "No asistió" la confirmada que nunca tuvo operario; la que tenía operario pasa a la lista "Por cerrar" del administrador. La estructura sigue la norma ISO/IEC/IEEE 29119-3 de documentación de pruebas (International Organization for Standardization [ISO], 2021). Ningún resultado de este documento es supuesto.
 
 ## 1. Plan de pruebas
 
@@ -68,7 +68,7 @@ Se prueban la aplicación web, la aplicación móvil y los siete servicios de ba
 
 ## 2. Inventario de pruebas automatizadas
 
-Al 21 de octubre de 2026 los repositorios tienen 584 métodos de prueba: 524 en el backend y 60 en la web. La app móvil no tiene pruebas automatizadas; se revisa con la compilación de TypeScript y el recorrido de pantallas (sección 3.2).
+Al 21 de octubre de 2026 (noche) los repositorios tienen 602 métodos de prueba: 540 en el backend y 62 en la web. La app móvil no tiene pruebas automatizadas; se revisa con la compilación de TypeScript y el recorrido de pantallas (sección 3.2).
 
 **Tabla 4**
 
@@ -79,11 +79,11 @@ Al 21 de octubre de 2026 los repositorios tienen 584 métodos de prueba: 524 en 
 | api-gateway | 2 | 14 | Ruteo de cada prefijo `/api/v1/**` a su servicio y que `/internal/**` no salga por el gateway (`GatewayRoutesTest`); chequeo de sesión: el token de una sesión cerrada no pasa, la respuesta se guarda por token, el logout la borra, si security-service falla la petición sigue y las rutas públicas no se revisan (`SessionCheckFilterTest`) |
 | security-service | 17 | 139 | Registro, login con bloqueo por intentos fallidos, recuperación de contraseña, perfil y dirección, administración de usuarios (incluida la regla de que una cuenta de administrador no se desactiva), roles y permisos, preferencias, objetos valor, política de contraseñas, emisión de JWT, sesiones abiertas y cerradas (el token de una sesión cerrada responde 401) y seguridad HTTP por rol (`ApiSecurityWebTest`) |
 | customer-service | 6 | 50 | Cuenta del cliente, placas, CRUD de vehículos, listener de `security.user_registered` y API web |
-| booking-service | 7 | 47 | Ciclo de vida de la reserva, cierre de las reservas vencidas, disponibilidad y motivo de una hora no disponible, bahías (`ServiceBayTest`), catálogo, datos del negocio (`EstablishmentTest`), operario preferido en el evento y API web |
-| operations-service | 11 | 56 | Asignación manual y automática (con el candado de asignaciones), una sola regla para las reservas sin operario, operarios libres, ventana de inicio, ejecución, calificación, ausencias, métricas del operario, resumen del equipo, ficha del operario, informe de inspección y API web |
-| notification-service | 12 | 106 | Casos de uso de notificaciones, fábrica de mensajes por evento, avisos en el idioma de la cuenta, recordatorios, alertas de reservas sin operario, aviso de versión nueva, tokens de dispositivo y controlador admin |
+| booking-service | 7 | 50 | Ciclo de vida de la reserva, cancelación de las programadas que vencieron sin confirmarse, "No asistió" solo para la confirmada vencida que pide operations por la ruta interna, disponibilidad y motivo de una hora no disponible, bahías (`ServiceBayTest`), catálogo, datos del negocio (`EstablishmentTest`), operario preferido en el evento y API web |
+| operations-service | 13 | 67 | Asignación manual y automática (con el candado de asignaciones), una sola regla para las reservas sin operario, reservas que terminaron y nadie cerró y lista "Por cerrar" (`FollowUpPolicyTest`, `FollowUpServiceTest`), operarios libres, ventana de inicio, ejecución, calificación, ausencias, métricas del operario, resumen del equipo, ficha del operario, informe de inspección y API web |
+| notification-service | 13 | 108 | Casos de uso de notificaciones, fábrica de mensajes por evento, avisos en el idioma de la cuenta, recordatorios, alertas de reservas sin operario, aviso de servicio sin registrar, campos `null` en el evento (`DomainEventEnvelopeTest`), aviso de versión nueva, tokens de dispositivo y controlador admin |
 | payment-service (.NET) | 9 | 112 | Pago y comprobante (máximo 2 MB), referencia reutilizada, historial con filtros, promociones, puntos de fidelización, política de pagos, servicios de comandos y consultas, y 7 pruebas de persistencia contra SQL Server |
-| Web (Angular) | 41 | 60 | Creación de componentes, guards y servicios (pruebas de humo `should create`), mensajes de error de la API, selección de la cuenta de pago, sesión entre pestañas, reservas sin operario y filtros, cuentas y roles fijos, reportes y barra de fidelización |
+| Web (Angular) | 41 | 62 | Creación de componentes, guards y servicios (pruebas de humo `should create`), mensajes de error de la API, selección de la cuenta de pago, sesión entre pestañas, reservas sin operario y filtros, lista "Por cerrar", cuentas y roles fijos, reportes y barra de fidelización |
 | Móvil | 0 | 0 | Sin pruebas automatizadas |
 
 > *Nota.* Los archivos de apoyo (`Fakes.java`, `InMemory*.java`, `InMemoryPorts.cs`, `DatabaseFixture.cs`) no se cuentan como pruebas. Las 7 pruebas de persistencia de payment se omiten solas si no está definida la variable `PAYMENT_INTEGRATION_DB` (`DatabaseFixture.cs:16-21`).
@@ -92,29 +92,33 @@ Las pruebas del backend son de dominio y de aplicación con dobles en memoria, m
 
 ## 3. Resultados de ejecución
 
-El 21 de octubre de 2026, con la rama *develop* de los diez repositorios actualizada ese día, el equipo ejecutó otra vez las ocho suites automatizadas: 689 pruebas, todas aprobadas y ninguna omitida, incluidas las 7 de persistencia de payment contra la base aislada `LavaRapidoPaymentIT`. Esa misma madrugada se repitieron por separado las suites que cambiaron ese día (web, api-gateway, security-service, booking-service, operations-service y las pruebas de dominio y de aplicación de payment-service), con el mismo resultado. La Tabla 5 muestra cada suite y lo que cambió frente a la ejecución anterior.
+En la noche del 21 de octubre de 2026, con la rama *develop* de los diez repositorios actualizada ese día, el equipo ejecutó otra vez las ocho suites automatizadas: 707 pruebas, todas aprobadas y ninguna omitida, incluidas las 7 de persistencia de payment contra la base aislada `LavaRapidoPaymentIT`. Es la ejecución final del día y recoge el cambio de las reservas que terminaron y nadie cerró, hecho después de la revisión del equipo, y el arreglo de los campos `null` en los eventos de notification-service. La Tabla 5 muestra cada suite y lo que cambió frente a la ejecución de la madrugada.
 
 **Tabla 5**
 
-*Resultados reales por artefacto (21 de octubre de 2026)*
+*Resultados reales por artefacto (21 de octubre de 2026, ejecución de la noche)*
 
-| Artefacto | Comando | Ejecutadas | Aprobadas | Fallidas | Omitidas | Frente al 19 de octubre |
+| Artefacto | Comando | Ejecutadas | Aprobadas | Fallidas | Omitidas | Frente a la madrugada del 21 de octubre (689) |
 | --- | --- | --- | --- | --- | --- | --- |
-| Web (Angular) | `npx ng test --watch=false` | 60 | 60 | 0 | 0 | +17: sesión entre pestañas (`auth.spec.ts`), reservas sin operario y filtros (`reservations-store.spec.ts`, `reservations.spec.ts`), cuentas y roles fijos (`management.spec.ts`), reportes con solo reservas completadas (`reports.spec.ts`) y barra de fidelización (`dashboard.spec.ts`) |
-| api-gateway | `./mvnw test` | 40 | 40 | 0 | 0 | +6: chequeo de sesión (`SessionCheckFilterTest`) |
-| security-service | `./mvnw test` | 155 | 155 | 0 | 0 | +4: salen 2 del cambio de rol revertido el 20 de octubre y entran 6 de sesiones; el token de una sesión cerrada responde 401 (`AuthenticationServiceTest`, `ApiSecurityWebTest`) |
+| Web (Angular) | `npx ng test --watch=false` | 62 | 62 | 0 | 0 | +2: lista "Por cerrar" en el store de reservas (`reservations-store.spec.ts`) |
+| api-gateway | `./mvnw test` | 40 | 40 | 0 | 0 | Sin cambios |
+| security-service | `./mvnw test` | 155 | 155 | 0 | 0 | Sin cambios |
 | customer-service | `./mvnw test` | 69 | 69 | 0 | 0 | Sin cambios |
-| booking-service | `./mvnw test` | 47 | 47 | 0 | 0 | +4: reservas vencidas (`BookingTest`, `BookingServiceTest`) |
-| operations-service | `./mvnw test` | 56 | 56 | 0 | 0 | +1: una sola regla para las reservas sin operario; además se comprueba que el candado se toma antes de guardar una asignación (`OperationsServiceTest`) |
-| notification-service | `./mvnw test` | 112 | 112 | 0 | 0 | Sin cambios |
-| payment-service: dominio | `dotnet test PaymentService.sln` | 115 | 115 | 0 | 0 | +2: comprobante de más de 2 MB y de 2 MB exactos (`PaymentTests`) |
+| booking-service | `./mvnw test` | 50 | 50 | 0 | 0 | +3: solo la programada vence sola, y la confirmada pasa a No asistió únicamente cuando operations lo pide por la ruta interna y ya venció (`BookingTest`, `BookingServiceTest`, `BookingApiWebTest`) |
+| operations-service | `./mvnw test` | 67 | 67 | 0 | 0 | +11: qué hacer con una reserva que terminó y nadie cerró (`FollowUpPolicyTest`), cierre de las que no tuvieron operario, aviso una sola vez, lista "Por cerrar" y cierre como "Se atendió" sin inventar horas (`FollowUpServiceTest`, `ServiceExecutionTest`, `OperationsApiWebTest`) |
+| notification-service | `./mvnw test` | 114 | 114 | 0 | 0 | +2: aviso al operario y al administrador de un servicio sin registrar (`StaffNotificationsTest`) y campo `null` en el evento sin pasar a la cola de errores (`DomainEventEnvelopeTest`) |
+| payment-service: dominio | `dotnet test PaymentService.sln` | 115 | 115 | 0 | 0 | Sin cambios |
 | payment-service: aplicación | (mismo comando) | 28 | 28 | 0 | 0 | Sin cambios |
 | payment-service: integración | (mismo comando, con `PAYMENT_INTEGRATION_DB`) | 7 | 7 | 0 | 0 | Sin cambios |
-| **Total** | | **689** | **689** | **0** | **0** | **+34** |
+| **Total** | | **707** | **707** | **0** | **0** | **+18** |
 
-> *Nota.* Fuentes: registro de la ejecución del equipo del 21 de octubre de 2026 (`vehicle-w-docs/11-quality/testing-strategy.md`), salida de Vitest y de `dotnet test`, y resumen de `./mvnw test` (`Tests run:`) con los reportes de surefire de la repetición. Hay más pruebas ejecutadas que métodos en la Tabla 4 porque las pruebas parametrizadas (`@ParameterizedTest`, `[Theory]`) corren una vez por cada dato. En customer-service el atributo `tests` del XML de surefire dice 68 por una clase de prueba anidada; Maven ejecuta y cuenta 69, y ese es el número correcto.
+> *Nota.* Fuentes: registro de las ejecuciones del equipo del 21 de octubre de 2026 (`vehicle-w-docs/11-quality/testing-strategy.md`), salida de Vitest y de `dotnet test`, y resumen de `./mvnw test` (`Tests run:`) con los reportes de surefire. Hay más pruebas ejecutadas que métodos en la Tabla 4 porque las pruebas parametrizadas (`@ParameterizedTest`, `[Theory]`) corren una vez por cada dato. En customer-service el atributo `tests` del XML de surefire dice 68 por una clase de prueba anidada; Maven ejecuta y cuenta 69, y ese es el número correcto.
 
-La ejecución anterior, del 19 de octubre de 2026, tuvo 655 pruebas, todas aprobadas: web 43, api-gateway 34, security-service 151, customer-service 69, booking-service 43, operations-service 55, notification-service 112 y payment-service 148 (113 de dominio, 28 de aplicación y 7 de persistencia). Las Figuras 1 a 3 son de esa ejecución.
+La ejecución de la madrugada del 21 de octubre de 2026 tuvo 689 pruebas, todas aprobadas: web 60, api-gateway 40, security-service 155, customer-service 69, booking-service 47, operations-service 56, notification-service 112 y payment-service 150 (115 de dominio, 28 de aplicación y 7 de persistencia). Frente al 19 de octubre sumó 34: sesión entre pestañas, reservas sin operario y filtros, cuentas y roles fijos, reportes y barra de fidelización en la web (+17); chequeo de sesión en el gateway (+6); sesiones en security-service (+4, después de quitar 2 del cambio de rol revertido); reservas vencidas en booking-service (+4); candado de asignaciones en operations-service (+1); y comprobante de máximo 2 MB en payment-service (+2). Esa misma madrugada se repitieron por separado las suites que habían cambiado, con el mismo resultado.
+
+La ejecución del 19 de octubre de 2026 tuvo 655 pruebas, todas aprobadas: web 43, api-gateway 34, security-service 151, customer-service 69, booking-service 43, operations-service 55, notification-service 112 y payment-service 148 (113 de dominio, 28 de aplicación y 7 de persistencia). Las Figuras 1 a 3 son de esa ejecución.
+
+Además de las pruebas automatizadas, el 21 de octubre de 2026 se comprobó en vivo la lista "Por cerrar": una reserva sin operario pasó sola a No asistió; una con operario sin iniciar y una iniciada sin finalizar quedaron por cerrar, con un aviso al operario y otro al administrador que no se repitió; al cerrarlas como "Se atendió" quedaron completadas sin horas inventadas, y cerrarlas otra vez respondió 409. Se vio igual en la web y en la app móvil (390 px).
 
 **Figura 1**
 
@@ -142,7 +146,7 @@ Observaciones de la ejecución:
 
 ### 3.1 Pruebas de punta a punta
 
-El 19 de octubre de 2026 se ejecutó `node --test "e2e/*.test.js"` desde `lavarapido-infra`, con el sistema completo en marcha y `E2E_OPERATOR_ID=2` (el operario de prueba de la base local). Pasaron las 19 pruebas en 11,2 s. Cada prueba borra lo que crea y deja los puntos del cliente como estaban. El 21 de octubre de 2026 el equipo las ejecutó otra vez, ya con el chequeo de sesión del gateway activo, y pasaron las 19; los archivos de la Tabla 5a no cambiaron desde el 18 de octubre.
+El 19 de octubre de 2026 se ejecutó `node --test "e2e/*.test.js"` desde `lavarapido-infra`, con el sistema completo en marcha y `E2E_OPERATOR_ID=2` (el operario de prueba de la base local). Pasaron las 19 pruebas en 11,2 s. Cada prueba borra lo que crea y deja los puntos del cliente como estaban. El 21 de octubre de 2026 el equipo las ejecutó otra vez, en la madrugada y en la noche, ya con el chequeo de sesión del gateway activo, y en las dos pasaron las 19; los archivos de la Tabla 5a no cambiaron desde el 18 de octubre.
 
 **Tabla 5a**
 
@@ -298,7 +302,7 @@ De los 41 requisitos del SRS v7.7, 38 tienen caso funcional y 39 una prueba auto
 | RF-005 | Implementado | `POST /bookings`, `GET /catalog/services` | `/client/reserve` | CP-08 | `BookingServiceTest`, `BookingTest` |
 | RF-006 | Implementado | `GET /bookings/availability` | `/client/reserve` | CP-09 | `AvailabilityPolicyTest` |
 | RF-007 | Implementado | `PUT /bookings/{id}`, `POST /bookings/{id}/cancel` | `/client/history` | CP-10, CP-11 | `BookingTest`, `BookingApiWebTest` |
-| RF-033 | Implementado | `GET /admin/bookings`, `PATCH /admin/bookings/{id}/status` | `/admin/reservations` | CP-31 | `BookingTest`, `BookingServiceTest` (incluido el cierre de reservas vencidas) |
+| RF-033 | Implementado | `GET /admin/bookings`, `PATCH /admin/bookings/{id}/status`, `GET /admin/assignments/to-close`, `POST /admin/assignments/{bookingId}/attended` | `/admin/reservations`, `/admin` ("Por cerrar") | CP-31 | `BookingTest`, `BookingServiceTest` (incluidas la cancelación de las programadas vencidas y la ruta interna de no asistió), `BookingApiWebTest`, `FollowUpPolicyTest`, `FollowUpServiceTest`, `reservations-store.spec.ts` |
 | RF-008 | Implementado | Evento `booking.confirmed`, `GET /internal/v1/bookings` | `/admin/reservations` | CP-35 | `AutoAssignmentPolicyTest`, `OperationsServiceTest` (asignación automática, cuenta desactivada), `booking-flow.test.js` |
 | RF-009 | Implementado | `GET /admin/assignments/{id}/candidates`, `PUT /admin/assignments/{id}` | `/admin/reservations` | CP-12 | `AssignmentPolicyTest`, `OperationsServiceTest` (candado de asignaciones y regla de reservas sin operario), `reservations-store.spec.ts` |
 | RF-010 | Implementado | `GET /operators/available`, `POST /bookings` (`preferredOperatorId`) | `/client/reserve` | CP-36 | `OperationsServiceTest` (operarios libres), `OperationsApiWebTest`, `booking-flow.test.js` |
@@ -335,12 +339,12 @@ De los 41 requisitos del SRS v7.7, 38 tienen caso funcional y 39 una prueba auto
 | # | Brecha | Recomendación |
 | --- | --- | --- |
 | 1 | La app móvil no tiene pruebas automatizadas | Agregar Jest con `jest-expo` al menos para validadores (`shared/validators`) y servicios (`core/services`) |
-| 2 | Muchas de las 60 pruebas de la web solo verifican que el componente se crea; las 17 agregadas el 21 de octubre de 2026 ya prueban reglas reales (sesión entre pestañas, reservas sin operario, roles fijos y reportes) | Probar más reglas reales: `authGuard` por rol, `authInterceptor` ante 401, formulario de reserva |
+| 2 | Muchas de las 62 pruebas de la web solo verifican que el componente se crea; las 19 agregadas el 21 de octubre de 2026 ya prueban reglas reales (sesión entre pestañas, reservas sin operario, "Por cerrar", roles fijos y reportes) | Probar más reglas reales: `authGuard` por rol, `authInterceptor` ante 401, formulario de reserva |
 | 3 | Las 7 pruebas de persistencia de payment necesitan una base migrada y se omiten sin ella; el 19 y el 21 de octubre se corrieron contra `LavaRapidoPaymentIT` y pasaron | Documentar en el README cómo crear la base de pruebas y definir `PAYMENT_INTEGRATION_DB`, y correrlas en GitHub Actions con un SQL Server de servicio |
 | 4 | De RF-023 (reportes) se prueban las métricas del operario, el resumen del equipo y, desde el 21 de octubre de 2026, que solo cuenten las reservas completadas (`reports.spec.ts`); la exportación PDF/Excel no tiene prueba | Agregar un caso funcional de reportes y exportación PDF/Excel |
 | 5 | RF-032 (bahías) y RF-034 (cuentas de pago) no tienen pruebas automatizadas propias: `ScheduleService` y `PaymentAccountService` no tienen clase de prueba | Agregar pruebas unitarias de esos dos servicios |
 | 6 | Los requisitos implementados después del 9 de octubre (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037 y RF-038) no tenían caso funcional propio | Cerrada el 19 de octubre de 2026 con los casos CP-34 a CP-41 |
-| 7 | Los cambios del 21 de octubre de 2026 (el token de una sesión cerrada deja de servir, el cierre de reservas vencidas, el comprobante de más de 2 MB y el efectivo que solo aparece con su cuenta activa) no tienen caso funcional propio; los cubren pruebas automatizadas, salvo el efectivo, y las 19 de punta a punta se ejecutaron con el chequeo de sesión activo | Agregar esos casos funcionales y ejecutarlos con el sistema completo; agregar una prueba de `PaymentAccountService` para la cuenta de efectivo |
+| 7 | Los cambios del 21 de octubre de 2026 (el token de una sesión cerrada deja de servir, las reservas que terminaron y nadie cerró con la lista "Por cerrar", el comprobante de más de 2 MB y el efectivo que solo aparece con su cuenta activa) no tienen caso funcional propio; los cubren pruebas automatizadas, salvo el efectivo, las 19 de punta a punta se ejecutaron con el chequeo de sesión activo y "Por cerrar" se comprobó en vivo en la web y en la app móvil | Agregar esos casos funcionales y ejecutarlos con el sistema completo; agregar una prueba de `PaymentAccountService` para la cuenta de efectivo |
 
 **Tabla 9**
 
@@ -358,8 +362,10 @@ De los 41 requisitos del SRS v7.7, 38 tienen caso funcional y 39 una prueba auto
 | 8 | En el celular (360 px) había botones fuera de la pantalla en la barra de la landing, títulos encimados, el botón ☰ sobre los títulos, etiquetas de Servicios asignados fuera de la pantalla, filtros de Gestión fuera de su tarjeta e interruptores de Configuración sobre su texto | Revisión de diseño adaptable del 17 de octubre de 2026 (Tabla 5c) | Media |
 | 9 | En la app móvil, los campos de fecha y búsqueda se aplastaban cuando iban en columna (Historial y Calificaciones) | `shared/components/screen/FilterInputs.tsx` | Baja |
 | 10 | El avance del próximo servicio del cliente mostraba 10 % o 25 % aunque el lavado no había empezado | `features/client/pages/dashboard/dashboard.ts` (web) y `modules/client/models/client.ts` (móvil) | Baja |
+| 11 | La primera versión del cierre automático (21 de octubre) dejaba en No asistió toda reserva confirmada que nadie inició una hora después de su fin; si el operario lavó el carro y olvidó darle "Iniciar", el historial, los reportes y las métricas registraban que el cliente no vino, y No asistió es definitivo | Revisión del equipo del 21 de octubre de 2026; `ExpiredBookingsJob` y `Booking.expire` de booking-service | Alta |
+| 12 | Un campo `null` en el payload de un evento mandaba el mensaje completo a la cola de errores (DLQ) de notification-service y el aviso no se creaba | `DomainEventEnvelope.java` de notification-service | Media |
 
-> *Nota.* Los defectos 7 a 10 se corrigieron entre el 16 y el 17 de octubre de 2026 en la rama *develop* de la web y de la app; el 8 y el 9 se volvieron a medir sin desbordes (Tabla 5c).
+> *Nota.* Los defectos 7 a 10 se corrigieron entre el 16 y el 17 de octubre de 2026 en la rama *develop* de la web y de la app; el 8 y el 9 se volvieron a medir sin desbordes (Tabla 5c). Los defectos 11 y 12 se corrigieron la noche del 21 de octubre de 2026: el sistema ya solo cancela la reserva programada que venció sin confirmarse y deja en No asistió la confirmada que nunca tuvo operario; la que tenía operario pasa a "Por cerrar" para que el administrador decida (11, `FollowUpPolicyTest`, `FollowUpServiceTest`); y el campo `null` se ignora (12, `DomainEventEnvelopeTest`).
 
 > *Nota.* Revisión del código del 16 de octubre de 2026: los seis defectos están corregidos. El panel saluda con el nombre de la sesión y la revisión de pagos muestra a quien revisa (1); la columna Cliente muestra el nombre del cliente (2); el inicio del cliente muestra el operario asignado en la web y en el móvil (3); la marca es LavaRápido en la web y en el móvil (4); la página de inicio describe el servicio en el lavadero (5); y la pantalla de pagos selecciona por cuenta y muestra el titular cuando dos cuentas comparten medio (6, `payment.spec.ts`).
 
