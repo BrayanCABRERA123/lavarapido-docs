@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 21 de octubre de 2026
 
-Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.5
+Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.6
 
 ## Control de Versiones
 
@@ -37,6 +37,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.3 | 2026-10-19 | Capturas tomadas de nuevo el 19 de octubre de 2026 con datos de demostración, y nueva Figura 5 de datos del negocio por completar (sección 11.1). | Equipo de desarrollo |
 | 4.4 | 2026-10-20 | Se retiró el cambio de tipo de usuario desde Gestión > Usuarios, que el equipo revirtió en la web, la app y el servidor: el rol se elige al crear la cuenta (sección 10.3). Se quitó el filtro Registrados de la lista de usuarios (sección 9.2). Las notificaciones abren su detalle con un botón para ir a Reservas o al inicio (sección 12.7). | Equipo de desarrollo |
 | 4.5 | 2026-10-21 | Revisión contra el código y el servidor del 21 de octubre de 2026: al desactivar una cuenta su sesión deja de servir (secciones 9.4, 9.6 y 17.5); la pestaña de roles dice que el acceso lo decide el rol (sección 10.1); la cuenta de efectivo y su opción para el cliente (sección 11.4); reservas que se cierran solas, conteo único de reservas sin operario y candado de la asignación (secciones 12.3 y 12.4); comprobante de máximo 2 MB (sección 12.6); reportes con solo reservas completadas (sección 13); respaldos automáticos del servidor público (secciones 14.6 y 15.2) y encabezados de seguridad (sección 17.4). Se corrigieron la fecha y la versión de la portada y la fila de datos que antes se guardaban solo en el navegador (Tabla 12). | Equipo de desarrollo |
+| 4.6 | 2026-10-21 | Cambio de la regla de las reservas que terminan sin cerrarse, revisada por el equipo la noche del 21 de octubre: solo pasa sola a No asistió la reserva confirmada que nunca tuvo operario; la que tenía operario y nadie registró queda en la tarjeta **Por cerrar** del inicio (web y app móvil), donde el administrador elige **Se atendió** o **No asistió** (secciones 6.3, 8.3, 12.3 y 12.7). Reservas sin operario con una sola regla también en la app móvil (secciones 8.3 y 12.4); variables *FOLLOW_UP_\** (sección 11.6); nuevo incidente y término del glosario (Tablas 18 y 20). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -190,6 +191,7 @@ La Tabla 2 resume el estado real de cada función en la versión del 21 de octub
 | Medios de pago (cuentas y códigos QR) | Configuración > Medios de pago | Completa. | 11.4 |
 | Operarios, disponibilidad semanal y ausencias | Operarios | Completa. | 12.1 |
 | Reservas: crear, reprogramar, cambiar el estado y cancelar | Reservas | Completa. | 12.3 |
+| Reservas por cerrar (servicios que terminaron sin registrarse) | Dashboard (web y app móvil) | Completa desde el 21 de octubre de 2026: **Se atendió** o **No asistió**. | 12.3 |
 | Asignación de operarios | Reservas, Dashboard | Completa: el sistema asigna un operario libre al confirmarse la reserva (el que eligió el cliente, si sigue libre) y el administrador lo cambia a mano o asigna las reservas que quedaron sin operario. | 12.4 |
 | Informe de inspección del vehículo | Reservas > Inspección | Completa: el informe y las fotos se guardan en operations-service y el cliente recibe el resumen con el enlace al informe por notificación y correo (**Notificar al cliente**). | 12.5 |
 | Revisión, aprobación, rechazo y reembolso de pagos; pagos manuales | Pagos | Completa. | 12.6 |
@@ -288,7 +290,8 @@ El panel de control (ruta */admin*, opción del menú **Dashboard**) resume lo q
 | Ingresos de los últimos 7 días | Gráfica con el total de la semana y el día de mayor movimiento proyectado. | **Ver reporte detallado**. |
 | Estado de los operarios | Operarios disponibles, ocupados y ausentes. | **Gestionar turnos y bahías**. |
 | Pagos pendientes de revisión | Últimos comprobantes enviados para validación. | **Revisar** cada uno. |
-| Reservas sin operario | Reservas confirmadas que esperan un técnico y cuya hora no ha terminado; desde el 21 de octubre de 2026 es el mismo conteo de la pantalla Reservas. | **Asignar** (sección 12.4). |
+| Reservas sin operario | Reservas programadas o confirmadas que esperan un técnico y cuya hora no ha terminado; desde el 21 de octubre de 2026 es el mismo conteo de la pantalla Reservas, en la web y en la app móvil. | **Asignar** (sección 12.4). |
+| Por cerrar | Reservas con operario que terminaron y nadie registró (no se iniciaron o no se finalizaron). Solo aparece cuando hay alguna, en la web y en la app móvil. | **Se atendió** o **No asistió** (sección 12.3). |
 
 *Nota.* Los nombres corresponden al panel cuando la interfaz está en español.
 
@@ -522,7 +525,7 @@ Las imágenes de los QR y los comprobantes se guardan dentro de la base de datos
 
 ### 11.6 Variables de Entorno de Operación
 
-Las variables que cambian el comportamiento de la plataforma se leen del archivo *lavarapido-infra/.env* y requieren reiniciar los servicios afectados. Las más relevantes para el administrador de TI son *MESSAGING_ENABLED* (eventos de RabbitMQ, también en payment-service), *MAIL_ENABLED* y *MAIL_\** (correo), *PUSH_ENABLED* (notificaciones push), *REMINDER_LEADS* (recordatorios, por defecto 24 h y 1 h), *BOOKING_ZONE* (zona horaria del lavadero), *BOOKING_SLOT_MINUTES* y *BOOKING_MAX_DAYS_AHEAD* (rejilla y ventana de reservas), *INTERNAL_API_KEY* (llamadas internas entre servicios) y *SPRING_PROFILES_ACTIVE* (perfil de los servicios Java; *dev* crea cuentas de demostración). Las del 21 de octubre de 2026, *SESSION_CHECK_\** (chequeo de sesión del gateway) y *BOOKING_EXPIRY_\** (cierre de reservas vencidas), tienen valor por defecto y todavía no pasan por el archivo de Compose, así que en Docker no se cambian desde *.env*. Sus valores y el procedimiento de cambio se describen en el Manual de Instalación.
+Las variables que cambian el comportamiento de la plataforma se leen del archivo *lavarapido-infra/.env* y requieren reiniciar los servicios afectados. Las más relevantes para el administrador de TI son *MESSAGING_ENABLED* (eventos de RabbitMQ, también en payment-service), *MAIL_ENABLED* y *MAIL_\** (correo), *PUSH_ENABLED* (notificaciones push), *REMINDER_LEADS* (recordatorios, por defecto 24 h y 1 h), *BOOKING_ZONE* (zona horaria del lavadero), *BOOKING_SLOT_MINUTES* y *BOOKING_MAX_DAYS_AHEAD* (rejilla y ventana de reservas), *INTERNAL_API_KEY* (llamadas internas entre servicios) y *SPRING_PROFILES_ACTIVE* (perfil de los servicios Java; *dev* crea cuentas de demostración). Las del 21 de octubre de 2026, *SESSION_CHECK_\** (chequeo de sesión del gateway), *BOOKING_EXPIRY_\** (reservas que terminaron sin cerrarse; *BOOKING_EXPIRY_GRACE_MINUTES* la usan booking-service y operations-service) y *FOLLOW_UP_\** (revisión de la lista **Por cerrar** en operations-service), tienen valor por defecto y todavía no pasan por el archivo de Compose, así que en Docker no se cambian desde *.env*. Sus valores y el procedimiento de cambio se describen en el Manual de Instalación.
 
 ## 12. Gestión de la Información Principal
 
@@ -572,7 +575,21 @@ La pantalla **Reservas** (ruta */admin/reservations*) lista las reservas con **C
 
 Las reglas del ciclo de vida son las mismas para todos: una reserva no puede quedar fuera del horario de atención ni ocupar una bahía que ya está tomada, y una reserva que ya empezó no se puede cancelar (Tabla 9). Cuando una reserva se crea, se reprograma o se cancela, todos los administradores activos reciben un aviso en la bandeja.
 
-**Reservas que nadie inicia (desde el 21 de octubre de 2026).** Una hora después de la hora de fin, el sistema cierra las reservas que siguen Programadas o Confirmadas: la Confirmada pasa a **No asistió** (aunque esté pagada; si corresponde un reembolso, lo hace el administrador en **Pagos**) y la Programada se cancela con el motivo "Venció sin confirmarse", que no aparece en la lista de motivos para cancelar a mano. Así se liberan el operario y la bahía. **No asistió** es un estado final: si un operario lavó el vehículo pero no marcó **Iniciar**, la reserva también se cierra así y ya no se puede pasar a Completada; por eso cada servicio se debe iniciar y finalizar en el sistema.
+**Reservas que terminaron sin cerrarse (desde el 21 de octubre de 2026).** El sistema solo cierra una reserva por su cuenta cuando no hay duda de lo que pasó; en los demás casos la decisión es del administrador:
+
+- Una reserva **Programada** que nunca se confirmó se cancela sola una hora después de su hora de fin, con el motivo "Venció sin confirmarse", que no aparece en la lista de motivos para cancelar a mano.
+- Una reserva **Confirmada** que nunca tuvo operario pasa sola a **No asistió** una hora después de su fin, porque nadie pudo atenderla.
+- Una reserva **Confirmada con operario** a la que nadie le dio **Iniciar** cuando terminó su hora, o una reserva **En progreso** que nadie finalizó una hora después de su fin, nunca se marca sola: pasa a la tarjeta **Por cerrar** del inicio. El operario recibe el aviso "¿Atendiste este servicio?" y cada administrador activo el aviso "Servicio sin registrar" (sección 12.7).
+
+Esta regla reemplazó la primera versión del mismo día, que cerraba como No asistió toda reserva que nadie iniciaba: si el operario lavaba el vehículo y olvidaba marcar **Iniciar**, quedaba registrado que el cliente no llegó. En ningún caso el sistema hace reembolsos: si la reserva estaba pagada, el administrador revisa el pago en **Pagos** (sección 12.6).
+
+Para cerrar las reservas pendientes:
+
+1. Ubicar la tarjeta **Por cerrar** en el **Dashboard** de la web o en el inicio de la app móvil. Solo aparece cuando hay alguna reserva pendiente y muestra las de la última semana.
+2. Confirmar con el operario si atendió el vehículo. Si todavía es el mismo día, el operario puede registrar el servicio con **Iniciar** y **Finalizar** aunque sea tarde; así se guardan sus horas reales y la reserva sale de la lista.
+3. Si el vehículo se atendió, hacer clic en **Se atendió**. La reserva queda Completada sin inventar horas: sin hora de inicio no cuenta para la puntualidad del operario y sin hora de fin no suma horas trabajadas, pero sí cuenta como servicio realizado y como ingreso. El cliente no recibe el aviso de que ya puede recoger el vehículo (llegaría horas tarde), pero sí puede calificar el servicio.
+4. Si el cliente no llegó, hacer clic en **No asistió**. Esta opción solo aplica a una reserva que nunca se inició y el estado es definitivo.
+5. Si aparece un mensaje de que la reserva ya no está por cerrar, es porque otro administrador o el operario la cerraron antes; basta con actualizar la pantalla.
 
 **Tabla 9**
 
@@ -584,8 +601,8 @@ Las reglas del ciclo de vida son las mismas para todos: una reserva no puede que
 | CONFIRMED (Confirmada) | Con turno y bahía. Las reservas que hacen los clientes empiezan aquí. | Asignar o cambiar el operario, reprogramar o cancelar. |
 | IN_PROGRESS (En progreso) | El operario inició el lavado. | Supervisar; ya no se puede cancelar. |
 | COMPLETED (Completada) | Servicio terminado. | Verificar o registrar el pago. |
-| CANCELLED (Cancelada) | Anulada por el cliente o por el lavadero, o cerrada por el sistema porque llegó su hora sin confirmarse. | Consultar el motivo. |
-| NO_SHOW (No asistió) | El cliente no llegó, o nadie inició el servicio hasta una hora después de su fin. | Registrarlo, revisar patrones y, si el cliente había pagado, decidir el reembolso. |
+| CANCELLED (Cancelada) | Anulada por el cliente o por el lavadero, o cerrada por el sistema porque pasó una hora de su fin sin confirmarse. | Consultar el motivo. |
+| NO_SHOW (No asistió) | El cliente no llegó (lo marca el administrador), o la reserva confirmada terminó sin operario hace una hora (lo marca el sistema). | Registrarlo, revisar patrones y, si el cliente había pagado, decidir el reembolso. |
 
 *Nota.* Códigos de la base de datos según ADR-010; la interfaz los traduce.
 
@@ -597,7 +614,7 @@ Las reglas del ciclo de vida son las mismas para todos: una reserva no puede que
 
 ### 12.4 Asignación de un Operario
 
-Cuando se confirma una reserva, **el sistema asigna el operario automáticamente** (RF-008): si el cliente eligió uno y sigue libre, se le asigna ese; si no, el operario libre con menos reservas ese día. Un operario está libre cuando su cuenta está activa, tiene turno a esa hora, no tiene una ausencia registrada y no atiende otra reserva en ese horario. Si ninguno está libre, la reserva queda sin operario y aparece en el bloque **Reservas sin operario** del Dashboard. Desde el 21 de octubre de 2026 el Dashboard y la pantalla **Reservas** usan el mismo conteo, que deja fuera las reservas cuya hora ya terminó. Una reserva reprogramada conserva su operario. El administrador asigna a mano en dos casos: cuando la reserva quedó sin operario y cuando necesita cambiar el que se asignó.
+Cuando se confirma una reserva, **el sistema asigna el operario automáticamente** (RF-008): si el cliente eligió uno y sigue libre, se le asigna ese; si no, el operario libre con menos reservas ese día. Un operario está libre cuando su cuenta está activa, tiene turno a esa hora, no tiene una ausencia registrada y no atiende otra reserva en ese horario. Si ninguno está libre, la reserva queda sin operario y aparece en el bloque **Reservas sin operario** del Dashboard. Desde el 21 de octubre de 2026 el Dashboard y la pantalla **Reservas**, en la web y en la app móvil, usan el mismo conteo: reservas programadas o confirmadas, sin operario en ningún servicio y cuya hora todavía no termina. Una reserva reprogramada conserva su operario. El administrador asigna a mano en dos casos: cuando la reserva quedó sin operario y cuando necesita cambiar el que se asignó.
 
 1. En el **Dashboard** (bloque **Reservas sin operario**) o en **Reservas**, hacer clic en **Asignar** en la reserva.
 2. La ventana de asignación muestra los detalles de la cita y la lista de operarios. Los operarios disponibles aparecen primero; los demás indican por qué no pueden tomar la reserva: **Inactivo**, **Sin turno a esa hora**, **Ausente** u **Ocupado a esa hora**.
@@ -679,7 +696,7 @@ El sistema no integra una pasarela de pagos (ADR-008). El cliente paga por fuera
 
 ### 12.7 Notificaciones y Avisos
 
-La opción **Notificaciones** del administrador funciona como la de los demás roles: lista las notificaciones con filtros y permite marcarlas como leídas o eliminarlas. Al hacer clic en una notificación se abre su detalle y queda leída; los avisos de reservas traen el botón **Ir a reservas** y el de bienvenida **Ir al inicio**. Todo administrador activo recibe avisos al personal en la bandeja y como notificación push (nunca por correo): una nueva reserva confirmada, una reserva movida a otra hora y una reserva cancelada (con el motivo).
+La opción **Notificaciones** del administrador funciona como la de los demás roles: lista las notificaciones con filtros y permite marcarlas como leídas o eliminarlas. Al hacer clic en una notificación se abre su detalle y queda leída; los avisos de reservas traen el botón **Ir a reservas** y el de bienvenida **Ir al inicio**. Todo administrador activo recibe avisos al personal en la bandeja y como notificación push (nunca por correo): una nueva reserva confirmada, una reserva movida a otra hora, una reserva cancelada (con el motivo) y, desde el 21 de octubre de 2026, el aviso "Servicio sin registrar" cuando una reserva con operario terminó y nadie la inició o la finalizó. Ese aviso llega una sola vez por reserva y abre el inicio, donde la reserva aparece en **Por cerrar** (sección 12.3).
 
 Los avisos se envían con *POST /api/v1/admin/notifications* (rol ADMIN), que acepta solo dos tipos: *SYSTEM_MESSAGE* (aviso libre, solo bandeja y push; disponible solo por la API, porque el panel no tiene una pantalla para ello) e *INSPECTION_REPORT* (enviado desde la pantalla de inspección, también por correo). Cualquier otro tipo se rechaza con 400 *NOTIFICATION_TYPE_NOT_ALLOWED*, para que nadie pueda escribir a mano un aviso que parezca automático (por ejemplo, un falso pago aprobado). El mensaje siempre se guarda en la bandeja del destinatario; la notificación push es adicional (requiere *PUSH_ENABLED=true* y la aplicación móvil) y respeta los interruptores de cada usuario.
 
@@ -1131,6 +1148,7 @@ docker compose logs --since 30m booking-service | grep -i error
 | No se pueden crear reservas (503 CUSTOMER_SERVICE_UNAVAILABLE) | customer-service caído o mal configurado. | Reiniciar el servicio; revisar CUSTOMER_SERVICE_URL. |
 | Los operarios no pueden iniciar servicios (503 BOOKING_SERVICE_UNAVAILABLE) | booking-service caído. | Reiniciar booking-service. |
 | Reservas sin operario | No había operarios libres cuando se confirmó la reserva (sin turno, ausentes u ocupados). | Asignar a mano (sección 12.4) y revisar los turnos y las ausencias de los operarios. |
+| Reservas en Por cerrar | El operario atendió el vehículo pero no marcó Iniciar o Finalizar, o el cliente no llegó. | Preguntar al operario y cerrar con Se atendió o No asistió (sección 12.3); recordar al equipo registrar cada servicio. |
 | Los pagos fallan a través del gateway en Docker | El contenedor de payment-service no está en ejecución o payment-migrate falló. | Revisar *docker compose ps* y el registro de payment-service (Manual de Instalación, sección 17). |
 | Un pago no se puede aprobar | Ya hay un pago aprobado para la reserva. | Revisar los pagos de la reserva y rechazar el duplicado. |
 | Pago aprobado sin el dinero | Comprobante falso o mal verificado. | Revisar quién lo aprobó (approved_by); contactar al cliente; reembolsarlo desde Pagos (sección 12.6). |
@@ -1182,6 +1200,7 @@ Todo incidente se debe registrar con la fecha, quién lo detectó, la descripci�
 | JWT | Token firmado que identifica al usuario y sus roles; dura una hora. |
 | Mínimo privilegio | Principio de dar a cada cuenta solo los permisos que necesita. |
 | Pago manual | Pago registrado por el administrador por dinero recibido en el lavadero. |
+| Por cerrar | Tarjeta del inicio con las reservas con operario que terminaron sin registrarse; el administrador las cierra con Se atendió o No asistió. |
 | Puntos de fidelización | Puntos que suma cada servicio cuando se aprueba su pago; se revierten si el pago se reembolsa. |
 | Reembolso | Devolución del dinero de un pago aprobado, que revierte los puntos de la reserva. |
 | Respaldo | Copia de la base de datos que permite recuperarla. |
