@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 20, 2026
+October 21, 2026
 
-Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.3
+Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.4
 
 ## Version Control
 
@@ -35,6 +35,7 @@ Table 1 records the change history of this document. Each time the installation 
 | 4.1 | 2026-10-17 | Review against the code of October 17, 2026. Added the optional *EXPO_PUBLIC_WEB_URL* variable of the mobile app (section 10.5) and the native dependencies *expo-image-picker* and *expo-image-manipulator*, which require *npm install* and a new APK (section 13.2). | Development team |
 | 4.2 | 2026-10-19 | Continuous integration with GitHub Actions: the scope was updated and it was removed from Annex B. | Development team |
 | 4.3 | 2026-10-20 | Review against the code of October 20, 2026: the *notification.notification_type* catalog has 24 rows (migrations 031 and 038 added the alert for a booking without an operator and the new app version notice). | Development team |
+| 4.4 | 2026-10-21 | Review against the code of October 21, 2026: optional variables of the gateway session check and of the close of expired bookings (section 10.2), booking-service seeds 110 to 112 (section 11.2), cancellation reasons (Table 9), automatic backups of the public server (section 11.6), check of the token of a closed session (sections 16.3 and 16.4), and new errors (Table 14). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -120,7 +121,7 @@ This manual explains how to prepare a machine, obtain the code, configure the en
 
 ### 4.1 Sources of This Document
 
-The procedures were verified against the infrastructure repository (*lavarapido-infra*: *docker-compose.yml*, *.env.example*, and the team guide), the source code of the eleven repositories (*develop* branch as of October 17, 2026), and the project documentation updated on that same date (Vehicle Washing Development Team, 2026a, 2026b). The values that depend on each installation (passwords, keys, and addresses) are written between angle brackets, such as `<SA_PASSWORD>`; no placeholder must be copied literally into a terminal. The implementation of a release in its target environment (entry criteria, acceptance, training, and rollback) is described in the Implementation Procedure.
+The procedures were verified against the infrastructure repository (*lavarapido-infra*: *docker-compose.yml*, *.env.example*, and the team guide), the source code of the eleven repositories (*develop* branch as of October 21, 2026), and the project documentation updated on that same date (Vehicle Washing Development Team, 2026a, 2026b). The values that depend on each installation (passwords, keys, and addresses) are written between angle brackets, such as `<SA_PASSWORD>`; no placeholder must be copied literally into a terminal. The implementation of a release in its target environment (entry criteria, acceptance, training, and rollback) is described in the Implementation Procedure.
 
 ### 4.2 Scope
 
@@ -410,6 +411,8 @@ If *git check-ignore* prints nothing, the file is not excluded and must not be f
 | INTERNAL_API_KEY | security-service and notification-service | Key of the internal routes; without it, booking, payment, and coupon notices and reminders are not sent by email, and the notification switches of each user cannot be read. |
 | REMINDER_LEADS | notification-service | Advance of the reminders; *24h,1h* by default. |
 | BOOKING_ZONE, BOOKING_SLOT_MINUTES, BOOKING_MAX_DAYS_AHEAD | booking-service and operations-service | America/Bogota, 30, and 60 by default. |
+| SESSION_CHECK_ENABLED, SESSION_CHECK_CACHE_TTL, SESSION_CHECK_TIMEOUT | api-gateway | Check of the token session (since October 21, 2026): *true*, *30s*, and *3s* by default. They are not in *.env.example* or in the Compose file: in Docker they keep their defaults and only change if the gateway runs from the IDE (action ACO-14). |
+| BOOKING_EXPIRY_CHECK_ENABLED, BOOKING_EXPIRY_CHECK_INTERVAL, BOOKING_EXPIRY_GRACE_MINUTES | booking-service | Automatic close of the bookings nobody started: *true*, *PT5M* (every 5 minutes), and *60* minutes after the end time by default. Like the previous ones, they do not go through the Compose file. |
 | SECURITY_SERVICE_URL, CUSTOMER_SERVICE_URL, BOOKING_SERVICE_URL | Services that call others | Addresses of the services; they have defaults for the local environment. payment-service needs BOOKING_SERVICE_URL to read the total and to credit the points of a booking. |
 
 *Note.* Prepared by the authors from *.env.example*, *docker-compose.yml*, and the configuration files of the services.
@@ -493,7 +496,7 @@ Wait until *lavarapido-sqlserver* and *lavarapido-rabbitmq* show the status *hea
 
 ### 11.2 Migrations of Each Service
 
-The Java services apply their migrations automatically when they start (*spring.liquibase*), and then Hibernate only validates that the entities match the tables. Therefore, the tables of the schemas *security*, *audit*, *customer*, *catalog*, *booking*, *execution*, and *notification* are created the first time each service starts (section 12). Table 8 shows the changelogs of the version of October 16, 2026.
+The Java services apply their migrations automatically when they start (*spring.liquibase*), and then Hibernate only validates that the entities match the tables. Therefore, the tables of the schemas *security*, *audit*, *customer*, *catalog*, *booking*, *execution*, and *notification* are created the first time each service starts (section 12). Table 8 shows the changelogs of the version of October 21, 2026.
 
 **Table 8**
 
@@ -503,7 +506,7 @@ The Java services apply their migrations automatically when they start (*spring.
 |---|---|---|
 | security-service | 001 schemas, 002 security and audit core, 003 user preference, 020 theme palettes, 023 custom role (created and dropped again by 026), 026 role permissions (permission catalog and default assignments), 030 notification switches of the user preference, 034 lockout after failed attempts, 035 person address, 036 account creation date, 039 acceptance of the legal documents; seed 101 roles. | DATABASECHANGELOG_SECURITY |
 | customer-service | 004 customer schema, 014 customer user id, 015 vehicle model; seed 102 vehicle types. | DATABASECHANGELOG_CUSTOMER |
-| booking-service | 005 catalog and booking schemas, 018 changes of ADR-010, 021 schedule history, 022 loyalty points of the catalog, 024 removal of the bay operator, 032 business data of the establishment; seeds 103 catalog, 104 statuses and reasons, 109 establishment, schedule, and four bays. | DATABASECHANGELOG_BOOKING |
+| booking-service | 005 catalog and booking schemas, 018 changes of ADR-010, 021 schedule history, 022 loyalty points of the catalog, 024 removal of the bay operator, 032 business data of the establishment; seeds 103 catalog, 104 statuses and reasons, 109 establishment, schedule, and four bays, 110 business data, 111 removal of the example business data so the real business fills it in, and 112 *EXPIRED* reason of the automatic close of expired bookings. | DATABASECHANGELOG_BOOKING |
 | operations-service | 007 execution schema, 033 inspection reports with phases, findings, and photos, 037 operator profile; seed 105 execution statuses. | DATABASECHANGELOG_OPERATIONS |
 | notification-service | 010 notification schema, 016 device tokens, 017 processed events, 019 booking reminders, 025 promotion redeemed type, 027 staff notifications and booking tracking, 028 payment refunded type, 029 loyalty and inspection types, 031 unassigned booking alert, 038 new app version notice type; seed 108 notification types. | DATABASECHANGELOG_NOTIFICATION |
 | payment-service | db/changelog/changes/001 to 020 (own numbering; 017 package fields, 018 required points, 019 catalog verification, 020 points reversal and sequence), run by the *payment-migrate* container. | DATABASECHANGELOG_PAYMENT |
@@ -570,6 +573,7 @@ SELECT payment_status_id, code FROM payment.payment_status WHERE payment_status_
 | customer.vehicle_type | 6 rows: CAR, SEDAN, SUV, PICKUP, TRUCK, and MOTO. |
 | catalog.service | The services BASIC, PREMIUM, and FULL with prices for the six vehicle types. |
 | booking.booking_status | 6 rows; identifier 5 corresponds to CANCELLED. |
+| booking.cancellation_reason | 7 rows; *EXPIRED* (seed 112) is only used by the system and does not appear in the list of reasons. |
 | booking.service_bay | 4 bays. |
 | execution.execution_status | 5 rows: PENDING, IN_PROGRESS, PAUSED, COMPLETED, and WITH_ISSUE. |
 | payment.payment_status | 5 rows; identifier 3 corresponds to APPROVED. |
@@ -589,6 +593,8 @@ docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -
   -Q "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/backup.bak' WITH INIT, CHECKSUM"
 docker cp lavarapido-sqlserver:/var/opt/mssql/data/backup.bak ./backup.bak
 ```
+
+On the public server backups are automatic: *deploy/backup-db.sh* backs up the database every day and before every update, *deploy/verify-backup.sh* checks each backup by restoring it under another name, and *deploy/restore-db.sh* restores one (Deployment Document, section 3.2).
 
 To reset a disposable local environment, stop the containers and delete the volumes. **This deletes all the data:**
 
@@ -702,7 +708,7 @@ npx expo start                # or: npm start
 
 The command opens the Metro development server (port 8081) and shows a QR code. For a quick test, open the application in an Android emulator (key *a*) or on a phone with Expo Go on the same Wi-Fi network. Remember to configure *EXPO_PUBLIC_API_URL* (section 10.5).
 
-**New native dependencies.** Since October 17, 2026, the app uses *expo-image-picker* (camera and gallery) and *expo-image-manipulator* (shrinking the photos) for the inspection report. After *git pull*, run *npm install* in *Frontend/LavadoVehicular-Movil*. Expo Go already includes these modules, but an APK built before that date does not: a new version must be built and published with EAS, as explained in the Deployment Document (section 4.3.3, "Publishing the mobile app"). The camera and photo permissions are declared in the *expo-image-picker* plugin inside *app.json*.
+**New native dependencies.** Since October 17, 2026, the app uses *expo-image-picker* (camera and gallery) and *expo-image-manipulator* (shrinking the photos) for the inspection report. After *git pull*, run *npm install* in *Frontend/LavadoVehicular-Movil*. Expo Go already includes these modules, but an APK built before that date does not: a new version must be built and published with EAS, as explained in the Deployment Document (section 4.3.3, "Publishing the mobile app"). The camera and photo permissions are declared in the *expo-image-picker* plugin inside *app.json*. The changes of October 21, 2026 (compressed receipt, QR magnifier, and mandatory APK update screen) add no native dependencies.
 
 **Push notifications.** Expo Go does not receive remote push notifications. To test them, build a development version with EAS and set *PUSH_ENABLED=true* in the backend:
 
@@ -840,7 +846,7 @@ done
 curl -i http://localhost:8080/api/v1/bookings/me
 ```
 
-Each health endpoint must answer *{"status":"UP"}*. The last command calls a protected route without a token through the gateway: it must return **401**. The gateway does not validate tokens (ADR-006): it forwards the request and the service rejects it. Every service, including payment-service, checks the database in its health endpoint: if SQL Server does not answer, it replies *DOWN* with code 503.
+Each health endpoint must answer *{"status":"UP"}*. The last command calls a protected route without a token through the gateway: it must return **401**. The gateway does not check the token signature (ADR-006): a request without a token goes straight through and booking-service rejects it. Since October 21, 2026 the gateway does cut the token of a closed session: after signing out, repeating the call with the same token (*-H "Authorization: Bearer `<TOKEN>`"*) returns 401 from the gateway, without reaching the service. Every service, including payment-service, checks the database in its health endpoint: if SQL Server does not answer, it replies *DOWN* with code 503.
 
 **Figure 9**
 
@@ -857,7 +863,8 @@ Each health endpoint must answer *{"status":"UP"}*. The last command calls a pro
 5. Log in as the operator on the day of the booking, start the service, and finish it.
 6. As the customer, report a payment with a test receipt; as the administrator, approve it in **Payments**.
 7. With messaging active, check that the customer received the notifications of the booking, the assignment, and the approved payment, the email in Mailpit, and the points in the dashboard.
-8. Restart the containers (*docker compose restart*) and check that the data remains.
+8. Sign out and repeat a call with the same token: the gateway answers 401.
+9. Restart the containers (*docker compose restart*) and check that the data remains.
 
 ### 16.5 Traces Verification
 
@@ -898,6 +905,8 @@ The first step in any error is to consult the log of the affected service with *
 | Liquibase: checksum mismatch | A changeset that already ran was edited. | Revert the change and write a new changeset; in a disposable environment, recreate the database. |
 | Liquibase: waiting for changelog lock | A previous start was interrupted. | Make sure no other instance is running and delete the row of the corresponding DATABASECHANGELOGLOCK_<SERVICE> table. |
 | 401 on every request | Expired token or different JWT_SECRET among services. | Log in again; check that all the services read the same .env file. |
+| 401 right after signing out in another tab or device | The session was closed and the gateway cuts its token. | Log in again. |
+| Requests take about 3 more seconds and the gateway log says *No se pudo confirmar la sesión* | security-service does not answer; the gateway lets the request through after waiting for it. | Start security-service and check its health. |
 | 503 CUSTOMER_SERVICE_UNAVAILABLE or BOOKING_SERVICE_UNAVAILABLE | The service called is down. | Start customer-service or booking-service. |
 | "Your customer profile is not ready yet" | The customer profile has not been created (event not consumed). | Wait and retry; with MESSAGING_ENABLED=true check the customer-service queue. |
 | Emails do not arrive in Mailpit | MAIL_ENABLED=false or wrong host or port. | MAIL_HOST=localhost and MAIL_PORT=1025 on the host; MAIL_DOCKER_HOST=mailpit in Docker. |
@@ -920,7 +929,7 @@ The first step in any error is to consult the log of the affected service with *
 
 | Term | Definition |
 |---|---|
-| API Gateway | Single entry point that routes the requests to the services; it does not validate tokens. |
+| API Gateway | Single entry point that routes the requests to the services; it does not check the token signature, but since October 21, 2026 it cuts the tokens of closed sessions. |
 | Changelog | Liquibase file that describes the changes of the database. |
 | Changeset | Unit of change of a changelog, identified by its id and author. |
 | Compose profile | Group of services of Docker Compose that starts only when it is requested (*--profile app*). |
@@ -968,6 +977,7 @@ The figures in this manual were taken on October 16, 2026, on a Windows 11 compu
 | Topic | What is missing | Section |
 |---|---|---|
 | One database login per service | The services use sa. | 11.4 |
+| Variables of October 21, 2026 | *SESSION_CHECK_\** and *BOOKING_EXPIRY_\** are not in *.env.example* or in *docker-compose.yml* (action ACO-14). | 10.2 |
 
 *Note.* Prepared by the authors from the verification of the repositories and the technical backlog.
 
