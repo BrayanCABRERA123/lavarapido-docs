@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 20, 2026
+October 21, 2026
 
-Document Type: Register of Corrective, Preventive, and Improvement Actions (Development Team and Instructor) · Version 2.4
+Document Type: Register of Corrective, Preventive, and Improvement Actions (Development Team and Instructor) · Version 2.5
 
 ## Version Control
 
@@ -34,6 +34,7 @@ Table 1 records the change history of this document. The action register (sectio
 | 2.2 | 2026-10-19 | Preventive action AP-01 was closed with continuous integration in GitHub Actions in the 10 repositories. | Development team |
 | 2.3 | 2026-10-19 | Test indicator with the run of October 19 (655 automated, 19 end-to-end, and 42 functional cases). | Development team |
 | 2.4 | 2026-10-20 | Review against the code of October 20, 2026: the register is still current (AM-03, rescheduling from the web and the app, and AM-12, the pause and issue states, remain open); the backend leader's full name was completed. | Development team |
+| 2.5 | 2026-10-21 | Review against the code of October 21, 2026. Corrective actions AC-44 to AC-52 were recorded and closed (a token that kept working after logout, bookings nobody closed, an operator assigned twice, receipts with no size limit, cash visible although it was disabled, reports counting unfinished bookings, misleading roles screen text, tabs out of step with the session, and a database transaction log with no limit); preventive action AP-04 (verified daily backups) was closed, corrective action ACO-14 (new variables missing from *.env.example* and the compose file) was opened, AP-16 to AP-18 (container logs, security headers, and health checks) and improvement AM-16 (mandatory APK update) were added and closed; the improvements of October 17 that repeated the identifiers AM-07 and AM-08 become AM-14 (inspection report in the app) and AM-15 (frequently asked questions); indicators with the tests of October 21. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -89,7 +90,7 @@ During its construction, its reviews with the instructor, and the writing of its
 
 ### 4.2 Sources of This Document
 
-The actions were verified against the code of the eleven repositories (*develop* branch as of October 17, 2026) and their Git history, and against the risk register, the technical backlog, the incident management, the testing strategy, and the architecture decision records (ADRs) of the project (Vehicle Washing Development Team, 2026a). The findings of the review of the manuals of October 7, 9, and 16, 2026, and of the complete review of the system of October 16 (Annex B of the Technical Manual and the annexes of the other manuals) are also included.
+The actions were verified against the code of the eleven repositories (*develop* branch as of October 21, 2026) and their Git history, and against the risk register, the technical backlog, the incident management, the testing strategy, and the architecture decision records (ADRs) of the project (Vehicle Washing Development Team, 2026a). The findings of the review of the manuals of October 7, 9, and 16, 2026, and of the complete review of the system of October 16 (Annex B of the Technical Manual and the annexes of the other manuals) are also included.
 
 ## 5. Objective
 
@@ -263,6 +264,15 @@ Table 6 records the nonconformities already corrected, with their root cause and
 | AC-41 | On a phone (360 px) there were buttons off the screen, overlapping titles, the ☰ button over the titles, and filters outside their card. | P2 | Styles designed for desktop, without phone rules, and a fixed 20 px line height inherited from the Material theme. | Phone rules in the landing, authentication, customer dashboard, assigned services, management, and settings; global room for the ☰ button and a relative line height for titles. | 60 web screens (360 and 768 px) and 26 app screens with no overflow (tests, Table 5b). | Responsive design check | 2026-10-17 |
 | AC-42 | In the app, the date and search inputs were squashed when placed in a column. | P3 | The box used *flex: 1*, which starts from a height of 0 in a column. | It grows only in width and keeps a minimum height of 46 px (*FilterInputs.tsx*). | History and Ratings show the full inputs. | Responsive design check | 2026-10-17 |
 | AC-43 | The next service progress showed 10% or 25% although the wash had not started. | P3 | The progress table gave a percentage to the Scheduled and Confirmed statuses. | Scheduled and Confirmed stay at 0% on the web and in the app. | The dashboard shows 0% until the operator starts the service. | Usage report | 2026-10-16 |
+| AC-44 | A token kept working up to an hour after logout or after the administrator disabled the account. | P2 | Each service only checked the JWT signature and expiry (ADR-006); nobody asked whether the session was still open. | security-service rejects the token of a closed session (*sid* claim, *ActiveSessionValidator*) and the gateway confirms it with *GET /api/v1/auth/session* before passing the request on, keeping the answer 30 seconds per token. | *SessionCheckFilterTest*, *ApiSecurityWebTest* (401 with the token of a closed session); 19 end-to-end tests with the check on. | TD-024 | 2026-10-21 |
+| AC-45 | Bookings nobody started stayed Scheduled or Confirmed forever, and each admin screen counted "without an operator" its own way. | P2 | There was no close for expired bookings and the "without an operator" rule was repeated in the screens. | *ExpiredBookingsJob* closes every 5 minutes the ones one hour past their end without being started (Confirmed → No-show; Scheduled → Cancelled with the *EXPIRED* reason), and *GET /api/v1/admin/assignments/unassigned* is the single count of bookings without an operator. | *BookingTest*, *BookingServiceTest*, *OperationsServiceTest*, *reservations-store.spec.ts*. | TD-025 | 2026-10-21 |
+| AC-46 | A manual and an automatic assignment at the same time could give an operator two services at the same time. | P2 | Both assignments read the operator schedule and saved without coordinating. | Both take the same SQL Server lock (*sp_getapplock* on *operations-assignment*) before reading and saving. | *OperationsServiceTest* checks that the lock is taken before saving. | TD-026 | 2026-10-21 |
+| AC-47 | The server accepted payment receipts of any size, and a phone photo of several MB was stored as it was in the database. | P3 | The size limit was not in the payment domain. | payment-service rejects a receipt over 2 MB (*RECEIPT_TOO_LARGE*) and the web and the app compress it before sending it. | *PaymentTests* (over 2 MB and exactly 2 MB). | Review of 2026-10-21 | 2026-10-21 |
+| AC-48 | The customer saw the Cash option even when the administrator had disabled that account. | P3 | *GET /api/v1/payment-accounts* did not return the cash account and the web and the app always added it on their own. | The API returns the cash account while it is active and the clients show Cash only if it comes in the list. | Payment screen with the cash account active and disabled. | Software Design, finding 8 | 2026-10-21 |
+| AC-49 | The Reports cards and charts counted bookings that had not been finished as services done. | P3 | The count took the bookings by date without looking at their status. | Only completed bookings count. | *reports.spec.ts*. | Review of 2026-10-21 | 2026-10-21 |
+| AC-50 | The roles tab promised that the permissions define what each user can do. | P3 | Real authorization uses the role in the token and the permission matrix is for reference (ADR-015), but the text did not say so. | The tab and the dialog explain that the roles are fixed and that the role decides the access. | *management.spec.ts* (fixed roles). | ADR-015 | 2026-10-21 |
+| AC-51 | After signing out or signing in with another account in one tab, the other browser tabs kept showing the previous session. | P3 | Each tab read the session only when it opened. | The tabs listen to the *storage* event: if another one signs out they go back to sign-in, and if another account signs in they reload. | *auth.spec.ts* (tabs). | Review of 2026-10-21 | 2026-10-21 |
+| AC-52 | The transaction log of the server database grew with no limit. | P2 | The database used the full recovery model without transaction log backups. | The database moves to the simple recovery model and is backed up in full every day (AP-04). | *RECOVERY SIMPLE* on the server; *lavarapido-infra*, commit of 2026-10-21. | R-008 | 2026-10-21 |
 
 *Note.* Prepared by the authors from the Git history of the repositories, the risk register, and the ADRs of the project (Vehicle Washing Development Team, 2026a).
 
@@ -276,6 +286,7 @@ Table 6 records the nonconformities already corrected, with their root cause and
 |---|---|---|---|---|---|---|---|
 | ACO-04 | The table *audit.audit_log* exists but nothing writes to it. | P2 | The triggers were not created and *SESSION_CONTEXT(N'user_id')* is not set. | Audit triggers on the sensitive tables and session context in each service, or remove the table from the design through an ADR. | Backend leader | Medium | Changes of prices, payment accounts, and roles visible in the audit trail. |
 | ACO-13 | Entities edited by administrators do not use optimistic locking: in concurrent edits, the last write wins. | P3 | The *row_version* column exists but is not mapped with *@Version*. | Map *@Version* in booking, customer, and security and answer 409 on conflict. | Backend leader | Low | Test of two updates with the same version. (TD-008) |
+| ACO-14 | The variables of October 21, 2026 (*SESSION_CHECK_\** in the gateway and *BOOKING_EXPIRY_\** in booking-service) are not in *.env.example* or in the *environment* block of *docker-compose.yml*, as the Implementation Procedure requires (section 13); in Docker only their defaults can be used. | P3 | They were added with a default in the *application.yml* of each service without updating the *lavarapido-infra* files. | Add them, commented, to *.env.example* and to the *environment* of *api-gateway* and *booking-service*. | Project leader | Low | The six variables appear in both files and *docker compose config* shows them. |
 
 *Note.* Prepared by the authors from the technical backlog, Annex B of the Technical Manual, and the verification of the code as of October 16, 2026. Actions ACO-01 to ACO-03 and ACO-05 to ACO-12 were closed and moved to Table 6 (AC-24 to AC-34).
 
@@ -292,7 +303,7 @@ Preventive actions address the causes of risks that have not yet materialized or
 | AP-01 | Regressions reach *develop* unnoticed. | Continuous integration per repository (*./mvnw verify*, *dotnet test*, *ng build*, *ng test*, and *tsc*) and the rule of merging only with a green result. | Project leader | High | Closed (2026-10-19): GitHub Actions in the 10 repositories, on every push or pull request to *develop* and *main* | R-003, TD-006 |
 | AP-02 | An event is lost between the commit and the publication. | Outbox pattern in security, booking, operations, and payment. | Backend leader | Low | Accepted as a risk until leaving the academic scope | R-005, TD-011 |
 | AP-03 | Secret leakage (*.env*, mail app password, *JWT_SECRET*). | Keep *.env* ignored, check with *git check-ignore* before each implementation, and rotate secrets every quarter or on suspicion. | Whole team | High | In progress (permanent) | R-004 |
-| AP-04 | Data loss before a demonstration or in operation. | Automated daily backup with verification and a monthly restoration test (Administrator Manual, section 14). | IT administrator | High | Open | R-008 |
+| AP-04 | Data loss before a demonstration or in operation. | Automated daily backup with verification and a restoration test (Administrator Manual, section 14). | IT administrator | High | Closed (2026-10-21): *backup-db.sh* backs up the database every day and before every update, *verify-backup.sh* restores each backup under another name to check it, and the last 14 are kept (Deployment Document) | R-008 |
 | AP-05 | The documentation drifts from the code again. | Pull request checklist that requires updating the affected models, OpenAPI contracts, ADRs, and manuals; review of the manuals before each implementation. | Author of each pull request | Medium | In progress (permanent) | R-010 |
 | AP-06 | Implementing with *MESSAGING_ENABLED=false*, without *INTERNAL_API_KEY*, or with the *dev* profile. | Checklist of Annex A of the Implementation Procedure. | IT administrator | Medium | Closed (included in the procedure) | R-I02, R-I03 |
 | AP-07 | Persistence defects (locks and triggers) seen only by hand. | Persistence tests with Testcontainers and a real SQL Server in booking-service. | Backend leader | Low | In progress (the end-to-end suite covers part of the risk) | TD-010 |
@@ -304,6 +315,9 @@ Preventive actions address the causes of risks that have not yet materialized or
 | AP-13 | Confusion caused by the own numbering of the payment changelogs, which repeats the global numbers. | Document the rule in the migration strategy and use the *pay-* prefix in the identifiers. | Backend leader | Low | Closed (documented) | TD-019 |
 | AP-14 | Features built that contradict decisions already recorded (cause of AC-11 and AC-12). | Review the current ADRs and the navigation map before starting a feature, and consult the team when there is a contradiction. | Whole team | Medium | In progress (permanent) | Lesson of ADR-015 |
 | AP-15 | Interface changes that break the phone layout without anyone noticing (cause of AC-41). | Measure the screens at 360 and 768 px with Playwright before merging interface changes, starting from the *e2e/width-360.js* script, and review the screenshots. | Frontend and backend leads | Medium | In progress (permanent) | Lesson from AC-41 |
+| AP-16 | Container logs filling the server disk. | Cap the logs of each container at 3 files of 10 MB. | Project leader | Medium | Closed (2026-10-20): *docker-compose.prod.yml* | Server review |
+| AP-17 | Browser-side attacks against the public site (embedding it in another page, loading scripts from other origins). | Security headers and a content security policy (CSP) in Caddy. | Project leader | Medium | Closed (2026-10-20): *deploy/Caddyfile* | OWASP A05 |
+| AP-18 | A container hanging without anyone noticing. | Health check every 30 seconds in every container, visible in *docker compose ps*. | Project leader | Medium | Closed (2026-10-20): *docker-compose.prod.yml* | Server review |
 
 *Note.* Prepared by the authors from the risk register, the technical backlog, and the security policy of the project.
 
@@ -321,8 +335,6 @@ Preventive actions address the causes of risks that have not yet materialized or
 | AM-04 | Complete the mobile application and build a version with EAS for push notifications. | Immediate notices on the phone. | Frontend leader | Medium | Closed (2026-10-16): APK built with EAS and published at */app/* on the server, with push notices of new versions | ADR-011 |
 | AM-05 | RS256 signing and refresh tokens. | Lower impact of a secret leak and longer sessions without logging in again. | Backend leader | Low | Open | ADR-006 |
 | AM-06 | Store receipts, QR codes, and photos outside the database. | Lighter database and faster backups. | Backend leader | Low | Open | Recommended evolution |
-| AM-07 | Manage the inspection report from the mobile app. | The administrator records the vehicle condition next to the vehicle, with camera photos shrunk on the phone. | Backend lead | Medium | Closed (2026-10-17): *AdminInspection* screen in the app | Team request |
-| AM-08 | Frequently asked questions on the home page. | Visitors solve the most common doubts (booking, payment, cancellation, points) without writing to the car wash. | Backend lead | Low | Closed (2026-10-17) | Landing review |
 | AM-07 | Separate the display fields and the real discount fields in *promotion.promotion*. | Prevents the displayed package and the applied discount from contradicting each other. | Backend leader | Low | Open | ADR-015 |
 | AM-08 | Publish the built web application behind the gateway with HTTPS. | Production-ready environment, without a development server. | Frontend leader | Medium | Closed (2026-10-16): web container with nginx behind Caddy and HTTPS on the public server (Deployment Document) | Implementation Procedure, R-I08 |
 | AM-09 | Coverage (JaCoCo) and static analysis (SonarQube) tools. | Objective code quality metrics. | Project leader | Low | Open | Testing strategy |
@@ -330,6 +342,9 @@ Preventive actions address the causes of risks that have not yet materialized or
 | AM-11 | Replace the figure placeholders of the manuals with real screenshots of the final version. | Complete manuals according to the SENA guide. | Frontend leader | High | Closed (2026-10-16): manuals 4.0 with real screenshots of the system | Annex A of each manual |
 | AM-12 | Use the execution statuses *PAUSED* and *WITH_ISSUE* in the operator interface. | Record pauses and issues of the service. | Frontend leader | Low | Open | Data model |
 | AM-13 | Expose in the panel the sending of general announcements (*SYSTEM_MESSAGE*) to groups of users. | Direct communication with customers and operators without using the API. | Frontend leader | Low | Open | Administrator Manual |
+| AM-14 | Manage the inspection report from the mobile app. | The administrator records the vehicle condition next to the vehicle, with camera photos shrunk on the phone. | Backend lead | Medium | Closed (2026-10-17): *AdminInspection* screen in the app | Team request |
+| AM-15 | Frequently asked questions on the home page. | Visitors solve the most common doubts (booking, payment, cancellation, points) without writing to the car wash. | Backend lead | Low | Closed (2026-10-17) | Landing review |
+| AM-16 | Require installing the new APK when there are native changes that do not arrive over the internet. | Nobody keeps using an app version without the fixes that depend on the APK. | Backend leader | Medium | Closed (2026-10-21): a screen that only lets the user download the published APK if its *versionCode* is higher; if the server does not answer, the app goes on | Review of 2026-10-21 |
 
 *Note.* Prepared by the authors from the recommended evolution of the Technical Manual, the ADRs, and the limitations documented in the manuals.
 
@@ -339,18 +354,18 @@ Preventive actions address the causes of risks that have not yet materialized or
 
 *Action Management Indicators*
 
-| Indicator | Formula | Target | Value as of 2026-10-17 |
+| Indicator | Formula | Target | Value as of 2026-10-21 |
 |---|---|---|---|
-| Closed corrective actions | Closed corrective actions / recorded corrective actions × 100 | ≥ 70% per delivery | 43 / 45 = 96% |
+| Closed corrective actions | Closed corrective actions / recorded corrective actions × 100 | ≥ 70% per delivery | 52 / 55 = 95% |
 | Open P0 and P1 corrective actions | Number of ACO with severity P0 or P1 | 0 before an implementation | 0 |
 | On-time closure | Actions closed within the time of their severity / closed actions × 100 | ≥ 90% | To be measured from version 1.0 |
 | Recurrence | Closed corrective actions whose problem reappears / closed corrective actions × 100 | 0% | 0% |
 | Escaped defects | Defects found in acceptance or operation / total defects of the period × 100 | Downward trend | To be measured from the first implementation |
-| Automated tests | Tests run and passed in every repository | Increasing | 655 unit and integration tests (web 43, gateway 34, Java services 430, and payment-service 148) as of October 19, 2026, 19 end-to-end tests, and 42 functional cases |
+| Automated tests | Tests run and passed in every repository | Increasing | 689 unit and integration tests (web 60, gateway 40, Java services 439, and payment-service 150) and 19 end-to-end tests as of October 21, 2026, and 42 functional cases as of October 19 |
 
-*Note.* Prepared by the authors. The test count corresponds to the run of October 16, 2026; version 1.0 counted annotations (about 400).
+*Note.* Prepared by the authors. The test count corresponds to the run of October 21, 2026; version 1.0 counted annotations (about 400).
 
-The project leader reviews the indicators at each retrospective and before each implementation. With AC-25 and AC-26 closed there are no open P0 or P1 corrective actions left, so entry criterion E6 of the Implementation Procedure is met. The two open corrective actions (ACO-04 and ACO-13) are P2 and P3 and have a recorded action.
+The project leader reviews the indicators at each retrospective and before each implementation. With AC-25 and AC-26 closed there are no open P0 or P1 corrective actions left, so entry criterion E6 of the Implementation Procedure is met. The three open corrective actions (ACO-04, ACO-13, and ACO-14) are P2 and P3 and have a recorded action.
 
 ## 14. Lessons Learned
 
@@ -364,7 +379,7 @@ The project leader reviews the indicators at each retrospective and before each 
 | L-02 | A service must not start before its dependencies are healthy; the orchestration must guarantee it. | AC-02 |
 | L-03 | Agreeing on the data model before coding a service prevents duplicate implementations. | AC-03 |
 | L-04 | Every decision already recorded in an ADR must be reviewed before building; a contradiction is discussed before coding. | AC-11, AC-12, AP-14 |
-| L-05 | A business rule must live in a single service, and the screens must query it, not repeat it. | AC-15 |
+| L-05 | A business rule must live in a single service, and the screens must query it, not repeat it. | AC-15, AC-45 |
 | L-06 | A preference that the user changes must be saved in their account to have an effect. | AC-16, AC-17 |
 | L-07 | A new service is not finished until it has a container, a gateway route, Compose variables, and published events. | AC-04, AC-05, AC-06 |
 | L-08 | Administrative endpoints also need strict input validation and allowlists. | AC-18, AC-19 |
@@ -372,6 +387,9 @@ The project leader reviews the indicators at each retrospective and before each 
 | L-10 | An accounting ledger needs reversal movements and concurrency control from day one. | AC-09 |
 | L-11 | A "create if it does not exist" operation must handle the race between two simultaneous requests. | AC-35 |
 | L-12 | Each interface option must say exactly what it does with the person's data: deactivating is not deleting. | AC-37 |
+| L-13 | Signing out must void the token in every service, not just delete it from the browser. | AC-44 |
+| L-14 | What is done by hand and what the system does on its own over the same resource need the same lock. | AC-46 |
+| L-15 | A backup only counts once it has been shown that it can be restored. | AP-04, AC-52 |
 
 *Note.* Prepared by the authors from the register of closed risks and the actions of this document.
 
@@ -463,14 +481,17 @@ Vehicle Washing Development Team. (2026a). *Vehicle washing management system: P
 | Project risk | Technical debt | Actions |
 |---|---|---|
 | R-002 Partial payment-service (closed as C-005) | TD-014, TD-015, TD-016, TD-017, TD-018 | AC-04 to AC-10, AC-27 |
-| R-003 Regressions without a safety net | TD-001, TD-006, TD-010 | AC-24, AP-01, AP-07, AM-10 |
+| R-003 Regressions without a safety net | TD-001, TD-006, TD-010, TD-027 | AC-24, AP-01, AP-07, AM-10 |
 | R-004 Secret leakage | — | AP-03 |
 | R-005 Lost event | TD-011 | AP-02 |
 | R-007 Known requirement gaps (closed as C-006) | TD-002, TD-003, TD-009 | AC-16, AC-17, AC-25, AC-31 |
-| R-008 Data loss | — | AP-04 |
+| R-008 Data loss | — | AP-04, AC-52 |
 | R-010 Documentation drift | — | AC-23, AC-34, AC-38, AP-05 |
 | R-011 Public server off | — | Implementation Procedure, R-I04 |
 | API abuse | TD-022 | AP-11 |
+| Closed sessions that stay active | TD-024 | AC-44 |
+| Booking and operator schedule | TD-025, TD-026 | AC-45, AC-46 |
+| Availability of the public server | — | AP-16, AP-17, AP-18 |
 | R-001 operations-service integration (closed as C-004) | TD-020 | AM-01 |
 | Law 1581 of 2012 | — | AC-26, AC-37 |
 
