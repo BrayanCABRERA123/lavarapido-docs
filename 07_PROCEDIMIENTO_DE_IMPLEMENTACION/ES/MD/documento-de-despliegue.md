@@ -75,6 +75,7 @@
 | 1.3 | 2026-10-19 | Juan Camilo Guilombo | Actualización del 19-10-2026 (migración 039 y app 1.1.0), acceso SSH con llave propia por integrante, despliegue desde GitHub Actions, integración continua en los 10 repositorios y evidencias nuevas de terminal y de la web |
 | 1.4 | 2026-10-20 | Equipo de desarrollo | Diagrama de topología: customer-service también se conecta a RabbitMQ (consume `security.user_registered` para crear el perfil del cliente) |
 | 1.5 | 2026-10-21 | Brayan Cabrera | Respaldos automáticos verificados (3.2), encabezados de seguridad y CSP (2.2.3 y 5.2.4), chequeos de salud y registros limitados en todos los contenedores, modelo de recuperación `SIMPLE`, actualización del 21-10-2026 (1.3.6), cambios del código del 21-10-2026 pendientes de desplegar (1.3.7) y retiro del VPS de Hostinger |
+| 1.6 | 2026-10-21 | Equipo de desarrollo | Cambios de la noche del 21-10-2026 en 1.3.7: las reservas confirmadas con operario que nadie registró ya no se cierran solas como "No asistió" y pasan a "Por cerrar", migraciones 040 (operations) y 041 (notification), variables `FOLLOW_UP_*`, arreglo de los campos `null` en los eventos de notification-service y ajustes de la app móvil |
 
 ### 1.3 Resumen de Cambios (Release Notes)
 
@@ -167,13 +168,14 @@ El 21-10-2026 a las 05:21 (hora del servidor) se reconstruyeron las imágenes co
 Están en `develop` desde el 21-10-2026 y entran con la próxima ejecución de `update-server.sh` o del flujo "Desplegar en Azure":
 
 - **security-service y api-gateway:** el token de una sesión cerrada (logout, cuenta inhabilitada o desactivada) deja de servir; el gateway lo confirma con `GET /api/v1/auth/session` y guarda la respuesta 30 segundos por token.
-- **booking-service:** cada 5 minutos se cierran las reservas que nadie inició una hora después de su fin; la semilla 112 agrega el motivo `EXPIRED`, y booking-service la aplica al arrancar.
-- **operations-service:** la asignación manual y la automática usan el mismo candado, y `GET /api/v1/admin/assignments/unassigned` da el conteo único de reservas sin operario.
+- **booking-service:** cada 5 minutos se cancela, con el motivo del sistema `EXPIRED` ("Venció sin confirmarse"), la reserva programada que siguió sin confirmarse una hora después de su fin; la semilla 112 agrega ese motivo, y booking-service la aplica al arrancar. La ruta interna `POST /internal/v1/bookings/{id}/no-show` deja en "No asistió" una reserva confirmada vencida, solo cuando la pide operations-service (409 `BOOKING_NOT_EXPIRED` si todavía no vence).
+- **operations-service:** la asignación manual y la automática usan el mismo candado, y `GET /api/v1/admin/assignments/unassigned` da el conteo único de reservas sin operario, que ahora usan la web y la app móvil. Cada 5 minutos, `FollowUpJob` deja en "No asistió" la reserva confirmada que nunca tuvo operario y terminó hace más de una hora; la que tenía operario y nadie inició o finalizó nunca se marca sola: pasa a la lista "Por cerrar" del administrador (`GET /api/v1/admin/assignments/to-close` y `POST /api/v1/admin/assignments/{bookingId}/attended`), con un solo aviso al operario y a los administradores. La migración 040 agrega `execution.service_execution.follow_up_notice_at`.
+- **notification-service:** avisos `OPERATOR_SERVICE_NOT_REGISTERED` y `ADMIN_SERVICE_NOT_REGISTERED` (bandeja y push, migración 041), y un campo `null` en el payload de un evento ya no manda el mensaje a la cola de errores (DLQ).
 - **payment-service:** comprobantes de máximo 2 MB (`RECEIPT_TOO_LARGE`) y la cuenta de efectivo en la lista del cliente solo mientras está activa.
-- **Web:** sesión sincronizada entre pestañas, comprobante comprimido, lupa para el QR, reportes que cuentan solo reservas completadas y textos de la pestaña de roles.
-- **App móvil:** comprobante comprimido, lupa para el QR y pantalla de actualización obligatoria del APK. No agregan dependencias nativas, así que llegan con `npm run publish:update`.
+- **Web:** sesión sincronizada entre pestañas, comprobante comprimido, lupa para el QR, reportes que cuentan solo reservas completadas, textos de la pestaña de roles y tarjeta "Por cerrar" en el inicio del administrador.
+- **App móvil:** comprobante comprimido, lupa para el QR, pantalla de actualización obligatoria del APK, tarjeta "Por cerrar" y conteo de reservas sin asignar con la regla de operations-service; el formulario de reserva del administrador guarda el operario y el estado elegidos, la barra de puntos del cliente queda completa cuando no queda nada por desbloquear y no muestra "0% OFF", el operario ve "—" cuando no tiene calificaciones, la pestaña de roles indica que los 3 roles son fijos y los avisos nuevos abren la pantalla de servicios del operario o el inicio del administrador. No agregan dependencias nativas, así que llegan con `npm run publish:update`.
 
-Las variables nuevas (`SESSION_CHECK_*` y `BOOKING_EXPIRY_*`) tienen valor por defecto y el compose no las pasa: no se agregan a `.env.production`.
+Las variables nuevas (`SESSION_CHECK_*`, `BOOKING_EXPIRY_*` y `FOLLOW_UP_*`) tienen valor por defecto y el compose no las pasa: no se agregan a `.env.production`. `FOLLOW_UP_*` necesita `INTERNAL_API_KEY`, que ya está en `.env.production`.
 
 ---
 
@@ -439,7 +441,7 @@ Se consulta con `tail -20 ~/lavarapido/backups/backup.log`; solo los problemas, 
 | `PUBLIC_URL` / `SITE_ADDRESS` | Dirección pública (CORS, enlaces de correo) y dominio de Caddy |
 | `PUSH_ENABLED` / `MESSAGING_ENABLED` | `true`: push con Expo y eventos con RabbitMQ |
 
-Las variables del 21-10-2026 no van en `.env.production`: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL` y `SESSION_CHECK_TIMEOUT` (chequeo de sesión del gateway: activo, 30 s y 3 s) y `BOOKING_EXPIRY_CHECK_ENABLED`, `BOOKING_EXPIRY_CHECK_INTERVAL` y `BOOKING_EXPIRY_GRACE_MINUTES` (cierre de reservas vencidas: activo, cada 5 minutos y 60 minutos de margen) quedan con su valor por defecto, porque el compose no las pasa a los contenedores.
+Las variables del 21-10-2026 no van en `.env.production`: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL` y `SESSION_CHECK_TIMEOUT` (chequeo de sesión del gateway: activo, 30 s y 3 s), `BOOKING_EXPIRY_CHECK_ENABLED` y `BOOKING_EXPIRY_CHECK_INTERVAL` (cancelación de las reservas programadas que vencieron sin confirmarse: activa y cada 5 minutos), `BOOKING_EXPIRY_GRACE_MINUTES` (60 minutos de margen, que usan booking-service y operations-service) y `FOLLOW_UP_ENABLED` y `FOLLOW_UP_INTERVAL` (seguimiento de las reservas que terminaron y nadie cerró: activo y cada 5 minutos) quedan con su valor por defecto, porque el compose no las pasa a los contenedores.
 
 #### 3.3.3 Límites de memoria y runtime (JVM -Xmx, ASPNETCORE_ENVIRONMENT)
 
@@ -511,7 +513,7 @@ Las migraciones son **automáticas**:
 
 1. El contenedor `db-init` crea la base `LavaRapido` si no existe y la deja en modelo de recuperación `SIMPLE`.
 2. El contenedor `payment-migrate` (Liquibase 4.29) aplica los changelogs de payment-service (`db/changelog/db.changelog-master.yaml`) y termina.
-3. Cada servicio Java aplica sus propios changelogs al arrancar. La numeración es global: 001–039 más las semillas 1xx de catálogos.
+3. Cada servicio Java aplica sus propios changelogs al arrancar. La numeración es global: 001–041 más las semillas 1xx de catálogos (la 040 de operations-service y la 041 de notification-service son del 21-10-2026 y entran con la próxima actualización).
 4. Hibernate solo valida que el modelo coincida con las tablas (`ddl-auto: validate`); nunca altera tablas.
 
 Producción **no carga datos de prueba**: solo catálogos (roles, servicios, estados, horario y datos del negocio).
@@ -532,7 +534,7 @@ q "SELECT u.username, r.code FROM security.app_user u JOIN security.user_role ur
 
 Resultado esperado:
 - los 9 esquemas con sus tablas;
-- en cada servicio, `ok` igual a `changesets` (16-10-2026: 143 de 143; 19-10-2026: 144 de 144, con la 039);
+- en cada servicio, `ok` igual a `changesets` (16-10-2026: 143 de 143; 19-10-2026: 144 de 144, con la 039); después de desplegar los cambios del 21-10-2026 deben aparecer también la 040 en `DATABASECHANGELOG_OPERATIONS` y la 041 en `DATABASECHANGELOG_NOTIFICATION`;
 - el administrador inicial creado (log de security: `First administrator created`).
 
 ### 4.3 Despliegue y Orquestación del Stack de Aplicación
