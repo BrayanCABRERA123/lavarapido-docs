@@ -74,7 +74,7 @@ La web tiene 35 pantallas enrutadas y la app móvil 31 pantallas; ambas separan 
 | `/client/notifications` | Notificaciones | CLIENT | Bandeja de avisos; al hacer clic se abre el detalle con **Ir a...** | `/notifications/*` |
 | `/client/profile` | Perfil | CLIENT | Datos personales, dirección, correo y contraseña | `/users/me`, `/users/me/address`, `/users/me/password`, `/users/me/email` |
 | `/client/configuration` | Configuración | CLIENT | Tema, idioma y canales de aviso | `/users/me/preferences` |
-| `/admin` | Dashboard | ADMIN | Indicadores del día y alertas | `GET /admin/bookings/day-summary` y stores de reservas, pagos, operarios y horario |
+| `/admin` | Dashboard | ADMIN | Indicadores del día y alertas, reservas sin operario y la tarjeta "Por cerrar" (solo cuando hay algo pendiente) | `GET /admin/bookings/day-summary`, `GET /admin/assignments/unassigned`, `GET /admin/assignments/to-close`, `POST /admin/assignments/{bookingId}/attended` y stores de reservas, pagos, operarios y horario |
 | `/admin/reservations` | Reservas | ADMIN | Crear, reprogramar, cambiar estado y asignar operario | `/admin/bookings/*`, `/admin/assignments/*` |
 | `/admin/reservations/:id/inspection` | Inspección | ADMIN | Recorrer las fases, registrar hallazgos con fotos, publicar y compartir | `/admin/inspections/{bookingId}/**` |
 | `/admin/payments` | Pagos | ADMIN | Revisar, aprobar, rechazar y reembolsar | `/admin/payments/*` |
@@ -297,7 +297,7 @@ Hay dos estilos. Las consultas que necesitan respuesta inmediata van por REST s�
 | --- | --- | --- | --- |
 | booking | customer | Validar que el vehículo sea del cliente | `CUSTOMER_SERVICE_URL` |
 | customer | security | Obtener el `person_id` si el evento de registro no llegó | `SECURITY_SERVICE_URL` |
-| operations | booking | Leer, iniciar y terminar reservas con el token del usuario; leer reservas sin usuario para la asignación automática y los operarios libres (`/internal/v1/bookings`) | `BOOKING_SERVICE_URL`, `BOOKING_INTERNAL_URL`, `INTERNAL_API_KEY` |
+| operations | booking | Leer, iniciar y terminar reservas con el token del usuario; leer reservas sin usuario para la asignación automática, los operarios libres y la tarea de seguimiento, y dejar en NO\_SHOW una reserva confirmada que terminó sin operario (`/internal/v1/bookings`, `POST /internal/v1/bookings/{id}/no-show`) | `BOOKING_SERVICE_URL`, `BOOKING_INTERNAL_URL`, `INTERNAL_API_KEY` |
 | operations | security | Nombres de operarios y clientes, y si la cuenta sigue activa (ruta interna con llave compartida) | `SECURITY_SERVICE_URL`, `SECURITY_INTERNAL_URL`, `INTERNAL_API_KEY` |
 | payment | booking | Consultar la reserva y su valor a pagar | `BOOKING_SERVICE_URL` |
 | notification | security | Correo e idioma de cada cuenta y lista de administradores (`/internal/v1/users`) | `SECURITY_SERVICE_URL`, `INTERNAL_API_KEY` |
@@ -316,14 +316,14 @@ Hay dos estilos. Las consultas que necesitan respuesta inmediata van por REST s�
 | `security.user.email-changed`, `security.user.password-changed`, `security.user.deactivated` | security (solo los escribe en el log) | Ninguno |
 | `booking.confirmed` | booking | notification (aviso y recordatorios), operations (asignación automática, con el operario que eligió el cliente) |
 | `booking.cancelled` | booking (también cuando el sistema cancela una reserva programada que venció) | notification |
-| `execution.operator_assigned`, `execution.service_started`, `execution.service_completed`, `execution.inspection_shared` | operations | notification |
+| `execution.operator_assigned`, `execution.service_started`, `execution.service_completed`, `execution.inspection_shared`, `execution.service_not_started`, `execution.service_not_finished` | operations | notification |
 | `payment.confirmed`, `payment.rejected`, `payment.refunded`, `payment.promotion_redeemed`, `payment.loyalty_points_earned` | payment | notification |
 
-> *Nota.* Fuente: `BookingEvent.java:17-18`, `ExecutionEvent.java:14-16`, `InspectionSharedEvent.java:15`, `PaymentIntegrationEvents.cs`, `CustomerProvisioned.java:15` y la lista `ROUTING_KEYS` de `notification-service/.../RabbitMessagingConfig.java`. notification escucha también `booking.created`, pero ningún servicio publica esa llave. El cierre automático de una reserva confirmada vencida (pasa a NO\_SHOW) no publica evento.
+> *Nota.* Fuente: `BookingEvent.java:17-18`, `ExecutionEvent.java:14-19`, `InspectionSharedEvent.java:15`, `PaymentIntegrationEvents.cs`, `CustomerProvisioned.java:15` y la lista `ROUTING_KEYS` de `notification-service/.../RabbitMessagingConfig.java`. notification escucha también `booking.created`, pero ningún servicio publica esa llave. Dejar en NO\_SHOW una reserva confirmada que terminó sin operario no publica evento, y tampoco cerrarla como "Se atendió" desde "Por cerrar": no se publica `ServiceCompleted`, para que al cliente no le llegue "ya puedes recogerlo" horas después. `ServiceNotStarted` y `ServiceNotFinished` se convierten en el aviso `OPERATOR_SERVICE_NOT_REGISTERED` para el operario y `ADMIN_SERVICE_NOT_REGISTERED` para cada administrador activo (bandeja y push, nunca correo).
 
-Las colas de notification y customer tienen su cola de mensajes muertos (dead letter). La cola de operations (`operations-service.events`, solo `booking.confirmed`) no la tiene: si la asignación automática falla, se registra en el log y la reserva queda para la alerta de reserva sin operario y la asignación manual (`BookingConfirmedListener.java`). notification guarda el `event_id` de cada evento en `notification.processed_event` para ignorar duplicados, porque la entrega es "al menos una vez" (`DomainEventConsumerService.java:61-72`). La mensajería se activa con `MESSAGING_ENABLED`; si está apagada, los servicios Java usan un publicador que solo escribe en el log (`LoggingDomainEventPublisher.java:16`).
+Las colas de notification y customer tienen su cola de mensajes muertos (dead letter). Desde el 21 de octubre de 2026, un campo `null` en el payload de un evento ya no manda el mensaje completo a la cola de mensajes muertos de notification: ese campo se ignora (`DomainEventEnvelope.java`). La cola de operations (`operations-service.events`, solo `booking.confirmed`) no la tiene: si la asignación automática falla, se registra en el log y la reserva queda para la alerta de reserva sin operario y la asignación manual (`BookingConfirmedListener.java`). notification guarda el `event_id` de cada evento en `notification.processed_event` para ignorar duplicados, porque la entrega es "al menos una vez" (`DomainEventConsumerService.java:61-72`). La mensajería se activa con `MESSAGING_ENABLED`; si está apagada, los servicios Java usan un publicador que solo escribe en el log (`LoggingDomainEventPublisher.java:16`).
 
-Desde el 21 de octubre de 2026 booking-service tiene además una tarea programada, `ExpiredBookingsJob`, que cada 5 minutos cierra las reservas que nadie inició una hora después de su hora de fin: la confirmada pasa a NO\_SHOW y la programada se cancela con el motivo `EXPIRED`. Así se liberan el operario y la bahía. La configuran `BOOKING_EXPIRY_CHECK_ENABLED`, `BOOKING_EXPIRY_CHECK_INTERVAL` y `BOOKING_EXPIRY_GRACE_MINUTES`, que tampoco pasan por el compose, así que en Docker la tarea corre con sus valores por defecto (`ExpiredBookingsJob.java`, `BookingService.closeExpired`).
+Desde el 21 de octubre de 2026 dos tareas programadas se ocupan de las reservas que terminaron y nadie cerró, y el sistema solo decide por su cuenta cuando no hay duda. En booking-service, `ExpiredBookingsJob` cancela cada 5 minutos, con el motivo del sistema `EXPIRED` ("Venció sin confirmarse"), la reserva que sigue programada una hora después de su hora de fin, y publica `booking.cancelled` (`ExpiredBookingsJob.java`, `BookingService.closeExpired`). En operations-service, `FollowUpJob` aplica `FollowUpPolicy` cada 5 minutos: la reserva confirmada que nunca tuvo operario y terminó hace más de una hora pasa a NO\_SHOW por la ruta interna de booking, que vuelve a comprobar que venció (409 `BOOKING_NOT_EXPIRED`); la confirmada con operario que nadie inició (`NOT_STARTED`) o la que está en curso y nadie finalizó una hora después de su fin (`NOT_FINISHED`) nunca cambia sola: pasa a la lista "Por cerrar" del administrador (`GET /api/v1/admin/assignments/to-close`), quien la cierra como "Se atendió" (`POST /api/v1/admin/assignments/{bookingId}/attended`, 409 `BOOKING_NOT_TO_CLOSE` si no está pendiente) o como "No asistió" con el cambio de estado de la reserva. Para avisar una sola vez se guarda `execution.service_execution.follow_up_notice_at` (changelog `040`), que se borra al iniciar el servicio. Así se evita registrar como inasistencia un servicio que sí se hizo y no se registró. Las variables son `BOOKING_EXPIRY_GRACE_MINUTES` (60, la usan booking y operations), `BOOKING_EXPIRY_CHECK_ENABLED` y `BOOKING_EXPIRY_CHECK_INTERVAL` (booking, `true` y `PT5M`), y `FOLLOW_UP_ENABLED` y `FOLLOW_UP_INTERVAL` (operations, `true` y `PT5M`; necesita `INTERNAL_API_KEY`). Tampoco pasan por el compose, así que en Docker las tareas corren con sus valores por defecto (`FollowUpJob.java`, `FollowUpService.java`).
 
 ### 3.4 Capas internas de cada servicio (hexagonal)
 
@@ -731,7 +731,7 @@ Notación: PK = llave primaria, UK = valor único, → = llave foránea, ⇢ = r
 - `execution.operator(operator_id PK, user_id ⇢ security.app_user UK, hired_on, is_active)`
 - `execution.operator_availability(operator_availability_id PK, operator_id → operator, day_of_week, starts_at, ends_at, is_active)`
 - `execution.operator_absence(operator_absence_id PK, operator_id → operator, starts_at, ends_at, reason)`
-- `execution.service_execution(service_execution_id PK, booking_service_id ⇢ booking.booking_service UK, operator_id → operator, execution_status_id → execution_status, started_at, finished_at, quality_rating, quality_comment, rated_at, is_comment_visible)`
+- `execution.service_execution(service_execution_id PK, booking_service_id ⇢ booking.booking_service UK, operator_id → operator, execution_status_id → execution_status, started_at, finished_at, quality_rating, quality_comment, rated_at, is_comment_visible, follow_up_notice_at)`
 - `execution.operator_profile(operator_id PK → operator, specialty, updated_at, updated_by)` · `execution.operator_skill(operator_skill_id PK, operator_id → operator, name, skill_level, display_order)`
 - `execution.inspection_report(inspection_report_id PK, booking_id ⇢ booking.booking UK, booking_code, vehicle, plate, services, booking_date, booking_time, duration_minutes, public_token UK, is_published, published_at)`
 - `execution.inspection_phase(inspection_phase_id PK, inspection_report_id → inspection_report, phase, status, started_at, finished_at)` · `execution.inspection_finding(inspection_finding_id PK, inspection_report_id → inspection_report, phase, area, severity, note)` · `execution.inspection_photo(inspection_photo_id PK, inspection_finding_id → inspection_finding, content_type, content, size_bytes)`
@@ -1248,6 +1248,7 @@ Operarios y ejecución de servicios. Dueño: operations-service.
 | quality_comment | NVARCHAR(500) | Sí |  | Comentario; solo con calificación |
 | rated_at | DATETIME2(3) | Sí |  | Fecha de la calificación |
 | is_comment_visible | BIT | No |  | Si el comentario se muestra |
+| follow_up_notice_at | DATETIME2(3) | Sí |  | Cuándo se avisó al operario y a los administradores que el servicio terminó sin registrarse; se borra al iniciar el servicio (changelog `040`) |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Bloque de auditoría (sección 5.1) |
 
 **Tabla 43**
@@ -1533,7 +1534,7 @@ Notificaciones, dispositivos y recordatorios. Dueño: notification-service.
 | Campo | Tipo | Nulo | Llave | Descripción |
 | --- | --- | --- | --- | --- |
 | notification_type_id | SMALLINT IDENTITY | No | PK | Identificador |
-| code | NVARCHAR(40) | No | UK | Uno de los 24 códigos, de `USER_WELCOME` a `APP_UPDATE_AVAILABLE` (changelog `038`) |
+| code | NVARCHAR(40) | No | UK | Uno de los 26 códigos, de `USER_WELCOME` a `ADMIN_SERVICE_NOT_REGISTERED` (changelogs `038` y `041`) |
 | name | NVARCHAR(80) | No |  | Nombre visible |
 | display_order | SMALLINT | No |  | Orden de presentación |
 | is_active | BIT | No |  | Tipo vigente |
@@ -2135,6 +2136,7 @@ classDiagram
     +changeableByCustomer(now) boolean
     +isExpired(now, grace) boolean
     +expire(systemReason)
+    +markUnattended(now, grace)
     +subtotal() BigDecimal
     +total() BigDecimal
     +durationMinutes() int
@@ -2324,6 +2326,7 @@ classDiagram
     +getForService(bookingId) BookingView
     +listForService(from, to) List~BookingView~
     +closeExpired() int
+    +markUnattended(bookingId) BookingView
   }
   class CatalogService {
     <<application service>>
@@ -2403,7 +2406,7 @@ classDiagram
   }
 ```
 
-> *Nota.* Adaptadores de salida: `BookingPersistenceAdapter`, `CatalogPersistenceAdapter`, `SchedulePersistenceAdapter` y `BayPersistenceAdapter` (JPA); `CustomerServiceDirectory` (REST a customer-service); `RabbitDomainEventPublisher` y `LoggingDomainEventPublisher`. Adaptadores de entrada: `BookingController`, `AdminBookingController`, `OperatorBookingController`, `CatalogController`, `ScheduleController` e `InternalBookingController` (`/internal/v1/bookings`, con `X-Internal-Key`); `ExpiredBookingsJob` (tarea programada que llama a `closeExpired`). Fuente: `lavarapido-booking-service/src/main/java/com/lavarapido/booking/`.
+> *Nota.* Adaptadores de salida: `BookingPersistenceAdapter`, `CatalogPersistenceAdapter`, `SchedulePersistenceAdapter` y `BayPersistenceAdapter` (JPA); `CustomerServiceDirectory` (REST a customer-service); `RabbitDomainEventPublisher` y `LoggingDomainEventPublisher`. Adaptadores de entrada: `BookingController`, `AdminBookingController`, `OperatorBookingController`, `CatalogController`, `ScheduleController` e `InternalBookingController` (`/internal/v1/bookings`, con `X-Internal-Key`, incluida `POST /internal/v1/bookings/{id}/no-show`, que llama a `markUnattended`); `ExpiredBookingsJob` (tarea programada que llama a `closeExpired`). Fuente: `lavarapido-booking-service/src/main/java/com/lavarapido/booking/`.
 
 *Puertos que usa cada servicio.*
 
@@ -2457,10 +2460,13 @@ classDiagram
     -String comment
     -Instant ratedAt
     -boolean commentVisible
+    -Instant followUpNoticeAt
     +assign(bookingServiceId, operatorId) ServiceExecution$
     +reassign(newOperatorId)
     +start(now)
     +finish(now)
+    +closeAsAttended()
+    +followUpNoticeSent(now)
     +rate(stars, text, now)
   }
   class ExecutionStatus {
@@ -2492,6 +2498,10 @@ classDiagram
     +startableAt(booking) Instant
     +check(booking, now)
   }
+  class FollowUpPolicy {
+    <<domain service>>
+    +of(booking, lines, now, grace) Optional~Reason~$
+  }
   class ExecutionEvent {
     <<event>>
     +Type type
@@ -2519,6 +2529,13 @@ classDiagram
     +teamSummary(weekOf) TeamSummary
     +myBookingOperators() List~BookingOperatorView~
     +unassigned(from, to) UnassignedView
+  }
+  class FollowUpService {
+    <<application service>>
+    implements FollowUpUseCase
+    +toClose(from, to) List~ToCloseView~
+    +closeAsAttended(bookingId, adminId)
+    +followUp() FollowUpRun
   }
   class AutoAssignmentPolicy {
     <<domain service>>
@@ -2567,6 +2584,7 @@ classDiagram
     +forService(bookingId) Optional~BookingSnapshot~
     +forService(from, to) List~BookingSnapshot~
     +advance(bookingId, status)
+    +markUnattended(bookingId)
   }
   class UserDirectory {
     <<interface>>
@@ -2588,12 +2606,13 @@ classDiagram
   OperatorProfileRepository ..> OperatorProfile
 ```
 
-> *Nota.* Adaptadores de salida: `OperatorPersistenceAdapter`, `ExecutionPersistenceAdapter`, `OperatorProfilePersistenceAdapter` e `InspectionPersistenceAdapter` (JPA); `BookingServiceDirectory` (REST a booking-service, con el token del usuario o con la llave interna); `SecurityUserDirectory` (REST a security-service); `RabbitDomainEventPublisher` y `LoggingDomainEventPublisher`. Adaptadores de entrada: `OperationsControllers` (rutas de administrador, operario y calificaciones), `AvailableOperatorsController`, `OperatorProfileController`, `InspectionControllers` y `BookingConfirmedListener` (RabbitMQ, asignación automática). Fuente: `lavarapido-operations-service/src/main/java/com/lavarapido/operations/`.
+> *Nota.* Adaptadores de salida: `OperatorPersistenceAdapter`, `ExecutionPersistenceAdapter`, `OperatorProfilePersistenceAdapter` e `InspectionPersistenceAdapter` (JPA); `BookingServiceDirectory` (REST a booking-service, con el token del usuario o con la llave interna); `SecurityUserDirectory` (REST a security-service); `RabbitDomainEventPublisher` y `LoggingDomainEventPublisher`. Adaptadores de entrada: `OperationsControllers` (rutas de administrador, operario y calificaciones), `AvailableOperatorsController`, `OperatorProfileController`, `InspectionControllers`, `FollowUpController` (`/admin/assignments/to-close` y `/admin/assignments/{bookingId}/attended`), `BookingConfirmedListener` (RabbitMQ, asignación automática) y `FollowUpJob` (tarea programada que llama a `followUp`). Fuente: `lavarapido-operations-service/src/main/java/com/lavarapido/operations/`.
 
 *Lo que usa cada servicio de aplicación.*
 
 - `OperationsService`: `OperatorRepository`, `ExecutionRepository`, `BookingDirectory`, `UserDirectory`, `DomainEventPublisher`, `AssignmentPolicy`, `StartPolicy`, `AutoAssignmentPolicy`, `ExecutionEvent`.
 - `OperatorProfileService`: `OperatorProfileRepository`, `OperatorRepository`.
+- `FollowUpService`: `ExecutionRepository`, `BookingDirectory`, `OperatorRepository`, `DomainEventPublisher`, `FollowUpPolicy`, `ExecutionEvent`.
 
 **Figura 26**
 
@@ -3034,6 +3053,8 @@ classDiagram
     SERVICE_COMPLETED
     PAYMENT_CONFIRMED
     ADMIN_BOOKING_UNASSIGNED
+    OPERATOR_SERVICE_NOT_REGISTERED
+    ADMIN_SERVICE_NOT_REGISTERED
     +category() NotificationCategory
   }
   class NotificationCategory {
@@ -3235,7 +3256,7 @@ classDiagram
   }
 ```
 
-> *Nota.* Entre servicios de aplicación la dependencia real es el puerto de entrada: por ejemplo, `DomainEventConsumerService` recibe un `SendNotificationUseCase`, que implementa `NotificationSendingService`. `NotificationTypeCode` tiene 24 códigos; el diagrama muestra solo algunos. Adaptadores de salida: `NotificationPersistenceAdapter`, `DeviceTokenPersistenceAdapter`, `BookingReminderPersistenceAdapter`, `BookingTrackingPersistenceAdapter` y `ProcessedEventPersistenceAdapter` (JPA); `SmtpEmailSender` y `LoggingEmailSender`; `ExpoPushSender` y `LoggingPushSender`; `SecurityServiceUserContactDirectory` (REST interna a security-service). Adaptadores de entrada: `NotificationController`, `AdminNotificationController`, `DeviceController`, `DomainEventListener` (RabbitMQ) y `ReminderScheduler` (tarea programada). Fuente: `lavarapido-notification-service/src/main/java/com/lavarapido/notification/`.
+> *Nota.* Entre servicios de aplicación la dependencia real es el puerto de entrada: por ejemplo, `DomainEventConsumerService` recibe un `SendNotificationUseCase`, que implementa `NotificationSendingService`. `NotificationTypeCode` tiene 26 códigos; el diagrama muestra solo algunos. Adaptadores de salida: `NotificationPersistenceAdapter`, `DeviceTokenPersistenceAdapter`, `BookingReminderPersistenceAdapter`, `BookingTrackingPersistenceAdapter` y `ProcessedEventPersistenceAdapter` (JPA); `SmtpEmailSender` y `LoggingEmailSender`; `ExpoPushSender` y `LoggingPushSender`; `SecurityServiceUserContactDirectory` (REST interna a security-service). Adaptadores de entrada: `NotificationController`, `AdminNotificationController`, `DeviceController`, `DomainEventListener` (RabbitMQ) y `ReminderScheduler` (tarea programada). Fuente: `lavarapido-notification-service/src/main/java/com/lavarapido/notification/`.
 
 *Lo que usa cada servicio de aplicación.*
 
@@ -3260,9 +3281,12 @@ classDiagram
 | Reserva | CONFIRMED → IN\_PROGRESS o NO\_SHOW | `Booking.java:112` |
 | Reserva | IN\_PROGRESS → COMPLETED | `Booking.java:113` |
 | Reserva | → CANCELLED | Solo por `cancel(reason)`, no por `moveTo` (`Booking.java:96, 114`) |
-| Reserva | Vencida: CONFIRMED → NO\_SHOW, SCHEDULED → CANCELLED (motivo `EXPIRED`) | Una hora después de su hora de fin sin haberse iniciado; la cierra el sistema (`Booking.java:127-141`, `ExpiredBookingsJob.java`) |
-| Ejecución | PENDING → IN\_PROGRESS → COMPLETED | `start()` y `finish()` (`ServiceExecution.java:65-80`) |
-| Ejecución | Calificación | Solo si está COMPLETED y una vez (`ServiceExecution.java:82-90`) |
+| Reserva | Vencida: SCHEDULED → CANCELLED (motivo `EXPIRED`) | Una hora después de su hora de fin sin haberse confirmado; la cancela el sistema (`Booking.java:129-134`, `ExpiredBookingsJob.java`) |
+| Reserva | Terminó sin operario: CONFIRMED → NO\_SHOW | Una hora después de su hora de fin y solo si ninguna línea tuvo operario; la pide operations y booking vuelve a comprobar que venció (`Booking.java:141-147`, `FollowUpPolicy.java`) |
+| Reserva | Confirmada con operario, sin iniciar o sin finalizar | Nunca cambia sola: pasa a "Por cerrar" y la resuelve el administrador (`FollowUpPolicy.java`, `FollowUpService.closeAsAttended`) |
+| Ejecución | PENDING → IN\_PROGRESS → COMPLETED | `start()` y `finish()` (`ServiceExecution.java:75-91`) |
+| Ejecución | PENDING o IN\_PROGRESS → COMPLETED ("Se atendió") | Solo desde "Por cerrar"; sin inventar horas (`ServiceExecution.java:98-103`) |
+| Ejecución | Calificación | Solo si está COMPLETED y una vez (`ServiceExecution.java:111-129`) |
 | Pago | Creado → en revisión → aprobado, rechazado o reembolsado | Métodos `SubmitForReview`, `Approve`, `Reject`, `Refund` (`Payment.cs:121-162`) |
 | Ejecución | Inicio | Solo desde 15 minutos antes de la hora de la reserva (`StartPolicy.java`) |
 | Cuenta | Bloqueada 15 minutos | Al quinto fallo dentro de 15 minutos; un inicio correcto o restablecer la contraseña la libera (`LoginLockout.java`) |
