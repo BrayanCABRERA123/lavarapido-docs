@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 21 de octubre de 2026
 
-Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.4
+Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.5
 
 ## Control de Versiones
 
@@ -36,6 +36,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.2 | 2026-10-19 | Integración continua con GitHub Actions: se actualizó el alcance y se retiró del Anexo B. | Equipo de desarrollo |
 | 4.3 | 2026-10-20 | Revisión contra el código del 20 de octubre de 2026: el catálogo *notification.notification_type* tiene 24 filas (las migraciones 031 y 038 agregaron la alerta de reserva sin operario y el aviso de versión nueva de la app). | Equipo de desarrollo |
 | 4.4 | 2026-10-21 | Revisión contra el código del 21 de octubre de 2026: variables opcionales del chequeo de sesión del gateway y del cierre de reservas vencidas (sección 10.2), semillas 110 a 112 de booking-service (sección 11.2), motivos de cancelación (Tabla 9), respaldos automáticos del servidor público (sección 11.6), verificación del token de una sesión cerrada (secciones 16.3 y 16.4) y errores nuevos (Tabla 14). | Equipo de desarrollo |
+| 4.5 | 2026-10-21 | Cambio de la regla de las reservas que terminan sin cerrarse, revisada por el equipo la noche del 21 de octubre: booking-service solo cancela las programadas vencidas y operations-service revisa las confirmadas y las iniciadas. Se agregaron las variables *FOLLOW_UP_ENABLED* y *FOLLOW_UP_INTERVAL*, *BOOKING_EXPIRY_GRACE_MINUTES* compartida por booking-service y operations-service, y los servicios que usan *INTERNAL_API_KEY* (sección 10.2); changelogs 040 de operations-service y 041 de notification-service (sección 11.2); 26 tipos de notificación (Tabla 9); verificación de la tarjeta "Por cerrar" (sección 16.4); un error nuevo (Tabla 14) y el Anexo B. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -408,11 +409,13 @@ Si *git check-ignore* no imprime nada, el archivo no está excluido y no se debe
 | MESSAGING_ENABLED | Servicios Java y payment-service | *true* publica y consume eventos de RabbitMQ; *false* (por defecto) solo los escribe en el registro. Sin eventos no hay notificaciones, avisos de pago ni avisos de puntos. |
 | RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_USERNAME, RABBITMQ_PASSWORD | Servicios Java y payment-service | localhost, 5672, guest, guest en el entorno local. |
 | PUSH_ENABLED, EXPO_ACCESS_TOKEN | notification-service | *true* envía notificaciones push mediante Expo; *false* solo las escribe en el registro. |
-| INTERNAL_API_KEY | security-service y notification-service | Llave de las rutas internas; sin ella no se envían por correo los avisos de reservas, pagos y cupones ni los recordatorios, y no se pueden leer los interruptores de notificación de cada usuario. |
+| INTERNAL_API_KEY | security-service, booking-service, operations-service y notification-service | Llave de las rutas internas; sin ella no se envían por correo los avisos de reservas, pagos y cupones ni los recordatorios, no se pueden leer los interruptores de notificación de cada usuario y operations-service no puede cerrar como No asistió las reservas confirmadas que terminaron sin operario. |
 | REMINDER_LEADS | notification-service | Anticipación de los recordatorios; *24h,1h* por defecto. |
 | BOOKING_ZONE, BOOKING_SLOT_MINUTES, BOOKING_MAX_DAYS_AHEAD | booking-service y operations-service | America/Bogota, 30 y 60 por defecto. |
 | SESSION_CHECK_ENABLED, SESSION_CHECK_CACHE_TTL, SESSION_CHECK_TIMEOUT | api-gateway | Chequeo de la sesión del token (desde el 21 de octubre de 2026): *true*, *30s* y *3s* por defecto. No están en *.env.example* ni en el archivo de Compose: en Docker quedan con su valor por defecto y solo cambian si el gateway corre desde el IDE (acción ACO-14). |
-| BOOKING_EXPIRY_CHECK_ENABLED, BOOKING_EXPIRY_CHECK_INTERVAL, BOOKING_EXPIRY_GRACE_MINUTES | booking-service | Cierre automático de las reservas que nadie inició: *true*, *PT5M* (cada 5 minutos) y *60* minutos después de la hora de fin por defecto. Igual que las anteriores, no pasan por el archivo de Compose. |
+| BOOKING_EXPIRY_CHECK_ENABLED, BOOKING_EXPIRY_CHECK_INTERVAL | booking-service | Cancelación automática de las reservas programadas que nunca se confirmaron (motivo *EXPIRED*): *true* y *PT5M* (cada 5 minutos) por defecto. Igual que las anteriores, no pasan por el archivo de Compose. |
+| BOOKING_EXPIRY_GRACE_MINUTES | booking-service y operations-service | Minutos después de la hora de fin antes de cerrar una reserva vencida; *60* por defecto. La usan los dos servicios, así que si se cambia debe tener el mismo valor en ambos. No pasa por el archivo de Compose. |
+| FOLLOW_UP_ENABLED, FOLLOW_UP_INTERVAL | operations-service | Revisión de las reservas que terminaron sin cerrarse (desde la noche del 21 de octubre de 2026): pasa a No asistió la confirmada que nunca tuvo operario y deja en "Por cerrar" la que tenía operario y nadie registró. *true* y *PT5M* por defecto; necesita *INTERNAL_API_KEY*. No pasan por el archivo de Compose. |
 | SECURITY_SERVICE_URL, CUSTOMER_SERVICE_URL, BOOKING_SERVICE_URL | Servicios que llaman a otros | Direcciones de los servicios; tienen valores por defecto para el entorno local. payment-service necesita BOOKING_SERVICE_URL para leer el total y acreditar los puntos de una reserva. |
 
 *Nota.* Elaborado por los autores a partir de *.env.example*, *docker-compose.yml* y los archivos de configuración de los servicios.
@@ -507,8 +510,8 @@ Los servicios Java aplican sus migraciones automáticamente al arrancar (*spring
 | security-service | 001 esquemas, 002 núcleo de seguridad y auditoría, 003 preferencias del usuario, 020 paletas de tema, 023 rol personalizado (creado y eliminado de nuevo por 026), 026 permisos por rol (catálogo de permisos y asignaciones por defecto), 030 interruptores de notificación de las preferencias, 034 bloqueo por intentos fallidos, 035 dirección de la persona, 036 fecha de creación de la cuenta, 039 aceptación de los documentos legales; semilla 101 roles. | DATABASECHANGELOG_SECURITY |
 | customer-service | 004 esquema de clientes, 014 identificador de usuario del cliente, 015 modelo del vehículo; semilla 102 tipos de vehículo. | DATABASECHANGELOG_CUSTOMER |
 | booking-service | 005 esquemas de catálogo y reservas, 018 cambios de ADR-010, 021 historial del horario, 022 puntos de fidelización del catálogo, 024 retiro del operario de la bahía, 032 datos del negocio del establecimiento; semillas 103 catálogo, 104 estados y motivos, 109 establecimiento, horario y cuatro bahías, 110 datos del negocio, 111 borrado de los datos de ejemplo del negocio para que el negocio real los complete y 112 motivo *EXPIRED* del cierre automático de reservas vencidas. | DATABASECHANGELOG_BOOKING |
-| operations-service | 007 esquema de ejecución, 033 informes de inspección con fases, hallazgos y fotos, 037 perfil del operario; semilla 105 estados de ejecución. | DATABASECHANGELOG_OPERATIONS |
-| notification-service | 010 esquema de notificaciones, 016 tokens de dispositivos, 017 eventos procesados, 019 recordatorios de reservas, 025 tipo de cupón canjeado, 027 notificaciones al personal y seguimiento de reservas, 028 tipo de pago reembolsado, 029 tipos de puntos e inspección, 031 aviso de reserva sin operario, 038 tipo de aviso de versión nueva de la app; semilla 108 tipos de notificación. | DATABASECHANGELOG_NOTIFICATION |
+| operations-service | 007 esquema de ejecución, 033 informes de inspección con fases, hallazgos y fotos, 037 perfil del operario, 040 hora del aviso de servicio sin registrar (*follow_up_notice_at*); semilla 105 estados de ejecución. | DATABASECHANGELOG_OPERATIONS |
+| notification-service | 010 esquema de notificaciones, 016 tokens de dispositivos, 017 eventos procesados, 019 recordatorios de reservas, 025 tipo de cupón canjeado, 027 notificaciones al personal y seguimiento de reservas, 028 tipo de pago reembolsado, 029 tipos de puntos e inspección, 031 aviso de reserva sin operario, 038 tipo de aviso de versión nueva de la app, 041 tipos de aviso de servicio sin registrar para el operario y el administrador; semilla 108 tipos de notificación. | DATABASECHANGELOG_NOTIFICATION |
 | payment-service | db/changelog/changes/001 a 020 (numeración propia; 017 campos de paquete, 018 puntos necesarios, 019 verificación de catálogos, 020 reversión de puntos y secuencia), ejecutados por el contenedor *payment-migrate*. | DATABASECHANGELOG_PAYMENT |
 
 *Nota.* Fuente: estrategia de migraciones de la documentación del proyecto y changelogs de los repositorios.
@@ -580,7 +583,7 @@ SELECT payment_status_id, code FROM payment.payment_status WHERE payment_status_
 | payment.payment_status | 5 filas; el identificador 3 corresponde a APPROVED. |
 | payment.payment_method_type | 4 filas: EFECTIVO, NEQUI, DAVIPLATA y TRANSFERENCIA. |
 | payment.loyalty_movement_type | 5 filas: EARNED, REDEEMED, EXPIRED, ADJUSTED y REVERSED. |
-| notification.notification_type | 24 filas. |
+| notification.notification_type | 26 filas. |
 
 *Nota.* Si una tabla de catálogo está vacía, el servicio dueño todavía no ha arrancado o su changeset de semilla no se ejecutó.
 
@@ -864,7 +867,8 @@ Cada endpoint de salud debe responder *{"status":"UP"}*. El último comando llam
 6. Como cliente, reportar un pago con un comprobante de prueba; como administrador, aprobarlo en **Pagos**.
 7. Con la mensajería activa, comprobar que el cliente recibió las notificaciones de la reserva, la asignación y el pago aprobado, el correo en Mailpit y los puntos en el panel.
 8. Cerrar sesión y repetir una llamada con el mismo token: el gateway responde 401.
-9. Reiniciar los contenedores (*docker compose restart*) y comprobar que los datos permanecen.
+9. Opcional: crear como administrador una reserva de prueba para una hora que termine pronto, con operario, y no iniciarla. Unos minutos después de su hora de fin debe aparecer en la tarjeta **Por cerrar** del inicio del administrador, con el aviso "Servicio sin registrar"; al hacer clic en **Se atendió** queda Completada.
+10. Reiniciar los contenedores (*docker compose restart*) y comprobar que los datos permanecen.
 
 ### 16.5 Verificación de Trazas
 
@@ -911,6 +915,7 @@ El primer paso ante cualquier error es consultar el registro del servicio afecta
 | "Tu perfil de cliente aún no está listo" | El perfil del cliente no se ha creado (evento no consumido). | Esperar y reintentar; con MESSAGING_ENABLED=true revisar la cola de customer-service. |
 | Los correos no llegan a Mailpit | MAIL_ENABLED=false o host o puerto equivocados. | MAIL_HOST=localhost y MAIL_PORT=1025 en el anfitrión; MAIL_DOCKER_HOST=mailpit en Docker. |
 | No llegan los correos de reservas, pagos ni los recordatorios | INTERNAL_API_KEY vacía. | Generar la llave y reiniciar security-service y notification-service. |
+| Las reservas que terminaron no aparecen en "Por cerrar" o las que no tenían operario no pasan a No asistió | FOLLOW_UP_ENABLED=false, INTERNAL_API_KEY vacía o booking-service caído. | Revisar el registro de operations-service (*Could not follow up finished bookings* o *was not closed as not attended*) y la llave interna. |
 | Las notificaciones no llegan | MESSAGING_ENABLED=false o mensajes en una cola de mensajes muertos. | Activar la mensajería y revisar las colas. |
 | Error de CORS en el navegador | El origen no está permitido. | CORS_ALLOWED_ORIGINS=http://localhost:4200,http://localhost:8081 (agregar el origen real si es distinto) y reiniciar los servicios. |
 | Pantalla en blanco o 404 en /api en la aplicación web | El gateway no está corriendo en el puerto 8080. | Iniciar el gateway y revisar *proxy.conf.json*. |
@@ -977,7 +982,7 @@ Las figuras de este manual se tomaron el 16 de octubre de 2026 en un computador 
 | Tema | Qué falta | Sección |
 |---|---|---|
 | Un inicio de sesión de base de datos por servicio | Los servicios usan sa. | 11.4 |
-| Variables del 21 de octubre de 2026 | *SESSION_CHECK_\** y *BOOKING_EXPIRY_\** no están en *.env.example* ni en *docker-compose.yml* (acción ACO-14). | 10.2 |
+| Variables del 21 de octubre de 2026 | *SESSION_CHECK_\**, *BOOKING_EXPIRY_\** y *FOLLOW_UP_\** no están en *.env.example* ni en *docker-compose.yml* (acción ACO-14). | 10.2 |
 
 *Nota.* Elaborado por los autores a partir de la verificación de los repositorios y del backlog técnico.
 
