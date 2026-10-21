@@ -75,6 +75,7 @@
 | 1.3 | 2026-10-19 | Juan Camilo Guilombo | Update of 2026-10-19 (migration 039 and app 1.1.0), SSH access with a personal key per member, deployment from GitHub Actions, continuous integration in the 10 repositories, and new terminal and web evidence |
 | 1.4 | 2026-10-20 | Development team | Topology diagram: customer-service also connects to RabbitMQ (it consumes `security.user_registered` to create the customer profile) |
 | 1.5 | 2026-10-21 | Brayan Cabrera | Verified automatic backups (3.2), security headers and CSP (2.2.3 and 5.2.4), health checks and capped logs in every container, `SIMPLE` recovery model, update of 2026-10-21 (1.3.6), code changes of 2026-10-21 pending deployment (1.3.7), and removal of the Hostinger VPS |
+| 1.6 | 2026-10-21 | Development team | Evening changes of 2026-10-21 in 1.3.7: confirmed bookings with an operator that nobody registered are no longer closed as "No-show" on their own and go to "To close", migrations 040 (operations) and 041 (notification), `FOLLOW_UP_*` variables, fix for `null` fields in notification-service events, and mobile app adjustments |
 
 ### 1.3 Change Summary (Release Notes)
 
@@ -167,13 +168,14 @@ On 2026-10-21 at 05:21 (server time), the images were rebuilt with the `develop`
 They are in `develop` since 2026-10-21 and go in with the next run of `update-server.sh` or of the "Desplegar en Azure" workflow:
 
 - **security-service and api-gateway:** the token of a closed session (logout, disabled or deactivated account) stops working; the gateway confirms it with `GET /api/v1/auth/session` and keeps the answer 30 seconds per token.
-- **booking-service:** every 5 minutes the bookings nobody started are closed one hour after their end; seed 112 adds the `EXPIRED` reason, and booking-service applies it on startup.
-- **operations-service:** manual and automatic assignment use the same lock, and `GET /api/v1/admin/assignments/unassigned` gives the single count of bookings without an operator.
+- **booking-service:** every 5 minutes, a scheduled booking still unconfirmed one hour after its end is cancelled with the system reason `EXPIRED` ("Expired without confirmation"); seed 112 adds that reason, and booking-service applies it on startup. The internal route `POST /internal/v1/bookings/{id}/no-show` sets an expired confirmed booking to "No-show", only when operations-service asks for it (409 `BOOKING_NOT_EXPIRED` if it has not expired yet).
+- **operations-service:** manual and automatic assignment use the same lock, and `GET /api/v1/admin/assignments/unassigned` gives the single count of bookings without an operator, now used by the web and the mobile app. Every 5 minutes, `FollowUpJob` sets to "No-show" a confirmed booking that never had an operator and ended more than an hour ago; one that had an operator and that nobody started or finished is never marked on its own: it goes to the administrator's "To close" list (`GET /api/v1/admin/assignments/to-close` and `POST /api/v1/admin/assignments/{bookingId}/attended`), with a single notice to the operator and the administrators. Migration 040 adds `execution.service_execution.follow_up_notice_at`.
+- **notification-service:** `OPERATOR_SERVICE_NOT_REGISTERED` and `ADMIN_SERVICE_NOT_REGISTERED` notices (inbox and push, migration 041), and a `null` field in an event payload no longer sends the message to the dead-letter queue (DLQ).
 - **payment-service:** receipts of at most 2 MB (`RECEIPT_TOO_LARGE`) and the cash account in the customer list only while it is active.
-- **Web:** session in step across tabs, compressed receipt, QR magnifier, reports that count only completed bookings, and the roles tab texts.
-- **Mobile app:** compressed receipt, QR magnifier, and mandatory APK update screen. They add no native dependencies, so they arrive with `npm run publish:update`.
+- **Web:** session in step across tabs, compressed receipt, QR magnifier, reports that count only completed bookings, the roles tab texts, and the "To close" card on the administrator's home.
+- **Mobile app:** compressed receipt, QR magnifier, mandatory APK update screen, "To close" card, and count of unassigned bookings with the operations-service rule; the administrator's booking form saves the chosen operator and status, the customer's points bar is full when nothing is left to unlock and does not show "0% OFF", the operator sees "—" when there are no ratings, the roles tab says the 3 roles are fixed, and the new notices open the operator's services screen or the administrator's home. They add no native dependencies, so they arrive with `npm run publish:update`.
 
-The new variables (`SESSION_CHECK_*` and `BOOKING_EXPIRY_*`) have defaults and the compose file does not pass them: they are not added to `.env.production`.
+The new variables (`SESSION_CHECK_*`, `BOOKING_EXPIRY_*`, and `FOLLOW_UP_*`) have defaults and the compose file does not pass them: they are not added to `.env.production`. `FOLLOW_UP_*` needs `INTERNAL_API_KEY`, which is already in `.env.production`.
 
 ---
 
@@ -439,7 +441,7 @@ Read it with `tail -20 ~/lavarapido/backups/backup.log`; only problems with `gre
 | `PUBLIC_URL` / `SITE_ADDRESS` | Public address (CORS, email links) and Caddy domain |
 | `PUSH_ENABLED` / `MESSAGING_ENABLED` | `true`: push with Expo and events with RabbitMQ |
 
-The variables of 2026-10-21 do not go in `.env.production`: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL`, and `SESSION_CHECK_TIMEOUT` (gateway session check: on, 30 s, and 3 s) and `BOOKING_EXPIRY_CHECK_ENABLED`, `BOOKING_EXPIRY_CHECK_INTERVAL`, and `BOOKING_EXPIRY_GRACE_MINUTES` (close of expired bookings: on, every 5 minutes, and a 60-minute grace) keep their defaults, because the compose file does not pass them to the containers.
+The variables of 2026-10-21 do not go in `.env.production`: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL`, and `SESSION_CHECK_TIMEOUT` (gateway session check: on, 30 s, and 3 s), `BOOKING_EXPIRY_CHECK_ENABLED` and `BOOKING_EXPIRY_CHECK_INTERVAL` (cancellation of scheduled bookings that expired without confirmation: on and every 5 minutes), `BOOKING_EXPIRY_GRACE_MINUTES` (60-minute grace, used by booking-service and operations-service), and `FOLLOW_UP_ENABLED` and `FOLLOW_UP_INTERVAL` (follow-up of bookings that ended and nobody closed: on and every 5 minutes) keep their defaults, because the compose file does not pass them to the containers.
 
 #### 3.3.3 Memory and runtime limits (JVM -Xmx, ASPNETCORE_ENVIRONMENT)
 
@@ -511,7 +513,7 @@ Migrations are **automatic**:
 
 1. The `db-init` container creates the `LavaRapido` database if it does not exist and sets it to the `SIMPLE` recovery model.
 2. The `payment-migrate` container (Liquibase 4.29) applies the payment-service changelogs (`db/changelog/db.changelog-master.yaml`) and exits.
-3. Each Java service applies its own changelogs on startup. Numbering is global: 001–039 plus the 1xx catalog seeds.
+3. Each Java service applies its own changelogs on startup. Numbering is global: 001–041 plus the 1xx catalog seeds (040 of operations-service and 041 of notification-service are from 2026-10-21 and come with the next update).
 4. Hibernate only validates that the model matches the tables (`ddl-auto: validate`); it never alters tables.
 
 Production **does not load test data**: only catalogs (roles, services, statuses, schedule and business data).
@@ -532,7 +534,7 @@ q "SELECT u.username, r.code FROM security.app_user u JOIN security.user_role ur
 
 Expected result:
 - the 9 schemas with their tables;
-- in each service, `ok` equal to `changesets` (2026-10-16: 143 of 143; 2026-10-19: 144 of 144, with 039);
+- in each service, `ok` equal to `changesets` (2026-10-16: 143 of 143; 2026-10-19: 144 of 144, with 039); after deploying the changes of 2026-10-21, 040 must also appear in `DATABASECHANGELOG_OPERATIONS` and 041 in `DATABASECHANGELOG_NOTIFICATION`;
 - the initial administrator created (security log: `First administrator created`).
 
 ### 4.3 Application Stack Deployment and Orchestration
