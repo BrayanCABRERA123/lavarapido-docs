@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 20, 2026
+October 21, 2026
 
-Manual Type: Technical Manual (Developers and Software Architects) · Version 4.4
+Manual Type: Technical Manual (Developers and Software Architects) · Version 4.5
 
 ## Version Control
 
@@ -37,6 +37,7 @@ Table 1 records the change history of this document. Each modification must add 
 | 4.2 | 2026-10-19 | Continuous integration with GitHub Actions in the 10 repositories (Table 6) and closure of TD-006. | Development team |
 | 4.3 | 2026-10-19 | Test results of October 19, 2026 (655 automated, 19 end-to-end, and 42 functional cases). | Development team |
 | 4.4 | 2026-10-20 | Review against the code of October 20, 2026: the role change of an account was reverted in the code and the manual does not document it; the rule that an administrator account cannot be deactivated (*ADMIN_CANNOT_BE_DISABLED*) and its 403 error codes were added; it is now stated that the web and the app use neither the customer's rescheduling nor the manual sending of notifications. | Development team |
+| 4.5 | 2026-10-21 | Review against the code of October 21, 2026: the token of a closed session stops working (security-service and gateway, sections 9.2, 13.2, and 14.1), automatic close of expired bookings (12.3 and Figure 3), operator assignment lock and single count of bookings without an operator (12.4), receipt of at most 2 MB and cash only with its account active (12.5), web and app changes (10.4, 10.5, and 12.7), tests of October 21 (689 automated and 19 end-to-end), and troubleshooting. The gateway routes missing from Table 5 and the changelog numbering (039 and seeds up to 112) were also corrected. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -131,7 +132,7 @@ The architecture relies on widely documented concepts: microservices (Newman, 20
 
 ### 4.1 Sources and Conventions of This Document
 
-Version 3.0 was verified against the source code of security-service, customer-service, payment-service, lavarapido-infra, the web application, and the mobile application (*develop* branch, October 5, 2026), and against the documentation of the other services (Vehicle Washing Development Team, 2026a, 2026b, 2026c, 2026d, 2026e, 2026f). Version 3.1 reviewed the eleven repositories (*develop* branch, October 9, 2026). Version 4.0 reviewed the eleven repositories again with the whole system running in Docker (*develop* branch, October 16, 2026): the figures for tables, changelogs, and tests come from queries to the database and from running the tests, not from previous documents. Annex B lists the discrepancies found between the code, the documentation, and the previous versions of the manuals, as the guide for writing manuals requires (Servicio Nacional de Aprendizaje [SENA], 2026). Identifiers (schemas, tables, columns, endpoints, events, and classes) are written exactly as in the code.
+Version 3.0 was verified against the source code of security-service, customer-service, payment-service, lavarapido-infra, the web application, and the mobile application (*develop* branch, October 5, 2026), and against the documentation of the other services (Vehicle Washing Development Team, 2026a, 2026b, 2026c, 2026d, 2026e, 2026f). Version 3.1 reviewed the eleven repositories (*develop* branch, October 9, 2026). Version 4.0 reviewed the eleven repositories again with the whole system running in Docker (*develop* branch, October 16, 2026): the figures for tables, changelogs, and tests come from queries to the database and from running the tests, not from previous documents. Version 4.5 was reviewed against the code of October 21, 2026. Annex B lists the discrepancies found between the code, the documentation, and the previous versions of the manuals, as the guide for writing manuals requires (Servicio Nacional de Aprendizaje [SENA], 2026). Identifiers (schemas, tables, columns, endpoints, events, and classes) are written exactly as in the code.
 
 ## 5. Objective
 
@@ -184,7 +185,7 @@ flowchart TB
     people(["Client · Operator · Administrator"]):::person
     web["Web app<br/>Angular 21"]
     mobile["Android app<br/>React Native / Expo"]
-    gateway["API Gateway · :8080<br/>Spring Cloud Gateway<br/>routing + CORS"]
+    gateway["API Gateway · :8080<br/>Spring Cloud Gateway<br/>routing, CORS, and open session"]
 
     subgraph services["Microservices"]
         direction LR
@@ -226,7 +227,7 @@ flowchart TB
 |---|---|---|---|
 | Web application | Angular 21 | 4200 | Interface of the three roles (customer, operator, and administrator). |
 | Mobile application | React Native 0.86 with Expo SDK 57 | 8081 (Metro) | Interface of the three roles; push notifications and new version notice (APK built with EAS). |
-| api-gateway | Spring Cloud Gateway 2025.1 (webmvc) | 8080 | Single entry point; routes */api/v1/\** by path; CORS. |
+| api-gateway | Spring Cloud Gateway 2025.1 (webmvc) | 8080 | Single entry point; routes */api/v1/\** by path; CORS; cuts the tokens of closed sessions (since October 21, 2026). |
 | security-service | Java 21, Spring Boot 4 | 3001 | People, accounts, roles, sessions, password recovery, profile, and preferences. |
 | customer-service | Java 21, Spring Boot 4 | 3002 | Customer profile, vehicle types, and vehicles. |
 | booking-service | Java 21, Spring Boot 4 | 3003 | Catalog and prices, establishment, schedule, bays, availability, and bookings. |
@@ -298,7 +299,7 @@ The backend adopts a microservices architecture with logical data ownership: eac
 
 ### 9.2 API Gateway
 
-The web and mobile clients call only the gateway (port 8080), so they do not need to know the internal addresses (ADR-005). The gateway routes */api/v1/\** by path to the owner service, forwards the method, body, query string, and the headers *Authorization*, *X-Correlation-Id*, and *Accept-Language* without changes, answers CORS (including preflight), and returns 404 for */internal/\** and unknown paths. **It does not validate tokens**: each service verifies the JWT itself (ADR-006). It has no database, cache, or request rate limit. Table 5 shows the routes.
+The web and mobile clients call only the gateway (port 8080), so they do not need to know the internal addresses (ADR-005). The gateway routes */api/v1/\** by path to the owner service, forwards the method, body, query string, and the headers *Authorization*, *X-Correlation-Id*, and *Accept-Language* without changes, answers CORS (including preflight), and returns 404 for */internal/\** and unknown paths. **It does not check the token signature**: each service verifies the JWT itself (ADR-006). Since October 21, 2026 it does confirm that the session of the token is still open: *SessionCheckFilter*, which runs right after CORS, asks security-service with *GET /api/v1/auth/session* and the same *Authorization* header; if the answer is 401, it returns that 401 without passing the request on. It keeps each answer for 30 seconds per SHA-256 fingerprint of the token (never the token itself), forgets the answer of a token when it goes through *POST /api/v1/auth/logout* and, if security-service does not answer within 3 seconds or answers 5xx, lets the request through so that a security-service outage does not bring down the rest of the API. It does not check public routes, the */api/v1/auth/* routes (except logout), or requests without a token. It is configured with *SESSION_CHECK_ENABLED*, *SESSION_CHECK_CACHE_TTL*, and *SESSION_CHECK_TIMEOUT*. It has no database or request rate limit. Table 5 shows the routes.
 
 **Table 5**
 
@@ -308,8 +309,8 @@ The web and mobile clients call only the gateway (port 8080), so they do not nee
 |---|---|
 | /api/v1/auth/\**, /api/v1/users/\**, /api/v1/admin/users/\**, /api/v1/admin/roles-permissions/\** | security-service :3001 |
 | /api/v1/vehicles/\**, /api/v1/vehicle-types, /api/v1/admin/vehicles | customer-service :3002 |
-| /api/v1/catalog/\**, /api/v1/schedule/\**, /api/v1/establishment, /api/v1/bookings/\**, /api/v1/admin/bookings/\**, /api/v1/admin/catalog/\**, /api/v1/admin/schedule/\**, /api/v1/admin/bays/\**, /api/v1/operator/bookings/\** | booking-service :3003 |
-| /api/v1/admin/operators/\**, /api/v1/admin/assignments/\**, /api/v1/operator/services/\**, /api/v1/operator/ratings, /api/v1/ratings/\** | operations-service :3004 |
+| /api/v1/catalog/\**, /api/v1/schedule/\**, /api/v1/establishment, /api/v1/bookings/\**, /api/v1/admin/bookings/\**, /api/v1/admin/catalog/\**, /api/v1/admin/schedule/\**, /api/v1/admin/bays/\**, /api/v1/admin/establishment, /api/v1/operator/bookings/\** | booking-service :3003 |
+| /api/v1/admin/operators/\**, /api/v1/operators/\**, /api/v1/admin/inspections/\**, /api/v1/public/inspections/\**, /api/v1/admin/assignments/\**, /api/v1/operator/services/\**, /api/v1/operator/ratings, /api/v1/ratings/\** | operations-service :3004 |
 | /api/v1/payments/\**, /api/v1/payment-accounts, /api/v1/admin/payments/\**, /api/v1/admin/payment-accounts/\**, /api/v1/admin/payment-methods, /api/v1/admin/promotions/\**, /api/v1/loyalty/\** | payment-service :3005 |
 | /api/v1/notifications/\**, /api/v1/admin/notifications/\** | notification-service :3006 |
 
@@ -377,6 +378,7 @@ REST is used when the caller needs an answer to continue (ADR-004). The calls be
 | payment-service | booking-service GET /bookings/{id}, /bookings/me, /admin/bookings/{id} | Total, status, owner, and loyalty points of the booking; the browser never sends the amount. |
 | notification-service | security-service GET /internal/v1/users/{id}/contact (header X-Internal-Key) | Current email, first name, active status, and notification switches of the user (ADR-011 sections 8 and 12). |
 | notification-service | security-service GET /internal/v1/users/admins (header X-Internal-Key) | Active administrators who receive the staff notices (ADR-011 section 10). |
+| api-gateway | security-service GET /api/v1/auth/session (the same token) | Confirm that the session of the token is still open before passing the request on (since October 21, 2026; section 9.2). |
 
 *Note.* If the target does not answer, the caller responds 503 with a stable code (CUSTOMER_SERVICE_UNAVAILABLE or BOOKING_SERVICE_UNAVAILABLE). Default timeouts: 3 s (5 s in payment-service).
 
@@ -394,7 +396,7 @@ The design also foresees the table *audit.audit_log*, fed by triggers that read 
 
 #### 9.5.2 Concurrency and Transactions
 
-The column *row_version* exists, but the entities are not yet mapped with *@Version* (TD-008), so the last write wins in concurrent administrative edits. The critical overlaps are protected by the database: the trigger *tr_booking_bay_overlap* prevents two active bookings from occupying the same bay at overlapping times, and *tr_operator_absence_overlap* prevents overlapping absences. Each use case opens a local transaction that only writes the schemas of its own service; there are no distributed transactions.
+The column *row_version* exists, but the entities are not yet mapped with *@Version* (TD-008), so the last write wins in concurrent administrative edits. The critical overlaps are protected by the database: the trigger *tr_booking_bay_overlap* prevents two active bookings from occupying the same bay at overlapping times, and *tr_operator_absence_overlap* prevents overlapping absences. Where two operations at the same time could clash, the Java services take a SQL Server application lock (*sp_getapplock*, owner *Transaction*) that is released when the transaction ends: booking-service uses *booking-schedule* when it creates or reschedules a booking and when it closes the expired ones, and operations-service uses *operations-assignment* in manual and automatic assignment (since October 21, 2026), waiting at most 10 seconds. Each use case opens a local transaction that only writes the schemas of its own service; there are no distributed transactions.
 
 #### 9.5.3 Logging, Correlation, and Errors
 
@@ -408,8 +410,8 @@ Errors follow RFC 9457, *Problem Details for HTTP APIs* (Nottingham et al., 2023
 
 | Code | Meaning | Examples of code |
 |---|---|---|
-| 400 | Invalid request or input. | VALIDATION_ERROR, INVALID_PLATE, UNKNOWN_PERMISSION, NOTIFICATION_TYPE_NOT_ALLOWED |
-| 401 | Authentication absent, invalid, or expired. | UNAUTHORIZED, INVALID_CREDENTIALS |
+| 400 | Invalid request or input. | VALIDATION_ERROR, INVALID_PLATE, UNKNOWN_PERMISSION, NOTIFICATION_TYPE_NOT_ALLOWED, RECEIPT_TOO_LARGE |
+| 401 | Authentication absent, invalid, or expired, or session closed. | UNAUTHORIZED, INVALID_CREDENTIALS |
 | 403 | Authenticated but not authorized. | FORBIDDEN, ACCOUNT_DISABLED, CANNOT_DISABLE_OWN_ACCOUNT, ADMIN_CANNOT_BE_DISABLED |
 | 404 | Resource not found or belonging to another user. | VEHICLE_NOT_FOUND, BOOKING_NOT_FOUND |
 | 409 | Conflict with the current state. | EMAIL_ALREADY_REGISTERED, SLOT_UNAVAILABLE, OPERATOR_BUSY, PAYMENT_ALREADY_REPORTED, TRANSACTION_REFERENCE_REUSED, PROMOTION_ALREADY_REDEEMED |
@@ -510,10 +512,11 @@ Front-end-proyecto-web/src/
 |   |   |-- constants/  api.ts (API_BASE_URL = '/api/v1'), payment-texts.ts (temporary)
 |   |   |-- guards/     auth-guard.ts (session and role per area)
 |   |   |-- interceptors/ auth-interceptor.ts (Bearer token; session expired -> /auth)
-|   |   |-- models/, utils/ (api-error.ts translates the error codes)
-|   |   `-- services/   auth, booking-api, operations-api, payments-api, promotions-api,
-|   |                   loyalty-api, role-permissions-api, notifications, vehicles,
-|   |                   user-admin, preferences, inspection-store, photo-storage...
+|   |   |-- models/, utils/ (api-error.ts translates the error codes; image-compress.ts keeps the receipt at 2 MB at most)
+|   |   `-- services/   auth (session in step across tabs), booking-api, operations-api,
+|   |                   payments-api, promotions-api, loyalty-api, role-permissions-api,
+|   |                   notifications, vehicles, user-admin, preferences, inspection-api,
+|   |                   inspection-photos...
 |   |-- features/
 |   |   |-- landing/        welcome page
 |   |   |-- auth/           login, register, forgot-password (3 steps)
@@ -534,6 +537,8 @@ The application is zoneless and uses signals; each area has a lazy module protec
 The mobile application is organized in *src/modules* by role (*auth*, *client*, *operator*, and *admin*, each with its *screens*), *src/shared* (components and shared screens of notifications, profile, and settings), and *src/app/config/locales* (es, en, fr, and pt). All the calls go to the gateway through *EXPO_PUBLIC_API_URL*.
 
 The administrator's inspection report (RF-036) follows the same organization as the rest of the module: *core/services/operations/InspectionService.ts* calls the same endpoints as the web (*/admin/inspections/...*); *modules/admin/viewmodels/useInspection.ts* keeps the state returned by the server; *modules/admin/services/inspectionPhotos.ts* takes or picks the photos with *expo-image-picker* and shrinks them with *expo-image-manipulator* (1600 px on the longer side, JPEG), because the server accepts at most 2 MB per photo; *modules/admin/components/inspection* holds the card of each phase, the finding form, and the enlarged photo; and *modules/admin/screens/AdminInspectionScreen.tsx* is the screen, opened from the booking detail (navigation route *AdminInspection*). The texts of this module are in *modules/admin/constants/inspectionTexts.ts*, in the four languages.
+
+Since October 21, 2026, *core/services/payments/receiptImage.ts* compresses the payment receipt to at most 2 MB before uploading it, *shared/components/feedback/ImageZoomModal.tsx* enlarges the QR of the payment account, and *app/providers/AppUpdatesCheck.tsx* reads */app/version.json* when the installed APK opens: if there is a higher *versionCode*, it shows a screen on top of everything that cannot be closed and only lets the user download the new APK; if the server does not answer, the app goes on (*core/services/appUpdates/publishedApk.ts*).
 
 ## 11. Database
 
@@ -790,10 +795,12 @@ The dictionary lists, for each table, its columns, types, nullability, and const
 | A cancellation reason only exists with status CANCELLED. | Constraint ck_booking_cancel. |
 | Only the vehicles of the customer are used in their bookings. | booking-service through customer-service (404 VEHICLE_NOT_FOUND). |
 | The operator assigned must be active, on shift for the whole booking, not absent, and not busy. | AssignmentPolicy in operations-service. |
+| A manual and an automatic assignment at the same time do not give the same operator two services at the same time. | *operations-assignment* lock (*sp_getapplock*) in operations-service. |
 | Only the assigned operator starts or finishes; only on the day of the booking; one service at a time. | operations-service. |
 | A booking is rated once, only when COMPLETED, and only by its owner; the rating is written on every line. | operations-service and constraints ck_sexec_*. |
 | At most one approved payment per booking; no second payment while one is in review; the amount is the booking total. | Index ux_payment_one_approved_per_booking and payment-service. |
 | A transaction reference cannot be reused. | payment-service (409 TRANSACTION_REFERENCE_REUSED). |
+| The customer receipt weighs 2 MB at most. | payment-service domain (*Payment.MaxReceiptBytes*, 400 RECEIPT_TOO_LARGE). |
 | A coupon is redeemed only if active, in its dates, and unlocked by the balance; once per booking. | payment-service (CustomerPromotionService) and promotion.booking_promotion. |
 | Two ledger movements of the same customer cannot be computed on the same balance. | Unique sequence_no per customer (409 on conflict). |
 
@@ -801,7 +808,7 @@ The dictionary lists, for each table, its columns, types, nullability, and const
 
 ### 11.5 Migrations and Initial Data
 
-Each service owns the Liquibase changelog of its schemas and applies it at startup; *ddl-auto: validate* then checks that the JPA entities match the tables. Each service records its history in its own tables `DATABASECHANGELOG_<SERVICE>` and `DATABASECHANGELOGLOCK_<SERVICE>`. The payment-service is the exception: its changelogs live in *db/changelog* and are run by the *payment-migrate* container (ADR-013). Every changeset has a precondition *onFail:MARK_RAN*, so a database created with the global script *lavarapido-6-services-sqlserver.sql* converges with one created by the services. The numbering is shared (001 to 013 initial schemas, 014 onward later changes, 101 to 109 seeds), except in payment-service, which uses its own numbering 001 to 020 (TD-019). The global high-water mark is 030; the next shared changeset is 031. The list of changelogs of each service is in the Installation Manual, section 11.2.
+Each service owns the Liquibase changelog of its schemas and applies it at startup; *ddl-auto: validate* then checks that the JPA entities match the tables. Each service records its history in its own tables `DATABASECHANGELOG_<SERVICE>` and `DATABASECHANGELOGLOCK_<SERVICE>`. The payment-service is the exception: its changelogs live in *db/changelog* and are run by the *payment-migrate* container (ADR-013). Every changeset has a precondition *onFail:MARK_RAN*, so a database created with the global script *lavarapido-6-services-sqlserver.sql* converges with one created by the services. The numbering is shared (001 to 013 initial schemas, 014 onward later changes, 101 to 112 seeds), except in payment-service, which uses its own numbering 001 to 020 (TD-019). The global high-water mark is 039; the next shared changeset is 040. The latest seed is booking-service 112 (*EXPIRED* cancellation reason, October 21, 2026). The list of changelogs of each service is in the Installation Manual, section 11.2.
 
 ## 12. Technical Modules
 
@@ -809,11 +816,11 @@ Each service owns the Liquibase changelog of its schemas and applies it at start
 
 **Function:** identity and access: registration with the acceptance of the legal documents, login with JWT and lockout after failed attempts, sessions, password recovery by code, profile (name, phone, address, email, password, and deactivation), preferences (theme, language, and the three notification switches, with partial update), account administration, and the informative permission matrix of the three fixed roles.
 
-**Main files:** AuthController, UserProfileController, UserAdministrationController, InternalUserController; AuthenticationService, AccountRegistrationService, PasswordRecoveryService, EmailChangeService, AccountDeactivationService, UserAdministrationService, UserPreferenceService; PasswordPolicy; JwtTokenIssuer; LoginLockout and LoginLockoutPersistenceAdapter; UserAddressController; EmailResetCodeNotifier; RabbitDomainEventPublisher; DevDataSeeder.
+**Main files:** AuthController (includes *GET /api/v1/auth/session*), ActiveSessionValidator, UserProfileController, UserAdministrationController, InternalUserController; AuthenticationService, AccountRegistrationService, PasswordRecoveryService, EmailChangeService, AccountDeactivationService, UserAdministrationService, UserPreferenceService; PasswordPolicy; JwtTokenIssuer; LoginLockout and LoginLockoutPersistenceAdapter; UserAddressController; EmailResetCodeNotifier; RabbitDomainEventPublisher; DevDataSeeder.
 
 **Tables:** schemas security and audit.
 
-**Rules:** passwords with BCrypt (cost 12); password policy of 8 to 72 characters with an uppercase letter, a digit, and a special character, without spaces; the recovery code has 6 digits, lasts 15 minutes, is single use, and five failed attempts invalidate it (counter in memory); requesting a new code invalidates the previous one; the email of a nonexistent account produces the same response; email change and deactivation require the current password; an administrator cannot deactivate their own account (403 CANNOT_DISABLE_OWN_ACCOUNT) and an administrator account cannot be deactivated from user administration (403 ADMIN_CANNOT_BE_DISABLED); the role is set when the account is created and there is no endpoint to change it; five failed attempts within 15 minutes lock the account for 15 minutes (*LoginLockout*, 423 ACCOUNT_LOCKED), and a successful login or a password reset clears the counter; registration stores the acceptance date of the legal documents when *acceptsTerms* and *acceptsDataPolicy* arrive.
+**Rules:** passwords with BCrypt (cost 12); password policy of 8 to 72 characters with an uppercase letter, a digit, and a special character, without spaces; the recovery code has 6 digits, lasts 15 minutes, is single use, and five failed attempts invalidate it (counter in memory); requesting a new code invalidates the previous one; the email of a nonexistent account produces the same response; email change and deactivation require the current password; an administrator cannot deactivate their own account (403 CANNOT_DISABLE_OWN_ACCOUNT) and an administrator account cannot be deactivated from user administration (403 ADMIN_CANNOT_BE_DISABLED); the role is set when the account is created and there is no endpoint to change it; five failed attempts within 15 minutes lock the account for 15 minutes (*LoginLockout*, 423 ACCOUNT_LOCKED), and a successful login or a password reset clears the counter; registration stores the acceptance date of the legal documents when *acceptsTerms* and *acceptsDataPolicy* arrive; every token carries its session in the *sid* claim, and since October 21, 2026 *ActiveSessionValidator* rejects the token of a closed session (logout, account disabled by the administrator or deactivated by its owner) on every security-service route; *GET /api/v1/auth/session* answers 204 if the session is still open and 401 if not, for the gateway.
 
 **Events:** publishes UserRegistered (*security.user_registered*), which carries *createdByAdmin* so that the welcome message explains how to log in; PasswordChanged, EmailChanged, and AccountDeactivated are raised by the domain. **Internal routes:** contact of a user with its switches, and list of active administrators.
 
@@ -831,19 +838,19 @@ Each service owns the Liquibase changelog of its schemas and applies it at start
 
 **Function:** catalog and prices by vehicle type, establishment, weekly schedule with break, exceptions, bays, availability, and bookings.
 
-**Rules:** availability is calculated on a 30-minute grid inside the opening hours, outside the break, not in the past, up to 60 days ahead, and with at least one active bay free for the whole duration; a booking is created directly as CONFIRMED with a bay; if the slot is taken, nothing is saved and up to five alternative times of the same day are returned (409 SLOT_UNAVAILABLE, which also carries the reason: CLOSED_DAY, OUTSIDE_HOURS, TIME_PASSED, or NO_FREE_BAY, calculated by *AvailabilityPolicy.whyUnavailable*); the request may carry *preferredOperatorId*, which travels in BookingConfirmed so that operations-service respects it if that operator is free; customers can reschedule or cancel only before the start; the administrator moves bookings through IN_PROGRESS, COMPLETED, NO_SHOW, or CANCELLED; each catalog service has its *loyalty_points*, each booking line copies them when the booking is built, and *Booking.totalLoyaltyPoints()* exposes the total in *BookingResponse.totalLoyaltyPoints*; changes of schedule, exceptions, and bays are recorded in *schedule_history*. The business data of the establishment (identity, tax information, and channels) are read and saved with *GET* and *PUT /api/v1/admin/establishment*; the */internal/v1/bookings* routes serve operations-service with the internal key. **Events:** publishes BookingConfirmed (created or rescheduled) and BookingCancelled.
+**Rules:** availability is calculated on a 30-minute grid inside the opening hours, outside the break, not in the past, up to 60 days ahead, and with at least one active bay free for the whole duration; a booking is created directly as CONFIRMED with a bay; if the slot is taken, nothing is saved and up to five alternative times of the same day are returned (409 SLOT_UNAVAILABLE, which also carries the reason: CLOSED_DAY, OUTSIDE_HOURS, TIME_PASSED, or NO_FREE_BAY, calculated by *AvailabilityPolicy.whyUnavailable*); the request may carry *preferredOperatorId*, which travels in BookingConfirmed so that operations-service respects it if that operator is free; customers can reschedule or cancel only before the start; the administrator moves bookings through IN_PROGRESS, COMPLETED, NO_SHOW, or CANCELLED; each catalog service has its *loyalty_points*, each booking line copies them when the booking is built, and *Booking.totalLoyaltyPoints()* exposes the total in *BookingResponse.totalLoyaltyPoints*; changes of schedule, exceptions, and bays are recorded in *schedule_history*. The business data of the establishment (identity, tax information, and channels) are read and saved with *GET* and *PUT /api/v1/admin/establishment*; the */internal/v1/bookings* routes serve operations-service with the internal key; creating, rescheduling, and closing expired bookings take the schedule lock (*sp_getapplock* on *booking-schedule*). **Expired bookings (since October 21, 2026):** every 5 minutes *ExpiredBookingsJob* calls *BookingService.closeExpired*, which closes the bookings still SCHEDULED or CONFIRMED one hour after their end time (*BOOKING_EXPIRY_GRACE_MINUTES*): a CONFIRMED one becomes NO_SHOW (paid or not; nothing is refunded automatically) and a SCHEDULED one is cancelled with the system reason *EXPIRED* (seed 112), which does not appear in the list of reasons. The job is turned off with *BOOKING_EXPIRY_CHECK_ENABLED=false* and its interval is *BOOKING_EXPIRY_CHECK_INTERVAL*. **Events:** publishes BookingConfirmed (created or rescheduled) and BookingCancelled (also when an expired booking is cancelled; the move to NO_SHOW publishes no event).
 
 ### 12.4 operations-service
 
 **Function:** operators, weekly shifts, absences, operator profile and skills, manual and automatic assignment, execution, ratings, and inspection reports (ADR-014).
 
-**Rules:** the operator rows are created from the accounts with the OPERATOR role; if two requests create the same operator at the same time, the second one reads the row already created instead of failing; *AssignmentPolicy* returns the reason that blocks an operator (OPERATOR_INACTIVE, OPERATOR_NOT_ON_SHIFT, OPERATOR_ABSENT, OPERATOR_BUSY); only SCHEDULED or CONFIRMED bookings are assigned, and one *service_execution* is created per booking line. **Automatic assignment (RF-008):** when BookingConfirmed is consumed, *AutoAssignmentPolicy* chooses the operator requested by the customer if still free and, otherwise, the free operator with the fewest bookings that day (on a tie, the lowest id); if nobody is free, the booking is left without an operator for the administrator, and a reschedule keeps the operator it already had. *GET /api/v1/operators/available* lists the free operators the customer can choose when booking. A service can be started from 15 minutes before the booked time (*StartPolicy*); starting and finishing move the booking in booking-service; the assignments returned by *GET /api/v1/admin/assignments* include the bay of the booking (ADR-015). **Inspection (RF-036):** only for services of 180 minutes or more; phases Reception, Exterior, Interior, Engine, and Delivery; up to five photos of 2 MB per finding, stored in *execution.inspection_photo*; the public link uses a random token and only works after publishing. **Events:** consumes *booking.confirmed* and publishes OperatorAssigned, ServiceStarted, ServiceCompleted, and InspectionShared.
+**Rules:** the operator rows are created from the accounts with the OPERATOR role; if two requests create the same operator at the same time, the second one reads the row already created instead of failing; *AssignmentPolicy* returns the reason that blocks an operator (OPERATOR_INACTIVE, OPERATOR_NOT_ON_SHIFT, OPERATOR_ABSENT, OPERATOR_BUSY); only SCHEDULED or CONFIRMED bookings are assigned, and one *service_execution* is created per booking line. **Automatic assignment (RF-008):** when BookingConfirmed is consumed, *AutoAssignmentPolicy* chooses the operator requested by the customer if still free and, otherwise, the free operator with the fewest bookings that day (on a tie, the lowest id); if nobody is free, the booking is left without an operator for the administrator, and a reschedule keeps the operator it already had. *GET /api/v1/operators/available* lists the free operators the customer can choose when booking. A service can be started from 15 minutes before the booked time (*StartPolicy*); starting and finishing move the booking in booking-service; the assignments returned by *GET /api/v1/admin/assignments* include the bay of the booking (ADR-015). Since October 21, 2026 manual and automatic assignment take the same lock (*ExecutionRepository.lockAssignments*, *sp_getapplock* on *operations-assignment*) before reading the operator bookings and saving, and *GET /api/v1/admin/assignments/unassigned* returns the single count of bookings without an operator (assignable and whose time has not ended) used by the dashboard and the bookings screen. **Inspection (RF-036):** only for services of 180 minutes or more; phases Reception, Exterior, Interior, Engine, and Delivery; up to five photos of 2 MB per finding, stored in *execution.inspection_photo*; the public link uses a random token and only works after publishing. **Events:** consumes *booking.confirmed* and publishes OperatorAssigned, ServiceStarted, ServiceCompleted, and InspectionShared.
 
 ### 12.5 payment-service
 
 **Function:** payment accounts with QR, payments with receipt, review, refunds, and manual payments (ADR-008 and ADR-013).
 
-**Rules:** only bookings CONFIRMED, IN_PROGRESS, or COMPLETED can be paid, and *PaymentPolicy.CanReportPayment* also requires that there is no approved payment and none pending or in review (exposed as *payable* in *GET /api/v1/payments/me/bookings*); the amount due is the total returned by booking-service minus the redeemed coupon (*AmountDueCalculator*); the payment reported by the customer goes directly to IN_REVIEW with the declared amount; a reused transaction reference is rejected; rejection requires a reason of up to 200 characters; a manual payment is approved immediately; the state machine is PENDING → IN_REVIEW → APPROVED or REJECTED, and APPROVED → REFUNDED. **Loyalty and promotions (ADR-015):** an approval credits the points of the booking as EARNED (idempotent per customer and booking); a refund reverses them (REVERSED); the balance is the *balance_after* of the last movement; a coupon is a percentage discount unlocked when the balance reaches *required_points*, and redeeming it does not consume points. **Events:** publishes PaymentConfirmed, PaymentRejected, PaymentRefunded, PromotionRedeemed, and LoyaltyPointsEarned after the commit, only with *MESSAGING_ENABLED=true*. **Correlation and health:** *CorrelationIdMiddleware* takes or creates the *X-Correlation-Id* and forwards it to booking-service; */health* and */actuator/health* check SQL Server with a 3-second limit.
+**Rules:** only bookings CONFIRMED, IN_PROGRESS, or COMPLETED can be paid, and *PaymentPolicy.CanReportPayment* also requires that there is no approved payment and none pending or in review (exposed as *payable* in *GET /api/v1/payments/me/bookings*); the amount due is the total returned by booking-service minus the redeemed coupon (*AmountDueCalculator*); the payment reported by the customer goes directly to IN_REVIEW with the declared amount; a reused transaction reference is rejected; the receipt weighs 2 MB at most (400 RECEIPT_TOO_LARGE; the web and the app compress it before sending it); *GET /api/v1/payment-accounts* returns the active accounts, including the cash account while it is active; rejection requires a reason of up to 200 characters; a manual payment is approved immediately; the state machine is PENDING → IN_REVIEW → APPROVED or REJECTED, and APPROVED → REFUNDED. **Loyalty and promotions (ADR-015):** an approval credits the points of the booking as EARNED (idempotent per customer and booking); a refund reverses them (REVERSED); the balance is the *balance_after* of the last movement; a coupon is a percentage discount unlocked when the balance reaches *required_points*, and redeeming it does not consume points. **Events:** publishes PaymentConfirmed, PaymentRejected, PaymentRefunded, PromotionRedeemed, and LoyaltyPointsEarned after the commit, only with *MESSAGING_ENABLED=true*. **Correlation and health:** *CorrelationIdMiddleware* takes or creates the *X-Correlation-Id* and forwards it to booking-service; */health* and */actuator/health* check SQL Server with a 3-second limit.
 
 ### 12.6 notification-service
 
@@ -853,7 +860,7 @@ Each service owns the Liquibase changelog of its schemas and applies it at start
 
 ### 12.7 Web and Mobile Clients
 
-The web application consumes the gateway through the services of *core/services*; *auth-interceptor* adds the token and redirects to */auth?expired* when the server answers 401 while the session is still open (a 401 that arrives after logging out is ignored, so "Your session expired" is not shown to someone who left on their own), and *api-error* translates the error codes. Every screen reads and saves through the API: the business data use *BusinessStore* over booking-service, and the inspection reports use *inspection-api* over operations-service (the photos are compressed in the browser before being sent). Only the reports are calculated in the browser from the bookings and payments. Roles and permissions, promotions, loyalty, preferences, and notification switches are read and saved through the API (*role-permissions-api*, *promotions-api*, *loyalty-api*, and *preferences*). The mobile application covers the three roles with equivalent screens and stores the session with *expo-secure-store*. Its HTTP client (*core/api/httpClient.ts*) sends JSON or *multipart* forms (the inspection photos), accepts its own timeout per request (60 seconds to upload photos), and applies the same rule as the web to a 401. *core/api/config.ts* exposes *WEB_URL*, the address of the web used to build the public link of the report; it is taken from *EXPO_PUBLIC_WEB_URL* or, when it is not set, from the same host as the gateway with port 4200.
+The web application consumes the gateway through the services of *core/services*; *auth-interceptor* adds the token and redirects to */auth?expired* when the server answers 401 while the session is still open (a 401 that arrives after logging out is ignored, so "Your session expired" is not shown to someone who left on their own), and *api-error* translates the error codes. Since October 21, 2026 the *auth* service listens to the *storage* event: if another tab of the same browser signs out, this one goes back to sign-in, and if another account signs in, it reloads so it does not show the previous account's data; the payment screen compresses the receipt to at most 2 MB and enlarges the QR with a magnifier. Every screen reads and saves through the API: the business data use *BusinessStore* over booking-service, and the inspection reports use *inspection-api* over operations-service (the photos are compressed in the browser before being sent). Only the reports are calculated in the browser from the bookings and payments; since October 21, 2026 only completed bookings count as services done. Roles and permissions, promotions, loyalty, preferences, and notification switches are read and saved through the API (*role-permissions-api*, *promotions-api*, *loyalty-api*, and *preferences*). The mobile application covers the three roles with equivalent screens and stores the session with *expo-secure-store*. Its HTTP client (*core/api/httpClient.ts*) sends JSON or *multipart* forms (the inspection photos), accepts its own timeout per request (60 seconds to upload photos), and applies the same rule as the web to a 401. *core/api/config.ts* exposes *WEB_URL*, the address of the web used to build the public link of the report; it is taken from *EXPO_PUBLIC_WEB_URL* or, when it is not set, from the same host as the gateway with port 4200.
 
 ### 12.8 Life Cycles
 
@@ -863,7 +870,7 @@ The web application consumes the gateway through the services of *core/services*
 
 | Entity | States (database codes) | Main transitions |
 |---|---|---|
-| Booking | SCHEDULED, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW | Creation → CONFIRMED; SCHEDULED → CONFIRMED; CONFIRMED → IN_PROGRESS → COMPLETED; SCHEDULED or CONFIRMED → CANCELLED or NO_SHOW. |
+| Booking | SCHEDULED, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW | Creation → CONFIRMED; SCHEDULED → CONFIRMED; CONFIRMED → IN_PROGRESS → COMPLETED; SCHEDULED or CONFIRMED → CANCELLED or NO_SHOW. A booking nobody started one hour after its end is closed by the system: CONFIRMED → NO_SHOW and SCHEDULED → CANCELLED with the EXPIRED reason. |
 | Service execution | PENDING, IN_PROGRESS, PAUSED, COMPLETED, WITH_ISSUE | PENDING → IN_PROGRESS → COMPLETED. PAUSED and WITH_ISSUE exist in the catalog but are not used. |
 | Payment | PENDING, IN_REVIEW, APPROVED, REJECTED, REFUNDED | PENDING → IN_REVIEW → APPROVED or REJECTED; APPROVED → REFUNDED. |
 | Point movement | EARNED, REVERSED (also REDEEMED, EXPIRED, and ADJUSTED in the catalog) | Payment approval → EARNED; refund → REVERSED. Movements are never modified. |
@@ -879,18 +886,18 @@ stateDiagram-v2
     direction LR
     [*] --> CONFIRMED : book with a free bay
     SCHEDULED --> CONFIRMED : confirm (admin)
-    SCHEDULED --> CANCELLED : cancel
+    SCHEDULED --> CANCELLED : cancel or expired
     CONFIRMED --> CONFIRMED : reschedule (admin)
     CONFIRMED --> IN_PROGRESS : start (operator, from 15 min before)
     CONFIRMED --> CANCELLED : cancel (client before the time, or admin)
-    CONFIRMED --> NO_SHOW : no show (admin)
+    CONFIRMED --> NO_SHOW : no show (admin) or expired
     IN_PROGRESS --> COMPLETED : finish (operator)
     COMPLETED --> [*]
     CANCELLED --> [*]
     NO_SHOW --> [*]
 ```
 
-*Note.* Gray states are final. The administrator can also change the status of a booking directly from the panel (*PATCH /api/v1/admin/bookings/{id}/status*).
+*Note.* Gray states are final. The administrator can also change the status of a booking directly from the panel (*PATCH /api/v1/admin/bookings/{id}/status*). *Expired* is the automatic close of *ExpiredBookingsJob* (section 12.3).
 
 ## 13. API or System Routes
 
@@ -909,7 +916,7 @@ The external API follows the REST style (Fielding, 2000). All external access go
 
 ### 13.2 Authentication in the API
 
-security-service issues a JWT signed with HS256 (secret JWT_SECRET of at least 32 bytes) valid for one hour, with the claims *sub* (user identifier), *roles*, *sid* (session identifier), *iss* (lavarapido-security-service), *aud* (lavarapido-api), *iat*, *nbf*, *exp*, and *jti*. There is no refresh token: when the token expires, the person logs in again. A JWT cannot be revoked before its expiration (Jones et al., 2015); logout only closes the session record. Every service validates the signature, the issuer, and the audience with the same secret.
+security-service issues a JWT signed with HS256 (secret JWT_SECRET of at least 32 bytes) valid for one hour, with the claims *sub* (user identifier), *roles*, *sid* (session identifier), *iss* (lavarapido-security-service), *aud* (lavarapido-api), *iat*, *nbf*, *exp*, and *jti*. There is no refresh token: when the token expires, the person logs in again. A JWT cannot be revoked by itself before its expiration (Jones et al., 2015). Since October 21, 2026 the system makes up for it with the *sid* claim: logging out, or the administrator disabling the account or the owner deactivating it, closes the session record; security-service rejects the tokens of that session and the gateway asks it (*GET /api/v1/auth/session*) before passing any request on to the other services, keeping the answer 30 seconds per token (section 9.2). Every service validates the signature, the issuer, and the audience with the same secret.
 
 ### 13.3 Endpoints
 
@@ -921,7 +928,8 @@ security-service issues a JWT signed with HS256 (secret JWT_SECRET of at least 3
 |---|---|---|---|
 | POST | /api/v1/auth/register | Public | Registers a customer (documentNumber, firstName, lastName, email, phone, password, acceptsTerms, acceptsDataPolicy). |
 | POST | /api/v1/auth/login | Public | Returns accessToken, expiry, and user; 423 ACCOUNT_LOCKED after five failed attempts. |
-| POST | /api/v1/auth/logout | Token | Closes the session. |
+| POST | /api/v1/auth/logout | Token | Closes the session; the token stops working. |
+| GET | /api/v1/auth/session | Token | 204 if the session of the token is still open; 401 if it was closed. Used by the gateway. |
 | POST | /api/v1/auth/password/forgot, /verify, /reset | Public | Password recovery in three steps. |
 | GET, PATCH | /api/v1/users/me | Token | Profile. |
 | PUT | /api/v1/users/me/email, /api/v1/users/me/password | Token | Change email or password (current password required). |
@@ -940,7 +948,7 @@ security-service issues a JWT signed with HS256 (secret JWT_SECRET of at least 3
 | GET | /api/v1/schedule/business-hours, /api/v1/schedule/exceptions, /api/v1/establishment | Public | Schedule and data of the business. |
 | GET | /api/v1/bookings/availability?date=&vehicleTypeId=&serviceIds= | Token | Free start times of a day. |
 | POST | /api/v1/bookings | CLIENT | Creates a booking. |
-| GET | /api/v1/bookings/me, /api/v1/bookings/{id}, /api/v1/bookings/cancellation-reasons | CLIENT | Own bookings and catalog of reasons. |
+| GET | /api/v1/bookings/me, /api/v1/bookings/{id}, /api/v1/bookings/cancellation-reasons | CLIENT | Own bookings and catalog of reasons (without the EXPIRED system reason). |
 | PUT, POST | /api/v1/bookings/{id}, /api/v1/bookings/{id}/cancel | CLIENT | Reschedule or cancel before the start. The web and the app only use the cancellation (without a reason: CUSTOMER_REQUEST is stored); rescheduling is done by the administrator. |
 | GET, POST | /api/v1/admin/bookings (?from=&to=&status=) | ADMIN | Lists and creates bookings for any customer. |
 | GET | /api/v1/admin/bookings/day-summary?date= | ADMIN | Indicators of the day for the dashboard. |
@@ -959,6 +967,7 @@ security-service issues a JWT signed with HS256 (secret JWT_SECRET of at least 3
 | PATCH, PUT | /api/v1/admin/operators/{id}/status, /availability | ADMIN | Activate or deactivate; replace the weekly shift. |
 | GET, POST, DELETE | /api/v1/admin/operators/{id}/absences[/{absenceId}] | ADMIN | Absences. |
 | GET | /api/v1/admin/assignments (?from=&to=) | ADMIN | Assignments. |
+| GET | /api/v1/admin/assignments/unassigned (?from=&to=) | ADMIN | Bookings without an operator that can still be assigned; the dashboard and the bookings screen use this count. |
 | PUT | /api/v1/admin/assignments/{bookingId} | ADMIN | Assigns or changes the operator (409 with the reason). |
 | GET | /api/v1/admin/assignments/{bookingId}/candidates | ADMIN | Operators with their blocking reason. |
 | GET, POST, PATCH, DELETE | /api/v1/admin/inspections/{bookingId}[/phases/{phase}, /findings[/{findingId}], /publish, /share, /photos/{photoId}] | ADMIN | Inspection report: start, phases, findings with photos (multipart), publish, and notify the customer. |
@@ -967,8 +976,8 @@ security-service issues a JWT signed with HS256 (secret JWT_SECRET of at least 3
 | POST | /api/v1/operator/services/{bookingId}/start, /finish | OPERATOR | Starts or finishes a service. |
 | GET | /api/v1/operator/ratings | OPERATOR | Ratings received. |
 | GET, POST | /api/v1/ratings/me, /api/v1/ratings/{bookingId} | CLIENT | Ratings given; rates a booking (1 to 5, comment up to 500). |
-| GET | /api/v1/payment-accounts | Token | Active accounts with QR. |
-| POST, GET | /api/v1/payments, /api/v1/payments/me | CLIENT | Reports a payment with receipt; own payments. |
+| GET | /api/v1/payment-accounts | Token | Active accounts with QR; the cash account only appears while it is active. |
+| POST, GET | /api/v1/payments, /api/v1/payments/me | CLIENT | Reports a payment with a receipt of at most 2 MB (400 RECEIPT_TOO_LARGE); own payments. |
 | GET | /api/v1/payments/me/bookings | CLIENT | Latest payment status and *payable* flag of each own booking. |
 | GET, POST | /api/v1/admin/payments (?status=) | ADMIN | Lists payments; registers a manual payment. |
 | GET | /api/v1/admin/payments/amount-due | ADMIN | Real amount due of a booking (with the coupon discount). |
@@ -1048,7 +1057,7 @@ The messaging uses a single topic exchange, *carwash.events*. The routing key fo
 |---|---|---|---|---|
 | UserRegistered | security.user_registered | security-service | customer-service, notification-service | Published |
 | BookingConfirmed | booking.confirmed | booking-service | notification-service, operations-service (automatic assignment) | Published |
-| BookingCancelled | booking.cancelled | booking-service | notification-service | Published |
+| BookingCancelled | booking.cancelled | booking-service | notification-service | Published (also when the system cancels an expired booking) |
 | OperatorAssigned | execution.operator_assigned | operations-service | notification-service | Published |
 | ServiceStarted | execution.service_started | operations-service | notification-service | Published |
 | ServiceCompleted | execution.service_completed | operations-service | notification-service | Published |
@@ -1062,7 +1071,7 @@ The messaging uses a single topic exchange, *carwash.events*. The routing key fo
 
 ### 13.5 Health and Verification
 
-Each service and the gateway expose */actuator/health* (and payment-service also */health*). All of them check the database: payment-service waits at most 3 seconds for SQL Server and, if it does not answer, replies DOWN with code 503. The recommended integration checks are described in the Installation Manual, section 16, and the end-to-end tests in *lavarapido-infra/e2e* run the complete flows against the containers.
+Each service and the gateway expose */actuator/health* (and payment-service also */health*). All of them check the database: payment-service waits at most 3 seconds for SQL Server and, if it does not answer, replies DOWN with code 503. On the public server, *docker-compose.prod.yml* also checks the health of every container every 30 seconds (*docker compose ps* shows them *healthy* or *unhealthy*). The recommended integration checks are described in the Installation Manual, section 16, and the end-to-end tests in *lavarapido-infra/e2e* run the complete flows against the containers.
 
 ## 14. Security
 
@@ -1082,8 +1091,8 @@ The security policy of the project is based on defense in depth, least privilege
 | Claims | sub, roles, sid, iss, aud, iat, nbf, exp, and jti; no name, email, phone, or document. |
 | Passwords | BCrypt with cost 12 (Provos & Mazières, 1999); maximum 72 characters, the input limit of BCrypt. |
 | Login attempts | Five failed attempts within 15 minutes lock the account for 15 minutes (423 ACCOUNT_LOCKED, table *security.login_lockout*); a successful login or a password reset clears the counter; the response time is the same for unknown emails. |
-| Sessions | security.user_session records each login; logout sets revoked_at. |
-| Revocation | A token remains valid until it expires (accepted risk of ADR-006). |
+| Sessions | security.user_session records each login; logout sets revoked_at, and deactivating or disabling the account closes all its sessions. |
+| Revocation | Since October 21, 2026 the token of a closed session stops working: security-service rejects it by its *sid* claim (*ActiveSessionValidator*) and the gateway cuts it before the other services (*SessionCheckFilter*, answer kept 30 seconds per token; if security-service does not answer, the request goes on). |
 
 *Note.* Source: configuration and code of security-service and ADR-006.
 
@@ -1103,7 +1112,7 @@ The system has three fixed roles (ADMIN, OPERATOR, and CLIENT) and no custom rol
 
 - The secrets (sa password, JWT secret, SMTP, RabbitMQ, and internal key) are read from environment variables or from *lavarapido-infra/.env*, excluded from Git; the repository only contains *.env.example*.
 - In the local environment the services connect with *sa*; before any shared deployment, each service must have a login with rights only on its schemas.
-- HTTPS with TLS 1.2 or later is mandatory outside the local environment; only the gateway must be exposed.
+- HTTPS with TLS 1.2 or later is mandatory outside the local environment; only the gateway must be exposed. On the public server, since October 20, 2026 Caddy adds the HSTS, *X-Content-Type-Options: nosniff*, *X-Frame-Options*, *Referrer-Policy*, and *Permissions-Policy* headers, removes the *Server* header, and sends with the web a content security policy (CSP) that only allows the project's own code, Google Fonts, and jsDelivr.
 - The demonstration accounts of *DevDataSeeder* exist only in the *dev* profile.
 
 ### 14.5 OWASP Top 10 Checklist
@@ -1115,12 +1124,12 @@ The system has three fixed roles (ADMIN, OPERATOR, and CLIENT) and no custom rol
 | Category | Control | Status |
 |---|---|---|
 | A01 Broken access control | Role per route and ownership in each service; identity from the token. | Applied |
-| A02 Cryptographic failures | BCrypt; secrets in environment variables; TLS outside local. | Applied (TLS pending in deployment) |
+| A02 Cryptographic failures | BCrypt; secrets in environment variables; TLS outside local. | Applied (TLS with Let's Encrypt on the public server) |
 | A03 Injection | Parameterized queries; validation of inputs. | Applied |
 | A04 Insecure design | Same response for unknown emails; identifiers are not used as access control. | Applied |
-| A05 Security misconfiguration | No stack traces in responses; Swagger only in dev. | Applied |
+| A05 Security misconfiguration | No stack traces in responses; Swagger only in dev; security headers and CSP on the public server. | Applied |
 | A06 Vulnerable components | Review with versions:display-dependency-updates, dotnet list package --vulnerable, and npm audit. | Manual |
-| A07 Identification and authentication failures | One-hour token; temporary lockout after failed attempts; no rate limit in the gateway. | Partial |
+| A07 Identification and authentication failures | One-hour token; the token of a closed session stops working; temporary lockout after failed attempts; no rate limit in the gateway. | Partial |
 | A08 Software and data integrity failures | Pinned versions; validation of messages; invalid messages to the DLQ. | Applied |
 | A09 Security logging and monitoring failures | Logs without personal data and with correlation id; audit trail not populated. | Partial |
 | A10 Server-side request forgery | The services only call configured internal addresses. | Applied |
@@ -1133,7 +1142,7 @@ The processing of personal data must comply with Statutory Law 1581 of 2012 (Con
 
 ### 14.7 Accepted Risks
 
-- Impossibility of revoking a JWT before its expiration.
+- The token of a closed session still works for up to 30 seconds (the answer the gateway keeps) or, if security-service does not answer, until it expires.
 - Symmetric HS256 signature with a secret shared among services.
 - No rate limit in the gateway; account lockout only slows down attempts against a single account.
 - Possible loss of events between the commit and the publication (no Outbox, TD-011).
@@ -1185,7 +1194,7 @@ The local environment and its startup order are described in the Installation Ma
 
 ### 16.2 Configuration
 
-The configuration variables are described in the Installation Manual, section 10. Any new variable must be added to *.env.example* with a comment and, if the service runs in Docker, to its *environment* block of *docker-compose.yml*.
+The configuration variables are described in the Installation Manual, section 10. Any new variable must be added to *.env.example* with a comment and, if the service runs in Docker, to its *environment* block of *docker-compose.yml*. Those of October 21, 2026 (*SESSION_CHECK_\** in the gateway and *BOOKING_EXPIRY_\** in booking-service) are not in those files yet, so in Docker they keep their defaults (action ACO-14).
 
 ### 16.3 Updates and Dependencies
 
@@ -1203,7 +1212,7 @@ The configuration variables are described in the Installation Manual, section 10
 
 ### 16.5 Testing
 
-The testing strategy proposes a pyramid of unit, integration, contract, and end-to-end tests, with at least 80% line coverage and 90% in the domain. On October 19, 2026, all the tests were run with these results: 655 unit and integration tests passed (web 43, gateway 34, security-service 151, customer-service 69, booking-service 43, operations-service 55, notification-service 112, and payment-service 148, including the 7 persistence tests against an isolated database), 19 of 19 end-to-end tests, and 42 of 42 functional cases passed against the complete system (*lavarapido-infra/e2e*: complete booking, payment, and service flow, inspection, and access rules). The Java services test their domain, use cases, and web layer without a database (*./mvnw test*); payment-service has three test projects (domain, application, and integration). There are still no persistence tests against a real SQL Server inside the Java services (TD-010); the end-to-end tests partly cover that gap. The recommended concurrency tests are two simultaneous bookings for the same bay, two updates with the same *row_version*, two simultaneous point movements of the same customer, and the duplicate delivery of the same event.
+The testing strategy proposes a pyramid of unit, integration, contract, and end-to-end tests, with at least 80% line coverage and 90% in the domain. On October 21, 2026, all the automated tests were run with these results: 689 unit and integration tests passed (web 60, gateway 40, security-service 155, customer-service 69, booking-service 47, operations-service 56, notification-service 112, and payment-service 150, including the 7 persistence tests against an isolated database) and 19 of 19 end-to-end tests, with the gateway session check on; the 42 functional cases were last run on October 19, 2026 and all passed against the complete system (*lavarapido-infra/e2e*: complete booking, payment, and service flow, inspection, and access rules). The Java services test their domain, use cases, and web layer without a database (*./mvnw test*); payment-service has three test projects (domain, application, and integration). There are still no persistence tests against a real SQL Server inside the Java services (TD-010); the end-to-end tests partly cover that gap. The recommended concurrency tests are two simultaneous bookings for the same bay, two updates with the same *row_version*, two simultaneous point movements of the same customer, and the duplicate delivery of the same event.
 
 ### 16.6 Diagnosing Frequent Problems
 
@@ -1213,7 +1222,9 @@ The testing strategy proposes a pyramid of unit, integration, contract, and end-
 
 | Symptom | Probable cause | Check |
 |---|---|---|
-| 401 with a token that seemed valid | Expired token or different JWT_SECRET, issuer, or audience. | Log in again; verify the .env file. |
+| 401 with a token that seemed valid | Expired token, different JWT_SECRET, issuer, or audience, or closed session (logout on another device or disabled account). | Log in again; verify the .env file; *GET /api/v1/auth/session* with the token tells whether the session is still open. |
+| 400 RECEIPT_TOO_LARGE when reporting a payment | The receipt weighs more than 2 MB (a client without the compression of the web or of the updated app). | Upload it from the web or from the updated app, which compress the image. |
+| A booking moved by itself to No-show or Cancelled | Nobody started it one hour after its end time (*ExpiredBookingsJob*). | Status and reason of the booking (EXPIRED on the cancelled ones); booking-service log (*Closed N expired bookings*). |
 | 503 CUSTOMER_SERVICE_UNAVAILABLE or BOOKING_SERVICE_UNAVAILABLE | The dependency is down or its URL is wrong. | Health of the service and CUSTOMER_SERVICE_URL or BOOKING_SERVICE_URL. |
 | "Customer profile not ready" (CUSTOMER_NOT_PROVISIONED) | The UserRegistered event was not consumed. | Queue customer-service.events and its DLQ. |
 | Notifications that do not arrive | MESSAGING_ENABLED=false, an event without recipient, or a message in the DLQ. | Configuration and queue notification-service.events.dlq. |
@@ -1239,7 +1250,7 @@ The testing strategy proposes a pyramid of unit, integration, contract, and end-
 | TD-012 | Metrics with Micrometer and Prometheus. | Low |
 | TD-019 | payment changelogs with their own numbering. | Low |
 
-*Note.* Source: *15-project-control/technical-backlog.md* of the documentation (Vehicle Washing Development Team, 2026a), reviewed against the code on October 16, 2026. Between October 8 and 16, 2026, TD-001, TD-002, TD-003, TD-009, TD-013, TD-014, TD-015, TD-016, TD-017, TD-018, TD-020, and TD-021 were resolved; their closure is recorded in the corrective, preventive, and improvement actions document. TD-006 was also closed on October 19, 2026, with continuous integration in GitHub Actions.
+*Note.* Source: *15-project-control/technical-backlog.md* of the documentation (Vehicle Washing Development Team, 2026a), reviewed against the code on October 16, 2026. Between October 8 and 16, 2026, TD-001, TD-002, TD-003, TD-009, TD-013, TD-014, TD-015, TD-016, TD-017, TD-018, TD-020, and TD-021 were resolved; their closure is recorded in the corrective, preventive, and improvement actions document. TD-006 was also closed on October 19, 2026, with continuous integration in GitHub Actions. On October 21, 2026, TD-024 (tokens of closed sessions), TD-025 (bookings nobody closed and the count of bookings without an operator), and TD-026 (an operator assigned twice) were closed, and TD-027 (tests of the administrator screens) was resolved for bookings, management, and reports.
 
 ### 16.8 Recommended Evolution
 
@@ -1255,7 +1266,7 @@ If the project leaves the academic scope, the documentation identifies as natura
 |---|---|
 | ADR | Architecture Decision Record. |
 | Aggregate | Group of domain objects kept consistent together, with a root (Evans, 2004); for example, Payment. |
-| API Gateway | Single external entry point that routes the requests; it does not validate tokens in this system. |
+| API Gateway | Single external entry point that routes the requests; in this system it does not check the token signature, but since October 21, 2026 it cuts the tokens of closed sessions. |
 | Hexagonal architecture | Ports and adapters style in which the domain does not depend on the infrastructure (Cockburn, 2005). |
 | Bay | Physical washing station; the number of active bays is the capacity. |
 | Correlation id | Identifier that follows a request through the gateway, the services, and the messages. |
@@ -1327,9 +1338,10 @@ Table 29 gathers the contradictions found between the code, the project document
 |---|---|---|
 | Stack of the services | Version 2.0 stated Java 21 and Spring Boot 3 in the six services. | Code: Spring Boot 4.0.8 in the Java services and .NET 8 in payment-service (ADR-013). |
 | Migrations | Version 2.0 described a single master changelog for the whole database. | Code and migration strategy: one changelog per service applied at startup; payment through payment-migrate. |
-| Gateway | Version 2.0 said that the gateway rejects invalid JWTs at the edge. | Gateway documentation and ADR-006: it does not validate tokens; each service does. |
+| Gateway | Version 2.0 said that the gateway rejects invalid JWTs at the edge. | Gateway documentation and ADR-006: it does not check the token signature; each service does. Since 2026-10-21 it does cut the tokens of closed sessions, asking security-service. |
 | Account lockout | Version 3.1 stated that it did not exist. | Code of 2026-10-16: five failed attempts within 15 minutes lock the account for 15 minutes (RF-004b). Resolved. |
 | Operator assignment | Version 3.1 stated manual assignment only and no choice by the customer. | Code of 2026-10-16: automatic assignment when the booking is confirmed, with the optional choice of the customer (RF-008 and RF-010). Resolved. |
+| Token revocation | Up to version 4.4 a token kept working until its expiration after logout. | Code of 2026-10-21: the token of a closed session stops working in security-service and in the gateway (TD-024). Resolved. |
 | Audit trail | The architecture says that triggers feed audit.audit_log. | Code: the table exists but no trigger or service writes to it. |
 | Booking request | Version 2.0 used customerVehicleId, scheduledStart, and services with quantity. | Code: vehicleId, serviceIds, date, time, and notes. |
 | Execution codes | Version 2.0 used Spanish codes (PENDIENTE, EN_PROCESO...). | Data model: PENDING, IN_PROGRESS, PAUSED, COMPLETED, WITH_ISSUE. |
