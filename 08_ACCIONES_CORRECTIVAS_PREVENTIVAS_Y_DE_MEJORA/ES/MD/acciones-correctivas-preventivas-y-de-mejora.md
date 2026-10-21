@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-20 de octubre de 2026
+21 de octubre de 2026
 
-Tipo de documento: Registro de acciones correctivas, preventivas y de mejoramiento (equipo de desarrollo e instructora) · Versión 2.4
+Tipo de documento: Registro de acciones correctivas, preventivas y de mejoramiento (equipo de desarrollo e instructora) · Versión 2.5
 
 ## Control de Versiones
 
@@ -34,6 +34,7 @@ La Tabla 1 registra el historial de cambios de este documento. El registro de ac
 | 2.2 | 2026-10-19 | Se cerró la acción preventiva AP-01 con la integración continua en GitHub Actions de los 10 repositorios. | Equipo de desarrollo |
 | 2.3 | 2026-10-19 | Indicador de pruebas con la ejecución del 19 de octubre (655 automatizadas, 19 de punta a punta y 42 casos funcionales). | Equipo de desarrollo |
 | 2.4 | 2026-10-20 | Revisión contra el código del 20 de octubre de 2026: el registro sigue vigente (AM-03, la reprogramación desde la web y la app, y AM-12, los estados de pausa y novedad, siguen abiertas); se completó el nombre de la líder de backend. | Equipo de desarrollo |
+| 2.5 | 2026-10-21 | Revisión contra el código del 21 de octubre de 2026. Se registraron y cerraron las correctivas AC-44 a AC-52 (token que seguía sirviendo después de cerrar sesión, reservas que nadie cerraba, asignación doble de un operario, comprobantes sin límite de tamaño, efectivo visible aunque estuviera desactivado, reportes que contaban reservas no terminadas, texto engañoso de la pantalla de roles, pestañas con la sesión desfasada y registro de transacciones de la base sin límite); se cerró la preventiva AP-04 (respaldos diarios verificados), se abrió la correctiva ACO-14 (variables nuevas fuera de *.env.example* y del compose) y se agregaron y cerraron AP-16 a AP-18 (registros de contenedores, encabezados de seguridad y chequeos de salud) y la mejora AM-16 (actualización obligatoria del APK); las mejoras del 17 de octubre que repetían los identificadores AM-07 y AM-08 pasan a ser AM-14 (informe de inspección en la app) y AM-15 (preguntas frecuentes); indicadores con las pruebas del 21 de octubre. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -89,7 +90,7 @@ Durante su construcción, sus revisiones con la instructora y la elaboración de
 
 ### 4.2 Fuentes de Este Documento
 
-Las acciones se verificaron contra el código de los once repositorios (rama *develop* al 17 de octubre de 2026) y su historial de Git, y contra el registro de riesgos, el backlog técnico, la gestión de incidentes, la estrategia de pruebas y los registros de decisiones de arquitectura (ADR) del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a). También se incluyen los hallazgos de la revisión de los manuales del 7, del 9 y del 16 de octubre de 2026 y de la revisión completa del sistema del 16 de octubre (anexo B del Manual Técnico y anexos de los demás manuales).
+Las acciones se verificaron contra el código de los once repositorios (rama *develop* al 21 de octubre de 2026) y su historial de Git, y contra el registro de riesgos, el backlog técnico, la gestión de incidentes, la estrategia de pruebas y los registros de decisiones de arquitectura (ADR) del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a). También se incluyen los hallazgos de la revisión de los manuales del 7, del 9 y del 16 de octubre de 2026 y de la revisión completa del sistema del 16 de octubre (anexo B del Manual Técnico y anexos de los demás manuales).
 
 ## 5. Objetivo
 
@@ -263,6 +264,15 @@ La Tabla 6 registra las no conformidades ya corregidas, con su causa raíz y la 
 | AC-41 | En el celular (360 px) había botones fuera de la pantalla, títulos encimados, el botón ☰ sobre los títulos y filtros fuera de su tarjeta. | P2 | Estilos pensados para escritorio, sin reglas para celular, e interlineado fijo de 20 px heredado del tema de Material. | Reglas de celular en la landing, autenticación, panel del cliente, servicios asignados, gestión y configuración; espacio global para el botón ☰ e interlineado relativo en los títulos. | 60 pantallas web (360 y 768 px) y 26 de la app sin desbordes (pruebas, Tabla 5b). | Revisión de diseño adaptable | 2026-10-17 |
 | AC-42 | En la app, los campos de fecha y búsqueda se aplastaban cuando iban en columna. | P3 | La caja usaba *flex: 1*, que parte de alto 0 en una columna. | Crece solo a lo ancho y conserva un alto mínimo de 46 px (*FilterInputs.tsx*). | Historial y Calificaciones muestran los campos completos. | Revisión de diseño adaptable | 2026-10-17 |
 | AC-43 | El avance del próximo servicio mostraba 10 % o 25 % sin que el lavado hubiera empezado. | P3 | La tabla de avance daba un porcentaje a los estados Programada y Confirmada. | Programada y Confirmada quedan en 0 % en la web y en la app. | El panel muestra 0 % hasta que el operario inicia el servicio. | Reporte de uso | 2026-10-16 |
+| AC-44 | Un token seguía sirviendo hasta una hora después de cerrar sesión o de que el administrador inhabilitara la cuenta. | P2 | Cada servicio solo verificaba la firma y la vigencia del JWT (ADR-006); nadie preguntaba si la sesión seguía abierta. | security-service rechaza el token de una sesión cerrada (claim *sid*, *ActiveSessionValidator*) y el gateway lo confirma con *GET /api/v1/auth/session* antes de pasar a los demás servicios, con la respuesta guardada 30 segundos por token. | *SessionCheckFilterTest*, *ApiSecurityWebTest* (401 con el token de una sesión cerrada); 19 pruebas de punta a punta con el chequeo activo. | TD-024 | 2026-10-21 |
+| AC-45 | Las reservas que nadie iniciaba quedaban Programadas o Confirmadas para siempre, y cada pantalla del administrador contaba "sin operario" a su manera. | P2 | No había un cierre para las reservas vencidas y la regla de "sin operario" estaba repetida en las pantallas. | *ExpiredBookingsJob* cierra cada 5 minutos las que pasaron una hora de su fin sin iniciarse (Confirmada → No asistió; Programada → Cancelada con el motivo *EXPIRED*), y *GET /api/v1/admin/assignments/unassigned* es el único conteo de reservas sin operario. | *BookingTest*, *BookingServiceTest*, *OperationsServiceTest*, *reservations-store.spec.ts*. | TD-025 | 2026-10-21 |
+| AC-46 | Una asignación manual y una automática al mismo tiempo podían darle a un operario dos servicios a la misma hora. | P2 | Las dos asignaciones leían la agenda del operario y guardaban sin coordinarse. | Las dos toman el mismo candado de SQL Server (*sp_getapplock* sobre *operations-assignment*) antes de leer y guardar. | *OperationsServiceTest* comprueba que el candado se toma antes de guardar. | TD-026 | 2026-10-21 |
+| AC-47 | El servidor aceptaba comprobantes de pago de cualquier tamaño, y una foto del celular de varios MB se guardaba tal cual en la base. | P3 | El límite de tamaño no estaba en el dominio de pagos. | payment-service rechaza un comprobante de más de 2 MB (*RECEIPT_TOO_LARGE*) y la web y la app lo comprimen antes de enviarlo. | *PaymentTests* (más de 2 MB y 2 MB exactos). | Revisión del 2026-10-21 | 2026-10-21 |
+| AC-48 | El cliente veía la opción Efectivo aunque el administrador hubiera desactivado esa cuenta. | P3 | *GET /api/v1/payment-accounts* no devolvía la cuenta de efectivo y la web y la app la agregaban siempre por su cuenta. | La API devuelve la cuenta de efectivo mientras está activa y los clientes muestran Efectivo solo si viene en la lista. | Pantalla de pagos con la cuenta de efectivo activa y desactivada. | Diseño del Software, hallazgo 8 | 2026-10-21 |
+| AC-49 | Las tarjetas y gráficas de Reportes contaban como servicios realizados reservas que no se habían terminado. | P3 | El conteo tomaba las reservas por fecha sin mirar su estado. | Solo cuentan las reservas completadas. | *reports.spec.ts*. | Revisión del 2026-10-21 | 2026-10-21 |
+| AC-50 | La pestaña de roles prometía que los permisos definen lo que cada usuario puede hacer. | P3 | La autorización real usa el rol del token y la matriz de permisos es de referencia (ADR-015), pero el texto no lo decía. | La pestaña y el diálogo explican que los roles son fijos y que el acceso lo decide el rol. | *management.spec.ts* (roles fijos). | ADR-015 | 2026-10-21 |
+| AC-51 | Al cerrar sesión o entrar con otra cuenta en una pestaña, las otras pestañas del navegador seguían mostrando la sesión anterior. | P3 | Cada pestaña leía la sesión solo al abrirse. | Las pestañas escuchan el evento *storage*: si otra cierra sesión vuelven al inicio de sesión y si entra otra cuenta se recargan. | *auth.spec.ts* (pestañas). | Revisión del 2026-10-21 | 2026-10-21 |
+| AC-52 | El registro de transacciones de la base del servidor crecía sin límite. | P2 | La base estaba en modelo de recuperación completo sin respaldos del registro de transacciones. | La base pasa al modelo de recuperación simple y se respalda completa todos los días (AP-04). | *RECOVERY SIMPLE* en el servidor; *lavarapido-infra*, commit del 2026-10-21. | R-008 | 2026-10-21 |
 
 *Nota.* Elaborado por los autores a partir del historial de Git de los repositorios, el registro de riesgos y los ADR del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a).
 
@@ -276,6 +286,7 @@ La Tabla 6 registra las no conformidades ya corregidas, con su causa raíz y la 
 |---|---|---|---|---|---|---|---|
 | ACO-04 | La tabla *audit.audit_log* existe pero nadie escribe en ella. | P2 | No se crearon los disparadores ni se fija *SESSION_CONTEXT(N'user_id')*. | Disparadores de auditoría en las tablas sensibles y contexto de sesión en cada servicio, o retirar la tabla del diseño mediante un ADR. | Líder de backend | Media | Cambios de precios, cuentas de pago y roles visibles en la auditoría. |
 | ACO-13 | Las entidades editadas por administradores no usan bloqueo optimista: en ediciones concurrentes gana la última escritura. | P3 | La columna *row_version* existe, pero no se mapea con *@Version*. | Mapear *@Version* en booking, customer y security y responder 409 ante conflicto. | Líder de backend | Baja | Prueba de dos actualizaciones con la misma versión. (TD-008) |
+| ACO-14 | Las variables del 21 de octubre de 2026 (*SESSION_CHECK_\** del gateway y *BOOKING_EXPIRY_\** de booking-service) no están en *.env.example* ni en el bloque *environment* de *docker-compose.yml*, como pide el Procedimiento de Implementación (sección 13); en Docker solo se pueden usar sus valores por defecto. | P3 | Se agregaron con valor por defecto en el *application.yml* de cada servicio sin actualizar los archivos de *lavarapido-infra*. | Agregarlas comentadas a *.env.example* y al *environment* de *api-gateway* y *booking-service*. | Líder de proyecto | Baja | Las seis variables aparecen en los dos archivos y *docker compose config* las muestra. |
 
 *Nota.* Elaborado por los autores a partir del backlog técnico, del anexo B del Manual Técnico y de la verificación del código al 16 de octubre de 2026. Las acciones ACO-01 a ACO-03 y ACO-05 a ACO-12 se cerraron y pasaron a la Tabla 6 (AC-24 a AC-34).
 
@@ -292,7 +303,7 @@ Las acciones preventivas atacan las causas de riesgos que todavía no se han mat
 | AP-01 | Regresiones que llegan a *develop* sin detectarse. | Integración continua por repositorio (*./mvnw verify*, *dotnet test*, *ng build*, *ng test* y *tsc*) y regla de integrar solo con el resultado en verde. | Líder de proyecto | Alta | Cerrada (2026-10-19): GitHub Actions en los 10 repositorios, en cada push o pull request a *develop* y *main* | R-003, TD-006 |
 | AP-02 | Pérdida de un evento entre el commit y la publicación. | Patrón Outbox en security, booking, operations y payment. | Líder de backend | Baja | Aceptada como riesgo hasta salir del alcance académico | R-005, TD-011 |
 | AP-03 | Fuga de secretos (*.env*, contraseña de aplicación del correo, *JWT_SECRET*). | Mantener *.env* ignorado, revisar con *git check-ignore* antes de cada implementación y rotar los secretos cada trimestre o ante sospecha. | Todo el equipo | Alta | En ejecución (permanente) | R-004 |
-| AP-04 | Pérdida de datos antes de una demostración o en operación. | Respaldo diario automatizado con verificación y prueba mensual de restauración (Manual de Administrador, sección 14). | Administrador de TI | Alta | Abierta | R-008 |
+| AP-04 | Pérdida de datos antes de una demostración o en operación. | Respaldo diario automatizado con verificación y prueba de restauración (Manual de Administrador, sección 14). | Administrador de TI | Alta | Cerrada (2026-10-21): *backup-db.sh* respalda la base todos los días y antes de cada actualización, *verify-backup.sh* restaura cada respaldo con otro nombre para comprobarlo y se guardan los últimos 14 (Documento de Despliegue) | R-008 |
 | AP-05 | La documentación vuelve a separarse del código. | Lista de revisión de pull requests que exige actualizar modelos, contratos OpenAPI, ADR y manuales afectados; revisión de los manuales antes de cada implementación. | Autor de cada pull request | Media | En ejecución (permanente) | R-010 |
 | AP-06 | Implementar con *MESSAGING_ENABLED=false*, sin *INTERNAL_API_KEY* o con el perfil *dev*. | Lista de verificación del Anexo A del Procedimiento de Implementación. | Administrador de TI | Media | Cerrada (incluida en el procedimiento) | R-I02, R-I03 |
 | AP-07 | Defectos de persistencia (bloqueos y disparadores) que solo se ven a mano. | Pruebas de persistencia con Testcontainers y SQL Server real en booking-service. | Líder de backend | Baja | En ejecución (la suite de punta a punta cubre parte del riesgo) | TD-010 |
@@ -304,6 +315,9 @@ Las acciones preventivas atacan las causas de riesgos que todavía no se han mat
 | AP-13 | Confusión por la numeración propia de los changelogs de pagos, que repite los números globales. | Documentar la regla en la estrategia de migraciones y usar el prefijo *pay-* en los identificadores. | Líder de backend | Baja | Cerrada (documentada) | TD-019 |
 | AP-14 | Funciones construidas que contradicen decisiones ya registradas (causa de AC-11 y AC-12). | Revisar los ADR vigentes y el mapa de navegación antes de iniciar una función, y consultar al equipo ante una contradicción. | Todo el equipo | Media | En ejecución (permanente) | Lección de ADR-015 |
 | AP-15 | Cambios de interfaz que rompen el diseño en el celular sin que nadie lo note (causa de AC-41). | Medir las pantallas a 360 y 768 px con Playwright antes de fusionar cambios de interfaz, a partir del script *e2e/width-360.js*, y revisar las capturas. | Líderes de frontend y backend | Media | En ejecución (permanente) | Lección de AC-41 |
+| AP-16 | Que los registros de los contenedores llenen el disco del servidor. | Limitar los registros de cada contenedor a 3 archivos de 10 MB. | Líder de proyecto | Media | Cerrada (2026-10-20): *docker-compose.prod.yml* | Revisión del servidor |
+| AP-17 | Ataques desde el navegador contra el sitio público (incrustarlo en otra página, cargar scripts de otros orígenes). | Encabezados de seguridad y política de contenido (CSP) en Caddy. | Líder de proyecto | Media | Cerrada (2026-10-20): *deploy/Caddyfile* | OWASP A05 |
+| AP-18 | Que un contenedor quede colgado sin que nadie lo note. | Chequeo de salud cada 30 segundos en todos los contenedores, visible en *docker compose ps*. | Líder de proyecto | Media | Cerrada (2026-10-20): *docker-compose.prod.yml* | Revisión del servidor |
 
 *Nota.* Elaborado por los autores a partir del registro de riesgos, el backlog técnico y la política de seguridad del proyecto.
 
@@ -321,8 +335,6 @@ Las acciones preventivas atacan las causas de riesgos que todavía no se han mat
 | AM-04 | Completar la aplicación móvil y construir una versión con EAS para las notificaciones push. | Avisos inmediatos en el teléfono. | Líder de frontend | Media | Cerrada (2026-10-16): APK compilado con EAS y publicado en */app/* del servidor, con avisos push de versión nueva | ADR-011 |
 | AM-05 | Firma RS256 y tokens de actualización (*refresh tokens*). | Menor impacto de una fuga del secreto y sesiones más largas sin volver a iniciar sesión. | Líder de backend | Baja | Abierta | ADR-006 |
 | AM-06 | Almacenar comprobantes, códigos QR y fotos fuera de la base de datos. | Base de datos más liviana y respaldos más rápidos. | Líder de backend | Baja | Abierta | Evolución recomendada |
-| AM-07 | Gestionar el informe de inspección desde la aplicación móvil. | El administrador registra el estado del vehículo junto al vehículo, con fotos de la cámara que se reducen en el celular. | Líder de backend | Media | Cerrada (2026-10-17): pantalla *AdminInspection* en la app | Solicitud del equipo |
-| AM-08 | Preguntas frecuentes en la página de inicio. | El visitante resuelve las dudas más comunes (reserva, pago, cancelación, puntos) sin escribir al lavadero. | Líder de backend | Baja | Cerrada (2026-10-17) | Revisión de la landing |
 | AM-07 | Separar en *promotion.promotion* los campos de presentación y los de descuento real. | Evita que el paquete mostrado y el descuento aplicado se contradigan. | Líder de backend | Baja | Abierta | ADR-015 |
 | AM-08 | Publicar la web compilada detrás del gateway con HTTPS. | Entorno apto para producción, sin servidor de desarrollo. | Líder de frontend | Media | Cerrada (2026-10-16): contenedor web con nginx detrás de Caddy y HTTPS en el servidor público (Documento de Despliegue) | Procedimiento de Implementación, R-I08 |
 | AM-09 | Herramientas de cobertura (JaCoCo) y análisis estático (SonarQube). | Métricas objetivas de calidad del código. | Líder de proyecto | Baja | Abierta | Estrategia de pruebas |
@@ -330,6 +342,9 @@ Las acciones preventivas atacan las causas de riesgos que todavía no se han mat
 | AM-11 | Reemplazar los marcadores de figuras de los manuales por capturas reales de la versión final. | Manuales completos según la guía del SENA. | Líder de frontend | Alta | Cerrada (2026-10-16): manuales 4.0 con capturas reales del sistema | Anexo A de cada manual |
 | AM-12 | Usar los estados de ejecución *PAUSED* y *WITH_ISSUE* en la interfaz del operario. | Registrar pausas y novedades del servicio. | Líder de frontend | Baja | Abierta | Modelo de datos |
 | AM-13 | Exponer en el panel el envío de avisos generales (*SYSTEM_MESSAGE*) a grupos de usuarios. | Comunicación directa con clientes y operarios sin usar la API. | Líder de frontend | Baja | Abierta | Manual de Administrador |
+| AM-14 | Gestionar el informe de inspección desde la aplicación móvil. | El administrador registra el estado del vehículo junto al vehículo, con fotos de la cámara que se reducen en el celular. | Líder de backend | Media | Cerrada (2026-10-17): pantalla *AdminInspection* en la app | Solicitud del equipo |
+| AM-15 | Preguntas frecuentes en la página de inicio. | El visitante resuelve las dudas más comunes (reserva, pago, cancelación, puntos) sin escribir al lavadero. | Líder de backend | Baja | Cerrada (2026-10-17) | Revisión de la landing |
+| AM-16 | Obligar a instalar el APK nuevo cuando hay cambios nativos que no llegan por internet. | Nadie sigue usando una versión de la app sin los arreglos que dependen del APK. | Líder de backend | Media | Cerrada (2026-10-21): pantalla que solo deja descargar el APK publicado si su *versionCode* es mayor; si el servidor no responde, la app sigue | Revisión del 2026-10-21 |
 
 *Nota.* Elaborado por los autores a partir de la evolución recomendada del Manual Técnico, de los ADR y de las limitaciones documentadas en los manuales.
 
@@ -339,18 +354,18 @@ Las acciones preventivas atacan las causas de riesgos que todavía no se han mat
 
 *Indicadores de la Gestión de Acciones*
 
-| Indicador | Fórmula | Meta | Valor al 2026-10-17 |
+| Indicador | Fórmula | Meta | Valor al 2026-10-21 |
 |---|---|---|---|
-| Acciones correctivas cerradas | Correctivas cerradas / correctivas registradas × 100 | ≥ 70 % por entrega | 43 / 45 = 96 % |
+| Acciones correctivas cerradas | Correctivas cerradas / correctivas registradas × 100 | ≥ 70 % por entrega | 52 / 55 = 95 % |
 | Correctivas P0 y P1 abiertas | Número de ACO con severidad P0 o P1 | 0 antes de una implementación | 0 |
 | Cierre en plazo | Acciones cerradas dentro del plazo de su severidad / acciones cerradas × 100 | ≥ 90 % | Por medir desde la versión 1.0 |
 | Reincidencia | Correctivas cerradas cuyo problema reaparece / correctivas cerradas × 100 | 0 % | 0 % |
 | Defectos escapados | Defectos encontrados en aceptación u operación / defectos totales del periodo × 100 | Tendencia a la baja | Por medir desde la primera implementación |
-| Pruebas automatizadas | Pruebas ejecutadas y aprobadas en todos los repositorios | Creciente | 655 unitarias y de integración (web 43, gateway 34, servicios Java 430 y payment-service 148) al 19 de octubre de 2026, 19 de punta a punta y 42 casos funcionales |
+| Pruebas automatizadas | Pruebas ejecutadas y aprobadas en todos los repositorios | Creciente | 689 unitarias y de integración (web 60, gateway 40, servicios Java 439 y payment-service 150) y 19 de punta a punta al 21 de octubre de 2026, y 42 casos funcionales al 19 de octubre |
 
-*Nota.* Elaborado por los autores. El conteo de pruebas corresponde a la ejecución del 16 de octubre de 2026; en la versión 1.0 se contaban anotaciones (unas 400).
+*Nota.* Elaborado por los autores. El conteo de pruebas corresponde a la ejecución del 21 de octubre de 2026; en la versión 1.0 se contaban anotaciones (unas 400).
 
-El líder de proyecto revisa los indicadores en cada retrospectiva y antes de cada implementación. Con AC-25 y AC-26 cerradas ya no quedan correctivas P0 ni P1 abiertas, por lo que se cumple el criterio de entrada E6 del Procedimiento de Implementación. Las dos correctivas abiertas (ACO-04 y ACO-13) son P2 y P3 y tienen acción registrada.
+El líder de proyecto revisa los indicadores en cada retrospectiva y antes de cada implementación. Con AC-25 y AC-26 cerradas ya no quedan correctivas P0 ni P1 abiertas, por lo que se cumple el criterio de entrada E6 del Procedimiento de Implementación. Las tres correctivas abiertas (ACO-04, ACO-13 y ACO-14) son P2 y P3 y tienen acción registrada.
 
 ## 14. Lecciones Aprendidas
 
@@ -364,7 +379,7 @@ El líder de proyecto revisa los indicadores en cada retrospectiva y antes de ca
 | L-02 | Un servicio no debe arrancar antes de que sus dependencias estén sanas; la orquestación lo debe garantizar. | AC-02 |
 | L-03 | Acordar el modelo de datos antes de programar un servicio evita implementaciones duplicadas. | AC-03 |
 | L-04 | Toda decisión ya registrada en un ADR debe revisarse antes de construir; una contradicción se consulta antes de programar. | AC-11, AC-12, AP-14 |
-| L-05 | Una regla de negocio debe vivir en un solo servicio y las pantallas deben consultarla, no repetirla. | AC-15 |
+| L-05 | Una regla de negocio debe vivir en un solo servicio y las pantallas deben consultarla, no repetirla. | AC-15, AC-45 |
 | L-06 | Una preferencia que la persona usuaria cambia debe guardarse en su cuenta para tener efecto. | AC-16, AC-17 |
 | L-07 | Un nuevo servicio no está terminado hasta que tiene contenedor, ruta en el gateway, variables en Compose y eventos publicados. | AC-04, AC-05, AC-06 |
 | L-08 | Los endpoints administrativos también necesitan validación estricta de entrada y listas permitidas. | AC-18, AC-19 |
@@ -372,6 +387,9 @@ El líder de proyecto revisa los indicadores en cada retrospectiva y antes de ca
 | L-10 | Un ledger contable necesita movimientos de reversión y control de concurrencia desde el primer día. | AC-09 |
 | L-11 | Una operación de "crear si no existe" debe manejar la carrera entre dos solicitudes simultáneas. | AC-35 |
 | L-12 | Cada opción de la interfaz debe decir exactamente qué hace con los datos de la persona: desactivar no es eliminar. | AC-37 |
+| L-13 | Cerrar sesión tiene que dejar sin efecto el token en todos los servicios, no solo borrarlo del navegador. | AC-44 |
+| L-14 | Lo que se hace a mano y lo que hace el sistema solo sobre el mismo recurso necesitan el mismo candado. | AC-46 |
+| L-15 | Un respaldo solo cuenta si se comprobó que se puede restaurar. | AP-04, AC-52 |
 
 *Nota.* Elaborado por los autores a partir del registro de riesgos cerrados y de las acciones de este documento.
 
@@ -463,14 +481,17 @@ Servicio Nacional de Aprendizaje. (2026). *Guía para elaborar manuales de softw
 | Riesgo del proyecto | Deuda técnica | Acciones |
 |---|---|---|
 | R-002 payment-service parcial (cerrado como C-005) | TD-014, TD-015, TD-016, TD-017, TD-018 | AC-04 a AC-10, AC-27 |
-| R-003 Regresiones sin red de seguridad | TD-001, TD-006, TD-010 | AC-24, AP-01, AP-07, AM-10 |
+| R-003 Regresiones sin red de seguridad | TD-001, TD-006, TD-010, TD-027 | AC-24, AP-01, AP-07, AM-10 |
 | R-004 Fuga de secretos | — | AP-03 |
 | R-005 Evento perdido | TD-011 | AP-02 |
 | R-007 Brechas de requisitos conocidas (cerrado como C-006) | TD-002, TD-003, TD-009 | AC-16, AC-17, AC-25, AC-31 |
-| R-008 Pérdida de datos | — | AP-04 |
+| R-008 Pérdida de datos | — | AP-04, AC-52 |
 | R-010 Desactualización de la documentación | — | AC-23, AC-34, AC-38, AP-05 |
 | R-011 Servidor público apagado | — | Procedimiento de Implementación, R-I04 |
 | Abuso de la API | TD-022 | AP-11 |
+| Sesiones cerradas que siguen activas | TD-024 | AC-44 |
+| Agenda de reservas y operarios | TD-025, TD-026 | AC-45, AC-46 |
+| Disponibilidad del servidor público | — | AP-16, AP-17, AP-18 |
 | R-001 Integración de operations-service (cerrado como C-004) | TD-020 | AM-01 |
 | Ley 1581 de 2012 | — | AC-26, AC-37 |
 

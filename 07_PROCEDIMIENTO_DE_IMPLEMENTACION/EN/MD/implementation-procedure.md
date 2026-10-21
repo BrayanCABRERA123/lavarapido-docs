@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 20, 2026
+October 21, 2026
 
-Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.3
+Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.4
 
 ## Version Control
 
@@ -33,6 +33,7 @@ Table 1 records the change history of this document. Each time the implementatio
 | 2.1 | 2026-10-17 | Review against the code of October 17, 2026. Stated that the mobile app needs a new APK because of the native modules of the inspection report (section 11.7, Phase 6). | Development team |
 | 2.2 | 2026-10-19 | Continuous integration with GitHub Actions in the 10 repositories and deployment from GitHub: the scope (6.2) and risk R-I09 were updated. | Development team |
 | 2.3 | 2026-10-20 | Review against the code of October 20, 2026: criterion E2 with the tests of October 19 (655 automated and 19 end-to-end) and RabbitMQ queues corrected (the operations-service queue has no dead-letter queue) and communication plan (the panel does not send general announcements). | Development team |
+| 2.4 | 2026-10-21 | Review against the code and the server of October 21, 2026: criterion E2 with the tests of that day (689 automated and 19 end-to-end), automatic pre-implementation backup on the public server (phase 3, monitoring, and rollback), smoke test H10 (the token of a closed session stops working), new variables with defaults, app updates without a new APK, and risk R-I11. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -99,7 +100,7 @@ In the context of the ADSO program, "software implementation" means **putting a 
 
 ### 4.2 Sources of This Document
 
-The procedure was verified against the code of the eleven repositories of the project (*develop* branch as of October 17, 2026), especially *lavarapido-infra/docker-compose.yml*, *docker-compose.prod.yml*, *.env.example*, and the *deploy* folder, and against the deployment, environments, continuous integration, operation, quality, and project control documentation (Vehicle Washing Development Team, 2026a, 2026b). The detailed installation, administration, and use procedures are not repeated here: they are referenced in the Installation Manual, the Administrator Manual, and the User Manual, version 4.0, and in the Deployment Document of this same folder, which records how the public server was set up.
+The procedure was verified against the code of the eleven repositories of the project (*develop* branch as of October 21, 2026), especially *lavarapido-infra/docker-compose.yml*, *docker-compose.prod.yml*, *.env.example*, and the *deploy* folder, and against the deployment, environments, continuous integration, operation, quality, and project control documentation (Vehicle Washing Development Team, 2026a, 2026b). The detailed installation, administration, and use procedures are not repeated here: they are referenced in the Installation Manual, the Administrator Manual, and the User Manual, version 4.0, and in the Deployment Document of this same folder, which records how the public server was set up.
 
 ## 5. Objective
 
@@ -233,14 +234,14 @@ The implementation **does not start** until all the criteria of Table 5 are met.
 | No. | Criterion | Evidence |
 |---|---|---|
 | E1 | The code of the release is merged into *develop* (or *main*) of the eleven repositories, with no uncommitted work. | Clean *git status* and *git log* with the last commit of each repository. |
-| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, and the end-to-end suite of *lavarapido-infra/e2e* against the containers. | Summaries without failures (on October 19, 2026: 655 automated tests and 19 end-to-end tests). |
+| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, and the end-to-end suite of *lavarapido-infra/e2e* against the containers. | Summaries without failures (on October 21, 2026: 689 automated tests and 19 end-to-end tests). |
 | E3 | The web application builds in production mode (*npx ng build*). | Folder *dist/* generated without errors. |
 | E4 | The release is tagged in each repository (for example, *v1.0.0*) (section 13). | *git tag* in each repository. |
 | E5 | The installation, administrator, and user manuals correspond to the release (version 4.0 or later). | Version control of the manuals. |
 | E6 | Open incidents of severity P0 and P1 are resolved; P2 and P3 incidents are recorded with their action in the corrective, preventive, and improvement actions document. | Updated action register. |
 | E7 | The target environment meets the hardware, software, and port requirements. | Checklist of Annex A. |
 | E8 | The production secrets are generated and stored outside the repository (*DB_PASSWORD*, *JWT_SECRET*, *INTERNAL_API_KEY*, *RABBITMQ_PASSWORD*, and the mail app password). | Verbal confirmation of the IT administrator; never a copy of the value. |
-| E9 | If the environment already has data, there is a verified backup less than 24 hours old (phase 3). | *.bak* file and output of RESTORE VERIFYONLY. |
+| E9 | If the environment already has data, there is a verified backup less than 24 hours old (phase 3). | *.bak* file and output of RESTORE VERIFYONLY; on the public server, the *RESPALDO \| OK* and *VERIFICACIÓN \| OK* lines of *~/lavarapido/backups/backup.log*. |
 | E10 | The implementation window is approved and communicated (section 15). | Approval message of the project leader. |
 
 *Note.* Prepared by the authors from the definition of done and the testing strategy of the project (Vehicle Washing Development Team, 2026a).
@@ -309,6 +310,7 @@ git check-ignore -v .env      # must show the .gitignore rule
 | ADMIN_EMAIL, ADMIN_PASSWORD | Email and password of the first administrator (only the first time). | security-service creates the account at startup if there is still no administrator. |
 | PUSH_ENABLED | *true* when the installed mobile application is the APK built with EAS. | Expo Go does not receive remote push notifications. |
 | BOOKING_ZONE | *America/Bogota* | Time zone of the car wash; the system stores UTC. |
+| SESSION_CHECK_\*, BOOKING_EXPIRY_\* | Not set. | They have defaults (gateway session check on with 30 s and 3 s; close of expired bookings every 5 minutes with a 60-minute grace) and the Compose file does not pass them to the containers. |
 
 *Note.* Prepared by the authors from *.env.example* and *docker-compose.yml*. Secret values are written only in the *.env* file; never in a message, a shared document, or a repository.
 
@@ -335,6 +337,8 @@ docker compose --profile app build
 
 **Responsible:** IT administrator. **Estimated duration:** 15 minutes. **Applies** when the environment already has data (later implementations).
 
+On the public server this phase is automatic: *deploy/update-server.sh* first runs *deploy/backup-db.sh* (full backup with a checksum, *RESTORE VERIFYONLY*, and a compressed copy in *~/lavarapido/backups/*, where the last 14 are kept) and, if the backup fails, does not update (Deployment Document, section 3.2). The following steps are for a computer on the local network.
+
 1. Generate a full backup with a checksum and verify it (Administrator Manual, section 14.3):
 
 ```bash
@@ -348,7 +352,7 @@ docker cp lavarapido-sqlserver:/var/opt/mssql/data/pre_v1.0.0.bak ./backups/
 2. Keep an encrypted copy of the current *.env* file, separate from the data backup.
 3. Write down the tag of the release in operation: it is the release to return to if a rollback is needed (section 12).
 
-**Evidence:** name, size, and verification result of the backup.
+**Evidence:** name, size, and verification result of the backup (on the public server, the *RESPALDO | OK* line of *backup.log*).
 
 ### 11.5 Phase 4: Infrastructure and Database
 
@@ -409,7 +413,7 @@ npx ng serve --host 0.0.0.0    # reachable from other machines on the local netw
 
 On the public server the web does not use *ng serve*: the *web* container builds the *dist/* folder and serves it with nginx (with security headers) behind Caddy and with HTTPS; *deploy/update-server.sh* rebuilds it after each push (Deployment Document).
 
-2. **Mobile application.** The APK is built with EAS with *EXPO_PUBLIC_API_URL* pointing to the server domain and is published with *npm run publish:apk*, which leaves it at */app/LavaRapidoVehicular.apk* and notifies the people who have the application by push. For tests in the local network, *npx expo start* can be used with the IPv4 address of the machine. The version of October 17, 2026, adds the native modules *expo-image-picker* and *expo-image-manipulator* (inspection report photos), so it requires building and publishing a new APK; an over-the-air update (*npm run publish:update*) is not enough, because it only changes the screen code.
+2. **Mobile application.** The APK is built with EAS with *EXPO_PUBLIC_API_URL* pointing to the server domain and is published with *npm run publish:apk*, which leaves it at */app/LavaRapidoVehicular.apk* and notifies the people who have the application by push. For tests in the local network, *npx expo start* can be used with the IPv4 address of the machine. The version of October 17, 2026, adds the native modules *expo-image-picker* and *expo-image-manipulator* (inspection report photos), so it requires building and publishing a new APK; an over-the-air update (*npm run publish:update*) is not enough, because it only changes the screen code. The app changes of October 21, 2026 (compressed receipt, QR magnifier, and mandatory update screen) add no native modules and do arrive with *npm run publish:update*; since then, if the server publishes an APK with a higher *versionCode*, the app asks to install it before going on.
 
 **Evidence:** screenshot of the welcome screen served from the server, with the address bar visible.
 
@@ -461,10 +465,11 @@ The smoke tests confirm that the release works end to end before handing it over
 | H7 | Start and finish of the service by the operator. | Booking COMPLETED; notifications to the customer. |
 | H8 | Payment report with a test receipt and approval by the administrator. | Payment approved; payment confirmed email and points credited. |
 | H9 | Dead-letter queues. | *notification-service.events.dlq* and *customer-service.events.dlq* at zero. |
+| H10 | Sign out and repeat a call with the same token (*curl -i -H "Authorization: Bearer \<token\>" https://\<domain\>/api/v1/bookings/me*). | 401: the gateway cuts the token of the closed session (version of October 21, 2026 or later). |
 
 *Note.* Prepared by the authors from the checklist before a review session of the project (Vehicle Washing Development Team, 2026a).
 
-**Criterion to continue:** the nine tests pass. A failure in H1 to H8 triggers the rollback evaluation (section 12).
+**Criterion to continue:** the ten tests pass. A failure in H1 to H8 or in H10 triggers the rollback evaluation (section 12).
 
 ### 11.10 Phase 9: Acceptance Testing
 
@@ -514,7 +519,8 @@ The smoke tests confirm that the release works end to end before handing it over
 | Errors of the last 24 hours | *docker compose logs --since 24h \| grep -i error* |
 | Dead-letter queues | RabbitMQ console (*http://localhost:15672*). |
 | Payments to review and bookings without an operator | Administrator panel. |
-| Daily backup generated and verified | File of the day and backup log. |
+| Daily backup generated and verified | File of the day and backup log; on the public server, *tail -5 ~/lavarapido/backups/backup.log* with the day's *RESPALDO \| OK* and *VERIFICACIÓN \| OK*, and *grep FALLÓ* with no results. |
+| Container status (public server) | *docker compose ps*: all *healthy*. |
 | Disk space | *docker system df*; usage below 80%. |
 
 *Note.* Adapted from the preventive maintenance plan of the Administrator Manual, section 17.6.
@@ -541,7 +547,7 @@ The rollback returns the environment to the previous release when the new one ca
 | Situation | Decision |
 |---|---|
 | *payment-migrate* or a Liquibase migration of a Java service fails | Roll back immediately. |
-| A smoke test H1 to H8 fails and is not fixed within 30 minutes | Roll back. |
+| A smoke test H1 to H8 or H10 fails and is not fixed within 30 minutes | Roll back. |
 | P0 incident in the first 24 hours of operation | Roll back. |
 | P1 incident without a fix or a workaround on the same day | Evaluate with the project leader; roll back if it affects bookings or payments. |
 | P2 or P3 remarks | Do not roll back; fix in a later release. |
@@ -558,7 +564,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
   operations-service payment-service notification-service
 ```
 
-3. Restore the pre-implementation backup of phase 3 (Administrator Manual, section 15.2). Liquibase changesets only move forward, so **a migration is not undone with another one**: the database is restored to its state before the release.
+3. Restore the pre-implementation backup of phase 3 (Administrator Manual, section 15.2). On the public server, *bash deploy/restore-db.sh \<backup.bak.gz\>* is used: it asks to type *RESTAURAR*, first backs up the current database, stops the services, restores, and starts them again. Liquibase changesets only move forward, so **a migration is not undone with another one**: the database is restored to its state before the release.
 4. In each repository, return to the previous tag (*git checkout v0.9.0*), rebuild, and start: *docker compose --profile app up -d --build*.
 5. Restore the previous *.env* file if the release had added variables.
 6. Repeat the smoke tests of section 11.9.
@@ -573,7 +579,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
 - **Branches.** Releases are implemented from *develop* or *main* (conventions of *00-governance/git-conventions.md*); never from a *feature/\** branch.
 - **Images.** The Compose file builds *lavarapido/\<service\>:local* images. To keep the previous release, each image can be tagged with the current release before rebuilding (*docker tag lavarapido/booking-service:local lavarapido/booking-service:v0.9.0*).
 - **Database.** The schema is versioned with Liquibase; each service keeps its history in *DATABASECHANGELOG_\<SERVICE\>* (payments in *DATABASECHANGELOG_PAYMENT*). An executed changeset is never edited.
-- **Configuration.** *.env.example* is versioned; *.env* is not. Every new variable is added to *.env.example* with a comment and to the *environment* block of the service in *docker-compose.yml*.
+- **Configuration.** *.env.example* is versioned; *.env* is not. Every new variable is added to *.env.example* with a comment and to the *environment* block of the service in *docker-compose.yml*. Those of October 21, 2026 (*SESSION_CHECK_\** and *BOOKING_EXPIRY_\**) do not follow this rule yet (action ACO-14).
 - **Documentation.** The version control of each manual records the software release it corresponds to.
 
 ## 14. Implementation Risks
@@ -590,10 +596,11 @@ docker compose stop api-gateway security-service customer-service booking-servic
 | R-I04 | The public server is off when it is needed (it is turned on on demand). | Medium | Medium | Tell the DevOps owner in advance and run *deploy/update-server.sh* after the last push. |
 | R-I05 | There is no request rate limit in the gateway or in Caddy (TD-022); account lockout only protects each account separately. | Medium | Medium | Long and unique passwords for the administrators; review the Caddy logs. |
 | R-I06 | A wrongly loaded QR code or payment account sends the money to a third party. | Low | High | Step 9 of Table 7. |
-| R-I07 | Data loss caused by *docker compose down -v* or a damaged volume. | Low | High | Pre-implementation backup (phase 3) and daily backup. |
+| R-I07 | Data loss caused by *docker compose down -v* or a damaged volume. | Low | High | Pre-implementation backup (phase 3) and daily backup, both verified; on the public server they are automatic (Deployment Document, section 3.2). |
 | R-I08 | In the local network the web is served with *ng serve* and without HTTPS. | Medium | Medium | Use it only inside the car wash network; outside it, use the public server with HTTPS. |
 | R-I09 | Continuous integration does not run the end-to-end tests, which need the complete system, so a regression across services can go unnoticed. | Low | Medium | Confirm that GitHub Actions is green in the 10 repositories and run the end-to-end suite and the smoke tests before each deployment. |
-| R-I10 | The role permissions editable in the panel are mistaken for real access control (ADR-015). | Low | Medium | Explain it in the training; real authorization comes from the role in the token. |
+| R-I10 | The role permissions editable in the panel are mistaken for real access control (ADR-015). | Low | Medium | Explain it in the training; real authorization comes from the role in the token, and since October 21, 2026 the roles tab says so. |
+| R-I11 | If security-service does not answer, the gateway lets requests through without confirming the session, and the token of a closed session works until it expires (1 hour at most); with security-service up, up to 30 seconds. | Low | Medium | Check the health of security-service (phase 5 and Table 10) and the gateway log (*No se pudo confirmar la sesión*). |
 
 *Note.* Prepared by the authors from the risk register, the technical backlog, and the verification of the code (Vehicle Washing Development Team, 2026a).
 
@@ -757,6 +764,7 @@ npm ci && npx ng build                             # Front-end-proyecto-web
 docker compose config --quiet && docker compose --profile app build
 
 # Phase 3: pre-implementation backup (see section 11.4)
+bash ~/lavarapido/lavarapido-infra/deploy/backup-db.sh   # public server (update-server.sh does it by itself)
 
 # Phase 4: infrastructure and database
 docker compose up -d && docker compose ps
@@ -769,6 +777,7 @@ for port in 3001 3002 3003 3004 3005 3006 8080; do curl -s http://localhost:$por
 npx ng serve --host 0.0.0.0
 
 # Rollback (see section 12)
+bash ~/lavarapido/lavarapido-infra/deploy/restore-db.sh <backup.bak.gz>   # public server
 docker compose stop api-gateway security-service customer-service booking-service \
   operations-service payment-service notification-service
 ```

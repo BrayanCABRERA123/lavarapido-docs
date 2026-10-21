@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-20 de octubre de 2026
+21 de octubre de 2026
 
-Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.3
+Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.4
 
 ## Control de Versiones
 
@@ -33,6 +33,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 2.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se indicó que la aplicación móvil necesita un APK nuevo por los módulos nativos del informe de inspección (sección 11.7, Fase 6). | Equipo de desarrollo |
 | 2.2 | 2026-10-19 | Integración continua con GitHub Actions en los 10 repositorios y despliegue desde GitHub: se actualizaron el alcance (6.2) y el riesgo R-I09. | Equipo de desarrollo |
 | 2.3 | 2026-10-20 | Revisión contra el código del 20 de octubre de 2026: criterio E2 con las pruebas del 19 de octubre (655 automatizadas y 19 de punta a punta) y colas de RabbitMQ corregidas (la cola de operations-service no tiene cola de mensajes muertos) y plan de comunicación (el panel no envía avisos generales). | Equipo de desarrollo |
+| 2.4 | 2026-10-21 | Revisión contra el código y el servidor del 21 de octubre de 2026: criterio E2 con las pruebas de ese día (689 automatizadas y 19 de punta a punta), respaldo previo automático en el servidor público (fase 3, monitoreo y reversión), prueba de humo H10 (el token de una sesión cerrada deja de servir), variables nuevas con valor por defecto, actualizaciones de la app sin APK nuevo y riesgo R-I11. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -99,7 +100,7 @@ En el contexto del programa ADSO, "implementación del software" designa la **pu
 
 ### 4.2 Fuentes de Este Documento
 
-El procedimiento se verificó contra el código de los once repositorios del proyecto (rama *develop* al 17 de octubre de 2026), en especial *lavarapido-infra/docker-compose.yml*, *docker-compose.prod.yml*, *.env.example* y la carpeta *deploy*, y contra la documentación de despliegue, entornos, integración continua, operación, calidad y control del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a, 2026b). Los procedimientos detallados de instalación, administración y uso no se repiten aquí: se remite al Manual de Instalación, al Manual de Administrador y al Manual de Usuario, versión 4.0, y al Documento de Despliegue de esta misma carpeta, que registra cómo se montó el servidor público.
+El procedimiento se verificó contra el código de los once repositorios del proyecto (rama *develop* al 21 de octubre de 2026), en especial *lavarapido-infra/docker-compose.yml*, *docker-compose.prod.yml*, *.env.example* y la carpeta *deploy*, y contra la documentación de despliegue, entornos, integración continua, operación, calidad y control del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a, 2026b). Los procedimientos detallados de instalación, administración y uso no se repiten aquí: se remite al Manual de Instalación, al Manual de Administrador y al Manual de Usuario, versión 4.0, y al Documento de Despliegue de esta misma carpeta, que registra cómo se montó el servidor público.
 
 ## 5. Objetivo
 
@@ -233,14 +234,14 @@ La implementación **no comienza** hasta que se cumplan todos los criterios de l
 | N.° | Criterio | Evidencia |
 |---|---|---|
 | E1 | El código de la versión está integrado en *develop* (o en *main*) de los once repositorios, sin trabajo sin confirmar. | *git status* limpio y *git log* con el último commit de cada repositorio. |
-| E2 | Las pruebas automáticas pasan: *./mvnw -B verify* en los servicios Java y en el gateway, *dotnet test* en payment-service, *ng test* en la web y la suite de punta a punta de *lavarapido-infra/e2e* contra los contenedores. | Resúmenes sin fallos (el 19 de octubre de 2026: 655 pruebas automatizadas y 19 de punta a punta). |
+| E2 | Las pruebas automáticas pasan: *./mvnw -B verify* en los servicios Java y en el gateway, *dotnet test* en payment-service, *ng test* en la web y la suite de punta a punta de *lavarapido-infra/e2e* contra los contenedores. | Resúmenes sin fallos (el 21 de octubre de 2026: 689 pruebas automatizadas y 19 de punta a punta). |
 | E3 | La aplicación web compila en modo producción (*npx ng build*). | Carpeta *dist/* generada sin errores. |
 | E4 | La versión está etiquetada en cada repositorio (por ejemplo, *v1.0.0*) (sección 13). | *git tag* en cada repositorio. |
 | E5 | Los manuales de instalación, administrador y usuario corresponden a la versión (versión 4.0 o posterior). | Control de versiones de los manuales. |
 | E6 | Las incidencias abiertas de severidad P0 y P1 están resueltas; las P2 y P3 están registradas con su acción en el documento de acciones correctivas, preventivas y de mejoramiento. | Registro de acciones actualizado. |
 | E7 | El entorno de destino cumple los requisitos de hardware, software y puertos. | Lista de verificación del Anexo A. |
 | E8 | Los secretos de producción están generados y guardados fuera del repositorio (*DB_PASSWORD*, *JWT_SECRET*, *INTERNAL_API_KEY*, *RABBITMQ_PASSWORD* y la contraseña de aplicación del correo). | Confirmación verbal del administrador de TI; nunca copia del valor. |
-| E9 | Si el entorno ya tiene datos, existe un respaldo verificado de menos de 24 horas (fase 3). | Archivo *.bak* y salida de RESTORE VERIFYONLY. |
+| E9 | Si el entorno ya tiene datos, existe un respaldo verificado de menos de 24 horas (fase 3). | Archivo *.bak* y salida de RESTORE VERIFYONLY; en el servidor público, las líneas *RESPALDO \| OK* y *VERIFICACIÓN \| OK* de *~/lavarapido/backups/backup.log*. |
 | E10 | La ventana de implementación está aprobada y comunicada (sección 15). | Mensaje de aprobación del líder de proyecto. |
 
 *Nota.* Elaborado por los autores a partir de la definición de terminado y de la estrategia de pruebas del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a).
@@ -309,6 +310,7 @@ git check-ignore -v .env      # debe mostrar la regla de .gitignore
 | ADMIN_EMAIL, ADMIN_PASSWORD | Correo y contraseña del primer administrador (solo la primera vez). | security-service crea la cuenta al arrancar si todavía no hay ningún administrador. |
 | PUSH_ENABLED | *true* cuando la aplicación móvil instalada es el APK compilado con EAS. | Expo Go no recibe notificaciones push remotas. |
 | BOOKING_ZONE | *America/Bogota* | Zona horaria del lavadero; el sistema guarda UTC. |
+| SESSION_CHECK_\*, BOOKING_EXPIRY_\* | No se definen. | Tienen valor por defecto (chequeo de sesión del gateway activo con 30 s y 3 s; cierre de reservas vencidas cada 5 minutos con 60 minutos de margen) y el archivo de Compose no las pasa a los contenedores. |
 
 *Nota.* Elaborado por los autores a partir de *.env.example* y *docker-compose.yml*. Los valores secretos se escriben solo en el archivo *.env*; nunca en un mensaje, un documento compartido o un repositorio.
 
@@ -335,6 +337,8 @@ docker compose --profile app build
 
 **Responsable:** administrador de TI. **Duración estimada:** 15 minutos. **Aplica** cuando el entorno ya tiene datos (implementaciones posteriores).
 
+En el servidor público esta fase es automática: *deploy/update-server.sh* corre primero *deploy/backup-db.sh* (respaldo completo con suma de comprobación, *RESTORE VERIFYONLY* y copia comprimida en *~/lavarapido/backups/*, donde se guardan los últimos 14) y, si el respaldo falla, no actualiza (Documento de Despliegue, sección 3.2). Los pasos siguientes son para un equipo de la red local.
+
 1. Generar un respaldo completo con suma de comprobación y verificarlo (Manual de Administrador, sección 14.3):
 
 ```bash
@@ -348,7 +352,7 @@ docker cp lavarapido-sqlserver:/var/opt/mssql/data/pre_v1.0.0.bak ./backups/
 2. Guardar una copia cifrada del archivo *.env* vigente, separada del respaldo de datos.
 3. Anotar la etiqueta de la versión que está en operación: es la versión a la que se vuelve si hay que revertir (sección 12).
 
-**Evidencia:** nombre, tamaño y resultado de la verificación del respaldo.
+**Evidencia:** nombre, tamaño y resultado de la verificación del respaldo (en el servidor público, la línea *RESPALDO | OK* de *backup.log*).
 
 ### 11.5 Fase 4: Infraestructura y Base de Datos
 
@@ -409,7 +413,7 @@ npx ng serve --host 0.0.0.0    # accesible desde otros equipos de la red local
 
 En el servidor público la web no usa *ng serve*: el contenedor *web* compila la carpeta *dist/* y la sirve con nginx (con encabezados de seguridad) detrás de Caddy y con HTTPS; *deploy/update-server.sh* lo reconstruye después de cada push (Documento de Despliegue).
 
-2. **Aplicación móvil.** El APK se compila con EAS con *EXPO_PUBLIC_API_URL* apuntando al dominio del servidor y se publica con *npm run publish:apk*, que lo deja en */app/LavaRapidoVehicular.apk* y avisa por push a quienes tienen la aplicación. Para pruebas en la red local se puede usar *npx expo start* con la dirección IPv4 del equipo. La versión del 17 de octubre de 2026 agrega los módulos nativos *expo-image-picker* y *expo-image-manipulator* (fotos del informe de inspección), por lo que exige compilar y publicar un APK nuevo; una actualización por internet (*npm run publish:update*) no basta, porque solo cambia el código de las pantallas.
+2. **Aplicación móvil.** El APK se compila con EAS con *EXPO_PUBLIC_API_URL* apuntando al dominio del servidor y se publica con *npm run publish:apk*, que lo deja en */app/LavaRapidoVehicular.apk* y avisa por push a quienes tienen la aplicación. Para pruebas en la red local se puede usar *npx expo start* con la dirección IPv4 del equipo. La versión del 17 de octubre de 2026 agrega los módulos nativos *expo-image-picker* y *expo-image-manipulator* (fotos del informe de inspección), por lo que exige compilar y publicar un APK nuevo; una actualización por internet (*npm run publish:update*) no basta, porque solo cambia el código de las pantallas. Los cambios de la app del 21 de octubre de 2026 (comprobante comprimido, lupa del QR y pantalla de actualización obligatoria) no agregan módulos nativos y sí llegan con *npm run publish:update*; desde entonces, si el servidor publica un APK con *versionCode* mayor, la app pide instalarlo antes de seguir.
 
 **Evidencia:** captura de la pantalla de bienvenida servida desde el servidor, con la barra de direcciones visible.
 
@@ -461,10 +465,11 @@ Las pruebas de humo confirman que la versión funciona de punta a punta antes de
 | H7 | Inicio y finalización del servicio por el operario. | Reserva COMPLETED; notificaciones al cliente. |
 | H8 | Reporte de pago con comprobante de prueba y aprobación por el administrador. | Pago aprobado; correo de pago confirmado y puntos acreditados. |
 | H9 | Colas de mensajes muertos. | *notification-service.events.dlq* y *customer-service.events.dlq* en cero. |
+| H10 | Cerrar sesión y repetir una llamada con el mismo token (*curl -i -H "Authorization: Bearer \<token\>" https://\<dominio\>/api/v1/bookings/me*). | 401: el gateway corta el token de la sesión cerrada (versión del 21 de octubre de 2026 o posterior). |
 
 *Nota.* Elaborado por los autores a partir de la lista de verificación previa a una revisión del proyecto (Equipo de Desarrollo Vehicle Washing, 2026a).
 
-**Criterio para continuar:** las nueve pruebas pasan. Una falla en H1 a H8 activa la evaluación de reversión (sección 12).
+**Criterio para continuar:** las diez pruebas pasan. Una falla en H1 a H8 o en H10 activa la evaluación de reversión (sección 12).
 
 ### 11.10 Fase 9: Pruebas de Aceptación
 
@@ -514,7 +519,8 @@ Las pruebas de humo confirman que la versión funciona de punta a punta antes de
 | Errores de las últimas 24 horas | *docker compose logs --since 24h \| grep -i error* |
 | Colas de mensajes muertos | Panel de RabbitMQ (*http://localhost:15672*). |
 | Pagos por revisar y reservas sin operario | Panel del administrador. |
-| Respaldo diario generado y verificado | Archivo del día y bitácora de respaldos. |
+| Respaldo diario generado y verificado | Archivo del día y bitácora de respaldos; en el servidor público, *tail -5 ~/lavarapido/backups/backup.log* con *RESPALDO \| OK* y *VERIFICACIÓN \| OK* del día, y *grep FALLÓ* sin resultados. |
+| Estado de los contenedores (servidor público) | *docker compose ps*: todos *healthy*. |
 | Espacio en disco | *docker system df*; uso por debajo del 80 %. |
 
 *Nota.* Adaptado del plan de mantenimiento preventivo del Manual de Administrador, sección 17.6.
@@ -541,7 +547,7 @@ La reversión devuelve el entorno a la versión anterior cuando la nueva no pued
 | Situación | Decisión |
 |---|---|
 | Falla *payment-migrate* o una migración Liquibase de un servicio Java | Revertir de inmediato. |
-| Una prueba de humo H1 a H8 falla y no se corrige en 30 minutos | Revertir. |
+| Una prueba de humo H1 a H8 o H10 falla y no se corrige en 30 minutos | Revertir. |
 | Incidente P0 en las primeras 24 horas de operación | Revertir. |
 | Incidente P1 sin corrección ni alternativa en el mismo día | Evaluar con el líder de proyecto; revertir si afecta reservas o pagos. |
 | Observaciones P2 o P3 | No revertir; corregir en una versión posterior. |
@@ -558,7 +564,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
   operations-service payment-service notification-service
 ```
 
-3. Restaurar el respaldo previo de la fase 3 (Manual de Administrador, sección 15.2). Los changesets de Liquibase solo avanzan, por lo que **no se deshace una migración con otra**: se restaura la base de datos al estado anterior a la versión.
+3. Restaurar el respaldo previo de la fase 3 (Manual de Administrador, sección 15.2). En el servidor público se usa *bash deploy/restore-db.sh \<respaldo.bak.gz\>*: pide escribir *RESTAURAR*, guarda antes un respaldo de cómo estaba la base, detiene los servicios, restaura y los vuelve a levantar. Los changesets de Liquibase solo avanzan, por lo que **no se deshace una migración con otra**: se restaura la base de datos al estado anterior a la versión.
 4. En cada repositorio, volver a la etiqueta anterior (*git checkout v0.9.0*), reconstruir y levantar: *docker compose --profile app up -d --build*.
 5. Restaurar el archivo *.env* anterior si la versión había agregado variables.
 6. Repetir las pruebas de humo de la sección 11.9.
@@ -573,7 +579,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
 - **Ramas.** Se implementa desde *develop* o *main* (convenciones de *00-governance/git-conventions.md*); nunca desde una rama *feature/\**.
 - **Imágenes.** El archivo de Compose construye imágenes *lavarapido/\<servicio\>:local*. Para conservar la versión anterior, antes de reconstruir se puede etiquetar cada imagen con la versión vigente (*docker tag lavarapido/booking-service:local lavarapido/booking-service:v0.9.0*).
 - **Base de datos.** El esquema se versiona con Liquibase; cada servicio guarda su historial en *DATABASECHANGELOG_\<SERVICIO\>* (pagos en *DATABASECHANGELOG_PAYMENT*). Un changeset ejecutado nunca se edita.
-- **Configuración.** *.env.example* se versiona; *.env* no. Toda variable nueva se agrega a *.env.example* con un comentario y al bloque *environment* del servicio en *docker-compose.yml*.
+- **Configuración.** *.env.example* se versiona; *.env* no. Toda variable nueva se agrega a *.env.example* con un comentario y al bloque *environment* del servicio en *docker-compose.yml*. Las del 21 de octubre de 2026 (*SESSION_CHECK_\** y *BOOKING_EXPIRY_\**) todavía no cumplen esta regla (acción ACO-14).
 - **Documentación.** El control de versiones de cada manual registra la versión del software a la que corresponde.
 
 ## 14. Riesgos de la Implementación
@@ -590,10 +596,11 @@ docker compose stop api-gateway security-service customer-service booking-servic
 | R-I04 | El servidor público está apagado cuando se necesita (se enciende bajo demanda). | Media | Medio | Avisar con anticipación al responsable de DevOps y ejecutar *deploy/update-server.sh* después del último push. |
 | R-I05 | No hay límite de solicitudes en el gateway ni en Caddy (TD-022); el bloqueo de cuentas solo protege cada cuenta por separado. | Media | Medio | Contraseñas largas y únicas para los administradores; revisar los registros de Caddy. |
 | R-I06 | Un código QR o una cuenta de pago mal cargada envía el dinero a un tercero. | Baja | Alto | Paso 9 de la Tabla 7. |
-| R-I07 | Pérdida de datos por *docker compose down -v* o por un volumen dañado. | Baja | Alto | Respaldo previo (fase 3) y respaldo diario. |
+| R-I07 | Pérdida de datos por *docker compose down -v* o por un volumen dañado. | Baja | Alto | Respaldo previo (fase 3) y respaldo diario, ambos verificados; en el servidor público son automáticos (Documento de Despliegue, sección 3.2). |
 | R-I08 | En la red local la web se sirve con *ng serve* y sin HTTPS. | Media | Medio | Usarla solo dentro de la red del lavadero; fuera de ella, usar el servidor público con HTTPS. |
 | R-I09 | La integración continua no corre las pruebas de punta a punta, que necesitan el sistema completo, y una regresión entre servicios puede pasar sin detectarse. | Baja | Medio | Confirmar que GitHub Actions está en verde en los 10 repositorios y ejecutar la suite de punta a punta y las pruebas de humo antes de cada despliegue. |
-| R-I10 | Los permisos por rol editables en el panel se confunden con control de acceso real (ADR-015). | Baja | Medio | Explicarlo en la capacitación; la autorización real la da el rol del token. |
+| R-I10 | Los permisos por rol editables en el panel se confunden con control de acceso real (ADR-015). | Baja | Medio | Explicarlo en la capacitación; la autorización real la da el rol del token, y desde el 21 de octubre de 2026 la pestaña de roles lo dice. |
+| R-I11 | Si security-service no responde, el gateway deja pasar las peticiones sin confirmar la sesión, y un token de una sesión cerrada sirve hasta que vence (máximo 1 hora); con security-service activo, hasta 30 segundos. | Baja | Medio | Revisar la salud de security-service (fase 5 y Tabla 10) y el registro del gateway (*No se pudo confirmar la sesión*). |
 
 *Nota.* Elaborado por los autores a partir del registro de riesgos, del backlog técnico y de la verificación del código (Equipo de Desarrollo Vehicle Washing, 2026a).
 
@@ -757,6 +764,7 @@ npm ci && npx ng build                             # Front-end-proyecto-web
 docker compose config --quiet && docker compose --profile app build
 
 # Fase 3: respaldo previo (ver sección 11.4)
+bash ~/lavarapido/lavarapido-infra/deploy/backup-db.sh   # servidor público (update-server.sh lo hace solo)
 
 # Fase 4: infraestructura y base de datos
 docker compose up -d && docker compose ps
@@ -769,6 +777,7 @@ for port in 3001 3002 3003 3004 3005 3006 8080; do curl -s http://localhost:$por
 npx ng serve --host 0.0.0.0
 
 # Reversión (ver sección 12)
+bash ~/lavarapido/lavarapido-infra/deploy/restore-db.sh <respaldo.bak.gz>   # servidor público
 docker compose stop api-gateway security-service customer-service booking-service \
   operations-service payment-service notification-service
 ```

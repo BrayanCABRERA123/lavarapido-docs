@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-17 de octubre de 2026
+21 de octubre de 2026
 
-Tipo de manual: Manual de usuario (roles Cliente y Operario) · Versión 4.1
+Tipo de manual: Manual de usuario (roles Cliente y Operario) · Versión 4.5
 
 ## Control de Versiones
 
@@ -37,6 +37,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 4.2 | 2026-10-19 | Las cuentas de administrador no tienen la opción Desactivar mi cuenta (preguntas frecuentes). | Equipo de desarrollo |
 | 4.3 | 2026-10-19 | Capturas tomadas de nuevo el 19 de octubre de 2026 (fecha en los paneles, calendarios sin días pasados y resumen de la reserva). | Equipo de desarrollo |
 | 4.4 | 2026-10-20 | El historial del cliente y el del operario van de la reserva más reciente a la más antigua y abren el detalle al hacer clic, con los botones **Ir al pago** e **Ir a calificaciones**. Las notificaciones abren su detalle al hacer clic, con un botón para ir al apartado de donde viene el aviso. Con el pago aprobado, la pantalla de pago solo muestra el resumen. | Equipo de desarrollo |
+| 4.5 | 2026-10-21 | Revisión contra el código del 21 de octubre de 2026: el comprobante se reduce a menos de 2 MB antes de enviarlo y el QR se amplía con **Ampliar QR** (sección 10.1.5); Efectivo solo aparece si el lavadero tiene activa esa cuenta; las reservas que nadie inicia se cierran solas una hora después de su hora de fin (Tabla 7, sección 10.2.3 y preguntas frecuentes); al cerrar sesión, las demás pestañas también salen (sección 12); la aplicación móvil pide instalar el APK nuevo cuando se publica (sección 6.2). Se corrigieron la fecha y la versión de la portada. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -120,7 +121,7 @@ Explicar paso a paso cómo el cliente y el operario deben ingresar, navegar y us
 
 - Las funciones del rol **Administrador** (reservas, asignación de operarios, revisión de pagos, horarios y bahías, usuarios, servicios, promociones, reportes y configuración), que se explican en el Manual de Administrador.
 - La instalación, la configuración y la construcción interna del software, que se explican en el Manual de Instalación y en el Manual Técnico.
-- La aplicación móvil Android (React Native con Expo), que ofrece módulos equivalentes para los tres roles. Se descarga desde la página de inicio de la web con el botón de descarga o el código QR; este manual documenta solo la versión web.
+- La aplicación móvil Android (React Native con Expo), que ofrece módulos equivalentes para los tres roles. Se descarga desde la página de inicio de la web con el botón de descarga o el código QR; este manual documenta solo la versión web. Desde el 21 de octubre de 2026, cuando el lavadero publica una versión nueva del APK, la aplicación muestra una pantalla que pide descargarla e instalarla antes de seguir.
 - El lavado a domicilio: en la versión actual el cliente lleva el vehículo al lavadero en la fecha y la hora reservadas.
 - La facturación electrónica ante la DIAN, las pasarelas de pago y la gestión de insumos o inventario.
 
@@ -528,8 +529,8 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 | Confirmada | La reserva tiene turno y bahía de lavado. Las reservas que hace el cliente se crean con este estado. | Sí, antes de la hora de inicio. |
 | En progreso | El operario inició el lavado. | No. |
 | Completada | El servicio terminó; desde este estado se puede calificar. | No. |
-| Cancelada | La reserva fue anulada por el cliente o por el lavadero. | No aplica. |
-| No asistió | El cliente no llegó al turno reservado. | No aplica. |
+| Cancelada | La reserva fue anulada por el cliente o por el lavadero, o el sistema la cerró porque llegó su hora sin confirmarse. | No aplica. |
+| No asistió | El cliente no llegó al turno reservado. Si nadie inicia el servicio, el sistema marca así la reserva una hora después de su hora de fin. | No aplica. |
 
 *Nota.* Códigos SCHEDULED, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED y NO_SHOW en la base de datos; la interfaz los traduce.
 
@@ -552,9 +553,9 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 | Nequi | Se escanea el código QR y se hace la transferencia desde la aplicación. | Sí |
 | Daviplata | Se escanea el código QR y se hace la transferencia desde la aplicación. | Sí |
 | Transferencia | Se escanea el código QR o se usan los datos de la cuenta que se muestran. | Sí |
-| Efectivo | Se paga en el lavadero al recibir el servicio. No se muestra código QR. | No; el administrador registra el pago en el local. |
+| Efectivo | Se paga en el lavadero al recibir el servicio. No se muestra código QR. Solo aparece si el lavadero tiene activa la cuenta de efectivo. | No; el administrador registra el pago en el local. |
 
-*Nota.* Los métodos digitales que se muestran dependen de las cuentas de pago que el administrador mantenga activas.
+*Nota.* Los métodos que se muestran, incluido Efectivo, dependen de las cuentas de pago que el administrador mantenga activas.
 
 **Nombre del módulo:** Pagar servicio.
 
@@ -569,8 +570,8 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 1. Abrir **Pagar servicio** y revisar el **Resumen de la reserva**: servicio, vehículo, **Subtotal**, **Descuento aplicado** y **TOTAL A PAGAR** (IVA del 19 % incluido).
 2. Si se tiene un cupón desbloqueado, escribirlo en **Código del cupón** y hacer clic en **Aplicar**. Aparece el mensaje "Cupón aplicado: [nombre]" y el descuento se resta del total a pagar.
 3. En **Selecciona tu método de pago**, elegir Nequi, Daviplata, Transferencia o Efectivo.
-4. Para un método digital: escanear el código QR con la aplicación bancaria o la billetera, o copiar el número que aparece en **Llave / Cuenta autorizada** con **Copiar número**, y transferir exactamente el **Monto a pagar**.
-5. En **Confirma tu pago**, arrastrar la imagen del comprobante o hacer clic para buscarla (JPG o PNG, máximo 10 MB).
+4. Para un método digital: escanear el código QR con la aplicación bancaria o la billetera, o copiar el número que aparece en **Llave / Cuenta autorizada** con **Copiar número**, y transferir exactamente el **Monto a pagar**. Si el código es difícil de leer, **Ampliar QR** lo muestra más grande, con **Acercar** y **Alejar** (también con la rueda del mouse o con doble clic).
+5. En **Confirma tu pago**, arrastrar la imagen del comprobante o hacer clic para buscarla (JPG o PNG de hasta 10 MB). La página la reduce a menos de 2 MB antes de enviarla; mientras tanto muestra "Preparando el comprobante...".
 6. Escribir la **Referencia de la transacción** impresa en el comprobante (de 8 a 12 letras o números emitidos por el banco) y revisar el **Monto pagado** (mayor que 0), que debe coincidir con lo transferido.
 7. Hacer clic en **Ya realicé el pago**. Mientras falten datos, el botón permanece deshabilitado y la lista "Para confirmar el pago te falta:" indica lo pendiente (comprobante, referencia o monto).
 8. Para efectivo: seleccionar **Efectivo** y hacer clic en **Confirmar reserva**; el pago se hace en el lavadero al recoger el vehículo.
@@ -583,6 +584,7 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 - Solo se pueden pagar las reservas en estado Confirmada, En progreso o Completada.
 - Mientras un pago está en revisión no se puede reportar otro para la misma reserva; una reserva admite un solo pago aprobado.
 - Si el administrador rechaza el pago, el cliente puede reportarlo de nuevo con un comprobante correcto.
+- Si la imagen no se puede reducir a menos de 2 MB, aparece "No pudimos reducir la imagen a menos de 2 MB. Prueba con una captura de pantalla del comprobante."
 - Cuando el pago se aprueba, el cliente recibe el aviso de pago confirmado (bandeja y correo), los puntos de fidelización de la reserva ("Ganaste N puntos", solo en la bandeja) y, por cada cupón que esos puntos desbloquean, el aviso "¡Tienes un cupón canjeable!" con su código (bandeja y correo). Si el pago se rechaza o se reembolsa, el cliente recibe un aviso y un correo; un reembolso revierte los puntos ganados por esa reserva.
 - Cuando el pago queda aprobado, la pantalla **Pagar servicio** de esa reserva solo muestra el resumen: desaparecen el método de pago, el código QR, la carga del comprobante y el botón **Ya realicé el pago**, y el cupón usado (si lo hay) ya no se puede quitar.
 - Un cupón se acepta solo si está activo, está dentro de sus fechas y el cliente alcanzó los puntos que exige; se puede canjear una vez por reserva. El sistema responde "Ese cupón no existe.", "Ese cupón no está vigente o todavía no acumulas los puntos necesarios." o "Ya canjeaste este cupón en esta reserva." Un canje exitoso envía un aviso y un correo de confirmación.
@@ -819,7 +821,7 @@ El operario recibe la cuenta del administrador del negocio. El operario solo pue
 
 **Resultado esperado:** El estado cambia a En progreso y luego a Completado ("¡Servicio finalizado!"). El cliente recibe los avisos y puede calificar el servicio.
 
-**Observaciones o restricciones:** El servicio se puede iniciar desde 15 minutos antes de la hora reservada. El operario solo puede actualizar los servicios que tiene asignados.
+**Observaciones o restricciones:** El servicio se puede iniciar desde 15 minutos antes de la hora reservada. El operario solo puede actualizar los servicios que tiene asignados. Si un servicio asignado no se inicia, una hora después de su hora de fin el sistema cierra la reserva como No asistió y el servicio deja de aparecer como pendiente.
 
 **Tabla 10**
 
@@ -952,7 +954,7 @@ El sistema valida la información mientras la persona escribe. Cuando un dato no
 
 | Mensaje o situación | Significado | Acción del usuario |
 |---|---|---|
-| Tu sesión expiró. Inicia sesión de nuevo. | Terminó la sesión de una hora. | Iniciar sesión de nuevo. |
+| Tu sesión expiró. Inicia sesión de nuevo. | Terminó la sesión de una hora, o la sesión se cerró (por ejemplo, porque el administrador desactivó la cuenta). | Iniciar sesión de nuevo. |
 | No tienes permiso para realizar esta acción | La acción pertenece a otro rol o a datos de otra persona. | Usar solo las opciones del rol. |
 | Tu perfil de cliente aún no está listo. Intenta de nuevo en unos minutos. | El perfil de cliente se está creando después del registro. | Esperar un momento e intentar de nuevo. |
 | Ya existe un vehículo registrado con esta placa | La placa pertenece a un vehículo activo. | Verificar la placa. |
@@ -966,6 +968,7 @@ El sistema valida la información mientras la persona escribe. Cuando un dato no
 | La fecha no es válida para reservar. | La fecha ya pasó o está fuera de la ventana de reservas. | Elegir una fecha válida. |
 | Esta reserva ya no se puede cambiar. | La reserva ya empezó o se cerró. | Contactar al lavadero. |
 | Archivo no válido | El comprobante no es una imagen JPG o PNG de hasta 10 MB. | Adjuntar una imagen válida. |
+| No pudimos reducir la imagen a menos de 2 MB. Prueba con una captura de pantalla del comprobante. | La foto del comprobante es demasiado pesada aun después de reducirla. | Adjuntar una captura de pantalla del comprobante. |
 | Para confirmar el pago te falta: ... | Faltan datos del pago (comprobante, referencia o monto). | Completar los elementos listados bajo el botón. |
 | Ese cupón no existe. | El código del cupón es incorrecto. | Revisar el código que aparece en el aviso del cupón. |
 | Ese cupón no está vigente o todavía no acumulas los puntos necesarios. | El cupón está pausado, fuera de sus fechas o bloqueado. | Revisar los puntos en el panel. |
@@ -984,6 +987,8 @@ Cerrar la sesión al terminar evita que otra persona use la cuenta, especialment
 2. Hacer clic en **Cerrar Sesión**.
 3. En la ventana "Cerrar sesión", hacer clic en **Sí, cerrar**.
 4. Verificar que el sistema vuelva a la pantalla de inicio de sesión.
+
+Al cerrar sesión, las demás pestañas del mismo navegador también vuelven a la pantalla de inicio de sesión, y si en una pestaña se entra con otra cuenta, las otras se recargan con esa cuenta. Desde el 21 de octubre de 2026 la sesión cerrada tampoco sirve en el servidor, aunque alguien hubiera copiado su acceso.
 
 **Figura 32**
 
@@ -1021,9 +1026,13 @@ Sí, es opcional. Al reservar, en **Operario (opcional)** aparecen los operarios
 
 La aplicación web no permite cambiar la fecha ni la hora. Cancele la reserva antes de su hora de inicio y reserve de nuevo, o contacte al lavadero.
 
+##### ¿Qué pasa si no llego a mi reserva?
+
+Si nadie inicia el servicio, una hora después de la hora de fin el sistema marca la reserva como No asistió y libera el turno. Si ya había pagado, contacte al lavadero: el reembolso lo decide el administrador.
+
 ##### ¿Cómo pago mi servicio?
 
-En Pagar servicio, elija el método. Con Nequi, Daviplata o Transferencia, escanee el código QR, transfiera el monto exacto y adjunte el comprobante con la referencia de la transacción; con Efectivo, pague en el lavadero.
+En Pagar servicio, elija el método. Con Nequi, Daviplata o Transferencia, escanee el código QR, transfiera el monto exacto y adjunte el comprobante con la referencia de la transacción; con Efectivo (si el lavadero lo tiene activo), pague en el lavadero.
 
 ##### ¿El sistema guarda los datos de mi tarjeta?
 

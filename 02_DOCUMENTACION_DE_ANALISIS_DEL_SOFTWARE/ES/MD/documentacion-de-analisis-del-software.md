@@ -8,7 +8,7 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 2.3, 20 de octubre de 2026
+Versión 2.4, 21 de octubre de 2026
 
 ---
 
@@ -21,7 +21,7 @@ Este documento muestra cómo se comporta LavaRápido cuando alguien lo usa: qué
 3. **Diagramas de actividades** de los procesos de negocio.
 4. **Diagramas de estados** de las entidades que cambian de estado (reserva, pago, ejecución del servicio, promoción e informe de inspección).
 
-El 20 de octubre de 2026 el contenido se revisó otra vez contra el código: el cliente solo cancela (la reprogramación la hace el administrador), se quitó el cambio de rol de las cuentas, se corrigieron las secuencias y los estados que no coincidían, y los casos de uso y diagramas se dibujaron de nuevo con líneas rectas y sin cruces. El 19 de octubre de 2026 se agregaron los casos de uso CU31 y CU32, la recuperación de la contraseña (sección 2.10) y el ciclo de vida de la cuenta (sección 4.6), y las capturas del inventario de pantallas se tomaron de nuevo con datos de demostración. El 17 de octubre de 2026 se agregaron el consentimiento de los documentos legales en el registro (sección 2.1) y el informe de inspección desde la aplicación móvil (sección 2.9). Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol.
+El 21 de octubre de 2026 se actualizaron, contra el código de ese día, el cierre de sesión que deja sin efecto el token (sección 2.8), el candado de la asignación de operarios (sección 2.4), el comprobante de máximo 2 MB y el efectivo que solo aparece si su cuenta está activa (secciones 2.5 y 3.4), y el cierre automático de las reservas que nadie inició (sección 4.1). El 20 de octubre de 2026 el contenido se revisó otra vez contra el código: el cliente solo cancela (la reprogramación la hace el administrador), se quitó el cambio de rol de las cuentas, se corrigieron las secuencias y los estados que no coincidían, y los casos de uso y diagramas se dibujaron de nuevo con líneas rectas y sin cruces. El 19 de octubre de 2026 se agregaron los casos de uso CU31 y CU32, la recuperación de la contraseña (sección 2.10) y el ciclo de vida de la cuenta (sección 4.6), y las capturas del inventario de pantallas se tomaron de nuevo con datos de demostración. El 17 de octubre de 2026 se agregaron el consentimiento de los documentos legales en el registro (sección 2.1) y el informe de inspección desde la aplicación móvil (sección 2.9). Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol.
 
 La especificación completa de cada requisito y caso de uso (actores, precondición, flujo normal, flujos alternos y postcondición) está en el *Informe de especificación de requisitos*, secciones 5 y 7.3; aquí se citan por su identificador (RF-XXX, CUXX).
 
@@ -325,6 +325,7 @@ sequenceDiagram
 
     MQ-)OP: BookingConfirmed (bookingId, preferredOperatorId)
     OP->>B: GET /internal/v1/bookings/{id} y ?from=&to= (X-Internal-Key)
+    OP->>DB: candado de asignaciones (sp_getapplock): una asignación a la vez
     OP->>S: GET /internal/v1/users/{id}/contact (cuenta activa)
     OP->>DB: turnos, ausencias, ejecuciones del día
     alt hay operarios libres
@@ -344,6 +345,7 @@ sequenceDiagram
     OP-->>W: cada operario + motivo de bloqueo (disponibles primero)
     A->>W: Elige un operario
     W->>OP: PUT /api/v1/admin/assignments/{bookingId}
+    OP->>DB: el mismo candado: si la automática está asignando, espera y luego la ve
     alt reserva SCHEDULED/CONFIRMED y AssignmentPolicy no encuentra motivo de bloqueo
         OP->>DB: una service_execution PENDING por línea de la reserva
         OP-->>W: 200 asignación
@@ -375,7 +377,7 @@ sequenceDiagram
     OP-->>W: 201 calificación
 ```
 
-*Fuente:* `operations-service` (`BookingConfirmedListener`, `OperationsService.autoAssign / candidates / assign / start / finish / rate`, `AssignmentPolicy`, `AutoAssignmentPolicy`, `StartPolicy`, ADR-014).
+*Fuente:* `operations-service` (`BookingConfirmedListener`, `OperationsService.autoAssign / candidates / assign / start / finish / rate`, `ExecutionPersistenceAdapter.lockAssignments`, `AssignmentPolicy`, `AutoAssignmentPolicy`, `StartPolicy`, ADR-014). El candado evita que una asignación manual y una automática simultáneas le den al mismo operario dos servicios a la misma hora.
 
 ### 2.5 Pago por comprobante y revisión (RF-013, RF-013b, RF-014)
 
@@ -391,9 +393,10 @@ sequenceDiagram
 
     C->>W: Paga el servicio
     W->>P: GET /api/v1/payment-accounts
-    P-->>W: cuentas activas que requieren comprobante (QR, instrucciones)
+    P-->>W: cuentas activas (QR e instrucciones; la de efectivo solo si está activa)
     C->>C: Paga desde la app del banco (fuera de la plataforma)
     C->>W: Cuenta, código de referencia, imagen del comprobante
+    W->>W: comprime la imagen a máximo 2 MB
     W->>P: POST /api/v1/payments
     P->>B: GET /bookings/{id} (JWT cliente)
     B-->>P: estado, total, dueño
@@ -402,6 +405,8 @@ sequenceDiagram
         P-->>W: 201 pago IN_REVIEW
     else no pagable / ya reportado / ya aprobado / referencia repetida
         P-->>W: 409 BOOKING_NOT_PAYABLE | PAYMENT_ALREADY_REPORTED | PAYMENT_ALREADY_APPROVED | TRANSACTION_REFERENCE_REUSED
+    else comprobante de más de 2 MB
+        P-->>W: 400 RECEIPT_TOO_LARGE
     end
 
     A->>W: Pagos → Verificar
@@ -507,7 +512,7 @@ sequenceDiagram
 
 *Fuente:* `security-service` (`RolePermissionController`, `RolePermissionAdministrationService`, migración `026-security-role-permissions.sql`), ADR-015.
 
-### 2.8 Inicio de sesión con bloqueo por intentos fallidos (RF-002, RF-004b)
+### 2.8 Inicio de sesión con bloqueo por intentos fallidos y cierre de sesión (RF-002, RF-004b, RF-027)
 
 ```mermaid
 sequenceDiagram
@@ -535,9 +540,22 @@ sequenceDiagram
         S-->>W: 200 JWT (1 h)
     end
     Note over S,DB: Restablecer la contraseña con el código (RF-003) también borra el bloqueo
+
+    U->>W: Cerrar sesión
+    W->>GW: POST /api/v1/auth/logout
+    GW->>GW: olvida la respuesta guardada de este token
+    GW->>S: enruta
+    S->>DB: cierra la sesión (revoked_at)
+    W-->>U: vuelve al inicio de sesión (las otras pestañas del navegador también)
+    Note over W,DB: Otra llamada con el mismo token (un token copiado)
+    W->>GW: GET /api/v1/bookings (token de la sesión cerrada)
+    GW->>S: GET /api/v1/auth/session (mismo token)
+    S->>DB: ¿sesión abierta y sin vencer?
+    S-->>GW: 401 UNAUTHORIZED
+    GW-->>W: 401 (booking-service no recibe la llamada)
 ```
 
-*Fuente:* `security-service` (`AuthenticationService.login`, `LoginLockout`, `PasswordRecoveryService`, migración `034-security-login-lockout.sql`).
+*Fuente:* `security-service` (`AuthenticationService.login / logout / isActive`, `ActiveSessionValidator`, `LoginLockout`, `PasswordRecoveryService`, migración `034-security-login-lockout.sql`) y gateway (`SessionCheckFilter`). El gateway guarda 30 segundos por token la respuesta de `/api/v1/auth/session`, así que una sesión abierta cuesta una llamada extra cada medio minuto y no una por petición. Una sesión también se cierra cuando el administrador desactiva la cuenta o el dueño la cierra; eso llega a los demás servicios en esos mismos 30 segundos.
 
 ### 2.9 Informe de inspección del vehículo (RF-036)
 
@@ -752,14 +770,14 @@ flowchart TD
 
     method -->|QR / Transferencia / Nequi / Daviplata| showqr[Mostrar QR de la cuenta activa e instrucciones]
     showqr --> extpay[Cliente paga desde su app bancaria<br/>fuera de la plataforma]
-    extpay --> upload[Sube comprobante + valor declarado + código de referencia]
+    extpay --> upload[Sube comprobante comprimido a máx. 2 MB<br/>+ valor declarado + código de referencia]
     upload --> dup{¿Código de referencia<br/>ya usado en otra reserva?}
     dup -->|Sí| rejectref[Rechazar: TRANSACTION_REFERENCE_REUSED]
     rejectref --> stop1([Fin])
     dup -->|No| inreview["Pago → En revisión (ligado a la reserva)"]
     inreview --> waitadm([Espera la revisión del admin])
 
-    method -->|Efectivo| cash[Cliente paga en el local]
+    method -->|Efectivo, si su cuenta está activa| cash[Cliente paga en el local]
     cash --> register[Admin registra el pago manualmente]
     register --> approved1["Pago → Aprobado directamente"]
     approved1 --> points1["Acreditar puntos de fidelización (RF-026)"]
@@ -825,10 +843,10 @@ flowchart TD
 stateDiagram-v2
     [*] --> CONFIRMED : crear (se asigna bahía libre de inmediato, RF-006)
     SCHEDULED --> CONFIRMED : confirmar (necesita bahía)
-    SCHEDULED --> CANCELLED : cancelar
+    SCHEDULED --> CANCELLED : cancelar o vencida
     CONFIRMED --> CONFIRMED : reprogramar (admin, nueva hora/bahía, se conservan precios)
     CONFIRMED --> IN_PROGRESS : iniciar
-    CONFIRMED --> NO_SHOW : el cliente no llegó
+    CONFIRMED --> NO_SHOW : el cliente no llegó o vencida
     CONFIRMED --> CANCELLED : cancelar (cliente antes del inicio o admin)
     IN_PROGRESS --> COMPLETED : finalizar
     COMPLETED --> [*]
@@ -836,7 +854,7 @@ stateDiagram-v2
     NO_SHOW --> [*]
 ```
 
-*Fuente:* `booking-service`, `Booking.moveTo`, `Booking.cancel`, `BookingStatus`. Solo `SCHEDULED` y `CONFIRMED` se pueden reprogramar o cancelar (RF-007). El cliente solo cancela, antes de la hora de inicio y sin escribir motivo (la reserva guarda `CUSTOMER_REQUEST`); el administrador reprograma (CU29) y puede elegir el motivo de la cancelación. `SCHEDULED` existe en el modelo pero el flujo actual siempre crea la reserva directo en `CONFIRMED`.
+*Fuente:* `booking-service`, `Booking.moveTo`, `Booking.cancel`, `Booking.expire`, `BookingStatus`, `ExpiredBookingsJob`. *Vencida:* cada 5 minutos una tarea cierra las reservas que siguen `SCHEDULED` o `CONFIRMED` una hora después de su hora de fin; la `CONFIRMED` pasa a `NO_SHOW` (pagada o no, nada se reembolsa solo) y la `SCHEDULED` se cancela con el motivo del sistema `EXPIRED`, que el administrador no puede elegir a mano. Así se liberan el operario y la bahía, y solo las canceladas publican `BookingCancelled`. Solo `SCHEDULED` y `CONFIRMED` se pueden reprogramar o cancelar (RF-007). El cliente solo cancela, antes de la hora de inicio y sin escribir motivo (la reserva guarda `CUSTOMER_REQUEST`); el administrador reprograma (CU29) y puede elegir el motivo de la cancelación. `SCHEDULED` existe en el modelo pero el flujo actual siempre crea la reserva directo en `CONFIRMED`.
 
 ### 4.2 Ciclo de vida del pago (RF-013b, RF-014, ADR-008)
 
@@ -917,7 +935,7 @@ stateDiagram-v2
     INACTIVA --> ACTIVA : el administrador la activa
 ```
 
-*Fuente:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus`, `AccountDeactivationService`). Un ingreso correcto antes del quinto intento borra el conteo de fallos. El usuario cierra su cuenta con la contraseña. Una cuenta bloqueada responde 423 aun con la contraseña correcta; una inactiva responde 403 después de validar la contraseña. Ninguna cuenta de administrador se puede desactivar (403 `ADMIN_CANNOT_BE_DISABLED`) y un administrador no puede desactivar ni cerrar su propia cuenta (403 `CANNOT_DISABLE_OWN_ACCOUNT`). Cada cuenta tiene un solo rol, fijado al crearla: no hay cambio de rol.
+*Fuente:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus`, `AccountDeactivationService`). Un ingreso correcto antes del quinto intento borra el conteo de fallos. El usuario cierra su cuenta con la contraseña. Una cuenta bloqueada responde 423 aun con la contraseña correcta; una inactiva responde 403 después de validar la contraseña. Ninguna cuenta de administrador se puede desactivar (403 `ADMIN_CANNOT_BE_DISABLED`) y un administrador no puede desactivar ni cerrar su propia cuenta (403 `CANNOT_DISABLE_OWN_ACCOUNT`). Cada cuenta tiene un solo rol, fijado al crearla: no hay cambio de rol. Al pasar a inactiva se cierran todas sus sesiones y sus tokens dejan de servir en máximo 30 segundos (sección 2.8).
 
 ---
 

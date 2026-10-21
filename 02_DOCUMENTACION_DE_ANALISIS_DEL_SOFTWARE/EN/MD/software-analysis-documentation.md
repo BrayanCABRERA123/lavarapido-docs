@@ -8,7 +8,7 @@ Software Analysis and Development Technologist program (ADSO), group (ficha) 314
 
 Instructor: Karol Daniela Correa
 
-Version 2.2, October 19, 2026
+Version 2.4, October 21, 2026
 
 ---
 
@@ -21,7 +21,7 @@ This document shows how LavaRápido behaves when someone uses it: what happens, 
 3. **Activity diagrams** of the business processes.
 4. **State diagrams** of the entities that change status (booking, payment, service execution, promotion and inspection report).
 
-On October 20, 2026, the content was checked again against the code: the client only cancels (the administrator reschedules), the role change of accounts was removed, the sequences and states that did not match were corrected, and the use case and other diagrams were redrawn with straight lines and no crossings. On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end.
+On October 21, 2026, the following were updated against the code of that day: the sign-out that voids the token (section 2.8), the lock on operator assignment (section 2.4), the receipt of at most 2 MB and the cash option that only appears while its account is active (sections 2.5 and 3.4), and the automatic close of bookings nobody started (section 4.1). On October 20, 2026, the content was checked again against the code: the client only cancels (the administrator reschedules), the role change of accounts was removed, the sequences and states that did not match were corrected, and the use case and other diagrams were redrawn with straight lines and no crossings. On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end.
 
 The full specification of each requirement and use case (actors, precondition, main flow, alternative flows and postcondition) is in the *Software Requirements Specification*, sections 5 and 7.3; here they are cited by their identifier (RF-XXX, CUXX).
 
@@ -325,6 +325,7 @@ sequenceDiagram
 
     MQ-)OP: BookingConfirmed (bookingId, preferredOperatorId)
     OP->>B: GET /internal/v1/bookings/{id} and ?from=&to= (X-Internal-Key)
+    OP->>DB: assignment lock (sp_getapplock): one assignment at a time
     OP->>S: GET /internal/v1/users/{id}/contact (active account)
     OP->>DB: shifts, absences, executions of the day
     alt there are free operators
@@ -344,6 +345,7 @@ sequenceDiagram
     OP-->>W: each operator + blocking reason (available ones first)
     A->>W: Picks an operator
     W->>OP: PUT /api/v1/admin/assignments/{bookingId}
+    OP->>DB: the same lock: if the automatic one is assigning, it waits and then sees it
     alt booking SCHEDULED/CONFIRMED and AssignmentPolicy finds no blocking reason
         OP->>DB: one PENDING service_execution per booking line
         OP-->>W: 200 assignment
@@ -375,7 +377,7 @@ sequenceDiagram
     OP-->>W: 201 rating
 ```
 
-*Source:* `operations-service` (`BookingConfirmedListener`, `OperationsService.autoAssign / candidates / assign / start / finish / rate`, `AssignmentPolicy`, `AutoAssignmentPolicy`, `StartPolicy`, ADR-014).
+*Source:* `operations-service` (`BookingConfirmedListener`, `OperationsService.autoAssign / candidates / assign / start / finish / rate`, `ExecutionPersistenceAdapter.lockAssignments`, `AssignmentPolicy`, `AutoAssignmentPolicy`, `StartPolicy`, ADR-014). The lock prevents a simultaneous manual and automatic assignment from giving the same operator two services at the same time.
 
 ### 2.5 Payment by receipt and review (RF-013, RF-013b, RF-014)
 
@@ -391,9 +393,10 @@ sequenceDiagram
 
     C->>W: Pays for the service
     W->>P: GET /api/v1/payment-accounts
-    P-->>W: active accounts that require a receipt (QR, instructions)
+    P-->>W: active accounts (QR and instructions; the cash one only while it is active)
     C->>C: Pays from the bank app (outside the platform)
     C->>W: Account, reference code, receipt image
+    W->>W: compresses the image to at most 2 MB
     W->>P: POST /api/v1/payments
     P->>B: GET /bookings/{id} (customer JWT)
     B-->>P: status, total, owner
@@ -402,6 +405,8 @@ sequenceDiagram
         P-->>W: 201 payment IN_REVIEW
     else not payable / already reported / already approved / reference reused
         P-->>W: 409 BOOKING_NOT_PAYABLE | PAYMENT_ALREADY_REPORTED | PAYMENT_ALREADY_APPROVED | TRANSACTION_REFERENCE_REUSED
+    else receipt larger than 2 MB
+        P-->>W: 400 RECEIPT_TOO_LARGE
     end
 
     A->>W: Payments → Verify
@@ -507,7 +512,7 @@ sequenceDiagram
 
 *Source:* `security-service` (`RolePermissionController`, `RolePermissionAdministrationService`, migration `026-security-role-permissions.sql`), ADR-015.
 
-### 2.8 Sign-in with lockout after failed attempts (RF-002, RF-004b)
+### 2.8 Sign-in with lockout after failed attempts and sign-out (RF-002, RF-004b, RF-027)
 
 ```mermaid
 sequenceDiagram
@@ -535,9 +540,22 @@ sequenceDiagram
         S-->>W: 200 JWT (1 h)
     end
     Note over S,DB: Resetting the password with the code (RF-003) also lifts the lockout
+
+    U->>W: Sign out
+    W->>GW: POST /api/v1/auth/logout
+    GW->>GW: forgets the cached answer of this token
+    GW->>S: routes
+    S->>DB: closes the session (revoked_at)
+    W-->>U: back to sign-in (the other tabs of the browser too)
+    Note over W,DB: Another call with the same token (a copied token)
+    W->>GW: GET /api/v1/bookings (token of the closed session)
+    GW->>S: GET /api/v1/auth/session (same token)
+    S->>DB: session open and not expired?
+    S-->>GW: 401 UNAUTHORIZED
+    GW-->>W: 401 (booking-service never gets the call)
 ```
 
-*Source:* `security-service` (`AuthenticationService.login`, `LoginLockout`, `PasswordRecoveryService`, migration `034-security-login-lockout.sql`).
+*Source:* `security-service` (`AuthenticationService.login / logout / isActive`, `ActiveSessionValidator`, `LoginLockout`, `PasswordRecoveryService`, migration `034-security-login-lockout.sql`) and the gateway (`SessionCheckFilter`). The gateway keeps each answer of `/api/v1/auth/session` for 30 seconds per token, so an open session costs one extra call every half minute, not one per request. A session also closes when the administrator deactivates the account or the owner closes it; that reaches the other services within the same 30 seconds.
 
 ### 2.9 Vehicle inspection report (RF-036)
 
@@ -752,14 +770,14 @@ flowchart TD
 
     method -->|QR / Transfer / Nequi / Daviplata| showqr[Show the QR of the active account and instructions]
     showqr --> extpay[Customer pays from their bank app<br/>outside the platform]
-    extpay --> upload[Uploads receipt + declared amount + reference code]
+    extpay --> upload[Uploads receipt compressed to max. 2 MB<br/>+ declared amount + reference code]
     upload --> dup{Reference code<br/>already used in another booking?}
     dup -->|Yes| rejectref[Reject: TRANSACTION_REFERENCE_REUSED]
     rejectref --> stop1([End])
     dup -->|No| inreview["Payment → Under review (linked to the booking)"]
     inreview --> waitadm([Waits for the admin review])
 
-    method -->|Cash| cash[Customer pays at the site]
+    method -->|Cash, if its account is active| cash[Customer pays at the site]
     cash --> register[Admin records the payment manually]
     register --> approved1["Payment → Approved directly"]
     approved1 --> points1["Credit loyalty points (RF-026)"]
@@ -825,10 +843,10 @@ flowchart TD
 stateDiagram-v2
     [*] --> CONFIRMED : create (a free bay is assigned immediately, RF-006)
     SCHEDULED --> CONFIRMED : confirm (needs a bay)
-    SCHEDULED --> CANCELLED : cancel
+    SCHEDULED --> CANCELLED : cancel or expired
     CONFIRMED --> CONFIRMED : reschedule (admin, new time/bay, prices are kept)
     CONFIRMED --> IN_PROGRESS : start
-    CONFIRMED --> NO_SHOW : the customer did not show up
+    CONFIRMED --> NO_SHOW : the customer did not show up or expired
     CONFIRMED --> CANCELLED : cancel (customer before the start, or admin)
     IN_PROGRESS --> COMPLETED : finish
     COMPLETED --> [*]
@@ -836,7 +854,7 @@ stateDiagram-v2
     NO_SHOW --> [*]
 ```
 
-*Source:* `booking-service`, `Booking.moveTo`, `Booking.cancel`, `BookingStatus`. Only `SCHEDULED` and `CONFIRMED` can be rescheduled or cancelled (RF-007). The customer only cancels, before the start time and without writing a reason (the booking stores `CUSTOMER_REQUEST`); the administrator reschedules (CU29) and may choose the cancellation reason. `SCHEDULED` exists in the model, but the current flow always creates the booking directly as `CONFIRMED`.
+*Source:* `booking-service`, `Booking.moveTo`, `Booking.cancel`, `Booking.expire`, `BookingStatus`, `ExpiredBookingsJob`. *Expired:* every 5 minutes a job closes the bookings still `SCHEDULED` or `CONFIRMED` one hour after their end time; a `CONFIRMED` one becomes `NO_SHOW` (paid or not, nothing is refunded automatically) and a `SCHEDULED` one is cancelled with the system reason `EXPIRED`, which the administrator cannot pick by hand. This frees the operator and the bay, and only the cancelled ones publish `BookingCancelled`. Only `SCHEDULED` and `CONFIRMED` can be rescheduled or cancelled (RF-007). The customer only cancels, before the start time and without writing a reason (the booking stores `CUSTOMER_REQUEST`); the administrator reschedules (CU29) and may choose the cancellation reason. `SCHEDULED` exists in the model, but the current flow always creates the booking directly as `CONFIRMED`.
 
 ### 4.2 Payment life cycle (RF-013b, RF-014, ADR-008)
 
@@ -917,7 +935,7 @@ stateDiagram-v2
     INACTIVE --> ACTIVE : the administrator activates it
 ```
 
-*Source:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus`, `AccountDeactivationService`). A successful sign-in before the fifth attempt clears the failure count. The user closes their account with the password. A locked account answers 423 even with the right password; an inactive one answers 403 after the password is checked. No administrator account can be deactivated (403 `ADMIN_CANNOT_BE_DISABLED`), and an administrator cannot deactivate or close their own account (403 `CANNOT_DISABLE_OWN_ACCOUNT`). Each account has one role, set when it is created: there is no role change.
+*Source:* `security-service` (`UserAccount`, `LoginLockout`, `UserAdministrationService.changeStatus`, `AccountDeactivationService`). A successful sign-in before the fifth attempt clears the failure count. The user closes their account with the password. A locked account answers 423 even with the right password; an inactive one answers 403 after the password is checked. No administrator account can be deactivated (403 `ADMIN_CANNOT_BE_DISABLED`), and an administrator cannot deactivate or close their own account (403 `CANNOT_DISABLE_OWN_ACCOUNT`). Each account has one role, set when it is created: there is no role change. When it becomes inactive, all its sessions are closed and their tokens stop working within 30 seconds (section 2.8).
 
 ---
 

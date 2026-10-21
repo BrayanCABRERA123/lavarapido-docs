@@ -40,7 +40,7 @@
 | Duración real | ~2 h 30 min (aprovisionamiento, compilación de imágenes, configuración de HTTPS y pruebas) |
 | Interrupción a usuarios | No aplica: primer despliegue (no había usuarios en producción) |
 | Ventana para próximas actualizaciones | Fuera de horario de atención del lavadero (antes de las 07:00 o después de las 18:00) |
-| Última actualización | 19-10-2026, 03:20 (hora del servidor), con `update-server.sh`: código de `develop` hasta el 17 y 18 de octubre y migración 039 |
+| Última actualización | 21-10-2026, 05:21 (hora del servidor): imágenes reconstruidas con el código de `develop` del 20 de octubre y la infraestructura nueva (respaldos, encabezados de seguridad, chequeos de salud y registros limitados); ver 1.3.6. Los cambios del código del 21 de octubre aún no están en el servidor (1.3.7) |
 
 #### 1.1.3 Entorno de destino (VPS / Staging / Producción)
 
@@ -50,7 +50,7 @@
 | Proveedor | Microsoft Azure (suscripción *Azure for Students*) |
 | Tipo | Máquina virtual Linux (IaaS) equivalente a un VPS |
 | Región | North Central US |
-| Entorno alterno | VPS Hostinger KVM 2 (contratado, pendiente de activación del pago) |
+| Entorno alterno | Ninguno: el VPS de Hostinger se descartó el 21-10-2026 porque el pago no se aprobó; la producción queda solo en Azure |
 
 #### 1.1.4 Matriz de roles y responsables (DevOps, Tech Lead, QA, DBA)
 
@@ -74,6 +74,7 @@
 | 1.2 | 2026-10-16 | Juan Camilo Guilombo | Conteo de tablas corregido (57) y creación del primer administrador con las variables de entorno |
 | 1.3 | 2026-10-19 | Juan Camilo Guilombo | Actualización del 19-10-2026 (migración 039 y app 1.1.0), acceso SSH con llave propia por integrante, despliegue desde GitHub Actions, integración continua en los 10 repositorios y evidencias nuevas de terminal y de la web |
 | 1.4 | 2026-10-20 | Equipo de desarrollo | Diagrama de topología: customer-service también se conecta a RabbitMQ (consume `security.user_registered` para crear el perfil del cliente) |
+| 1.5 | 2026-10-21 | Brayan Cabrera | Respaldos automáticos verificados (3.2), encabezados de seguridad y CSP (2.2.3 y 5.2.4), chequeos de salud y registros limitados en todos los contenedores, modelo de recuperación `SIMPLE`, actualización del 21-10-2026 (1.3.6), cambios del código del 21-10-2026 pendientes de desplegar (1.3.7) y retiro del VPS de Hostinger |
 
 ### 1.3 Resumen de Cambios (Release Notes)
 
@@ -132,6 +133,7 @@
 | Dependencias web | `qrcode` 1.5.4 |
 | Dependencias móviles | `expo-notifications`, `expo-device`, `expo-build-properties`, `expo-updates`, `expo-application` |
 | Servicios externos | Expo Push + Firebase Cloud Messaging (push), Gmail SMTP (correo), EAS (compilación y actualizaciones de la app) |
+| Operación del servidor (20 y 21-10-2026) | Respaldos automáticos con verificación (`backup-db.sh`, `verify-backup.sh`, `restore-db.sh`), base en modelo de recuperación `SIMPLE`, chequeo de salud cada 30 s en los 11 contenedores, registros de cada contenedor limitados a 3 archivos de 10 MB, y encabezados de seguridad con CSP en Caddy |
 
 #### 1.3.4 Cambios incompatibles (Breaking changes)
 
@@ -152,6 +154,26 @@ El 19-10-2026 a las 03:20 (hora del servidor) se corrió `update-server.sh`. Que
 - **App móvil:** versión 1.1.0 (versionCode 5), publicada el 19-10-2026 a las 05:03, con la versión visible en Configuración.
 
 Quedan para la próxima actualización los cambios subidos después: los mensajes de error con `spring.web.error` en los servicios Java y los últimos ajustes de la web y de la app.
+
+#### 1.3.6 Actualización del 21-10-2026
+
+El 21-10-2026 a las 05:21 (hora del servidor) se reconstruyeron las imágenes con el código de `develop` del 20 de octubre y la infraestructura nueva de `lavarapido-infra`. Antes se tomó un respaldo de la base.
+
+- **Infraestructura:** respaldos automáticos verificados (3.2); base en modelo de recuperación `SIMPLE`; chequeo de salud cada 30 segundos en los 11 contenedores, incluido Caddy (`docker compose ps` los muestra `healthy`); registros limitados a 3 archivos de 10 MB por contenedor; encabezados de seguridad y política de contenido (CSP) en Caddy (5.2.4).
+- **Backend y web:** los cambios que quedaron pendientes el 19-10 (mensajes de error con `spring.web.error` y ajustes de la web) y los del 19 y 20 de octubre: se retiró el cambio de rol de una cuenta, los datos de ejemplo del negocio se borran para que el negocio real los complete (semilla 111 de booking-service) y la web abre el detalle de cada reserva y aviso.
+
+#### 1.3.7 Cambios del 21-10-2026 pendientes de desplegar
+
+Están en `develop` desde el 21-10-2026 y entran con la próxima ejecución de `update-server.sh` o del flujo "Desplegar en Azure":
+
+- **security-service y api-gateway:** el token de una sesión cerrada (logout, cuenta inhabilitada o desactivada) deja de servir; el gateway lo confirma con `GET /api/v1/auth/session` y guarda la respuesta 30 segundos por token.
+- **booking-service:** cada 5 minutos se cierran las reservas que nadie inició una hora después de su fin; la semilla 112 agrega el motivo `EXPIRED`, y booking-service la aplica al arrancar.
+- **operations-service:** la asignación manual y la automática usan el mismo candado, y `GET /api/v1/admin/assignments/unassigned` da el conteo único de reservas sin operario.
+- **payment-service:** comprobantes de máximo 2 MB (`RECEIPT_TOO_LARGE`) y la cuenta de efectivo en la lista del cliente solo mientras está activa.
+- **Web:** sesión sincronizada entre pestañas, comprobante comprimido, lupa para el QR, reportes que cuentan solo reservas completadas y textos de la pestaña de roles.
+- **App móvil:** comprobante comprimido, lupa para el QR y pantalla de actualización obligatoria del APK. No agregan dependencias nativas, así que llegan con `npm run publish:update`.
+
+Las variables nuevas (`SESSION_CHECK_*` y `BOOKING_EXPIRY_*`) tienen valor por defecto y el compose no las pasa: no se agregan a `.env.production`.
 
 ---
 
@@ -198,6 +220,7 @@ Quedan para la próxima actualización los cambios subidos después: los mensaje
 | Base de datos | `LavaRapido`: 9 esquemas y 57 tablas — `security` (11), `customer` (3), `booking` (10), `catalog` (3), `execution` (11), `notification` (6), `payment` (7), `promotion` (5), `audit` (1) |
 | Migraciones | **Liquibase**: los servicios Java las aplican al arrancar; payment-service las aplica con el contenedor `payment-migrate`. Cada servicio lleva su historial en `dbo.DATABASECHANGELOG_<SERVICIO>` |
 | Volúmenes persistentes | `sqlserver-data` (base), `rabbitmq-data` (colas), `caddy-data` (certificados) |
+| Respaldos | `~/lavarapido/backups/` en el disco de la VM, fuera de Docker: los últimos 14 y la bitácora `backup.log` (3.2) |
 
 ### 2.2 Diagrama de Arquitectura de Red e Infraestructura
 
@@ -259,6 +282,7 @@ flowchart TB
 
 - **Certificado:** Let's Encrypt, emitido y renovado automáticamente por Caddy (vence el 14-01-2027 y se renueva antes). Se guarda en el volumen `caddy-data`.
 - **Dominio:** etiqueta DNS de Azure en la IP pública: `lavarapidovehicular.northcentralus.cloudapp.azure.com`.
+- **Encabezados de seguridad:** desde el 20-10-2026 Caddy agrega HSTS, `nosniff`, `X-Frame-Options`, `Referrer-Policy` y `Permissions-Policy` a todas las respuestas, quita el encabezado `Server` y envía una política de contenido (CSP) con la web (5.2.4).
 - **Configuración:** `lavarapido-infra/deploy/Caddyfile`.
 
 ### 2.3 Matriz de Ambientes, Direccionamiento IP y Puertos
@@ -267,7 +291,6 @@ flowchart TB
 |---|---|---|---|
 | Desarrollo | PC de cada integrante | `localhost` (web 4200, móvil 8081, gateway 8080) | Programación y pruebas locales (Mailpit atrapa los correos) |
 | Producción académica | Azure VM `vehiclecarwash-vm` | IP estática `64.236.160.129` · https://lavarapidovehicular.northcentralus.cloudapp.azure.com | Exposición, pruebas del equipo, app instalada |
-| Producción alterna (pendiente) | VPS Hostinger KVM 2 | Por asignar | Migración cuando se active el pago |
 
 | Puerto | Servicio | ¿Expuesto a internet? |
 |---|---|---|
@@ -309,19 +332,28 @@ ls -l /var/run/docker.sock         # socket local del motor
 
 ### 3.2 Estrategia y Ejecución de Respaldos (Backups)
 
-> **Estado:** procedimiento definido; **la automatización periódica está pendiente**. Se ejecuta a mano antes de cada despliegue que incluya migraciones.
+> **Estado: automatizado desde el 21-10-2026.** Los respaldos, su verificación y la restauración se probaron en producción (ver 3.2.4).
 
 #### 3.2.1 Respaldo lógico de base de datos (Dump / Snapshot)
 
-```bash
-cd ~/lavarapido/lavarapido-infra
-P=$(grep '^DB_PASSWORD=' .env.production | cut -d= -f2-)
-sudo docker exec -e SQLCMDPASSWORD="$P" lavarapido-sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -C -Q "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/backup/LavaRapido_$(date +%F).bak' WITH COMPRESSION, INIT"
-sudo docker cp lavarapido-sqlserver:/var/opt/mssql/backup/LavaRapido_$(date +%F).bak ~/backups/
-```
+`deploy/backup-db.sh` hace un respaldo completo de `LavaRapido` (`BACKUP DATABASE … WITH CHECKSUM`), comprueba que se puede restaurar (`RESTORE VERIFYONLY`), lo saca del contenedor y lo comprime con gzip, porque SQL Server Express no comprime sus respaldos. Queda en `~/lavarapido/backups/LavaRapido-AAAAMMDD-HHMMSS.bak.gz`, con permisos `600`, y se conservan los **últimos 14**.
 
-Complemento a nivel de infraestructura: **snapshot del disco** de la VM desde el portal de Azure (Discos → Crear instantánea).
+| Cuándo corre | Quién lo dispara |
+|---|---|
+| Antes de cada actualización | `update-server.sh` (si el respaldo falla, **no actualiza**) |
+| 5 minutos después de encender la VM | `crontab` de `azureuser` (`@reboot`) |
+| Todos los días a las 23:00 UTC (6 p. m. en Colombia), si la VM está encendida | `crontab` de `azureuser` |
+| A mano | `bash ~/lavarapido/lavarapido-infra/deploy/backup-db.sh` |
+
+La VM se enciende a demanda; por eso, además del diario, se respalda al arrancar y antes de actualizar. La base usa el modelo de recuperación **`SIMPLE`** (lo aplica `db-init`): con respaldos completos no hacen falta respaldos del registro de transacciones, y el registro no crece sin límite.
+
+Medición del 21-10-2026: la base ocupa 72 MB y el respaldo comprimido **1,4 MB**; tarda **menos de 2 segundos**.
+
+Complemento a nivel de infraestructura: **snapshot del disco** de la VM desde el portal de Azure (Discos → Crear instantánea). Los respaldos viven en el mismo disco de la VM: protegen de un error humano o de una migración mala, no de perder la VM. Para tener una copia afuera, se bajan al PC:
+
+```bash
+scp -i ~/.ssh/lavarapido_azure "azureuser@64.236.160.129:~/lavarapido/backups/*.bak.gz" .
+```
 
 #### 3.2.2 Respaldo de volúmenes persistentes de Docker
 
@@ -345,6 +377,39 @@ git -C ~/lavarapido/lavarapido-infra rev-parse HEAD > ~/backups/infra-commit_$(d
 ```
 
 La configuración del stack (`docker-compose.yml`, `docker-compose.prod.yml`, `deploy/Caddyfile`) está versionada en GitHub (`lavarapido-infra`). Para volver atrás basta un `git checkout <commit>` y un nuevo `up -d`.
+
+#### 3.2.4 Verificación automática y restauración
+
+**Verificación automática.** Después de cada respaldo programado corre `deploy/verify-backup.sh`: restaura el último respaldo con otro nombre (`LavaRapido_verificacion`), revisa que tenga las tablas de la base real y que se pueda leer, y la borra. Así se sabe cada día que los respaldos sirven, **sin tocar la base real**.
+
+**Restauración.** Nunca es automática: volver a un respaldo borra lo que pasó después, así que siempre la decide una persona.
+
+```bash
+bash ~/lavarapido/lavarapido-infra/deploy/restore-db.sh <archivo.bak.gz> --as LavaRapido_prueba   # revisar un respaldo sin tocar la base
+bash ~/lavarapido/lavarapido-infra/deploy/restore-db.sh <archivo.bak.gz>     # volver la base a ese respaldo
+```
+
+En el segundo caso el script pide escribir `RESTAURAR`, guarda primero un respaldo de cómo estaba la base, detiene los 7 servicios, restaura y los vuelve a levantar (2 a 3 minutos sin servicio). Si la restauración falla, la base queda abierta como estaba y los servicios vuelven a arrancar.
+
+**Bitácora.** Cada respaldo, verificación y restauración, también las canceladas o fallidas, queda en `~/lavarapido/backups/backup.log`:
+
+```
+2026-10-21 06:11:16 UTC | RESTAURACIÓN | CANCELADA | LavaRapido-20261021-061111.bak.gz -> LavaRapido | azureuser
+2026-10-21 06:12:05 UTC | RESPALDO | OK | LavaRapido-20261021-061204.bak.gz (1.4M) | azureuser
+2026-10-21 06:12:08 UTC | VERIFICACIÓN | OK | LavaRapido-20261021-061204.bak.gz: 69 tablas, 4 usuarios, 2 reservas | azureuser
+```
+
+Se consulta con `tail -20 ~/lavarapido/backups/backup.log`; solo los problemas, con `grep FALLÓ ~/lavarapido/backups/backup.log`.
+
+**Pruebas realizadas en producción (21-10-2026):**
+
+| Prueba | Resultado |
+|---|---|
+| Respaldo manual y antes de actualizar | ✅ 1,4 MB, verificado |
+| Restaurar con otro nombre y comparar con la base real | ✅ Mismos registros en usuarios, reservas, pagos, avisos y operarios; 69 tablas |
+| Restaurar encima de la base real | ✅ Datos idénticos; los 11 contenedores volvieron a `healthy`; base `MULTI_USER / ONLINE / SIMPLE` |
+| Verificación con un respaldo dañado a propósito | ✅ Detectado y anotado como `FALLÓ`, sin dejar bases de prueba ni archivos temporales |
+| Restauración cancelada | ✅ Anotada como `CANCELADA` |
 
 ### 3.3 Gestión de Variables de Entorno y Secretos
 
@@ -374,6 +439,8 @@ La configuración del stack (`docker-compose.yml`, `docker-compose.prod.yml`, `d
 | `PUBLIC_URL` / `SITE_ADDRESS` | Dirección pública (CORS, enlaces de correo) y dominio de Caddy |
 | `PUSH_ENABLED` / `MESSAGING_ENABLED` | `true`: push con Expo y eventos con RabbitMQ |
 
+Las variables del 21-10-2026 no van en `.env.production`: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL` y `SESSION_CHECK_TIMEOUT` (chequeo de sesión del gateway: activo, 30 s y 3 s) y `BOOKING_EXPIRY_CHECK_ENABLED`, `BOOKING_EXPIRY_CHECK_INTERVAL` y `BOOKING_EXPIRY_GRACE_MINUTES` (cierre de reservas vencidas: activo, cada 5 minutos y 60 minutos de margen) quedan con su valor por defecto, porque el compose no las pasa a los contenedores.
+
 #### 3.3.3 Límites de memoria y runtime (JVM -Xmx, ASPNETCORE_ENVIRONMENT)
 
 | Contenedor | Límite (`mem_limit`) | Runtime |
@@ -383,15 +450,16 @@ La configuración del stack (`docker-compose.yml`, `docker-compose.prod.yml`, `d
 | SQL Server | `MSSQL_MEMORY_LIMIT_MB=1536` | `MSSQL_PID=Express` |
 | web / caddy | 64 MB c/u | nginx / Caddy |
 | Todos | `restart: unless-stopped` | Se reinician solos ante fallos y al arrancar la máquina |
+| Todos (desde el 20-10-2026) | Registros: 3 archivos de 10 MB (`json-file`) · chequeo de salud cada 30 s | Los servicios Java tienen 150 s para arrancar antes de contar fallos. Docker no reinicia solo un contenedor `unhealthy`: el estado se ve en `docker compose ps`, Portainer y `update-server.sh` |
 
 ### 3.4 Protocolo de Comunicación y Ventana de Mantenimiento
 
 1. **Aviso previo (24 h):** el DevOps informa al equipo por el grupo del proyecto la fecha, la ventana y los cambios (release notes).
 2. **Congelamiento:** no se suben cambios a la rama a desplegar durante la ventana.
-3. **Inicio:** se informa "inicio de despliegue" y se toma el respaldo (sección 3.2).
+3. **Inicio:** se informa "inicio de despliegue". `update-server.sh` toma el respaldo de la base antes de actualizar (sección 3.2).
 4. **Ejecución:** runbook de la sección 4.
 5. **Verificación:** pruebas de humo de la sección 5. El QA confirma cada rol.
-6. **Cierre:** se informa "despliegue terminado" con la versión y las evidencias. Si falla, **rollback**: `git checkout` del commit anterior en `lavarapido-infra` y en los servicios, `update-server.sh`, y si la migración dañó datos, restaurar el `.bak`.
+6. **Cierre:** se informa "despliegue terminado" con la versión y las evidencias. Si falla, **rollback**: `git checkout` del commit anterior en `lavarapido-infra` y en los servicios, `update-server.sh`, y si la migración dañó datos, restaurar el respaldo con `restore-db.sh` (sección 3.2.4).
 7. **Ventana estándar:** fuera del horario de atención del lavadero (antes de las 07:00 o después de las 18:00, hora de Colombia).
 
 ---
@@ -441,7 +509,7 @@ ssh -i ~/.ssh/lavarapido_azure -L 9443:localhost:9443 azureuser@64.236.160.129
 
 Las migraciones son **automáticas**:
 
-1. El contenedor `db-init` crea la base `LavaRapido` si no existe.
+1. El contenedor `db-init` crea la base `LavaRapido` si no existe y la deja en modelo de recuperación `SIMPLE`.
 2. El contenedor `payment-migrate` (Liquibase 4.29) aplica los changelogs de payment-service (`db/changelog/db.changelog-master.yaml`) y termina.
 3. Cada servicio Java aplica sus propios changelogs al arrancar. La numeración es global: 001–039 más las semillas 1xx de catálogos.
 4. Hibernate solo valida que el modelo coincida con las tablas (`ddl-auto: validate`); nunca altera tablas.
@@ -508,7 +576,7 @@ sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml \
   --env-file .env.production --profile app up -d --build
 ```
 
-**Actualizaciones posteriores**: suben primero los cambios a GitHub y luego:
+**Actualizaciones posteriores**: suben primero los cambios a GitHub y luego (el script respalda la base antes de tocar nada y, si el respaldo falla, no actualiza):
 
 ```bash
 bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh                 # todo
@@ -587,7 +655,7 @@ done
 sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production --profile app ps
 ```
 
-Esperado: `{"status":"UP"}` en cada servicio Java, y todos los contenedores `Up`. `db-init` y `payment-migrate` deben quedar en `Exited (0)`.
+Esperado: `{"status":"UP"}` en cada servicio Java, y todos los contenedores `Up (healthy)`. `db-init` y `payment-migrate` deben quedar en `Exited (0)`.
 
 #### 5.1.4 Documentación interactiva de la API (Swagger UI / OpenAPI)
 
@@ -643,6 +711,21 @@ nc -zv 64.236.160.129 1433    # desde afuera: debe FALLAR (puerto cerrado)
   - envío real de correo (código de recuperación por Gmail);
   - push real al celular;
   - el interruptor de push (apagado → solo bandeja; encendido → push).
+
+#### 5.2.4 Verificación de encabezados de seguridad
+
+Desde el 20-10-2026 Caddy agrega a todas las respuestas (web, API y descargas) los encabezados de seguridad, y a la web una política de contenido (CSP) que solo permite código propio más Google Fonts y las banderas de jsDelivr.
+
+```bash
+curl -s -I https://lavarapidovehicular.northcentralus.cloudapp.azure.com/ | grep -iE "strict|content-security|x-frame|x-content|referrer|permissions|server"
+```
+
+| Prueba | Esperado | Resultado (20-10-2026) |
+|---|---|---|
+| Encabezados en la web, `/api` y `/app` | HSTS, `nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy`, `Permissions-Policy`; CSP en la web | ✅ Sin encabezados repetidos |
+| Encabezado `Server` | No aparece (antes mostraba `nginx/1.27.5`) | ✅ |
+| Web con el CSP activo (portada, login, registro, recuperar contraseña) | Carga completa: estilos, fuentes, banderas, QR | ✅ 0 bloqueos y 0 errores en consola |
+| Cargar un script externo desde la consola del navegador (simula un ataque) | El navegador lo bloquea: *Refused to load the script … Content Security Policy* | ✅ Bloqueado |
 
 ### 5.3 Inspección de Logs y Monitoreo de Recursos
 

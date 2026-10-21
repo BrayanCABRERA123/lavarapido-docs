@@ -15,8 +15,8 @@
 | Aprendices | Brayan Estiven Patiño Cabrera (líder de proyecto), Juan Camilo Guilombo Osorio (líder de frontend), Merari Urbano (líder de backend) |
 | Instructora | Karol Daniela Correa |
 | Centro de formación | Industria |
-| Fecha | 20 de octubre de 2026 |
-| Versión | 1.4 |
+| Fecha | 21 de octubre de 2026 |
+| Versión | 1.5 |
 
 
 
@@ -68,7 +68,7 @@ La web tiene 35 pantallas enrutadas y la app móvil 31 pantallas; ambas separan 
 | `**` | Página no encontrada | Público | Avisar que la dirección no existe y volver al inicio | Ninguno |
 | `/client` | Inicio del cliente | CLIENT | Resumen, próxima reserva con su operario y puntos | `GET /bookings/me`, `/vehicles`, `/loyalty/balance`, `/operators/my-bookings` |
 | `/client/reserve` | Reservar | CLIENT | Elegir vehículo, servicio, fecha, hora y, si quiere, operario | `GET /catalog/services`, `/bookings/availability`, `/operators/available`; `POST /bookings` |
-| `/client/payment` | Pagos | CLIENT | Pagar una reserva y subir comprobante; con el pago aprobado solo queda el resumen | `GET /payment-accounts`, `/payments/me/bookings`; `POST /payments`; `/loyalty/*` |
+| `/client/payment` | Pagos | CLIENT | Pagar una reserva y subir comprobante (se comprime a máximo 2 MB antes de enviarlo; el QR se amplía con una lupa); Efectivo solo aparece si su cuenta está activa; con el pago aprobado solo queda el resumen | `GET /payment-accounts`, `/payments/me/bookings`; `POST /payments`; `/loyalty/*` |
 | `/client/history` | Historial | CLIENT | Reservas de la más reciente a la más antigua, pagos, cancelación y calificación; al hacer clic se abre el detalle con **Ir al pago** | `/bookings/me`, `POST /bookings/{id}/cancel`, `/payments/me`, `POST /ratings/{bookingId}` |
 | `/client/vehicles` | Mis vehículos | CLIENT | CRUD de vehículos | `GET/POST/PUT/DELETE /vehicles`, `GET /vehicle-types` |
 | `/client/notifications` | Notificaciones | CLIENT | Bandeja de avisos; al hacer clic se abre el detalle con **Ir a...** | `/notifications/*` |
@@ -78,12 +78,12 @@ La web tiene 35 pantallas enrutadas y la app móvil 31 pantallas; ambas separan 
 | `/admin/reservations` | Reservas | ADMIN | Crear, reprogramar, cambiar estado y asignar operario | `/admin/bookings/*`, `/admin/assignments/*` |
 | `/admin/reservations/:id/inspection` | Inspección | ADMIN | Recorrer las fases, registrar hallazgos con fotos, publicar y compartir | `/admin/inspections/{bookingId}/**` |
 | `/admin/payments` | Pagos | ADMIN | Revisar, aprobar, rechazar y reembolsar | `/admin/payments/*` |
-| `/admin/management` | Gestión | ADMIN | Usuarios (crear, activar o desactivar; filtros Habilitados e Inhabilitados), roles y permisos, servicios, promociones | `/admin/users`, `/admin/roles-permissions`, `/admin/catalog/services`, `/admin/promotions` |
+| `/admin/management` | Gestión | ADMIN | Usuarios (crear, activar o desactivar; filtros Habilitados e Inhabilitados), roles fijos y matriz de permisos (de referencia: el acceso lo decide el rol), servicios, promociones | `/admin/users`, `/admin/roles-permissions`, `/admin/catalog/services`, `/admin/promotions` |
 | `/admin/schedule` | Horario y bahías | ADMIN | Horario semanal, excepciones y bahías | `/admin/schedule/*`, `/admin/bays/*` |
 | `/admin/operators` | Operarios | ADMIN | Lista, resumen del equipo y alta de operarios | `/admin/operators`, `/admin/operators/summary`, `POST /admin/users` |
 | `/admin/operators/:id` | Detalle de operario | ADMIN | Disponibilidad, ausencias, ficha y métricas de la semana | `/admin/operators/{id}/availability`, `/absences`, `/metrics`, `/admin/operators/profiles`, `PUT /admin/operators/{id}/profile` |
 | `/admin/operators/:id/calendar` | Calendario del operario | ADMIN | Agenda del operario | `/admin/assignments` |
-| `/admin/reports` | Reportes | ADMIN | Ingresos y servicios; exportar PDF/Excel | Stores de pagos y reservas (jsPDF, xlsx) |
+| `/admin/reports` | Reportes | ADMIN | Ingresos y servicios terminados (solo cuentan las reservas completadas); exportar PDF/Excel | Stores de pagos y reservas (jsPDF, xlsx) |
 | `/admin/notifications` | Notificaciones | ADMIN | Bandeja de avisos; el detalle lleva a Reservas o al inicio | `/notifications/*` |
 | `/admin/profile` | Perfil | ADMIN | Datos de la cuenta | `/users/me` |
 | `/admin/settings` | Ajustes | ADMIN | Datos del negocio y medios de pago | `/admin/payment-accounts`, `GET/PUT /admin/establishment` |
@@ -111,7 +111,7 @@ El móvil replica las áreas de la web con pantallas propias de React Native. No
 | OPERATOR | `OperatorHome`, `OperatorAssigned`, `OperatorSchedule`, `OperatorHistory`, `OperatorRatings`, `OperatorNotifications`, `OperatorProfile`, `OperatorSettings` | `/operator/*` |
 | ADMIN | `AdminDashboard`, `AdminReservations`, `AdminPayments`, `AdminManagement`, `AdminSchedule`, `AdminOperators`, `AdminOperatorCalendar`, `AdminReports`, `AdminNotifications`, `AdminProfile`, `AdminSettings`, `AdminInspection` | `/admin/*` (`AdminInspection` = `/admin/reservations/:id/inspection`) |
 
-> *Nota.* Si un usuario tiene varios roles, el móvil entra al de más privilegio: ADMIN, luego OPERATOR, luego CLIENT (`RootNavigator.tsx:42-46`). La sesión se guarda en el llavero del sistema con `expo-secure-store` (`src/core/storage/sessionStorage.ts:15-20`).
+> *Nota.* Si un usuario tiene varios roles, el móvil entra al de más privilegio: ADMIN, luego OPERATOR, luego CLIENT (`RootNavigator.tsx:42-46`). La sesión se guarda en el llavero del sistema con `expo-secure-store` (`src/core/storage/sessionStorage.ts:15-20`). Desde el 21 de octubre de 2026, al abrir el APK instalado, `AppUpdatesCheck` lee `/app/version.json` del servidor; si hay un `versionCode` mayor que el instalado, muestra encima de todo una pantalla que no se cierra y solo deja descargar el APK nuevo. Si el servidor no responde, la app sigue normal (`src/app/providers/AppUpdatesCheck.tsx`). No es una pantalla enrutada, así que no cambia el conteo de 31.
 
 ### 2.3 Diagrama de navegación
 
@@ -240,7 +240,7 @@ El sistema sigue una arquitectura de microservicios (Newman, 2021): un API Gatew
 flowchart TB
   WEB["Web Angular 21<br/>navegador :4200"]
   MOV["Móvil React Native / Expo<br/>Android :8081"]
-  GW["API Gateway Spring Cloud :8080<br/>enruta /api/v1/** y responde CORS"]
+  GW["API Gateway Spring Cloud :8080<br/>enruta /api/v1/**, responde CORS<br/>y corta tokens de sesiones cerradas"]
     subgraph SVC["Microservicios (cada uno valida el JWT)"]
       direction LR
       SEC["security :3001<br/>Java"]
@@ -264,9 +264,9 @@ flowchart TB
   SVC -->|"correo: security y notification<br/>push: notification"| EXT
 ```
 
-> *Nota.* Notación basada en el modelo C4 (Brown, s.f.). Los clientes solo hablan con el gateway; cada servicio valida el JWT y guarda en su propio esquema.
+> *Nota.* Notación basada en el modelo C4 (Brown, s.f.). Los clientes solo hablan con el gateway; cada servicio valida el JWT y guarda en su propio esquema. Desde el 21 de octubre de 2026 el gateway además rechaza los tokens de las sesiones cerradas.
 
-La web y el móvil solo llaman al puerto 8080. El gateway reenvía el encabezado `Authorization` sin validarlo; cada servicio valida el JWT por su cuenta (`Backend/lavarapido-api-gateway/src/main/resources/application.yml`, comentario de rutas, ADR-006). Las rutas `/internal/**` entre servicios no tienen ruta en el gateway y responden 404 desde afuera.
+La web y el móvil solo llaman al puerto 8080. El gateway no revisa la firma del JWT: reenvía el encabezado `Authorization` y cada servicio valida el token por su cuenta (`Backend/lavarapido-api-gateway/src/main/resources/application.yml`, comentario de rutas, ADR-006). Desde el 21 de octubre de 2026 sí confirma que la sesión del token siga abierta: `SessionCheckFilter`, que corre justo después del CORS, pregunta a security-service con `GET /api/v1/auth/session` (204 si la sesión sigue abierta, 401 si se cerró con logout o porque la cuenta se desactivó) y guarda la respuesta 30 segundos por huella SHA-256 del token, así que una sesión abierta cuesta una llamada extra cada medio minuto. Si security-service no contesta en 3 segundos, deja pasar la petición, y al hacer logout borra la respuesta guardada de ese token. security-service hace la misma comprobación con el claim `sid` del token (`ActiveSessionValidator`). Se configura con `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL` y `SESSION_CHECK_TIMEOUT`, que el `docker-compose.yml` no pasa al contenedor: en Docker quedan los valores por defecto (`SessionCheckFilter.java`, `SessionCheckConfig.java`). Las rutas `/internal/**` entre servicios no tienen ruta en el gateway y responden 404 desde afuera.
 
 ### 3.2 Responsabilidad de cada contenedor
 
@@ -301,8 +301,9 @@ Hay dos estilos. Las consultas que necesitan respuesta inmediata van por REST s�
 | operations | security | Nombres de operarios y clientes, y si la cuenta sigue activa (ruta interna con llave compartida) | `SECURITY_SERVICE_URL`, `SECURITY_INTERNAL_URL`, `INTERNAL_API_KEY` |
 | payment | booking | Consultar la reserva y su valor a pagar | `BOOKING_SERVICE_URL` |
 | notification | security | Correo e idioma de cada cuenta y lista de administradores (`/internal/v1/users`) | `SECURITY_SERVICE_URL`, `INTERNAL_API_KEY` |
+| gateway | security | Confirmar que la sesión del token siga abierta (`GET /api/v1/auth/session`; la respuesta se guarda 30 segundos por token) | `ROUTE_SECURITY_URL` |
 
-> *Nota.* Fuente: `Backend/lavarapido-infra/docker-compose.yml`.
+> *Nota.* Fuente: `Backend/lavarapido-infra/docker-compose.yml` y, para el gateway, `SessionCheckConfig.java`.
 
 **Tabla 7**
 
@@ -314,13 +315,15 @@ Hay dos estilos. Las consultas que necesitan respuesta inmediata van por REST s�
 | `customer.provisioned` | customer (solo lo escribe en el log) | Ninguno |
 | `security.user.email-changed`, `security.user.password-changed`, `security.user.deactivated` | security (solo los escribe en el log) | Ninguno |
 | `booking.confirmed` | booking | notification (aviso y recordatorios), operations (asignación automática, con el operario que eligió el cliente) |
-| `booking.cancelled` | booking | notification |
+| `booking.cancelled` | booking (también cuando el sistema cancela una reserva programada que venció) | notification |
 | `execution.operator_assigned`, `execution.service_started`, `execution.service_completed`, `execution.inspection_shared` | operations | notification |
 | `payment.confirmed`, `payment.rejected`, `payment.refunded`, `payment.promotion_redeemed`, `payment.loyalty_points_earned` | payment | notification |
 
-> *Nota.* Fuente: `BookingEvent.java:17-18`, `ExecutionEvent.java:14-16`, `InspectionSharedEvent.java:15`, `PaymentIntegrationEvents.cs`, `CustomerProvisioned.java:15` y la lista `ROUTING_KEYS` de `notification-service/.../RabbitMessagingConfig.java`. notification escucha también `booking.created`, pero ningún servicio publica esa llave.
+> *Nota.* Fuente: `BookingEvent.java:17-18`, `ExecutionEvent.java:14-16`, `InspectionSharedEvent.java:15`, `PaymentIntegrationEvents.cs`, `CustomerProvisioned.java:15` y la lista `ROUTING_KEYS` de `notification-service/.../RabbitMessagingConfig.java`. notification escucha también `booking.created`, pero ningún servicio publica esa llave. El cierre automático de una reserva confirmada vencida (pasa a NO\_SHOW) no publica evento.
 
 Las colas de notification y customer tienen su cola de mensajes muertos (dead letter). La cola de operations (`operations-service.events`, solo `booking.confirmed`) no la tiene: si la asignación automática falla, se registra en el log y la reserva queda para la alerta de reserva sin operario y la asignación manual (`BookingConfirmedListener.java`). notification guarda el `event_id` de cada evento en `notification.processed_event` para ignorar duplicados, porque la entrega es "al menos una vez" (`DomainEventConsumerService.java:61-72`). La mensajería se activa con `MESSAGING_ENABLED`; si está apagada, los servicios Java usan un publicador que solo escribe en el log (`LoggingDomainEventPublisher.java:16`).
+
+Desde el 21 de octubre de 2026 booking-service tiene además una tarea programada, `ExpiredBookingsJob`, que cada 5 minutos cierra las reservas que nadie inició una hora después de su hora de fin: la confirmada pasa a NO\_SHOW y la programada se cancela con el motivo `EXPIRED`. Así se liberan el operario y la bahía. La configuran `BOOKING_EXPIRY_CHECK_ENABLED`, `BOOKING_EXPIRY_CHECK_INTERVAL` y `BOOKING_EXPIRY_GRACE_MINUTES`, que tampoco pasan por el compose, así que en Docker la tarea corre con sus valores por defecto (`ExpiredBookingsJob.java`, `BookingService.closeExpired`).
 
 ### 3.4 Capas internas de cada servicio (hexagonal)
 
@@ -395,7 +398,7 @@ flowchart TB
 
 `docker compose up -d` levanta solo SQL Server, Mailpit y RabbitMQ, y los servicios se corren desde el IDE. `docker compose --profile app up -d --build` levanta además los siete servicios en contenedores (`Backend/lavarapido-infra/docker-compose.yml:1-6`). Los servicios Java crean sus tablas con Liquibase al arrancar; payment-service las crea con el contenedor `payment-migrate`.
 
-En producción el mismo archivo de compose corre en una máquina virtual de Azure con `docker-compose.prod.yml` encima: se agregan dos contenedores, `web` (nginx con el build de Angular) y `caddy`, que es el único con puertos publicados (80 y 443, con el certificado HTTPS que gestiona Caddy). Caddy envía `/api/*` al gateway, `/app/*` a la descarga del APK y su `version.json`, y todo lo demás a la web. Ningún servicio publica puertos en el servidor, Mailpit no se levanta (los correos salen por Gmail SMTP) y el servidor se actualiza con `deploy/update-server.sh`, por un integrante del equipo por SSH o desde el flujo manual de GitHub Actions "Desplegar en Azure" (`deploy/ci-deploy.sh`). Fuente: `lavarapido-infra/docker-compose.prod.yml`, `deploy/Caddyfile`, `.github/workflows/deploy.yml`; diagrama en `vehicle-w-docs/08-uml/diagrams/source/deployment-production.md`.
+En producción el mismo archivo de compose corre en una máquina virtual de Azure con `docker-compose.prod.yml` encima: se agregan dos contenedores, `web` (nginx con el build de Angular) y `caddy`, que es el único con puertos publicados (80 y 443, con el certificado HTTPS que gestiona Caddy). Caddy envía `/api/*` al gateway, `/app/*` a la descarga del APK y su `version.json`, y todo lo demás a la web. Ningún servicio publica puertos en el servidor, Mailpit no se levanta (los correos salen por Gmail SMTP) y el servidor se actualiza con `deploy/update-server.sh`, por un integrante del equipo por SSH o desde el flujo manual de GitHub Actions "Desplegar en Azure" (`deploy/ci-deploy.sh`). Desde el 20 y el 21 de octubre de 2026: Caddy envía encabezados de seguridad y una política de contenido (CSP); cada contenedor tiene un chequeo de salud cada 30 segundos y sus registros se limitan a 3 archivos de 10 MB; la base se respalda todos los días y antes de cada actualización (`deploy/backup-db.sh`), cada respaldo se comprueba restaurándolo con otro nombre (`deploy/verify-backup.sh`) y se guardan los últimos 14 (`deploy/restore-db.sh` restaura uno). Fuente: `lavarapido-infra/docker-compose.prod.yml`, `deploy/Caddyfile`, `deploy/backup-db.sh`, `.github/workflows/deploy.yml`; diagrama en `vehicle-w-docs/08-uml/diagrams/source/deployment-production.md`.
 
 ## 4. Patrones de diseño
 
@@ -425,7 +428,7 @@ El código aplica 17 patrones verificables: 5 de arquitectura, 8 de diseño en e
 | 16 | Guard + Interceptor (cadena de responsabilidad) | `Web/src/app/core/guards/auth-guard.ts:10-34`, `core/interceptors/auth-interceptor.ts:14-38` | Controlar el acceso por rol y adjuntar el token solo a la API propia |
 | 17 | Política de dominio (Specification) | `AssignmentPolicy.java`, `AutoAssignmentPolicy.java`, `StartPolicy.java` (operations); `LoginLockout.java` (security) | Cada regla de negocio (quién puede tomar una reserva, a quién se asigna sola, desde cuándo se inicia, cuándo se bloquea una cuenta) vive en una clase pura del dominio que se prueba sin base de datos |
 
-> *Nota.* Otros mecanismos presentes: filtro de correlación `X-Correlation-Id` (`CorrelationIdFilter.java:23-39`), stores con signals de Angular para el estado del área admin (`features/admin/services/*-store.ts`) y carga diferida de módulos por rol (`loadChildren` en `app.routes.ts`).
+> *Nota.* Otros mecanismos presentes: filtro de correlación `X-Correlation-Id` (`CorrelationIdFilter.java:23-39`), filtro de sesión del gateway con la respuesta guardada 30 segundos por token (`SessionCheckFilter.java`), tarea programada que cierra reservas vencidas (`ExpiredBookingsJob.java`), stores con signals de Angular para el estado del área admin (`features/admin/services/*-store.ts`) y carga diferida de módulos por rol (`loadChildren` en `app.routes.ts`).
 
 ### 4.1 Fragmentos representativos
 
@@ -511,6 +514,7 @@ La base `LavaRapido` (SQL Server 2022) tiene 57 tablas en 9 esquemas, creadas po
 - **Bloque de auditoría.** Casi todas las tablas de dominio terminan con `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by` y `row_version`. No lo tienen las tablas base de `security` (`person`, `app_user`, `role`, `permission`, `role_permission`, `user_role`, `user_session`, `password_reset_token`), `audit.audit_log`, `booking.schedule_history` ni `notification.booking_tracking`. Tampoco lo tienen completo las tablas que se agregaron en octubre (`security.login_lockout`, `security.person_address`, `execution.operator_profile`, `execution.operator_skill` y las cuatro del informe de inspección): solo guardan las columnas de fecha y autor que usan.
 - **Borrado lógico.** `deleted_at` no nulo indica fila eliminada; varios índices únicos son filtrados con `WHERE deleted_at IS NULL`.
 - **Concurrencia optimista.** Un trigger `tr_touch_<tabla>` actualiza `updated_at` y suma 1 a `row_version` en cada UPDATE de las tablas que se editan (16 triggers); en payment, `EfUnitOfWork` lo hace antes de guardar. Solo payment-service compara `row_version` al actualizar (token de concurrencia de EF Core); los servicios Java todavía no lo revisan.
+- **Candados de aplicación.** Donde dos operaciones a la vez podrían chocar, los servicios Java toman un candado de SQL Server (`sp_getapplock`) que se suelta al terminar la transacción: booking-service usa `booking-schedule` al crear o reprogramar una reserva y al cerrar las vencidas, y operations-service usa `operations-assignment` (desde el 21 de octubre de 2026) en la asignación manual y la automática, para que un operario no quede con dos servicios a la misma hora (`BookingPersistenceAdapter.lockSchedule`, `ExecutionPersistenceAdapter.lockAssignments`).
 - **Fechas en UTC.** Todos los valores por defecto usan `SYSUTCDATETIME()`.
 - **Catálogos con código.** Los estados y tipos son tablas con `code` único (`booking_status`, `payment_status`, `execution_status`, etc.) cargadas por changelogs semilla.
 
@@ -1120,7 +1124,7 @@ Establecimiento, horario, bahías y reservas. Dueño: booking-service.
 | Campo | Tipo | Nulo | Llave | Descripción |
 | --- | --- | --- | --- | --- |
 | cancellation_reason_id | SMALLINT IDENTITY | No | PK | Identificador |
-| code | NVARCHAR(30) | No | UK | Código (seis motivos semilla) |
+| code | NVARCHAR(30) | No | UK | Código (siete motivos semilla; `EXPIRED`, de la semilla `112`, solo lo usa el sistema al cancelar una reserva programada vencida y no se ofrece al cancelar a mano) |
 | name | NVARCHAR(60) | No |  | Nombre visible |
 | is_customer_fault | BIT | No |  | Si la falta es del cliente |
 | display_order | SMALLINT | No |  | Orden de presentación |
@@ -1529,7 +1533,7 @@ Notificaciones, dispositivos y recordatorios. Dueño: notification-service.
 | Campo | Tipo | Nulo | Llave | Descripción |
 | --- | --- | --- | --- | --- |
 | notification_type_id | SMALLINT IDENTITY | No | PK | Identificador |
-| code | NVARCHAR(40) | No | UK | Uno de los 23 códigos, de `USER_WELCOME` a `ADMIN_BOOKING_UNASSIGNED` |
+| code | NVARCHAR(40) | No | UK | Uno de los 24 códigos, de `USER_WELCOME` a `APP_UPDATE_AVAILABLE` (changelog `038`) |
 | name | NVARCHAR(80) | No |  | Nombre visible |
 | display_order | SMALLINT | No |  | Orden de presentación |
 | is_active | BIT | No |  | Tipo vigente |
@@ -1809,9 +1813,10 @@ classDiagram
   direction LR
   class AuthenticationService {
     <<application service>>
-    implements AuthenticateUserUseCase, LogoutUseCase
+    implements AuthenticateUserUseCase, LogoutUseCase, SessionStatusUseCase
     +login(command) AuthenticationResult
     +logout(userId, sessionId)
+    +isActive(userId, sessionId) boolean
   }
   class AccountRegistrationService {
     <<application service>>
@@ -1876,6 +1881,7 @@ classDiagram
     +open(userId, startedAt, expiresAt, ipAddress, userAgent) long
     +revoke(sessionId, userId, revokedAt)
     +revokeAll(userId, revokedAt)
+    +isActive(sessionId, userId, now) boolean
   }
   class PasswordResetTokenRepository {
     <<interface>>
@@ -1940,7 +1946,7 @@ classDiagram
   }
 ```
 
-> *Nota.* Adaptadores de salida: `UserAccountPersistenceAdapter`, `UserSessionPersistenceAdapter`, `PasswordResetTokenPersistenceAdapter`, `UserPreferencePersistenceAdapter`, `RolePermissionPersistenceAdapter`, `LoginLockoutPersistenceAdapter` y `PersonAddressPersistenceAdapter` (JPA); `BCryptPasswordHasher`; `JwtTokenIssuer`; `SecureRandomResetCodeGenerator`; `EmailResetCodeNotifier`, `LoggingResetCodeNotifier` y `UndeliveredResetCodeNotifier`; `InMemoryResetAttemptCounter`; `RabbitDomainEventPublisher` y `LoggingDomainEventPublisher`. Adaptadores de entrada: `AuthController`, `UserProfileController`, `UserAdministrationController`, `RolePermissionController`, `UserAddressController` e `InternalUserController`. Fuente: `security-service/src/main/java/com/lavarapido/security/`.
+> *Nota.* Adaptadores de salida: `UserAccountPersistenceAdapter`, `UserSessionPersistenceAdapter`, `PasswordResetTokenPersistenceAdapter`, `UserPreferencePersistenceAdapter`, `RolePermissionPersistenceAdapter`, `LoginLockoutPersistenceAdapter` y `PersonAddressPersistenceAdapter` (JPA); `BCryptPasswordHasher`; `JwtTokenIssuer`; `SecureRandomResetCodeGenerator`; `EmailResetCodeNotifier`, `LoggingResetCodeNotifier` y `UndeliveredResetCodeNotifier`; `InMemoryResetAttemptCounter`; `RabbitDomainEventPublisher` y `LoggingDomainEventPublisher`. Adaptadores de entrada: `AuthController` (incluye `GET /auth/session` para el gateway), `ActiveSessionValidator` (rechaza el JWT de una sesión cerrada), `UserProfileController`, `UserAdministrationController`, `RolePermissionController`, `UserAddressController` e `InternalUserController`. Fuente: `security-service/src/main/java/com/lavarapido/security/`.
 
 *Puertos que usa cada servicio.*
 
@@ -2127,6 +2133,8 @@ classDiagram
     +cancel(reason)
     +moveTo(target)
     +changeableByCustomer(now) boolean
+    +isExpired(now, grace) boolean
+    +expire(systemReason)
     +subtotal() BigDecimal
     +total() BigDecimal
     +durationMinutes() int
@@ -2315,6 +2323,7 @@ classDiagram
     +daySummary(date, caller) DaySummary
     +getForService(bookingId) BookingView
     +listForService(from, to) List~BookingView~
+    +closeExpired() int
   }
   class CatalogService {
     <<application service>>
@@ -2346,6 +2355,7 @@ classDiagram
     +int slotMinutes
     +int maxDaysAhead
     +int alternatives
+    +Duration expiryGrace
   }
   class BookingRepository {
     <<interface>>
@@ -2355,6 +2365,7 @@ classDiagram
     +findById(bookingId) Optional~Booking~
     +findForCustomer(userId, vehicleIds) List~Booking~
     +findStartingBetween(from, to, status) List~Booking~
+    +findNotStartedEndingBefore(before) List~Booking~
     +findCancellationReason(code) Optional~CancellationReason~
   }
   class CatalogRepository {
@@ -2392,7 +2403,7 @@ classDiagram
   }
 ```
 
-> *Nota.* Adaptadores de salida: `BookingPersistenceAdapter`, `CatalogPersistenceAdapter`, `SchedulePersistenceAdapter` y `BayPersistenceAdapter` (JPA); `CustomerServiceDirectory` (REST a customer-service); `RabbitDomainEventPublisher` y `LoggingDomainEventPublisher`. Adaptadores de entrada: `BookingController`, `AdminBookingController`, `OperatorBookingController`, `CatalogController`, `ScheduleController` e `InternalBookingController` (`/internal/v1/bookings`, con `X-Internal-Key`). Fuente: `lavarapido-booking-service/src/main/java/com/lavarapido/booking/`.
+> *Nota.* Adaptadores de salida: `BookingPersistenceAdapter`, `CatalogPersistenceAdapter`, `SchedulePersistenceAdapter` y `BayPersistenceAdapter` (JPA); `CustomerServiceDirectory` (REST a customer-service); `RabbitDomainEventPublisher` y `LoggingDomainEventPublisher`. Adaptadores de entrada: `BookingController`, `AdminBookingController`, `OperatorBookingController`, `CatalogController`, `ScheduleController` e `InternalBookingController` (`/internal/v1/bookings`, con `X-Internal-Key`); `ExpiredBookingsJob` (tarea programada que llama a `closeExpired`). Fuente: `lavarapido-booking-service/src/main/java/com/lavarapido/booking/`.
 
 *Puertos que usa cada servicio.*
 
@@ -2507,6 +2518,7 @@ classDiagram
     +metrics(operatorId, weekOf) OperatorWeekMetrics
     +teamSummary(weekOf) TeamSummary
     +myBookingOperators() List~BookingOperatorView~
+    +unassigned(from, to) UnassignedView
   }
   class AutoAssignmentPolicy {
     <<domain service>>
@@ -2541,6 +2553,7 @@ classDiagram
   }
   class ExecutionRepository {
     <<interface>>
+    +lockAssignments()
     +findByLineIds(bookingServiceIds) List~ServiceExecution~
     +findByOperator(operatorId) List~ServiceExecution~
     +findRated(operatorId) List~ServiceExecution~
@@ -3243,13 +3256,14 @@ classDiagram
 
 | Entidad | Transición | Condición (código) |
 | --- | --- | --- |
-| Reserva | SCHEDULED → CONFIRMED | Tiene bahía asignada (`Booking.java:110`) |
-| Reserva | CONFIRMED → IN\_PROGRESS o NO\_SHOW | `Booking.java:111` |
-| Reserva | IN\_PROGRESS → COMPLETED | `Booking.java:112` |
-| Reserva | → CANCELLED | Solo por `cancel(reason)`, no por `moveTo` (`Booking.java:95, 113`) |
+| Reserva | SCHEDULED → CONFIRMED | Tiene bahía asignada (`Booking.java:111`) |
+| Reserva | CONFIRMED → IN\_PROGRESS o NO\_SHOW | `Booking.java:112` |
+| Reserva | IN\_PROGRESS → COMPLETED | `Booking.java:113` |
+| Reserva | → CANCELLED | Solo por `cancel(reason)`, no por `moveTo` (`Booking.java:96, 114`) |
+| Reserva | Vencida: CONFIRMED → NO\_SHOW, SCHEDULED → CANCELLED (motivo `EXPIRED`) | Una hora después de su hora de fin sin haberse iniciado; la cierra el sistema (`Booking.java:127-141`, `ExpiredBookingsJob.java`) |
 | Ejecución | PENDING → IN\_PROGRESS → COMPLETED | `start()` y `finish()` (`ServiceExecution.java:65-80`) |
 | Ejecución | Calificación | Solo si está COMPLETED y una vez (`ServiceExecution.java:82-90`) |
-| Pago | Creado → en revisión → aprobado, rechazado o reembolsado | Métodos `SubmitForReview`, `Approve`, `Reject`, `Refund` (`Payment.cs:116-157`) |
+| Pago | Creado → en revisión → aprobado, rechazado o reembolsado | Métodos `SubmitForReview`, `Approve`, `Reject`, `Refund` (`Payment.cs:121-162`) |
 | Ejecución | Inicio | Solo desde 15 minutos antes de la hora de la reserva (`StartPolicy.java`) |
 | Cuenta | Bloqueada 15 minutos | Al quinto fallo dentro de 15 minutos; un inicio correcto o restablecer la contraseña la libera (`LoginLockout.java`) |
 | Informe de inspección | Borrador → publicado | `publish()`; solo un informe publicado se comparte (`InspectionReport.java`) |
@@ -3275,7 +3289,7 @@ classDiagram
 | 10 | En "Servicios asignados" del operario (web) la columna Cliente muestra la placa | `operator/pages/assigned-services/assigned-services.ts:141` |
 | 11 | El nombre de la marca no es uniforme entre clientes ("AquaWash", "Car Wash", "Lavado Vehicular", "Express Car Wash") y la landing anuncia "servicio móvil… donde estés", aunque el SRS v4 define un único local | Figuras 2 y 7 |
 
-> *Nota.* Revisión del código del 15 de octubre de 2026: el hallazgo 5 está corregido (el informe de inspección, su enlace público y los datos del negocio se guardan en operations-service y booking-service; en el móvil `settingsMock.ts` solo conserva las preferencias de aviso iniciales) y el 7 también (`bin/` quedó en el `.gitignore` de booking-service). Los hallazgos 3, 4, 8, 9, 10 y 11 siguen en el código. Revisión del 20 de octubre de 2026: el 6 ya no aplica (las carpetas locales tienen los nombres reales de los repositorios), el 9 no aparece en el código y el 10 está corregido (la columna Cliente muestra `clientName`); los hallazgos 3, 4 y 8 siguen igual.
+> *Nota.* Revisión del código del 15 de octubre de 2026: el hallazgo 5 está corregido (el informe de inspección, su enlace público y los datos del negocio se guardan en operations-service y booking-service; en el móvil `settingsMock.ts` solo conserva las preferencias de aviso iniciales) y el 7 también (`bin/` quedó en el `.gitignore` de booking-service). Los hallazgos 3, 4, 8, 9, 10 y 11 siguen en el código. Revisión del 20 de octubre de 2026: el 6 ya no aplica (las carpetas locales tienen los nombres reales de los repositorios), el 9 no aparece en el código y el 10 está corregido (la columna Cliente muestra `clientName`); los hallazgos 3, 4 y 8 siguen igual. Revisión del 21 de octubre de 2026: el 8 está corregido (`GET /payment-accounts` devuelve también la cuenta de efectivo mientras está activa, `PaymentAccountService.cs:27`, y la web y el móvil muestran Efectivo solo si viene en esa lista); los hallazgos 3 y 4 siguen igual.
 
 ## Referencias
 

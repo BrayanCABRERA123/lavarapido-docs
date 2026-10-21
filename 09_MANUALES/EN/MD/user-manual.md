@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 17, 2026
+October 21, 2026
 
-Manual Type: User Manual (Customer and Operator Roles) · Version 4.1
+Manual Type: User Manual (Customer and Operator Roles) · Version 4.5
 
 ## Version Control
 
@@ -37,6 +37,7 @@ Table 1 records the change history of this document. Each time the development t
 | 4.2 | 2026-10-19 | Administrator accounts do not have the Deactivate my account option (frequently asked questions). | Development team |
 | 4.3 | 2026-10-19 | Screenshots taken again on October 19, 2026 (date on the dashboards, calendars without past days, and booking summary). | Development team |
 | 4.4 | 2026-10-20 | The customer's and the operator's history go from the newest booking to the oldest and open the detail on click, with the **Go to payment** and **Go to ratings** buttons. Notifications open their detail on click, with a button to go to the section the notice comes from. Once the payment is approved, the payment screen only shows the summary. | Development team |
+| 4.5 | 2026-10-21 | Review against the code of October 21, 2026: the receipt is reduced below 2 MB before it is sent and the QR can be enlarged with **Enlarge QR** (section 10.1.5); Cash only appears if the business keeps that account active; bookings nobody starts close on their own one hour after their end time (Table 7, section 10.2.3, and frequently asked questions); when signing out, the other tabs sign out too (section 12); the mobile app asks to install the new APK when it is published (section 6.2). The date and the version of the cover were corrected. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -120,7 +121,7 @@ To explain step by step how the customer and the operator must log in, navigate,
 
 - The functions of the **Administrator** role (bookings, operator assignment, payment review, schedules and bays, users, services, reports, and configuration), which are explained in the Administrator Manual.
 - The installation, configuration, and internal construction of the software, which are explained in the Installation Manual and the Technical Manual.
-- The Android mobile application (React Native with Expo), which offers equivalent modules for the three roles. It is downloaded from the home page of the web with the download button or the QR code; this manual documents only the web version.
+- The Android mobile application (React Native with Expo), which offers equivalent modules for the three roles. It is downloaded from the home page of the web with the download button or the QR code; this manual documents only the web version. Since October 21, 2026, when the business publishes a new version of the APK, the app shows a screen that asks to download and install it before going on.
 - At-home washing: in the current version the customer brings the vehicle to the business on the booked date and time.
 - Electronic invoicing with the DIAN (Colombian tax authority), payment gateways, and the management of supplies or inventory.
 
@@ -528,8 +529,8 @@ Each module is documented with the same format: name, description, role that can
 | Confirmed | The booking has a slot and a washing bay. Bookings made by the customer are created with this status. | Yes, before the start time. |
 | In progress | The operator started the wash. | No. |
 | Completed | The service is finished; from this status it can be rated. | No. |
-| Cancelled | The booking was voided by the customer or by the business. | Not applicable. |
-| No show | The customer did not arrive at the booked slot. | Not applicable. |
+| Cancelled | The booking was voided by the customer or by the business, or the system closed it because its time came without being confirmed. | Not applicable. |
+| No show | The customer did not arrive at the booked slot. If nobody starts the service, the system marks the booking this way one hour after its end time. | Not applicable. |
 
 *Note.* The names are those displayed by the interface in English (codes SCHEDULED, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, and NO_SHOW in the database).
 
@@ -552,9 +553,9 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 | Nequi | The QR code is scanned and the transfer is made from the app. | Yes |
 | Daviplata | The QR code is scanned and the transfer is made from the app. | Yes |
 | Transfer | The QR code is scanned or the account data shown is used. | Yes |
-| Cash | Paid at the business when the service is received. No QR code is shown. | No; the administrator records the payment at the business. |
+| Cash | Paid at the business when the service is received. No QR code is shown. It only appears if the business keeps the cash account active. | No; the administrator records the payment at the business. |
 
-*Note.* The digital methods shown depend on the payment accounts that the administrator keeps active.
+*Note.* The methods shown, Cash included, depend on the payment accounts that the administrator keeps active.
 
 **Module name:** Pay service.
 
@@ -569,8 +570,8 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 1. Open **Pay service** and review the **Booking summary**: service, vehicle, **Subtotal**, **Discount applied**, and **TOTAL TO PAY** (VAT of 19% included).
 2. If you have an unlocked coupon, type it in **Coupon code** and click **Apply**. The message "Coupon applied: [name]" appears, and the discount is subtracted from the total to pay.
 3. In **Select your payment method**, choose Nequi, Daviplata, Transfer, or Cash.
-4. For a digital method: scan the QR code with the banking or wallet app, or copy the number shown in **Authorized key / account** with **Copy number**, and transfer exactly the **Amount to pay**.
-5. In **Confirm your payment**, drag the image of the receipt or click to browse for it (JPG or PNG, maximum 10 MB).
+4. For a digital method: scan the QR code with the banking or wallet app, or copy the number shown in **Authorized key / account** with **Copy number**, and transfer exactly the **Amount to pay**. If the code is hard to read, **Enlarge QR** shows it bigger, with **Zoom in** and **Zoom out** (also with the mouse wheel or a double click).
+5. In **Confirm your payment**, drag the image of the receipt or click to browse for it (JPG or PNG of up to 10 MB). The page reduces it below 2 MB before sending it; meanwhile it shows "Preparing the receipt...".
 6. Type the **Transaction reference** printed on the receipt (8 to 12 letters or numbers issued by the bank) and check the **Amount paid** (greater than 0), which must match the amount transferred.
 7. Click **I've made the payment**. While data is missing, the button stays disabled and the list "To confirm the payment you still need to:" shows what is pending (receipt, reference, or amount).
 8. For cash: select **Cash** and click **Confirm booking**; the payment is made at the business when the vehicle is picked up.
@@ -583,6 +584,7 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 - Only bookings in Confirmed, In progress, or Completed status can be paid.
 - While a payment is in review, another one cannot be reported for the same booking; a booking admits a single approved payment.
 - If the administrator rejects the payment, the customer can report it again with a correct receipt.
+- If the image cannot be reduced below 2 MB, the message "We could not reduce the image below 2 MB. Try a screenshot of the receipt." appears.
 - When the payment is approved, the customer receives the notice "Payment confirmed" (inbox and email), the loyalty points of the booking ("You earned N points", inbox only), and, for each coupon those points unlock, the notice "You have a redeemable coupon!" with its code (inbox and email). If the payment is rejected or refunded, the customer receives a notice and an email; a refund reverses the points earned by that booking.
 - Once the payment is approved, the **Pay service** screen of that booking only shows the summary: the payment method, the QR code, the receipt upload, and the **I've made the payment** button disappear, and the coupon used (if any) can no longer be removed.
 - A coupon is accepted only if it is active, is within its dates, and the customer has reached the points it requires; it can be redeemed once per booking. The system answers "That coupon doesn't exist.", "That coupon isn't active, or you haven't reached the points it needs yet.", or "You already redeemed this coupon on this booking." A successful redemption sends a confirmation notice and email.
@@ -819,7 +821,7 @@ The operator receives the account from the business administrator. The operator 
 
 **Expected result:** The status changes to In progress and then to Completed ("Service finished!"). The customer receives the notices and can rate the service.
 
-**Notes or restrictions:** The service can be started from 15 minutes before the booked time. The operator can only update the services assigned to them.
+**Notes or restrictions:** The service can be started from 15 minutes before the booked time. The operator can only update the services assigned to them. If an assigned service is not started, one hour after its end time the system closes the booking as No show and the service no longer appears as pending.
 
 **Table 10**
 
@@ -952,7 +954,7 @@ The system validates the information while the person types. When a piece of dat
 
 | Message or situation | Meaning | User action |
 |---|---|---|
-| Your session expired. Please sign in again. | The one-hour session ended. | Log in again. |
+| Your session expired. Please sign in again. | The one-hour session ended, or the session was closed (for example, because the administrator deactivated the account). | Log in again. |
 | You do not have permission to perform this action | The action belongs to another role or to another person's data. | Use only the options of the role. |
 | Your customer profile is not ready yet. Please try again in a few minutes. | The customer profile is being created after registration. | Wait a moment and try again. |
 | A vehicle is already registered with this plate | The plate belongs to an active vehicle. | Verify the plate. |
@@ -968,6 +970,7 @@ The system validates the information while the person types. When a piece of dat
 | Invalid file | The receipt is not a JPG or PNG image of up to 10 MB. | Attach a valid image. |
 | Only a completed service can be rated. / This service was already rated. | The rating is not allowed. | Wait until the service is completed; a booking is rated only once. |
 | You must start the service first. / This service was already started. | The operator tried an action out of order. | Start the service before finishing it. |
+| We could not reduce the image below 2 MB. Try a screenshot of the receipt. | The photo of the receipt is too heavy even after reducing it. | Attach a screenshot of the receipt. |
 | To confirm the payment you still need to: ... | Data of the payment is missing (receipt, reference, or amount). | Complete the items listed under the button. |
 | That coupon doesn't exist. | The coupon code is wrong. | Check the code shown in the coupon notice. |
 | That coupon isn't active, or you haven't reached the points it needs yet. | The coupon is paused, outside its dates, or locked. | Check the points in the dashboard. |
@@ -984,6 +987,8 @@ Logging out when finished prevents another person from using the account, especi
 2. Click **Log Out**.
 3. In the "Log out" window, click **Yes, log out**.
 4. Verify that the system returns to the login screen.
+
+When signing out, the other tabs of the same browser also go back to the login screen, and if another account signs in on one tab, the others reload with that account. Since October 21, 2026 the closed session does not work on the server either, even if someone had copied its access.
 
 **Figure 32**
 
@@ -1021,9 +1026,13 @@ Yes, it is optional. When booking, **Operator (optional)** lists the operators w
 
 The web application does not allow changing the date or the time. Cancel the booking before its start time and book again, or contact the business.
 
+##### What happens if I do not arrive for my booking?
+
+If nobody starts the service, one hour after the end time the system marks the booking as No show and frees the slot. If you had already paid, contact the business: the administrator decides on the refund.
+
 ##### How do I pay for my service?
 
-In Pay service, choose the method. With Nequi, Daviplata, or Transfer, scan the QR code, transfer the exact amount, and attach the receipt with the transaction reference; with Cash, pay at the business.
+In Pay service, choose the method. With Nequi, Daviplata, or Transfer, scan the QR code, transfer the exact amount, and attach the receipt with the transaction reference; with Cash (if the business has it active), pay at the business.
 
 ##### Does the system store my card data?
 

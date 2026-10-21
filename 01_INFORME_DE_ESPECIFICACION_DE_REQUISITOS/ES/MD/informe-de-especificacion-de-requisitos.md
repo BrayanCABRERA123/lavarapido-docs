@@ -10,7 +10,7 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 7.6, 20 de octubre de 2026
+Versión 7.7, 21 de octubre de 2026
 
 ---
 
@@ -33,12 +33,13 @@ Versión 7.6, 20 de octubre de 2026
 | V7.4 | 19/10/2026 | Equipo de desarrollo | Nuevos casos de uso CU31 (gestionar la cuenta propia, RF-027) y CU32 (procesos automáticos: primer administrador, notificaciones por evento, recordatorios, alerta de reserva sin operario y aviso de versión nueva). Pasan a ser 32 casos de uso. |
 | V7.5 | 19/10/2026 | Equipo de desarrollo | Pruebas del 19 de octubre de 2026 (655 automatizadas, 19 de punta a punta y 42 casos funcionales, Tabla 58) y capturas del sistema tomadas de nuevo ese día. |
 | V7.6 | 20/10/2026 | Equipo de desarrollo | Se retira el cambio de rol de una cuenta, que el equipo revirtió en el código (RF-028, CU27): el rol se asigna al crear la cuenta y el sistema no ofrece cambiarlo. Una cuenta de administrador sigue sin poder desactivarse y un administrador no cierra su propia cuenta. Se corrigen la tabla de eventos de dominio (solo viajan por RabbitMQ los eventos que tienen consumidor), los tipos de notificación de RF-018 y el detalle con botón "Ir a…" de CU17, el diagrama de estados de la ejecución (Figura 6: sin pausa ni novedad, que no se usan) y la restricción RT-05 (servidor público en Azure). RF-007 y CU07: el cliente solo cancela, sin escribir motivo, y la reprogramación la hace el administrador (RF-033, CU29). |
+| V7.7 | 21/10/2026 | Equipo de desarrollo | Estado verificado contra el código al 21 de octubre de 2026: cerrar sesión o desactivar una cuenta deja sin efecto su token (RF-027, RF-028, RNF-004); las reservas que nadie inició se cierran solas una hora después de su hora de fin (RF-033, CU32, Figura 4); la asignación manual y la automática no se cruzan y el conteo de reservas sin operario es uno solo (RF-008, RF-017); el comprobante se comprime a máximo 2 MB y el efectivo solo se ofrece si su cuenta está activa (RF-013, RF-013b, RF-034); los reportes cuentan solo los servicios completados (RF-023); la aplicación pide instalar el APK nuevo antes de seguir (CU32); respaldos diarios verificados de la base (9.2); pruebas del 21 de octubre (689 automatizadas, Tabla 58). |
 
 ---
 
 ## Resumen
 
-Este documento especifica los requisitos de LavaRápido, una plataforma web y móvil que organiza la operación de un lavadero de vehículos de un único local: registro de clientes y vehículos, reserva de turnos con validación de horario y bahías, asignación automática o manual de operarios, ejecución y calificación del servicio, informe de inspección del vehículo, pago por QR o transferencia con revisión del comprobante, promociones, puntos de fidelización y notificaciones. La especificación sigue la estructura de IEEE 830 (IEEE, 1998) y de ISO/IEC/IEEE 29148 (ISO/IEC/IEEE, 2018), y se basa en la documentación técnica del proyecto (repositorio `vehicle-w-docs`) y en el código de sus siete componentes de servidor, revisado el 20 de octubre de 2026. Define 41 requisitos funcionales con criterios de aceptación verificables, 12 requisitos no funcionales con su métrica de verificación, 32 casos de uso, las reglas de negocio, los ciclos de vida de la reserva, del pago y de la ejecución, los requisitos de datos y las restricciones técnicas, de datos, de operación y regulatorias. Al 20 de octubre de 2026, 40 requisitos funcionales están implementados y 1 parcialmente.
+Este documento especifica los requisitos de LavaRápido, una plataforma web y móvil que organiza la operación de un lavadero de vehículos de un único local: registro de clientes y vehículos, reserva de turnos con validación de horario y bahías, asignación automática o manual de operarios, ejecución y calificación del servicio, informe de inspección del vehículo, pago por QR o transferencia con revisión del comprobante, promociones, puntos de fidelización y notificaciones. La especificación sigue la estructura de IEEE 830 (IEEE, 1998) y de ISO/IEC/IEEE 29148 (ISO/IEC/IEEE, 2018), y se basa en la documentación técnica del proyecto (repositorio `vehicle-w-docs`) y en el código de sus siete componentes de servidor, revisado el 21 de octubre de 2026. Define 41 requisitos funcionales con criterios de aceptación verificables, 12 requisitos no funcionales con su métrica de verificación, 32 casos de uso, las reglas de negocio, los ciclos de vida de la reserva, del pago y de la ejecución, los requisitos de datos y las restricciones técnicas, de datos, de operación y regulatorias. Al 21 de octubre de 2026, 40 requisitos funcionales están implementados y 1 parcialmente.
 
 **Palabras clave:** especificación de requisitos, lavadero de vehículos, reservas, microservicios, casos de uso.
 
@@ -225,7 +226,7 @@ flowchart TB
     people(["Cliente · Operario · Administrador"]):::person
     web["App web<br/>Angular 21"]
     mobile["App Android<br/>React Native / Expo"]
-    gateway["API Gateway · :8080<br/>Spring Cloud Gateway<br/>enrutamiento + CORS"]
+    gateway["API Gateway · :8080<br/>Spring Cloud Gateway<br/>enrutamiento, CORS<br/>y chequeo de sesión"]
 
     subgraph services["Microservicios"]
         direction LR
@@ -264,7 +265,7 @@ flowchart TB
 
 | Componente | Puerto | Tecnología | Responsabilidad |
 |---|---|---|---|
-| API Gateway | 8080 | Spring Cloud Gateway | Entrada única para la web y la aplicación; enruta por ruta y responde CORS. No expone las rutas internas. |
+| API Gateway | 8080 | Spring Cloud Gateway | Entrada única para la web y la aplicación; enruta por ruta y responde CORS. No expone las rutas internas. Corta los tokens de sesiones cerradas preguntando a security-service (la respuesta se guarda 30 segundos por token). |
 | security-service | 3001 | Java 21, Spring Boot 4 | Cuentas, roles y permisos, autenticación con JWT, bloqueo por intentos fallidos, recuperación de contraseña, dirección del perfil y preferencias. |
 | customer-service | 3002 | Java 21, Spring Boot 4 | Perfil del cliente, vehículos y tipos de vehículo. |
 | booking-service | 3003 | Java 21, Spring Boot 4 | Catálogo y precios, horario, bahías, disponibilidad, reservas, resumen del día y datos del negocio. |
@@ -415,7 +416,7 @@ El sistema no controla dispositivos de hardware. Los usuarios requieren un compu
 
 Cada requisito tiene un identificador único que se conserva entre versiones. Cada requisito se redacta como una capacidad verificable y se acompaña de criterios de aceptación medibles (Wiegers y Beatty, 2013).
 
-La prioridad sigue la técnica MoSCoW: Esencial (debe tener), Deseable (debería tener) y Opcional (podría tener). El estado de cada requisito se verificó contra el código y las pruebas automatizadas el 20 de octubre de 2026: Implementado (construido y probado), Parcial (construido en parte; se indica qué falta) y Pendiente (no construido).
+La prioridad sigue la técnica MoSCoW: Esencial (debe tener), Deseable (debería tener) y Opcional (podría tener). El estado de cada requisito se verificó contra el código y las pruebas automatizadas el 21 de octubre de 2026: Implementado (construido y probado), Parcial (construido en parte; se indica qué falta) y Pendiente (no construido).
 
 ### 5.2 Autenticación y Cuentas
 
@@ -429,9 +430,9 @@ La prioridad sigue la técnica MoSCoW: Esencial (debe tener), Deseable (debería
 | RF-003 | **Recuperación de contraseña.** El sistema debe permitir restablecer la contraseña con un código de 6 dígitos enviado al correo registrado. | • El código vence a los 15 minutos y se invalida tras 5 intentos fallidos.<br>• Ante un correo no registrado, la respuesta es idéntica y no se envía correo.<br>• El código se guarda solo como hash, es de un solo uso y pedir uno nuevo invalida el anterior.<br>• La nueva contraseña no puede ser igual a la actual. | Deseable | Implementado |
 | RF-004 | **Cambio de contraseña.** El sistema debe permitir que el usuario autenticado cambie su contraseña después de validar la actual. | • Si la contraseña actual no coincide, el cambio se rechaza y la contraseña no varía.<br>• La nueva contraseña cumple la política de RNF-004. | Deseable | Implementado |
 | RF-004b | **Bloqueo por intentos fallidos.** El sistema debe bloquear la cuenta durante 15 minutos tras 5 intentos fallidos de inicio de sesión dentro de un lapso de 15 minutos. | • Durante el bloqueo, el inicio de sesión se rechaza con la respuesta 423 (`ACCOUNT_LOCKED`) y un mensaje que explica el bloqueo, aunque la contraseña sea correcta.<br>• Un inicio de sesión correcto antes del quinto fallo borra el conteo.<br>• Un restablecimiento exitoso de contraseña (RF-003) levanta el bloqueo. | Esencial | Implementado |
-| RF-027 | **Gestión de la cuenta propia.** El sistema debe permitir que el usuario consulte y actualice sus datos de perfil y su dirección de contacto, cambie su correo, cierre sesión y desactive su cuenta. | • Cerrar sesión revoca la sesión en el servidor.<br>• Desactivar la cuenta pide la contraseña actual y cierra todas las sesiones; un administrador no puede cerrar su propia cuenta.<br>• La dirección es opcional, tiene hasta 200 caracteres y se guarda en el servidor, de modo que es la misma en la web y en la aplicación; guardarla vacía la borra.<br>• Las cuentas se desactivan y no se borran, para conservar reservas, pagos y calificaciones. | Deseable | Implementado |
-| RF-028 | **Administración de usuarios.** El sistema debe permitir que el administrador liste los usuarios con su fecha de registro, cree cuentas de operario y de administrador, y active o desactive cuentas. | • Una cuenta desactivada no puede iniciar sesión, se cierran todas sus sesiones y conserva su historial.<br>• El rol se asigna al crear la cuenta (cliente por el registro público; operario o administrador cuando la crea un administrador) y el sistema no ofrece cambiarlo después.<br>• Una cuenta de administrador no se puede desactivar (`ADMIN_CANNOT_BE_DISABLED`) y el administrador no puede desactivar su propia cuenta.<br>• Solo el rol administrador accede a esta función (respuesta 403 para los demás roles). | Deseable | Implementado |
-| RF-029 | **Roles y permisos.** El sistema debe manejar tres roles fijos (administrador, operario y cliente) y permitir que el administrador consulte y edite la matriz de permisos de cada rol. | • No se pueden crear ni borrar roles.<br>• En esta versión la matriz es informativa: la autorización efectiva se basa en el rol del token JWT (ADR-015). | Opcional | Implementado |
+| RF-027 | **Gestión de la cuenta propia.** El sistema debe permitir que el usuario consulte y actualice sus datos de perfil y su dirección de contacto, cambie su correo, cierre sesión y desactive su cuenta. | • Cerrar sesión revoca la sesión en el servidor y el token de esa sesión deja de servir de inmediato en todos los servicios.<br>• Desactivar la cuenta pide la contraseña actual y cierra todas las sesiones; un administrador no puede cerrar su propia cuenta.<br>• La dirección es opcional, tiene hasta 200 caracteres y se guarda en el servidor, de modo que es la misma en la web y en la aplicación; guardarla vacía la borra.<br>• Las cuentas se desactivan y no se borran, para conservar reservas, pagos y calificaciones. | Deseable | Implementado |
+| RF-028 | **Administración de usuarios.** El sistema debe permitir que el administrador liste los usuarios con su fecha de registro, cree cuentas de operario y de administrador, y active o desactive cuentas. | • Una cuenta desactivada no puede iniciar sesión, se cierran todas sus sesiones (sus tokens dejan de servir en máximo 30 segundos) y conserva su historial.<br>• El rol se asigna al crear la cuenta (cliente por el registro público; operario o administrador cuando la crea un administrador) y el sistema no ofrece cambiarlo después.<br>• Una cuenta de administrador no se puede desactivar (`ADMIN_CANNOT_BE_DISABLED`) y el administrador no puede desactivar su propia cuenta.<br>• Solo el rol administrador accede a esta función (respuesta 403 para los demás roles). | Deseable | Implementado |
+| RF-029 | **Roles y permisos.** El sistema debe manejar tres roles fijos (administrador, operario y cliente) y permitir que el administrador consulte y edite la matriz de permisos de cada rol. | • No se pueden crear ni borrar roles.<br>• En esta versión la matriz es informativa: la autorización efectiva se basa en el rol del token JWT (ADR-015), y la pantalla de roles lo indica. | Opcional | Implementado |
 
 **Evidencia en el sistema (módulo de autenticación y cuentas)**
 
@@ -483,7 +484,7 @@ La prioridad sigue la técnica MoSCoW: Esencial (debe tener), Deseable (debería
 | RF-005 | **Solicitud de reserva.** El sistema debe permitir que el cliente reserve uno o más servicios para uno de sus vehículos, eligiendo fecha y hora de inicio. | • El precio de cada servicio corresponde al tipo de vehículo elegido.<br>• Las horas se ofrecen en franjas de 30 minutos y hasta 60 días hacia adelante (valores configurables).<br>• Solo se aceptan vehículos del propio cliente. | Esencial | Implementado |
 | RF-006 | **Validación de disponibilidad.** Antes de confirmar, el sistema debe validar el horario del local, sus excepciones y la existencia de una bahía activa sin reservas solapadas. | • Con bahía libre, la reserva queda confirmada de inmediato con la bahía asignada.<br>• Sin bahía libre, no se guarda nada y se ofrecen hasta 5 horas alternativas del mismo día.<br>• Ante dos solicitudes simultáneas por la misma bahía y hora, solo una se confirma (RNF-003). | Esencial | Implementado |
 | RF-007 | **Modificación y cancelación.** El sistema debe permitir que el cliente cancele su reserva mientras esté en estado Programada o Confirmada y antes de su hora de inicio, y que el administrador la reprograme (RF-033). | • El cliente cancela desde su historial confirmando un diálogo, sin escribir motivo: el sistema guarda el motivo `CUSTOMER_REQUEST` y libera la bahía.<br>• La reprogramación, que hace el administrador, asigna nueva hora y bahía, y conserva los precios.<br>• Con el servicio en proceso o terminado, o pasada la hora de inicio en el caso del cliente, la acción se bloquea (`BOOKING_NOT_CHANGEABLE`).<br>• La API también acepta que el cliente reprograme (`PUT /bookings/{id}`), pero la web y la app no ofrecen esa pantalla (acción de mejora AM-03). | Esencial | Implementado |
-| RF-033 | **Gestión administrativa de reservas.** El sistema debe permitir que el administrador consulte todas las reservas por rango de fechas y cambie su estado (confirmar, cancelar con motivo, marcar "no asistió") o la reprograme, respetando el ciclo de vida de la Figura 4. | • Una transición no permitida por el ciclo de vida se rechaza. | Deseable | Implementado |
+| RF-033 | **Gestión administrativa de reservas.** El sistema debe permitir que el administrador consulte todas las reservas por rango de fechas y cambie su estado (confirmar, cancelar con motivo, marcar "no asistió") o la reprograme, respetando el ciclo de vida de la Figura 4. | • Una transición no permitida por el ciclo de vida se rechaza.<br>• Una reserva Programada o Confirmada que nadie inició se cierra sola una hora después de su hora de fin: la Confirmada pasa a No asistió (aunque esté pagada; el reembolso lo decide el administrador) y la Programada se cancela con el motivo *Venció sin confirmarse* (`EXPIRED`), que solo usa el sistema y no se ofrece al cancelar a mano. | Deseable | Implementado |
 
 **Evidencia:**
 
@@ -500,7 +501,7 @@ La prioridad sigue la técnica MoSCoW: Esencial (debe tener), Deseable (debería
 
 | ID | Requisito | Criterios de aceptación | Prioridad | Estado |
 |---|---|---|---|---|
-| RF-008 | **Asignación automática de operario.** El sistema debe asignar automáticamente un operario disponible a cada reserva confirmada. | • Es elegible el operario con cuenta activa, con turno que cubra la franja, sin ausencia y sin otra reserva solapada.<br>• Si el cliente eligió un operario (RF-010) y sigue libre, se le asigna a él; si no, se elige al de menos reservas ese día y el empate se resuelve por el menor identificador.<br>• Una reprogramación conserva el operario que ya tenía la reserva.<br>• Si no hay operario disponible, la reserva queda sin asignar y los administradores reciben una alerta cuando faltan menos de 2 horas para el inicio, para que asignen manualmente (RF-009). | Esencial | Implementado |
+| RF-008 | **Asignación automática de operario.** El sistema debe asignar automáticamente un operario disponible a cada reserva confirmada. | • Es elegible el operario con cuenta activa, con turno que cubra la franja, sin ausencia y sin otra reserva solapada.<br>• Si el cliente eligió un operario (RF-010) y sigue libre, se le asigna a él; si no, se elige al de menos reservas ese día y el empate se resuelve por el menor identificador.<br>• Una reprogramación conserva el operario que ya tenía la reserva.<br>• Si no hay operario disponible, la reserva queda sin asignar y los administradores reciben una alerta cuando faltan menos de 2 horas para el inicio, para que asignen manualmente (RF-009).<br>• La asignación automática y la manual se hacen una a la vez (candado en la base de datos), de modo que un operario no queda con dos servicios a la misma hora. | Esencial | Implementado |
 | RF-009 | **Asignación y reasignación manual.** El sistema debe permitir que el administrador asigne o reasigne un operario a una reserva desde una lista de candidatos. | • La lista muestra primero a los disponibles, ordenados por nombre, con su calificación promedio y el motivo de no disponibilidad de los demás.<br>• Se bloquea la asignación de un operario inactivo, sin turno, ausente o con otra reserva a esa hora.<br>• La reasignación solo procede mientras la ejecución esté pendiente; el operario asignado recibe una notificación. | Deseable | Implementado |
 | RF-010 | **Elección de operario por el cliente.** El sistema debe permitir que el cliente elija, de forma opcional, un operario de la lista de disponibles al reservar. | • Al escoger la hora, el cliente ve los operarios libres en ese horario con su primer nombre y su calificación promedio; no ve datos de contacto.<br>• Si no elige ninguno, el lavadero asigna uno libre (RF-008).<br>• Si el operario elegido ya no está libre al confirmar, se asigna otro operario libre y el cliente ve en su inicio el nombre de quien lo atenderá. | Deseable | Implementado |
 | RF-011 | **Servicios asignados.** El sistema debe mostrar al operario sus reservas asignadas con cliente, vehículo, hora, servicios y bahía. | • El operario solo ve las reservas asignadas a él. | Esencial | Implementado |
@@ -527,9 +528,9 @@ La prioridad sigue la técnica MoSCoW: Esencial (debe tener), Deseable (debería
 
 | ID | Requisito | Criterios de aceptación | Prioridad | Estado |
 |---|---|---|---|---|
-| RF-034 | **Cuentas de pago del local.** El sistema debe permitir que el administrador cree, edite, active y desactive las cuentas de pago de cada método digital (titular, número de cuenta, imagen QR e instrucciones). | • Solo las cuentas activas se muestran al cliente. | Esencial | Implementado |
-| RF-013 | **Métodos de pago.** El sistema debe mostrar al cliente los métodos de pago del local (efectivo, Nequi, Daviplata y transferencia bancaria) y, para cada método digital, su QR e instrucciones. | • El efectivo no muestra QR. | Esencial | Implementado |
-| RF-013b | **Carga del comprobante.** Para un método digital, el sistema debe permitir que el cliente suba el comprobante con el valor declarado y el código de referencia de la transacción. | • Se aceptan imágenes JPG o PNG de hasta 10 MB; la aplicación las comprime antes de enviarlas.<br>• El pago queda En revisión y ligado a la reserva.<br>• El efectivo no requiere comprobante. | Esencial | Implementado |
+| RF-034 | **Cuentas de pago del local.** El sistema debe permitir que el administrador cree, edite, active y desactive las cuentas de pago de cada método digital (titular, número de cuenta, imagen QR e instrucciones). | • Solo las cuentas activas se muestran al cliente.<br>• La cuenta de efectivo también se activa o desactiva: mientras está desactivada, el cliente no ve la opción de pagar en efectivo. | Esencial | Implementado |
+| RF-013 | **Métodos de pago.** El sistema debe mostrar al cliente los métodos de pago del local (efectivo, Nequi, Daviplata y transferencia bancaria) y, para cada método digital, su QR e instrucciones. | • El efectivo no muestra QR y solo se ofrece mientras su cuenta está activa (RF-034).<br>• El QR de cada cuenta se puede ver en grande con una lupa. | Esencial | Implementado |
+| RF-013b | **Carga del comprobante.** Para un método digital, el sistema debe permitir que el cliente suba el comprobante con el valor declarado y el código de referencia de la transacción. | • El cliente elige una imagen JPG o PNG de hasta 10 MB; la web y la aplicación la comprimen a máximo 2 MB antes de enviarla, y el servidor rechaza un comprobante de más de 2 MB (`RECEIPT_TOO_LARGE`).<br>• El pago queda En revisión y ligado a la reserva.<br>• El efectivo no requiere comprobante. | Esencial | Implementado |
 | RF-014 | **Revisión del pago.** El sistema debe permitir que el administrador apruebe o rechace un pago en revisión comparando el valor declarado con el valor a pagar, y registre directamente los pagos en efectivo. | • El rechazo exige un motivo; el cliente es notificado y puede enviar otro comprobante.<br>• Una reserva admite como máximo un pago aprobado.<br>• La aprobación acredita los puntos de fidelización (RF-026). | Esencial | Implementado |
 | RF-015 | **Historial de pagos.** El sistema debe mostrar al cliente su historial de pagos ordenado por fecha y asociado a cada servicio. | • Los pagos se ordenan de la reserva más reciente a la más antigua.<br>• Se puede filtrar por rango de fechas de la reserva y por nombre del servicio (`GET /payments/me?from=&to=&service=`); una fecha inicial posterior a la final se rechaza con `INVALID_DATE_RANGE`.<br>• Sin pagos, se muestra un mensaje que lo indica. | Deseable | Implementado |
 | RF-016 | **Restricciones de pago.** El sistema no debe capturar ni almacenar datos de tarjeta y debe rechazar un comprobante cuyo código de referencia ya figure en el pago de otra reserva. | • El rechazo devuelve el código de error `TRANSACTION_REFERENCE_REUSED`. | Esencial | Implementado |
@@ -551,11 +552,11 @@ La prioridad sigue la técnica MoSCoW: Esencial (debe tener), Deseable (debería
 
 | ID | Requisito | Criterios de aceptación | Prioridad | Estado |
 |---|---|---|---|---|
-| RF-017 | **Panel por rol.** El sistema debe mostrar a cada rol un panel con métricas de resumen y accesos rápidos. | • Sin datos, se muestra un mensaje que lo indica en lugar de una pantalla vacía.<br>• El panel del administrador compara las reservas del día con las del día anterior, contadas por booking-service con la fecha del lavadero.<br>• El panel del cliente muestra su próximo servicio con el nombre del operario asignado. | Deseable | Implementado |
+| RF-017 | **Panel por rol.** El sistema debe mostrar a cada rol un panel con métricas de resumen y accesos rápidos. | • Sin datos, se muestra un mensaje que lo indica en lugar de una pantalla vacía.<br>• El panel del administrador compara las reservas del día con las del día anterior, contadas por booking-service con la fecha del lavadero.<br>• El panel del cliente muestra su próximo servicio con el nombre del operario asignado.<br>• El número de reservas sin operario del panel del administrador es el mismo de la pantalla de reservas: lo calcula operations-service con una sola regla (reservas programadas o confirmadas que no han terminado y no tienen operario en ninguna línea). | Deseable | Implementado |
 | RF-018 | **Notificaciones.** El sistema debe notificar a los usuarios los eventos relevantes en una bandeja con estado leído/no leído, por push en la aplicación móvil y por correo en los eventos de reserva. | • Tipos: bienvenida, reserva creada, confirmada y cancelada, recordatorio, operario asignado, servicio iniciado y finalizado, pago confirmado, rechazado y reembolsado, puntos ganados, promoción disponible y canjeada, informe de inspección compartido, aviso de versión nueva de la app y mensaje del sistema; el personal recibe además avisos de servicio cancelado, reprogramado o retirado (operario) y de reserva creada, reprogramada, cancelada o sin operario (administrador).<br>• Los recordatorios se envían 24 horas y 1 hora antes de la reserva y se cancelan cuando el servicio inicia o termina.<br>• Los administradores reciben una alerta cuando una reserva empieza en menos de 2 horas y sigue sin operario.<br>• Cada notificación se escribe en el idioma de la cuenta que la recibe.<br>• Abrir una notificación la marca como leída. | Deseable | Implementado |
 | RF-019 | **Tema visual por cuenta.** El sistema debe permitir elegir entre cuatro paletas visuales y conservar la elección en la cuenta del usuario. | • Al iniciar sesión con otra cuenta en el mismo equipo se aplica el tema de esa cuenta. | Opcional | Implementado |
 | RF-020 | **Idioma por cuenta.** El sistema debe permitir cambiar el idioma de la interfaz entre español, inglés, francés y portugués, y conservarlo en la cuenta. | • Sin sesión, el idioma elegido se recuerda en el navegador. | Opcional | Implementado |
-| RF-023 | **Reportes operativos.** El sistema debe generar reportes de servicios realizados, ingresos, calificación promedio y desempeño por operario para un periodo elegido. | • Sin datos en el periodo, se muestra un mensaje que lo indica. | Deseable | **Parcial.** La web lee reservas y pagos reales, y operations-service calcula las métricas semanales de cada operario (servicios, puntualidad, ingresos y horas trabajadas) y el resumen del equipo; faltan los reportes consolidados para un periodo elegido. |
+| RF-023 | **Reportes operativos.** El sistema debe generar reportes de servicios realizados, ingresos, calificación promedio y desempeño por operario para un periodo elegido. | • Sin datos en el periodo, se muestra un mensaje que lo indica.<br>• Solo las reservas completadas cuentan como servicios realizados; las futuras, las canceladas y las de no asistió no cuentan. | Deseable | **Parcial.** La web lee reservas y pagos reales, y operations-service calcula las métricas semanales de cada operario (servicios, puntualidad, ingresos y horas trabajadas) y el resumen del equipo; faltan los reportes consolidados para un periodo elegido. |
 
 **Evidencia:**
 
@@ -599,12 +600,15 @@ Las reglas de negocio son condiciones que el sistema debe mantener siempre, con 
 | INV-BOOK-005/006 | Una reserva solo se confirma dentro del horario y con una bahía activa sin reservas solapadas. | RF-006 |
 | INV-BOOK-007 | Solo las reservas Programadas o Confirmadas se pueden reprogramar o cancelar; el cliente solo cancela antes de la hora de inicio. | RF-007 |
 | INV-BOOK-008 | Cada línea conserva el precio vigente al reservar, aunque el catálogo cambie después. | RF-031 |
+| RN-BOOK-01 | Una reserva Programada o Confirmada que nadie inició se cierra sola una hora después de su hora de fin (No asistió o cancelada con el motivo `EXPIRED`). | RF-033 |
 | INV-EXEC-001/002 | Cada línea de servicio tiene a lo sumo una ejecución y un operario responsable. | RF-009 |
 | INV-EXEC-003 | Un operario no puede tener servicios solapados. | RF-009 |
 | INV-EXEC-004 | Solo el operario asignado actualiza el avance de su servicio. | RF-012b |
 | RN-EXEC-01 | Un servicio solo se inicia desde 15 minutos antes de la hora de la reserva. | RF-012b |
 | RN-ASSIGN-01 | La asignación automática respeta la elección del cliente si ese operario está libre; si no, elige al de menos reservas del día y, en empate, al de menor identificador. | RF-008, RF-010 |
+| RN-ASSIGN-02 | Las asignaciones manuales y automáticas se hacen una a la vez, de modo que un operario no recibe dos servicios a la misma hora. | RF-008, RF-009 |
 | RN-AUTH-01 | Cinco contraseñas erradas dentro de 15 minutos bloquean la cuenta 15 minutos. | RF-004b |
+| RN-AUTH-02 | El token de una sesión cerrada (cierre de sesión o cuenta desactivada) no sirve aunque no haya vencido. | RF-027, RF-028 |
 | RN-INSP-01 | El informe de inspección solo aplica a reservas de 180 minutos o más y solo se edita mientras el vehículo está en el lavadero (reserva Confirmada o En proceso). | RF-036 |
 | INV-RATING-001 a 004 | La calificación es única, entera de 1 a 5, posterior a la finalización; el comentario requiere puntaje. | RF-012 |
 | INV-PAY-001 | Todo pago pertenece a una reserva; una reserva tiene como máximo un pago aprobado. | RF-014 |
@@ -612,6 +616,7 @@ Las reglas de negocio son condiciones que el sistema debe mantener siempre, con 
 | INV-PAY-005 | Una diferencia entre el valor declarado y el valor a pagar es motivo de rechazo, nunca de aprobación automática. | RF-014 |
 | INV-PAY-006 | Un código de referencia no se reutiliza entre reservas. | RF-016 |
 | INV-PAY-007 | El sistema no captura ni almacena datos de tarjeta. | RF-016 |
+| RN-PAY-01 | El comprobante que sube el cliente pesa como máximo 2 MB. | RF-013b |
 | INV-LOY-001 | El saldo de puntos se calcula siempre desde el libro de movimientos. | RF-026 |
 | RN-PROMO-01 | El descuento es porcentual (1 a 100), se aplica sobre el total de la reserva y no lo supera. | RF-025 |
 
@@ -627,9 +632,9 @@ Los requisitos no funcionales se clasifican según las características de calid
 | ID | Característica | Requisito y métrica | Verificación | Estado |
 |---|---|---|---|---|
 | RNF-001 | Eficiencia de desempeño | El percentil 95 del tiempo de respuesta de los endpoints de reserva y de autenticación es menor de 2 segundos, y la consulta de disponibilidad responde en menos de 2 segundos con el conjunto de datos de prueba. | Script `lavarapido-infra/e2e/performance.js`: 30 peticiones por endpoint a través del gateway en el ambiente local | **Implementado.** Medido el 14 de octubre de 2026: el percentil 95 más alto fue de 686 ms (`/payments/me`). |
-| RNF-002 | Disponibilidad | Todos los servicios responden UP en su endpoint de salud (`/actuator/health` o `/health`) durante cada sesión de revisión académica. | Verificación antes de cada sesión | **Implementado.** Verificado en vivo el 9 de octubre de 2026: los 6 servicios y el gateway respondieron `200 OK`. |
-| RNF-003 | Integridad y concurrencia | Ante solicitudes simultáneas, solo una reserva ocupa una bahía en una franja; no se asigna un operario ocupado; una reserva no tiene dos pagos aprobados (índice único filtrado) y un código de referencia no se repite. | Pruebas de integración | Parcial: reglas implementadas; pruebas de integración pendientes |
-| RNF-004 | Seguridad | Endpoints privados con JWT (401 sin token o con token vencido); vigencia del token de 1 hora; contraseñas con BCrypt de 8 a 72 caracteres, con al menos una mayúscula, un número y un carácter especial, sin espacios; acceso por rol (403 entre roles) y por dueño del recurso; bloqueo tras 5 intentos fallidos; secretos solo en variables de entorno; HTTPS fuera de desarrollo. | Pruebas web por rol, pruebas de política de contraseñas y de bloqueo, prueba de que el gateway no expone `/internal`, revisión de código | **Implementado**; en el servidor público Caddy sirve todo por HTTPS. |
+| RNF-002 | Disponibilidad | Todos los servicios responden UP en su endpoint de salud (`/actuator/health` o `/health`) durante cada sesión de revisión académica. | Verificación antes de cada sesión | **Implementado.** Verificado en vivo el 9 de octubre de 2026: los 6 servicios y el gateway respondieron `200 OK`. Desde el 20 de octubre de 2026, en el servidor público Docker revisa cada 30 segundos la salud de todos los contenedores. |
+| RNF-003 | Integridad y concurrencia | Ante solicitudes simultáneas, solo una reserva ocupa una bahía en una franja; no se asigna un operario ocupado; una reserva no tiene dos pagos aprobados (índice único filtrado) y un código de referencia no se repite. | Pruebas de integración | Parcial: reglas implementadas (las reservas y las asignaciones se hacen una a la vez con candados de la base de datos); pruebas de integración contra SQL Server pendientes |
+| RNF-004 | Seguridad | Endpoints privados con JWT (401 sin token, con token vencido o con la sesión cerrada); vigencia del token de 1 hora; contraseñas con BCrypt de 8 a 72 caracteres, con al menos una mayúscula, un número y un carácter especial, sin espacios; acceso por rol (403 entre roles) y por dueño del recurso; bloqueo tras 5 intentos fallidos; secretos solo en variables de entorno; HTTPS fuera de desarrollo. | Pruebas web por rol, pruebas de política de contraseñas y de bloqueo, pruebas del chequeo de sesión del gateway, prueba de que el gateway no expone `/internal`, revisión de código | **Implementado**; en el servidor público Caddy sirve todo por HTTPS. |
 | RNF-005 | Mantenibilidad: observabilidad | Cada servicio escribe en la salida estándar las peticiones y errores con el identificador de correlación `X-Correlation-Id`. | Revisión de bitácoras con `docker logs` | Parcial |
 | RNF-006 | Mantenibilidad | Todo cambio entra por Pull Request con al menos una aprobación, usa Conventional Commits y versiona los cambios de esquema con Liquibase; frontend y backend se comunican solo por la API. | Historial de GitHub y revisión de código | Parcial |
 | RNF-007 | Portabilidad | Un integrante nuevo levanta toda la solución en contenedores Docker siguiendo la guía de instalación local, en cualquier sistema operativo del equipo. | Instalación desde cero en más de un equipo | Parcial |
@@ -913,7 +918,7 @@ Cada caso de uso se especifica con el formato de Cockburn (2001): actores, preco
 | Actores | Sistema. |
 | Precondición | La reserva está Confirmada y sin operario. |
 | Flujo normal | 1. Al recibir la confirmación de la reserva, el sistema identifica a los operarios elegibles para la franja. 2. Si el cliente eligió un operario y está libre, lo asigna; si no, elige al de menos reservas ese día (empate: menor identificador). 3. Notifica al cliente y al operario. |
-| Flujos alternos | • Sin operarios elegibles: la reserva queda sin operario y, cuando faltan menos de 2 horas, los administradores reciben una alerta para CU09. • Reserva reprogramada que ya tenía operario: se conserva. |
+| Flujos alternos | • Sin operarios elegibles: la reserva queda sin operario y, cuando faltan menos de 2 horas, los administradores reciben una alerta para CU09. • Reserva reprogramada que ya tenía operario: se conserva. • El administrador asigna a mano al mismo tiempo: las dos asignaciones se atienden una detrás de otra y la segunda ve la primera. |
 | Postcondición | El servicio tiene un operario asignado y notificado. |
 | Requisitos | RF-008, RF-010 |
 | Estado | Implementado |
@@ -965,7 +970,7 @@ Cada caso de uso se especifica con el formato de Cockburn (2001): actores, preco
 | Actores | Cliente. |
 | Precondición | La reserva está confirmada y no tiene un pago aprobado. |
 | Flujo normal | 1. El cliente elige el método de pago. 2. Para un método digital, ve el QR y las instrucciones. 3. Sube el comprobante con el valor declarado y el código de referencia. 4. El pago queda En revisión. |
-| Flujos alternos | • Efectivo: no se sube comprobante y el administrador registra el pago. • Código de referencia ya usado en otra reserva: el comprobante se rechaza. • El cliente puede aplicar una promoción (CU25). |
+| Flujos alternos | • Efectivo: no se sube comprobante y el administrador registra el pago; si el administrador desactivó la cuenta de efectivo, esa opción no aparece. • Código de referencia ya usado en otra reserva: el comprobante se rechaza. • La imagen sigue pesando más de 2 MB después de comprimirla: no se envía y se pide otra. • El cliente puede aplicar una promoción (CU25). |
 | Postcondición | El pago queda registrado y ligado a la reserva. |
 | Requisitos | RF-013, RF-013b, RF-016 |
 | Estado | Implementado |
@@ -1186,7 +1191,7 @@ Cada caso de uso se especifica con el formato de Cockburn (2001): actores, preco
 | Actores | Administrador. |
 | Precondición | El administrador está autenticado. |
 | Flujo normal | 1. Consulta las reservas por rango de fechas. 2. Cambia el estado de una reserva (cancelar con motivo, marcar "no asistió"). 3. Si hace falta, la reprograma a otra fecha y hora, con nueva bahía y los mismos precios. |
-| Flujos alternos | • Transición no permitida por el ciclo de vida: se rechaza. |
+| Flujos alternos | • Transición no permitida por el ciclo de vida: se rechaza. • Reserva que nadie inició: el sistema la cierra una hora después de su hora de fin (CU32). |
 | Postcondición | La reserva queda en el nuevo estado y se notifica al cliente. |
 | Requisitos | RF-033 |
 | Estado | Implementado |
@@ -1212,7 +1217,7 @@ Cada caso de uso se especifica con el formato de Cockburn (2001): actores, preco
 |---|---|
 | Actores | Cliente, operario o administrador (cada uno con su cuenta). |
 | Precondición | El usuario está autenticado. |
-| Flujo normal | 1. Abre su perfil. 2. Actualiza nombres, apellidos, teléfono y dirección de contacto. 3. Cambia su correo confirmando la contraseña actual. 4. Cierra la sesión. 5. Si ya no usará la cuenta, la desactiva confirmando la contraseña: se cierran todas sus sesiones. |
+| Flujo normal | 1. Abre su perfil. 2. Actualiza nombres, apellidos, teléfono y dirección de contacto. 3. Cambia su correo confirmando la contraseña actual. 4. Cierra la sesión: el token de esa sesión deja de servir. 5. Si ya no usará la cuenta, la desactiva confirmando la contraseña: se cierran todas sus sesiones. |
 | Flujos alternos | • Correo ya registrado por otra cuenta: no se cambia. • Contraseña actual incorrecta: no se cambia el correo ni se desactiva la cuenta. • Cuenta de administrador: no tiene la opción de desactivarse. • Dirección vacía: se borra. |
 | Postcondición | Los datos del perfil quedan actualizados, o la cuenta queda desactivada con su historial. |
 | Requisitos | RF-027 |
@@ -1225,10 +1230,10 @@ Cada caso de uso se especifica con el formato de Cockburn (2001): actores, preco
 |---|---|
 | Actores | Sistema (tareas programadas y eventos). Para el aviso de una versión nueva de la app, lo inicia un integrante del equipo al publicar el APK. |
 | Precondición | Los servicios y RabbitMQ están en marcha. |
-| Flujo normal | 1. Al arrancar, si no existe ningún administrador, el sistema crea el primero con los datos de la configuración del servidor. 2. Cada evento de reserva, operario, pago o inspección se convierte en notificaciones para el cliente, el operario y los administradores, una sola vez por evento. 3. Al confirmarse una reserva programa sus recordatorios (24 horas y 1 hora antes) y los envía a su hora. 4. Dos horas antes de una reserva sin operario avisa a los administradores. 5. Al publicarse un APK nuevo avisa a los usuarios que tienen la app instalada. |
-| Flujos alternos | • La reserva se cancela, inicia o termina: los recordatorios pendientes se quitan. • El servicio estuvo apagado y la hora de la reserva ya pasó: el recordatorio se cierra sin enviarse. • La misma versión de la app se publica otra vez: no se repite el aviso. • Ya existe un administrador: no se crea otro. |
-| Postcondición | Los usuarios reciben los avisos que les corresponden, sin duplicados. |
-| Requisitos | RF-018 |
+| Flujo normal | 1. Al arrancar, si no existe ningún administrador, el sistema crea el primero con los datos de la configuración del servidor. 2. Cada evento de reserva, operario, pago o inspección se convierte en notificaciones para el cliente, el operario y los administradores, una sola vez por evento. 3. Al confirmarse una reserva programa sus recordatorios (24 horas y 1 hora antes) y los envía a su hora. 4. Dos horas antes de una reserva sin operario avisa a los administradores. 5. Al publicarse un APK nuevo avisa a los usuarios que tienen la app instalada, y la app no deja seguir hasta descargar la versión nueva. 6. Cada 5 minutos cierra las reservas Programadas o Confirmadas que nadie inició una hora después de su hora de fin: la Confirmada pasa a No asistió y la Programada se cancela con el motivo `EXPIRED`. |
+| Flujos alternos | • La reserva se cancela, inicia o termina: los recordatorios pendientes se quitan. • El servicio estuvo apagado y la hora de la reserva ya pasó: el recordatorio se cierra sin enviarse. • La misma versión de la app se publica otra vez: no se repite el aviso. • Ya existe un administrador: no se crea otro. • Una vuelta del cierre de reservas falla (base caída o agenda ocupada): se intenta en la siguiente. |
+| Postcondición | Los usuarios reciben los avisos que les corresponden, sin duplicados, y ninguna reserva queda abierta después de su hora. |
+| Requisitos | RF-018, RF-033 |
 | Estado | Implementado |
 
 ---
@@ -1247,6 +1252,8 @@ El flujo principal del negocio recorre los servicios del sistema en el orden sig
 6. Desde 15 minutos antes de la hora, el operario inicia el servicio y al terminar lo finaliza (CU11); la reserva pasa a En proceso y luego a Completada, y los recordatorios pendientes se cancelan. En los servicios de 180 minutos o más, el administrador registra el informe de inspección y lo comparte con el cliente (CU30).
 7. El cliente califica el servicio (CU15).
 
+Si nadie inicia una reserva, el sistema la cierra una hora después de su hora de fin (CU32): la Confirmada queda en No asistió.
+
 La regla que define si el pago debe estar aprobado antes de iniciar el servicio sigue abierta (sección 11.3); hoy los pasos 5 y 6 son independientes.
 
 ### 8.2 Ciclo de Vida de la Reserva
@@ -1260,10 +1267,10 @@ La Figura 4 muestra los estados de una reserva y las transiciones permitidas.
 stateDiagram-v2
     [*] --> CONFIRMED : crear (se asigna bahía libre de inmediato, RF-006)
     SCHEDULED --> CONFIRMED : confirmar (necesita bahía)
-    SCHEDULED --> CANCELLED : cancelar
+    SCHEDULED --> CANCELLED : cancelar o vencida
     CONFIRMED --> CONFIRMED : reprogramar (admin, nueva hora y bahía, se conservan precios)
     CONFIRMED --> IN_PROGRESS : iniciar
-    CONFIRMED --> NO_SHOW : el cliente no llegó
+    CONFIRMED --> NO_SHOW : el cliente no llegó o vencida
     CONFIRMED --> CANCELLED : cancelar (cliente antes de la hora, o admin con motivo)
     IN_PROGRESS --> COMPLETED : finalizar
     COMPLETED --> [*]
@@ -1271,7 +1278,7 @@ stateDiagram-v2
     NO_SHOW --> [*]
 ```
 
-*Nota.* Los códigos en mayúsculas son los que guarda el sistema (ADR-010). Solo `SCHEDULED` y `CONFIRMED` se pueden reprogramar o cancelar (RF-007). `SCHEDULED`, `CONFIRMED` e `IN_PROGRESS` ocupan la bahía. `SCHEDULED` existe en el modelo pero el flujo actual nunca crea una reserva en ese estado: toda reserva nace `CONFIRMED` directamente. Fuente: `booking-service`, `Booking.moveTo`, `Booking.cancel`, `BookingStatus`.
+*Nota.* Los códigos en mayúsculas son los que guarda el sistema (ADR-010). Solo `SCHEDULED` y `CONFIRMED` se pueden reprogramar o cancelar (RF-007). `SCHEDULED`, `CONFIRMED` e `IN_PROGRESS` ocupan la bahía. `SCHEDULED` existe en el modelo pero el flujo actual nunca crea una reserva en ese estado: toda reserva nace `CONFIRMED` directamente. Una reserva Programada o Confirmada que nadie inició se cierra sola una hora después de su hora de fin (RN-BOOK-01). Fuente: `booking-service`, `Booking.moveTo`, `Booking.cancel`, `Booking.expire`, `ExpiredBookingsJob`, `BookingStatus`.
 
 ### 8.3 Ciclos de Vida del Pago y de la Ejecución
 
@@ -1318,7 +1325,7 @@ Los servicios publican eventos en RabbitMQ para avisar a otros servicios sin blo
 |---|---|---|
 | `security.user_registered` | security-service | customer-service crea el perfil (`customer.provisioned`); notificación de bienvenida. |
 | `booking.confirmed` | booking-service | Se publica al crear y al reprogramar una reserva. Notificación de reserva y programación de recordatorios; operations-service asigna el operario de forma automática, con la preferencia del cliente si la hay. |
-| `booking.cancelled` | booking-service | Notificación de cancelación y anulación de recordatorios. |
+| `booking.cancelled` | booking-service | Notificación de cancelación y anulación de recordatorios. También se publica cuando el sistema cancela una reserva programada que venció. |
 | `payment.confirmed`, `payment.rejected` | payment-service | Notificación del resultado de la revisión del pago. |
 | `payment.refunded` | payment-service | Notificación del reembolso al cliente. |
 | `payment.promotion_redeemed` | payment-service | Notificación del canje en la bandeja y por correo. |
@@ -1327,7 +1334,7 @@ Los servicios publican eventos en RabbitMQ para avisar a otros servicios sin blo
 | `execution.service_started`, `execution.service_completed` | operations-service | Notificación al cliente y cancelación de los recordatorios pendientes. |
 | `execution.inspection_shared` | operations-service | Notificación al cliente con el enlace del informe de inspección. |
 
-*Nota.* Cada notificación se escribe en el idioma de la cuenta que la recibe. Los eventos `security.user.deactivated`, `customer.provisioned` y `customer.vehicle.registered/updated/removed` existen en el dominio, pero hoy solo se escriben en la bitácora del servicio: no se publican en RabbitMQ porque ningún servicio los consume. notification-service también escucha `booking.created`, que booking-service no publica. La alerta de reserva sin operario no depende de un evento: notification-service revisa periódicamente las reservas confirmadas que empiezan en menos de 2 horas sin operario.
+*Nota.* Cada notificación se escribe en el idioma de la cuenta que la recibe. Los eventos `security.user.deactivated`, `customer.provisioned` y `customer.vehicle.registered/updated/removed` existen en el dominio, pero hoy solo se escriben en la bitácora del servicio: no se publican en RabbitMQ porque ningún servicio los consume. notification-service también escucha `booking.created`, que booking-service no publica. El cierre automático de una reserva confirmada (No asistió) no publica evento. La alerta de reserva sin operario no depende de un evento: notification-service revisa periódicamente las reservas confirmadas que empiezan en menos de 2 horas sin operario.
 
 ---
 
@@ -1361,6 +1368,7 @@ La base de datos tiene 9 esquemas y 57 tablas. Cada esquema tiene un único serv
 - El enlace público del informe de inspección usa un código aleatorio y no muestra el correo, el teléfono ni la placa completa del cliente.
 - No se borran registros con historial; se desactivan. Esta versión no define una política de retención ni de supresión de datos personales, que deberá definirse antes de un despliegue real conforme a la Ley 1581 de 2012.
 - Todo cambio de esquema se aplica con una migración versionada de Liquibase.
+- En el servidor público la base se respalda todos los días y antes de cada actualización, con suma de comprobación, verificación y una restauración de prueba en una base aparte; se conservan los últimos 14 respaldos.
 
 ---
 
@@ -1408,7 +1416,7 @@ La Tabla 57 relaciona cada requisito funcional con su historia de usuario, sus c
 | RF-030 | Gestión de vehículos del cliente | — | CU26 | customer | Implementado |
 | RF-031 | Catálogo de servicios y precios | — | CU21 | booking | Implementado |
 | RF-032 | Gestión de bahías | — | CU20 | booking | Implementado |
-| RF-033 | Gestión administrativa de reservas | — | CU29 | booking | Implementado |
+| RF-033 | Gestión administrativa de reservas | — | CU29, CU32 | booking | Implementado |
 | RF-034 | Cuentas de pago del local | — | CU28 | payment | Implementado |
 | RF-035 | Reembolso | — | CU13 | payment | Implementado |
 | RF-036 | Informe de inspección del vehículo | — | CU30 | operations, notification | Implementado |
@@ -1421,24 +1429,24 @@ La Tabla 57 relaciona cada requisito funcional con su historia de usuario, sus c
 
 ### 11.1 Resumen del Avance
 
-De los 41 requisitos funcionales, 40 están implementados y 1 parcialmente (RF-023, reportes consolidados). Los siete componentes de servidor están construidos; el 9 de octubre de 2026 se levantaron los seis servicios y el gateway, y cada uno respondió `200 OK` en su endpoint de salud. La web y la aplicación Android están conectadas a los seis servicios a través del gateway. La Tabla 58 resume las pruebas automatizadas de los servicios y de la web, ejecutadas el 19 de octubre de 2026.
+De los 41 requisitos funcionales, 40 están implementados y 1 parcialmente (RF-023, reportes consolidados). Los siete componentes de servidor están construidos; el 9 de octubre de 2026 se levantaron los seis servicios y el gateway, y cada uno respondió `200 OK` en su endpoint de salud. La web y la aplicación Android están conectadas a los seis servicios a través del gateway. La Tabla 58 resume las pruebas automatizadas de los servicios y de la web, ejecutadas el 21 de octubre de 2026.
 
 **Tabla 58**
 *Pruebas Automatizadas por Componente*
 
 | Componente | Comando | Pruebas | Fecha del conteo |
 |---|---|---|---|
-| Aplicación web (Angular) | `npx ng test --watch=false` | 43 | 19 de octubre de 2026 |
-| api-gateway | `./mvnw test` | 34 | 19 de octubre de 2026 |
-| security-service | `./mvnw test` | 151 | 19 de octubre de 2026 |
-| customer-service | `./mvnw test` | 69 | 19 de octubre de 2026 |
-| booking-service | `./mvnw test` | 43 | 19 de octubre de 2026 |
-| operations-service | `./mvnw test` | 55 | 19 de octubre de 2026 |
-| notification-service | `./mvnw test` | 112 | 19 de octubre de 2026 |
-| payment-service | `dotnet test` | 148 | 19 de octubre de 2026 |
-| **Total** | | **655** | |
+| Aplicación web (Angular) | `npx ng test --watch=false` | 60 | 21 de octubre de 2026 |
+| api-gateway | `./mvnw test` | 40 | 21 de octubre de 2026 |
+| security-service | `./mvnw test` | 155 | 21 de octubre de 2026 |
+| customer-service | `./mvnw test` | 69 | 21 de octubre de 2026 |
+| booking-service | `./mvnw test` | 47 | 21 de octubre de 2026 |
+| operations-service | `./mvnw test` | 56 | 21 de octubre de 2026 |
+| notification-service | `./mvnw test` | 112 | 21 de octubre de 2026 |
+| payment-service | `dotnet test` | 150 | 21 de octubre de 2026 |
+| **Total** | | **689** | |
 
-*Nota.* Todas las pruebas pasaron. Las 148 de payment-service incluyen 7 de persistencia que necesitan SQL Server; el 19 de octubre se corrieron contra una base aislada. Además, `lavarapido-infra/e2e` tiene 19 pruebas de punta a punta que se ejecutan con el sistema levantado y que pasaron el 19 de octubre de 2026, y los 42 casos funcionales de la Documentación de Pruebas pasaron ese mismo día: el flujo de reserva con elección de operario y asignación automática, el flujo completo de los tres roles (reserva, pago, aprobación con puntos, servicio y calificación), el informe de inspección con fotos y enlace público, y las reglas de acceso por rol. La carpeta incluye también la medición de RNF-001 y la revisión de las pantallas web a 360 px (RNF-008). En la revisión manual del 9 de octubre se corrigieron una ruta que faltaba en el API Gateway (`/api/v1/loyalty/**`) y un estilo que desalineaba las insignias de las promociones.
+*Nota.* Todas las pruebas pasaron. Las 150 de payment-service incluyen 7 de persistencia que necesitan SQL Server; el 21 de octubre se corrieron contra una base aislada. Además, `lavarapido-infra/e2e` tiene 19 pruebas de punta a punta que se ejecutan con el sistema levantado y que pasaron el 21 de octubre de 2026 con el chequeo de sesión del gateway activo: el flujo de reserva con elección de operario y asignación automática, el flujo completo de los tres roles (reserva, pago, aprobación con puntos, servicio y calificación), el informe de inspección con fotos y enlace público, y las reglas de acceso por rol. Los 42 casos funcionales de la Documentación de Pruebas se ejecutaron completos por última vez el 19 de octubre de 2026. La carpeta incluye también la medición de RNF-001 y la revisión de las pantallas web a 360 px (RNF-008). En la revisión manual del 9 de octubre se corrigieron una ruta que faltaba en el API Gateway (`/api/v1/loyalty/**`) y un estilo que desalineaba las insignias de las promociones.
 
 ### 11.2 Pendientes para la Entrega
 

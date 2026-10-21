@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-20 de octubre de 2026
+21 de octubre de 2026
 
-Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.3
+Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.4
 
 ## Control de Versiones
 
@@ -35,6 +35,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.1 | 2026-10-17 | Revisión contra el código del 17 de octubre de 2026. Se agregaron la variable opcional *EXPO_PUBLIC_WEB_URL* de la aplicación móvil (sección 10.5) y las dependencias nativas *expo-image-picker* y *expo-image-manipulator*, que exigen *npm install* y un APK nuevo (sección 13.2). | Equipo de desarrollo |
 | 4.2 | 2026-10-19 | Integración continua con GitHub Actions: se actualizó el alcance y se retiró del Anexo B. | Equipo de desarrollo |
 | 4.3 | 2026-10-20 | Revisión contra el código del 20 de octubre de 2026: el catálogo *notification.notification_type* tiene 24 filas (las migraciones 031 y 038 agregaron la alerta de reserva sin operario y el aviso de versión nueva de la app). | Equipo de desarrollo |
+| 4.4 | 2026-10-21 | Revisión contra el código del 21 de octubre de 2026: variables opcionales del chequeo de sesión del gateway y del cierre de reservas vencidas (sección 10.2), semillas 110 a 112 de booking-service (sección 11.2), motivos de cancelación (Tabla 9), respaldos automáticos del servidor público (sección 11.6), verificación del token de una sesión cerrada (secciones 16.3 y 16.4) y errores nuevos (Tabla 14). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -120,7 +121,7 @@ Este manual explica cómo preparar un equipo, obtener el código, configurar las
 
 ### 4.1 Fuentes de Este Documento
 
-Los procedimientos se verificaron contra el repositorio de infraestructura (*lavarapido-infra*: *docker-compose.yml*, *.env.example* y la guía del equipo), el código fuente de los once repositorios (rama *develop* al 17 de octubre de 2026) y la documentación del proyecto actualizada a esa misma fecha (Equipo de Desarrollo Vehicle Washing, 2026a, 2026b). Los valores que dependen de cada instalación (contraseñas, llaves y direcciones) se escriben entre ángulos, como `<CONTRASEÑA_SA>`; ningún marcador se debe copiar literalmente en una terminal. La puesta en operación de una versión en su entorno de destino (criterios de entrada, aceptación, capacitación y reversión) se describe en el Procedimiento de Implementación.
+Los procedimientos se verificaron contra el repositorio de infraestructura (*lavarapido-infra*: *docker-compose.yml*, *.env.example* y la guía del equipo), el código fuente de los once repositorios (rama *develop* al 21 de octubre de 2026) y la documentación del proyecto actualizada a esa misma fecha (Equipo de Desarrollo Vehicle Washing, 2026a, 2026b). Los valores que dependen de cada instalación (contraseñas, llaves y direcciones) se escriben entre ángulos, como `<CONTRASEÑA_SA>`; ningún marcador se debe copiar literalmente en una terminal. La puesta en operación de una versión en su entorno de destino (criterios de entrada, aceptación, capacitación y reversión) se describe en el Procedimiento de Implementación.
 
 ### 4.2 Alcance
 
@@ -410,6 +411,8 @@ Si *git check-ignore* no imprime nada, el archivo no está excluido y no se debe
 | INTERNAL_API_KEY | security-service y notification-service | Llave de las rutas internas; sin ella no se envían por correo los avisos de reservas, pagos y cupones ni los recordatorios, y no se pueden leer los interruptores de notificación de cada usuario. |
 | REMINDER_LEADS | notification-service | Anticipación de los recordatorios; *24h,1h* por defecto. |
 | BOOKING_ZONE, BOOKING_SLOT_MINUTES, BOOKING_MAX_DAYS_AHEAD | booking-service y operations-service | America/Bogota, 30 y 60 por defecto. |
+| SESSION_CHECK_ENABLED, SESSION_CHECK_CACHE_TTL, SESSION_CHECK_TIMEOUT | api-gateway | Chequeo de la sesión del token (desde el 21 de octubre de 2026): *true*, *30s* y *3s* por defecto. No están en *.env.example* ni en el archivo de Compose: en Docker quedan con su valor por defecto y solo cambian si el gateway corre desde el IDE (acción ACO-14). |
+| BOOKING_EXPIRY_CHECK_ENABLED, BOOKING_EXPIRY_CHECK_INTERVAL, BOOKING_EXPIRY_GRACE_MINUTES | booking-service | Cierre automático de las reservas que nadie inició: *true*, *PT5M* (cada 5 minutos) y *60* minutos después de la hora de fin por defecto. Igual que las anteriores, no pasan por el archivo de Compose. |
 | SECURITY_SERVICE_URL, CUSTOMER_SERVICE_URL, BOOKING_SERVICE_URL | Servicios que llaman a otros | Direcciones de los servicios; tienen valores por defecto para el entorno local. payment-service necesita BOOKING_SERVICE_URL para leer el total y acreditar los puntos de una reserva. |
 
 *Nota.* Elaborado por los autores a partir de *.env.example*, *docker-compose.yml* y los archivos de configuración de los servicios.
@@ -493,7 +496,7 @@ Esperar a que *lavarapido-sqlserver* y *lavarapido-rabbitmq* muestren el estado 
 
 ### 11.2 Migraciones de Cada Servicio
 
-Los servicios Java aplican sus migraciones automáticamente al arrancar (*spring.liquibase*), y luego Hibernate solo valida que las entidades coincidan con las tablas. Por eso, las tablas de los esquemas *security*, *audit*, *customer*, *catalog*, *booking*, *execution* y *notification* se crean la primera vez que arranca cada servicio (sección 12). La Tabla 8 muestra los changelogs de la versión del 16 de octubre de 2026.
+Los servicios Java aplican sus migraciones automáticamente al arrancar (*spring.liquibase*), y luego Hibernate solo valida que las entidades coincidan con las tablas. Por eso, las tablas de los esquemas *security*, *audit*, *customer*, *catalog*, *booking*, *execution* y *notification* se crean la primera vez que arranca cada servicio (sección 12). La Tabla 8 muestra los changelogs de la versión del 21 de octubre de 2026.
 
 **Tabla 8**
 
@@ -503,7 +506,7 @@ Los servicios Java aplican sus migraciones automáticamente al arrancar (*spring
 |---|---|---|
 | security-service | 001 esquemas, 002 núcleo de seguridad y auditoría, 003 preferencias del usuario, 020 paletas de tema, 023 rol personalizado (creado y eliminado de nuevo por 026), 026 permisos por rol (catálogo de permisos y asignaciones por defecto), 030 interruptores de notificación de las preferencias, 034 bloqueo por intentos fallidos, 035 dirección de la persona, 036 fecha de creación de la cuenta, 039 aceptación de los documentos legales; semilla 101 roles. | DATABASECHANGELOG_SECURITY |
 | customer-service | 004 esquema de clientes, 014 identificador de usuario del cliente, 015 modelo del vehículo; semilla 102 tipos de vehículo. | DATABASECHANGELOG_CUSTOMER |
-| booking-service | 005 esquemas de catálogo y reservas, 018 cambios de ADR-010, 021 historial del horario, 022 puntos de fidelización del catálogo, 024 retiro del operario de la bahía, 032 datos del negocio del establecimiento; semillas 103 catálogo, 104 estados y motivos, 109 establecimiento, horario y cuatro bahías. | DATABASECHANGELOG_BOOKING |
+| booking-service | 005 esquemas de catálogo y reservas, 018 cambios de ADR-010, 021 historial del horario, 022 puntos de fidelización del catálogo, 024 retiro del operario de la bahía, 032 datos del negocio del establecimiento; semillas 103 catálogo, 104 estados y motivos, 109 establecimiento, horario y cuatro bahías, 110 datos del negocio, 111 borrado de los datos de ejemplo del negocio para que el negocio real los complete y 112 motivo *EXPIRED* del cierre automático de reservas vencidas. | DATABASECHANGELOG_BOOKING |
 | operations-service | 007 esquema de ejecución, 033 informes de inspección con fases, hallazgos y fotos, 037 perfil del operario; semilla 105 estados de ejecución. | DATABASECHANGELOG_OPERATIONS |
 | notification-service | 010 esquema de notificaciones, 016 tokens de dispositivos, 017 eventos procesados, 019 recordatorios de reservas, 025 tipo de cupón canjeado, 027 notificaciones al personal y seguimiento de reservas, 028 tipo de pago reembolsado, 029 tipos de puntos e inspección, 031 aviso de reserva sin operario, 038 tipo de aviso de versión nueva de la app; semilla 108 tipos de notificación. | DATABASECHANGELOG_NOTIFICATION |
 | payment-service | db/changelog/changes/001 a 020 (numeración propia; 017 campos de paquete, 018 puntos necesarios, 019 verificación de catálogos, 020 reversión de puntos y secuencia), ejecutados por el contenedor *payment-migrate*. | DATABASECHANGELOG_PAYMENT |
@@ -571,6 +574,7 @@ SELECT payment_status_id, code FROM payment.payment_status WHERE payment_status_
 | customer.vehicle_type | 6 filas: CAR, SEDAN, SUV, PICKUP, TRUCK y MOTO. |
 | catalog.service | Los servicios BASIC, PREMIUM y FULL con precios para los seis tipos de vehículo. |
 | booking.booking_status | 6 filas; el identificador 5 corresponde a CANCELLED. |
+| booking.cancellation_reason | 7 filas; *EXPIRED* (semilla 112) solo lo usa el sistema y no aparece en la lista de motivos. |
 | booking.service_bay | 4 bahías. |
 | execution.execution_status | 5 filas: PENDING, IN_PROGRESS, PAUSED, COMPLETED y WITH_ISSUE. |
 | payment.payment_status | 5 filas; el identificador 3 corresponde a APPROVED. |
@@ -589,6 +593,8 @@ docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -
   -Q "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/backup.bak' WITH INIT, CHECKSUM"
 docker cp lavarapido-sqlserver:/var/opt/mssql/data/backup.bak ./backup.bak
 ```
+
+En el servidor público los respaldos son automáticos: *deploy/backup-db.sh* respalda la base todos los días y antes de cada actualización, *deploy/verify-backup.sh* comprueba cada respaldo restaurándolo con otro nombre y *deploy/restore-db.sh* restaura uno (Documento de Despliegue, sección 3.2).
 
 Para reiniciar un entorno local desechable, detener los contenedores y borrar los volúmenes. **Esto borra todos los datos:**
 
@@ -702,7 +708,7 @@ npx expo start                # o: npm start
 
 El comando abre el servidor de desarrollo Metro (puerto 8081) y muestra un código QR. Para una prueba rápida, abrir la aplicación en un emulador de Android (tecla *a*) o en un teléfono con Expo Go en la misma red Wi-Fi. Recordar configurar *EXPO_PUBLIC_API_URL* (sección 10.5).
 
-**Dependencias nativas nuevas.** Desde el 17 de octubre de 2026 la aplicación usa *expo-image-picker* (cámara y galería) y *expo-image-manipulator* (reducción de las fotos) para el informe de inspección. Después de hacer *git pull*, ejecutar *npm install* en *Frontend/LavadoVehicular-Movil*. Expo Go ya incluye estos módulos, pero un APK compilado antes de esa fecha no los tiene: hay que compilar y publicar una versión nueva con EAS, como explica el Documento de Despliegue (sección 4.3.3, «Publicación de la app móvil»). Los permisos de cámara y fotos se declaran en el *plugin* de *expo-image-picker* dentro de *app.json*.
+**Dependencias nativas nuevas.** Desde el 17 de octubre de 2026 la aplicación usa *expo-image-picker* (cámara y galería) y *expo-image-manipulator* (reducción de las fotos) para el informe de inspección. Después de hacer *git pull*, ejecutar *npm install* en *Frontend/LavadoVehicular-Movil*. Expo Go ya incluye estos módulos, pero un APK compilado antes de esa fecha no los tiene: hay que compilar y publicar una versión nueva con EAS, como explica el Documento de Despliegue (sección 4.3.3, «Publicación de la app móvil»). Los permisos de cámara y fotos se declaran en el *plugin* de *expo-image-picker* dentro de *app.json*. Los cambios del 21 de octubre de 2026 (comprobante comprimido, lupa del QR y pantalla de actualización obligatoria del APK) no agregan dependencias nativas.
 
 **Notificaciones push.** Expo Go no recibe notificaciones push remotas. Para probarlas, construir una versión de desarrollo con EAS y fijar *PUSH_ENABLED=true* en el backend:
 
@@ -840,7 +846,7 @@ done
 curl -i http://localhost:8080/api/v1/bookings/me
 ```
 
-Cada endpoint de salud debe responder *{"status":"UP"}*. El último comando llama a una ruta protegida sin token a través del gateway: debe devolver **401**. El gateway no valida tokens (ADR-006): reenvía la solicitud y el servicio la rechaza. Todos los servicios, incluido payment-service, comprueban la base de datos en su endpoint de salud: si SQL Server no responde, contestan *DOWN* con el código 503.
+Cada endpoint de salud debe responder *{"status":"UP"}*. El último comando llama a una ruta protegida sin token a través del gateway: debe devolver **401**. El gateway no verifica la firma de los tokens (ADR-006): una solicitud sin token pasa directo y la rechaza booking-service. Desde el 21 de octubre de 2026 el gateway sí corta el token de una sesión cerrada: después de cerrar sesión, repetir la llamada con el mismo token (*-H "Authorization: Bearer `<TOKEN>`"*) devuelve 401 desde el gateway, sin llegar al servicio. Todos los servicios, incluido payment-service, comprueban la base de datos en su endpoint de salud: si SQL Server no responde, contestan *DOWN* con el código 503.
 
 **Figura 9**
 
@@ -857,7 +863,8 @@ Cada endpoint de salud debe responder *{"status":"UP"}*. El último comando llam
 5. Ingresar como operario el día de la reserva, iniciar el servicio y finalizarlo.
 6. Como cliente, reportar un pago con un comprobante de prueba; como administrador, aprobarlo en **Pagos**.
 7. Con la mensajería activa, comprobar que el cliente recibió las notificaciones de la reserva, la asignación y el pago aprobado, el correo en Mailpit y los puntos en el panel.
-8. Reiniciar los contenedores (*docker compose restart*) y comprobar que los datos permanecen.
+8. Cerrar sesión y repetir una llamada con el mismo token: el gateway responde 401.
+9. Reiniciar los contenedores (*docker compose restart*) y comprobar que los datos permanecen.
 
 ### 16.5 Verificación de Trazas
 
@@ -898,6 +905,8 @@ El primer paso ante cualquier error es consultar el registro del servicio afecta
 | Liquibase: checksum mismatch | Se editó un changeset que ya se había ejecutado. | Revertir el cambio y escribir un changeset nuevo; en un entorno desechable, recrear la base de datos. |
 | Liquibase: waiting for changelog lock | Se interrumpió un arranque anterior. | Asegurarse de que no corre otra instancia y borrar la fila de la tabla DATABASECHANGELOGLOCK_<SERVICIO> correspondiente. |
 | 401 en todas las solicitudes | Token vencido o JWT_SECRET distinto entre servicios. | Ingresar de nuevo; comprobar que todos los servicios lean el mismo archivo .env. |
+| 401 justo después de cerrar sesión en otra pestaña o dispositivo | La sesión se cerró y el gateway corta su token. | Ingresar de nuevo. |
+| Las solicitudes tardan unos 3 segundos más y el registro del gateway dice *No se pudo confirmar la sesión* | security-service no responde; el gateway deja pasar la solicitud después de esperarlo. | Iniciar security-service y revisar su salud. |
 | 503 CUSTOMER_SERVICE_UNAVAILABLE o BOOKING_SERVICE_UNAVAILABLE | El servicio llamado está caído. | Iniciar customer-service o booking-service. |
 | "Tu perfil de cliente aún no está listo" | El perfil del cliente no se ha creado (evento no consumido). | Esperar y reintentar; con MESSAGING_ENABLED=true revisar la cola de customer-service. |
 | Los correos no llegan a Mailpit | MAIL_ENABLED=false o host o puerto equivocados. | MAIL_HOST=localhost y MAIL_PORT=1025 en el anfitrión; MAIL_DOCKER_HOST=mailpit en Docker. |
@@ -920,7 +929,7 @@ El primer paso ante cualquier error es consultar el registro del servicio afecta
 
 | Término | Definición |
 |---|---|
-| API Gateway | Punto de entrada único que enruta las solicitudes a los servicios; no valida tokens. |
+| API Gateway | Punto de entrada único que enruta las solicitudes a los servicios; no verifica la firma de los tokens, pero desde el 21 de octubre de 2026 corta los de sesiones cerradas. |
 | Changelog | Archivo de Liquibase que describe los cambios de la base de datos. |
 | Changeset | Unidad de cambio de un changelog, identificada por su id y su autor. |
 | Cola de mensajes muertos (DLQ) | Cola donde se guardan los mensajes que fallaron después de los reintentos. |
@@ -968,6 +977,7 @@ Las figuras de este manual se tomaron el 16 de octubre de 2026 en un computador 
 | Tema | Qué falta | Sección |
 |---|---|---|
 | Un inicio de sesión de base de datos por servicio | Los servicios usan sa. | 11.4 |
+| Variables del 21 de octubre de 2026 | *SESSION_CHECK_\** y *BOOKING_EXPIRY_\** no están en *.env.example* ni en *docker-compose.yml* (acción ACO-14). | 10.2 |
 
 *Nota.* Elaborado por los autores a partir de la verificación de los repositorios y del backlog técnico.
 

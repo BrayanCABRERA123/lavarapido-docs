@@ -4,6 +4,18 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-10-21 — Código del 21 de octubre, servidor con respaldos y pruebas del día
+
+**Contenido** (español e inglés)
+
+- Código del 21 de octubre: el token de una sesión cerrada deja de servir (security-service y API Gateway); las reservas que nadie inicia se cierran solas una hora después de su hora de fin (motivo `EXPIRED`); la asignación manual y la automática usan el mismo candado y hay un solo conteo de reservas sin operario; el comprobante pesa como máximo 2 MB; Efectivo solo aparece con su cuenta activa; la sesión de la web se sincroniza entre pestañas; los reportes cuentan solo reservas completadas; la pestaña de roles dice que el acceso lo decide el rol; la app exige instalar el APK nuevo cuando se publica. Se documentó en 01 SRS 7.7, 02 Análisis 2.4, 04 Diseño 1.5, 05 Artefactos, 09 Manuales (técnico 4.5, instalación 4.4, usuario 4.5 y administrador 4.5) y 10 Artículos.
+- Servidor (20 y 21 de octubre): respaldos diarios y antes de cada actualización, verificados con una restauración de prueba; modelo de recuperación SIMPLE; encabezados de seguridad y CSP en Caddy; chequeos de salud y registros limitados en todos los contenedores; se descartó el VPS de Hostinger. Se documentó en 03 Propuesta 1.4, 07 Despliegue 1.5 (con la actualización del 21 de octubre y los cambios del código que faltan por desplegar), 07 Procedimiento 2.4 y los manuales de instalación y de administrador.
+- 06 Pruebas: ejecución del 21 de octubre con 689 pruebas automatizadas y 19 de punta a punta, inventario de 584 métodos de prueba, trazabilidad y brechas.
+- 08 Acciones 2.5: correctivas AC-44 a AC-52 cerradas y ACO-14 abierta (variables nuevas que no están en `.env.example` ni en el compose); preventivas AP-04 y AP-16 a AP-18 cerradas; mejora AM-16. Las mejoras del 17 de octubre que repetían los identificadores AM-07 y AM-08 pasan a ser AM-14 y AM-15.
+- Correcciones encontradas en la revisión: rutas que faltaban en la tabla del gateway y numeración de los changelogs (manual técnico), fecha y versión de la portada de los manuales de usuario y de administrador, 24 tipos de notificación y líneas de código citadas (diseño), y referencias de los artículos con las versiones vigentes de los documentos.
+- 11 Evidencias: estado del servidor y pruebas del 21 de octubre.
+- PDF y Word: pendientes de regenerar con el generador del equipo; esta entrada solo cambia los Markdown.
+
 ## 2026-10-20 — Revisión completa contra el código y diagramas sin cruces
 
 **Contenido** (español e inglés)

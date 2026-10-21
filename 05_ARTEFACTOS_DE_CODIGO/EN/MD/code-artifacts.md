@@ -15,7 +15,7 @@
 | Apprentices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano Quintero |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 20, 2026 |
+| Date | October 21, 2026 |
 
 The system's code lives in 10 GitHub repositories: the web application, the mobile application, and 8 backend repositories. Each one has a GitHub Actions workflow (`.github/workflows/ci.yml`) that builds it and runs its tests on every change (in `lavarapido-infra` it validates the deploy scripts, the Docker Compose files and the end-to-end test syntax); `lavarapido-infra` also has `deploy.yml`, a workflow started by hand to update the server. This document inventories the two clients and explains how to build and run them; the backend is described only as far as the clients need it. Source code is not reproduced.
 
@@ -23,19 +23,19 @@ The system's code lives in 10 GitHub repositories: the web application, the mobi
 
 **Table 2**
 
-*System repositories (`develop` branch, as of October 20, 2026)*
+*System repositories (`develop` branch, as of October 21, 2026)*
 
 | Artifact | Repository | Technology | Commits | Last commit |
 | --- | --- | --- | --- | --- |
-| Web application | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 449 | 2026-10-20 |
-| Mobile application | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 221 | 2026-10-20 |
-| Infrastructure | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 68 | 2026-10-19 |
-| API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 16 | 2026-10-19 |
-| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 60 | 2026-10-20 |
+| Web application | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 472 | 2026-10-21 |
+| Mobile application | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 224 | 2026-10-21 |
+| Infrastructure | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 86 | 2026-10-21 |
+| API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 21 | 2026-10-21 |
+| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 63 | 2026-10-21 |
 | customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 22 | 2026-10-19 |
-| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 54 | 2026-10-19 |
-| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 42 | 2026-10-19 |
-| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 46 | 2026-10-19 |
+| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 59 | 2026-10-21 |
+| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 47 | 2026-10-21 |
+| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 49 | 2026-10-21 |
 | notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 39 | 2026-10-19 |
 
 **Table 3**
@@ -44,10 +44,10 @@ The system's code lives in 10 GitHub repositories: the web application, the mobi
 
 | Artifact | Source files (`.ts`, `.tsx`, `.html`, `.scss`) | Lines | Screens |
 | --- | --- | --- | --- |
-| Web (`Web/src`) | 442 | 47,100 | 35 routes |
-| Mobile (`LavadoVehicular-Movil/src`) | 293 | 34,884 | 31 screens |
+| Web (`Web/src`) | 449 | 48,002 | 35 routes |
+| Mobile (`LavadoVehicular-Movil/src`) | 295 | 35,164 | 31 screens |
 
-> *Note.* Count of October 20, 2026, with `git ls-files` and `wc -l` over `src`; includes tests and comments.
+> *Note.* Count of October 21, 2026, with `git ls-files` and `wc -l` over `src`; includes tests and comments.
 
 ## 2. Web Application
 
@@ -64,8 +64,8 @@ The web client is an Angular 21 SPA (Angular, n.d.) with standalone components, 
 | `core/constants` | `API_BASE_URL = '/api/v1'` (`core/constants/api.ts:4`) |
 | `core/guards` | `authGuard` (session and role) and `guestGuard` (hides login from users who already have a session) |
 | `core/interceptors` | `authInterceptor`: adds the JWT and ends the session on a 401 while the session is still open (it ignores a late 401 after logging out) |
-| `core/services` | 17 HTTP and state services: `auth`, `booking-api`, `vehicles`, `operations-api`, `payments-api`, `promotions-api`, `loyalty-api`, `notifications`, `preferences`, `role-permissions-api`, `user-admin`, `user-session`, `inspection-api`, `inspection-photos`, `local-storage`, `notification-watcher`, `api` |
-| `core/models`, `core/utils` | DTO interfaces and utilities (for example, API error translation) |
+| `core/services` | 17 HTTP and state services: `auth`, `booking-api`, `vehicles`, `operations-api`, `payments-api`, `promotions-api`, `loyalty-api`, `notifications`, `preferences`, `role-permissions-api`, `user-admin`, `user-session`, `inspection-api`, `inspection-photos`, `local-storage`, `notification-watcher`, `api`; `auth` also follows sign-in and sign-out in the other tabs of the same browser |
+| `core/models`, `core/utils` | DTO interfaces and utilities (for example, API error translation and `image-compress.ts`, which shrinks the receipt image to at most 2 MB before uploading it) |
 | `features/landing` | Public page: navbar, hero, about us, features, services, download, contact, frequently asked questions, and footer |
 | `features/auth` | Login, sign-up, and three-step password recovery |
 | `features/client` | 8 client pages + `viewmodels/client.viewmodel.ts` (layout) |
@@ -121,11 +121,11 @@ The mobile app is built with Expo 57 on React Native 0.86 (Expo, n.d.; React Nat
 | Folder | Contents |
 | --- | --- |
 | `app/config` | i18next with `es`, `en`, `fr`, `pt` (`app/config/locales`) |
-| `app/providers` | `AppProviders` and account preference sync |
+| `app/providers` | `AppProviders`, sync of the account preferences and the push token, and `AppUpdatesCheck` (if the server published a newer APK, it must be installed before going on) |
 | `app/theme` | Theme context, colors, and typography |
 | `core/api` | `config.ts` (gateway URL and `WEB_URL` for public links), `httpClient.ts` (fetch with JWT, JSON or *multipart*, and a 15 s timeout or the one each call asks for), `apiError.ts` |
 | `core/navigation` | `RootNavigator` (screens per role) and route types |
-| `core/services` | `auth`, `booking`, `vehicles`, `operations`, `payments`, `notifications`, `users` |
+| `core/services` | `auth`, `booking`, `vehicles`, `operations`, `payments` (with `receiptImage.ts`, which compresses the receipt to at most 2 MB), `notifications`, `users`, `appUpdates` (reads `/app/version.json`) |
 | `core/storage` | Session in `expo-secure-store` (AsyncStorage on web) |
 | `modules/auth`, `client`, `operator`, `admin` | Screens, components, models, hooks, and view models for each role |
 | `shared` | Per-role layouts, shared views (profile, notifications, settings), validators, components, and utilities |
@@ -193,6 +193,8 @@ docker compose --profile app up -d --build   # the whole backend in containers
 | Email | `MAIL_ENABLED`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` |
 | Messaging | `MESSAGING_ENABLED`, `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD`; `AUTO_ASSIGN_ENABLED=false` (optional) turns off only the automatic assignment |
 | Push | `PUSH_ENABLED` (and `EXPO_ACCESS_TOKEN` in the compose file) |
+
+> *Note.* The variables of October 21, 2026 are not in `.env.example` or in the compose file because they have defaults: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL`, and `SESSION_CHECK_TIMEOUT` (gateway session check: on, 30 s, and 3 s) and `BOOKING_EXPIRY_CHECK_ENABLED`, `BOOKING_EXPIRY_CHECK_INTERVAL`, and `BOOKING_EXPIRY_GRACE_MINUTES` (close of expired bookings in booking-service: on, every 5 minutes, and a 60-minute grace). They only change when the service runs from the IDE or when they are added to the service `environment` in the compose file.
 
 To run a Java service from the console, use its Maven Wrapper (`./mvnw spring-boot:run` inside the service folder) with Java 21 (Spring, n.d.). payment-service runs with `dotnet run --project src/PaymentService.Api` and requires the .NET 8 SDK (Microsoft, n.d.). When starting with `--profile app`, the folders must be named after their repositories (`lavarapido-security-service`, `lavarapido-operation-service`), because that is how the compose file references them.
 
