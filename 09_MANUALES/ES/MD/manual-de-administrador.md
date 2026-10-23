@@ -707,7 +707,7 @@ Los avisos se envían con *POST /api/v1/admin/notifications* (rol ADMIN), que ac
 **Promociones.** La pestaña **Gestión > Promociones** administra los cupones de descuento que los clientes desbloquean con sus puntos (datos guardados en payment-service, *GET*, *POST*, *PUT*, *PATCH* y *DELETE /api/v1/admin/promotions*):
 
 1. Crear una promoción y escribir el **Nombre**, la **Descripción**, el código del **Cupón** (por ejemplo, PREMIUM20), el ícono, los beneficios y la **Fecha de inicio** (si es futura, la promoción queda programada hasta ese día).
-2. Escribir el **Descuento al canjear (%)**, entre 1 y 100 (100 = gratis), que se aplica al total de la reserva cuando el cliente canjea el cupón.
+2. Escribir el **Descuento al canjear (%)**, entre 1 y 99, que se aplica al total de la reserva cuando el cliente canjea el cupón. No hay cupones del 100 %: el pago exige un monto mayor que cero, así que el sistema siempre deja al menos 1 peso por pagar (también con un descuento fijo mayor que el total).
 3. Escribir los **Puntos de fidelización necesarios** para desbloquear el cupón (0 = disponible para todos).
 4. Guardar. La tarjeta de la promoción muestra el descuento y los puntos necesarios (o "disponible para todos"). El estado se calcula a partir de la fecha de inicio y se puede pausar o reanudar desde la tarjeta.
 

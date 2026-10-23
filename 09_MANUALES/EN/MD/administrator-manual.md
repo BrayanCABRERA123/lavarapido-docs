@@ -707,7 +707,7 @@ Announcements are sent with *POST /api/v1/admin/notifications* (ADMIN role), whi
 **Promotions.** The **Management > Promotions** tab manages the discount coupons that customers unlock with their points (data saved in payment-service, *GET*, *POST*, *PUT*, *PATCH*, and *DELETE /api/v1/admin/promotions*):
 
 1. Click to create a promotion and type the **Name**, the **Description**, the **Coupon** code (for example, PREMIUM20), the icon, the benefits, and the **Start date** (if it is in the future, the promotion stays scheduled until that day).
-2. Type the **Discount on redemption (%)**, between 1 and 100 (100 = free), which is applied to the booking total when the customer redeems the coupon.
+2. Type the **Discount on redemption (%)**, between 1 and 99, which is applied to the booking total when the customer redeems the coupon. There are no 100 % coupons: the payment requires an amount greater than zero, so the system always leaves at least 1 peso to pay (also with a fixed discount larger than the total).
 3. Type the **Loyalty points required** to unlock the coupon (0 = available to everyone).
 4. Save. The card of the promotion shows the discount ("N% off") and the points needed ("unlocks at N points" or "available to everyone"). The status is calculated from the start date and can be paused or resumed from the card.
 
