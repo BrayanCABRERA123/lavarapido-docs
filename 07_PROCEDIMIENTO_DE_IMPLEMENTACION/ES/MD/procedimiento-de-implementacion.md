@@ -311,7 +311,7 @@ git check-ignore -v .env      # debe mostrar la regla de .gitignore
 | ADMIN_EMAIL, ADMIN_PASSWORD | Correo y contraseña del primer administrador (solo la primera vez). | security-service crea la cuenta al arrancar si todavía no hay ningún administrador. |
 | PUSH_ENABLED | *true* cuando la aplicación móvil instalada es el APK compilado con EAS. | Expo Go no recibe notificaciones push remotas. |
 | BOOKING_ZONE | *America/Bogota* | Zona horaria del lavadero; el sistema guarda UTC. |
-| SESSION_CHECK_\*, BOOKING_EXPIRY_\*, FOLLOW_UP_\* | No se definen. | Tienen valor por defecto (chequeo de sesión del gateway activo con 30 s y 3 s; cancelación de las reservas programadas que vencieron sin confirmarse cada 5 minutos, con 60 minutos de margen después del fin; seguimiento de operations-service cada 5 minutos para las reservas que terminaron y nadie cerró, que usa el mismo margen y *INTERNAL_API_KEY*) y el archivo de Compose no las pasa a los contenedores. |
+| SESSION_CHECK_\*, BOOKING_EXPIRY_\*, FOLLOW_UP_\* | Opcionales (comentadas en *.env.production.example*). | Tienen valor por defecto (chequeo de sesión del gateway activo con 30 s y 3 s; cancelación de las reservas programadas que vencieron sin confirmarse cada 5 minutos, con 60 minutos de margen después del fin; seguimiento de operations-service cada 5 minutos para las reservas que terminaron y nadie cerró en los últimos 28 días, *FOLLOW_UP_LOOK_BACK_DAYS*, que usa el mismo margen y *INTERNAL_API_KEY*). Son nueve y *docker-compose.yml* las pasa a los contenedores. |
 
 *Nota.* Elaborado por los autores a partir de *.env.example* y *docker-compose.yml*. Los valores secretos se escriben solo en el archivo *.env*; nunca en un mensaje, un documento compartido o un repositorio.
 
@@ -581,7 +581,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
 - **Ramas.** Se implementa desde *develop* o *main* (convenciones de *00-governance/git-conventions.md*); nunca desde una rama *feature/\**.
 - **Imágenes.** El archivo de Compose construye imágenes *lavarapido/\<servicio\>:local*. Para conservar la versión anterior, antes de reconstruir se puede etiquetar cada imagen con la versión vigente (*docker tag lavarapido/booking-service:local lavarapido/booking-service:v0.9.0*).
 - **Base de datos.** El esquema se versiona con Liquibase; cada servicio guarda su historial en *DATABASECHANGELOG_\<SERVICIO\>* (pagos en *DATABASECHANGELOG_PAYMENT*). Un changeset ejecutado nunca se edita.
-- **Configuración.** *.env.example* se versiona; *.env* no. Toda variable nueva se agrega a *.env.example* con un comentario y al bloque *environment* del servicio en *docker-compose.yml*. Las del 21 de octubre de 2026 (*SESSION_CHECK_\**, *BOOKING_EXPIRY_\** y *FOLLOW_UP_\**) todavía no cumplen esta regla (acción ACO-14).
+- **Configuración.** *.env.example* se versiona; *.env* no. Toda variable nueva se agrega a *.env.example* con un comentario y al bloque *environment* del servicio en *docker-compose.yml*. Las del 21 de octubre de 2026 (*SESSION_CHECK_\**, *BOOKING_EXPIRY_\** y *FOLLOW_UP_\**, nueve variables) ya cumplen esta regla (acción ACO-14 cerrada).
 - **Documentación.** El control de versiones de cada manual registra la versión del software a la que corresponde.
 
 ## 14. Riesgos de la Implementación

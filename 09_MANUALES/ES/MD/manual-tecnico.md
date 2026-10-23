@@ -1200,7 +1200,7 @@ El entorno local y su orden de arranque se describen en el Manual de Instalació
 
 ### 16.2 Configuración
 
-Las variables de configuración se describen en el Manual de Instalación, sección 10. Toda variable nueva se debe agregar a *.env.example* con un comentario y, si el servicio corre en Docker, a su bloque *environment* de *docker-compose.yml*. Las del 21 de octubre de 2026 (*SESSION_CHECK_\** del gateway, *BOOKING_EXPIRY_\** de booking-service, con *BOOKING_EXPIRY_GRACE_MINUTES* compartida con operations-service, y *FOLLOW_UP_ENABLED* y *FOLLOW_UP_INTERVAL* de operations-service) todavía no están en esos archivos, así que en Docker quedan con su valor por defecto (acción ACO-14).
+Las variables de configuración se describen en el Manual de Instalación, sección 10. Toda variable nueva se debe agregar a *.env.example* con un comentario y, si el servicio corre en Docker, a su bloque *environment* de *docker-compose.yml*. Las del 21 de octubre de 2026 (*SESSION_CHECK_\** del gateway, *BOOKING_EXPIRY_\** de booking-service, con *BOOKING_EXPIRY_GRACE_MINUTES* compartida con operations-service, y *FOLLOW_UP_ENABLED*, *FOLLOW_UP_INTERVAL* y *FOLLOW_UP_LOOK_BACK_DAYS* de operations-service; nueve en total) ya están en esos archivos (acción ACO-14 cerrada). *ADMIN_DOCUMENT* y *ADMIN_PHONE* completan los datos del primer administrador en producción.
 
 ### 16.3 Actualizaciones y Dependencias
 

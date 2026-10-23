@@ -412,10 +412,11 @@ Si *git check-ignore* no imprime nada, el archivo no está excluido y no se debe
 | INTERNAL_API_KEY | security-service, booking-service, operations-service y notification-service | Llave de las rutas internas; sin ella no se envían por correo los avisos de reservas, pagos y cupones ni los recordatorios, no se pueden leer los interruptores de notificación de cada usuario y operations-service no puede cerrar como No asistió las reservas confirmadas que terminaron sin operario. |
 | REMINDER_LEADS | notification-service | Anticipación de los recordatorios; *24h,1h* por defecto. |
 | BOOKING_ZONE, BOOKING_SLOT_MINUTES, BOOKING_MAX_DAYS_AHEAD | booking-service y operations-service | America/Bogota, 30 y 60 por defecto. |
-| SESSION_CHECK_ENABLED, SESSION_CHECK_CACHE_TTL, SESSION_CHECK_TIMEOUT | api-gateway | Chequeo de la sesión del token (desde el 21 de octubre de 2026): *true*, *30s* y *3s* por defecto. No están en *.env.example* ni en el archivo de Compose: en Docker quedan con su valor por defecto y solo cambian si el gateway corre desde el IDE (acción ACO-14). |
-| BOOKING_EXPIRY_CHECK_ENABLED, BOOKING_EXPIRY_CHECK_INTERVAL | booking-service | Cancelación automática de las reservas programadas que nunca se confirmaron (motivo *EXPIRED*): *true* y *PT5M* (cada 5 minutos) por defecto. Igual que las anteriores, no pasan por el archivo de Compose. |
-| BOOKING_EXPIRY_GRACE_MINUTES | booking-service y operations-service | Minutos después de la hora de fin antes de cerrar una reserva vencida; *60* por defecto. La usan los dos servicios, así que si se cambia debe tener el mismo valor en ambos. No pasa por el archivo de Compose. |
-| FOLLOW_UP_ENABLED, FOLLOW_UP_INTERVAL | operations-service | Revisión de las reservas que terminaron sin cerrarse (desde la noche del 21 de octubre de 2026): pasa a No asistió la confirmada que nunca tuvo operario y deja en "Por cerrar" la que tenía operario y nadie registró. *true* y *PT5M* por defecto; necesita *INTERNAL_API_KEY*. No pasan por el archivo de Compose. |
+| SESSION_CHECK_ENABLED, SESSION_CHECK_CACHE_TTL, SESSION_CHECK_TIMEOUT | api-gateway | Chequeo de la sesión del token (desde el 21 de octubre de 2026): *true*, *30s* y *3s* por defecto. Están comentadas en *.env.example* y el archivo de Compose las pasa al contenedor. |
+| BOOKING_EXPIRY_CHECK_ENABLED, BOOKING_EXPIRY_CHECK_INTERVAL | booking-service | Cancelación automática de las reservas programadas que nunca se confirmaron (motivo *EXPIRED*): *true* y *PT5M* (cada 5 minutos) por defecto. Igual que las anteriores, pasan por el archivo de Compose. |
+| BOOKING_EXPIRY_GRACE_MINUTES | booking-service y operations-service | Minutos después de la hora de fin antes de cerrar una reserva vencida; *60* por defecto. La usan los dos servicios, así que si se cambia debe tener el mismo valor en ambos; el archivo de Compose la pasa a los dos. |
+| FOLLOW_UP_ENABLED, FOLLOW_UP_INTERVAL, FOLLOW_UP_LOOK_BACK_DAYS | operations-service | Revisión de las reservas que terminaron sin cerrarse (desde la noche del 21 de octubre de 2026): pasa a No asistió la confirmada que nunca tuvo operario y deja en "Por cerrar" la que tenía operario y nadie registró. *true*, *PT5M* y *28* (días hacia atrás que revisa, porque el servidor puede pasar semanas apagado) por defecto; necesita *INTERNAL_API_KEY*. Pasan por el archivo de Compose. |
+| ADMIN_DOCUMENT, ADMIN_PHONE | security-service (producción) | Cédula y celular del primer administrador, junto a *ADMIN_EMAIL* y *ADMIN_PASSWORD* en *.env.production*. Sin ellos su perfil queda con valores de relleno. Los pasa *docker-compose.prod.yml*. |
 | SECURITY_SERVICE_URL, CUSTOMER_SERVICE_URL, BOOKING_SERVICE_URL | Servicios que llaman a otros | Direcciones de los servicios; tienen valores por defecto para el entorno local. payment-service necesita BOOKING_SERVICE_URL para leer el total y acreditar los puntos de una reserva. |
 
 *Nota.* Elaborado por los autores a partir de *.env.example*, *docker-compose.yml* y los archivos de configuración de los servicios.
@@ -982,7 +983,7 @@ Las figuras de este manual se tomaron el 16 de octubre de 2026 en un computador 
 | Tema | Qué falta | Sección |
 |---|---|---|
 | Un inicio de sesión de base de datos por servicio | Los servicios usan sa. | 11.4 |
-| Variables del 21 de octubre de 2026 | *SESSION_CHECK_\**, *BOOKING_EXPIRY_\** y *FOLLOW_UP_\** no están en *.env.example* ni en *docker-compose.yml* (acción ACO-14). | 10.2 |
+| Variables del 21 de octubre de 2026 | Resuelto: las nueve (*SESSION_CHECK_\**, *BOOKING_EXPIRY_\** y *FOLLOW_UP_\**) están en *.env.example* y *docker-compose.yml* (acción ACO-14 cerrada). | 10.2 |
 
 *Nota.* Elaborado por los autores a partir de la verificación de los repositorios y del backlog técnico.
 
