@@ -586,7 +586,9 @@ bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh web             # sol
 bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh security-service notification-service
 ```
 
-**Desde GitHub, sin SSH:** con la máquina encendida, en el repositorio `lavarapido-infra` → *Actions → Desplegar en Azure → Run workflow*. En *Servicios* se deja vacío para actualizar todo o se escriben los nombres (`web payment-service`). Al terminar, el flujo comprueba que la web y la API respondan 200. Usa una llave propia de GitHub (secreto `AZURE_SSH_KEY`) que en el servidor solo puede ejecutar `deploy/ci-deploy.sh`, que valida los nombres y no deja correr dos actualizaciones a la vez.
+`update-server.sh` y `setup-server.sh` despliegan la rama `develop` de cada repositorio (variable `BRANCH`, por defecto `develop`). Para desplegar `main`, cuando el equipo la ponga al día: `BRANCH=main bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh`.
+
+**Desde GitHub, sin SSH:** el botón *Run workflow* de un flujo manual solo aparece cuando su archivo está en la rama por defecto del repositorio. Al 23-10-2026 `deploy.yml` está en `develop` y todavía no en `main`, así que el botón no existe y se usa la opción por SSH de arriba. Cuando `deploy.yml` llegue a `main`: con la máquina encendida, en el repositorio `lavarapido-infra` → *Actions → Desplegar en Azure → Run workflow*. El flujo también despliega `develop` (llama a `update-server.sh`). En *Servicios* se deja vacío para actualizar todo o se escriben los nombres (`web payment-service`). Al terminar, el flujo comprueba que la web y la API respondan 200. Usa una llave propia de GitHub (secreto `AZURE_SSH_KEY`) que en el servidor solo puede ejecutar `deploy/ci-deploy.sh`, que valida los nombres y no deja correr dos actualizaciones a la vez.
 
 **Integración continua:** desde el 19-10-2026 los 10 repositorios tienen `.github/workflows/ci.yml`, que corre en cada push o pull request a `develop` y `main`, y el resultado aparece como ✓ o ✗ junto a cada commit:
 
