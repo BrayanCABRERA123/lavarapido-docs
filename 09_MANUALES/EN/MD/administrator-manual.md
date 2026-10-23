@@ -373,7 +373,7 @@ Operators can also be created from **Operators > New operator** (section 12.1), 
 3. Confirm the message "Deactivate [name]? They will no longer be able to log in." Since October 21, 2026, if the person had an open session, that session stops working within 30 seconds on all their devices.
 4. Verify that the status changes to **Disabled** and, if the person is an operator with pending services, reassign them (section 12.4).
 
-An administrator account cannot be deactivated: the button appears blocked with the message "An administrator account cannot be disabled." Since the user type is not changed from the panel (section 10.3), removing an administrator requires the IT administrator to take that role away in the database and write it down in the team's log. Nobody can deactivate their own account either, from this table or from **Profile**.
+An administrator account cannot be deactivated: the button appears blocked with the message "An administrator account cannot be disabled." Since the user type is not changed from the panel (section 10.3), removing an administrator requires the IT administrator to take that role away in the database (*security.user_role*) and write it down in the team's log. Since October 23, 2026 (E-02), as soon as the role disappears from *security.user_role* the system revokes all of that person's sessions (*security.user_session.revoked_at*): the token that still said Administrator stops working within 30 seconds and, when signing in again, the person only has the roles left. Nobody can deactivate their own account either, from this table or from **Profile**.
 
 ### 9.5 Password Reset
 
@@ -436,7 +436,7 @@ A valid role is not enough: each service also verifies the ownership of the reso
 
 Each account has one user type (Client, Operator, or Administrator), chosen when it is created: Client when the person signs up from the public screen, or the **Assigned role** of **Create user** (section 9.3) when the administrator creates it. Since October 20, 2026, the web and the app do not offer changing the user type of an existing account: the **User type** column of **Management > Users** only shows it, and the server has no route to change it.
 
-If a person really needs another role, the IT administrator adjusts it in the database (*security.user_role*, with the same procedure as section 8.4), asks the person to sign out and sign in again, and records who asked for the change and why in the team's log. If the new role is Operator, the operations service creates their operator record the next time the operators are listed; then give them shifts in **Operators** (section 12).
+If a person really needs another role, the IT administrator adjusts it in the database (*security.user_role*, with the same procedure as section 8.4), records who asked for the change and why in the team's log. If a role was removed, there is no need to ask the person to sign out: since October 23, 2026 (E-02) the system compares the token's roles with *security.user_role* and revokes all their sessions within 30 seconds. If a role was only added, the person must sign out and sign in again so the token includes it. If the new role is Operator, the operations service creates their operator record the next time the operators are listed; then give them shifts in **Operators** (section 12).
 
 ## 11. System Configuration
 
