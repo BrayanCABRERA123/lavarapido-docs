@@ -269,7 +269,7 @@ Cada fase indica su responsable, su duración estimada, los pasos y la evidencia
 
 1. Instalar y verificar Git, Docker con Compose v2, JDK 21, .NET 8 SDK y Node.js 22 LTS (Manual de Instalación, sección 7.1). En Windows, confirmar que Docker usa el motor Linux con WSL 2.
 2. Comprobar que los puertos 1433, 5672, 15672, 1025, 8025, 3001 a 3006, 8080 y 4200 estén libres. Si hay un SQL Server nativo de Windows en el 1433, detener el servicio *MSSQLSERVER*.
-3. Clonar los repositorios **uno al lado del otro y con su nombre original**, en la etiqueta de la versión. El repositorio de operaciones se llama *lavarapido-operation-service* (en singular) y *docker-compose.yml* lo construye con ese nombre: clonarlo con otro nombre hace fallar la construcción.
+3. Clonar los repositorios **uno al lado del otro y con su nombre original**, en la etiqueta de la versión. **Mientras no exista la etiqueta `v1.0.0`** (se crea al pasar `develop` a `main`), `git clone -b v1.0.0` falla con *Remote branch v1.0.0 not found*: hasta entonces se clona la rama `develop` reemplazando `-b v1.0.0` por `-b develop`. El repositorio de operaciones se llama *lavarapido-operation-service* (en singular) y *docker-compose.yml* lo construye con ese nombre: clonarlo con otro nombre hace fallar la construcción.
 
 ```bash
 mkdir Backend && cd Backend

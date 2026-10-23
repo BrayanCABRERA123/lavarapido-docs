@@ -520,7 +520,7 @@ Los servicios Java aplican sus migraciones automáticamente al arrancar (*spring
 
 ### 11.3 Método Alternativo: Script Global
 
-El repositorio de documentación conserva el script *lavarapido-6-services-sqlserver.sql*, con el modelo completo, para quienes crean la base de datos a mano. Como cada changeset tiene una precondición, los servicios pueden arrancar después sobre una base creada con ese script: Liquibase marca como ejecutados los objetos que ya existen. El script se ejecuta sobre la base de datos vacía:
+**Al 23 de octubre de 2026 el script *lavarapido-6-services-sqlserver.sql* no está versionado en ninguno de los repositorios** (tampoco en su historial), así que este método no se puede seguir: la base se crea solo con los changelogs de Liquibase que cada servicio aplica al arrancar (sección 11.2). Si el equipo vuelve a publicar el script, se ejecuta sobre la base de datos vacía y, como cada changeset tiene una precondición, Liquibase marca como ejecutados los objetos que ya existen:
 
 ```bash
 sqlcmd -S localhost,1433 -U sa -P "<CONTRASEÑA_SA>" -C -d LavaRapido -b -i lavarapido-6-services-sqlserver.sql
@@ -713,11 +713,11 @@ El comando abre el servidor de desarrollo Metro (puerto 8081) y muestra un códi
 
 **Dependencias nativas nuevas.** Desde el 17 de octubre de 2026 la aplicación usa *expo-image-picker* (cámara y galería) y *expo-image-manipulator* (reducción de las fotos) para el informe de inspección. Después de hacer *git pull*, ejecutar *npm install* en *Frontend/LavadoVehicular-Movil*. Expo Go ya incluye estos módulos, pero un APK compilado antes de esa fecha no los tiene: hay que compilar y publicar una versión nueva con EAS, como explica el Documento de Despliegue (sección 4.3.3, «Publicación de la app móvil»). Los permisos de cámara y fotos se declaran en el *plugin* de *expo-image-picker* dentro de *app.json*. Los cambios del 21 de octubre de 2026 (comprobante comprimido, lupa del QR y pantalla de actualización obligatoria del APK) no agregan dependencias nativas.
 
-**Notificaciones push.** Expo Go no recibe notificaciones push remotas. Para probarlas, construir una versión de desarrollo con EAS y fijar *PUSH_ENABLED=true* en el backend:
+**Notificaciones push.** Expo Go no recibe notificaciones push remotas. Para probarlas, construir el APK con el perfil *preview* de EAS (el único definido en *eas.json* además de *production*; no existe un perfil *development*) y fijar *PUSH_ENABLED=true* en el backend:
 
 ```bash
 npx eas-cli login
-npx eas-cli build --profile development --platform android
+npx eas-cli build --profile preview --platform android
 ```
 
 **Figura 8**
