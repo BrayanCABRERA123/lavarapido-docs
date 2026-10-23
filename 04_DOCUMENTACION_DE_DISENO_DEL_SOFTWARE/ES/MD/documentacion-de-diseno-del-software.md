@@ -514,7 +514,7 @@ La base `LavaRapido` (SQL Server 2022) tiene 57 tablas en 9 esquemas, creadas po
 - **Bloque de auditoría.** Casi todas las tablas de dominio terminan con `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by` y `row_version`. No lo tienen las tablas base de `security` (`person`, `app_user`, `role`, `permission`, `role_permission`, `user_role`, `user_session`, `password_reset_token`), `audit.audit_log`, `booking.schedule_history` ni `notification.booking_tracking`. Tampoco lo tienen completo las tablas que se agregaron en octubre (`security.login_lockout`, `security.person_address`, `execution.operator_profile`, `execution.operator_skill` y las cuatro del informe de inspección): solo guardan las columnas de fecha y autor que usan.
 - **Borrado lógico.** `deleted_at` no nulo indica fila eliminada; varios índices únicos son filtrados con `WHERE deleted_at IS NULL`.
 - **Concurrencia optimista.** Un trigger `tr_touch_<tabla>` actualiza `updated_at` y suma 1 a `row_version` en cada UPDATE de las tablas que se editan (16 triggers); en payment, `EfUnitOfWork` lo hace antes de guardar. Solo payment-service compara `row_version` al actualizar (token de concurrencia de EF Core); los servicios Java todavía no lo revisan.
-- **Candados de aplicación.** Donde dos operaciones a la vez podrían chocar, los servicios Java toman un candado de SQL Server (`sp_getapplock`) que se suelta al terminar la transacción: booking-service usa `booking-schedule` al crear o reprogramar una reserva y al cerrar las vencidas, y operations-service usa `operations-assignment` (desde el 21 de octubre de 2026) en la asignación manual y la automática, para que un operario no quede con dos servicios a la misma hora (`BookingPersistenceAdapter.lockSchedule`, `ExecutionPersistenceAdapter.lockAssignments`).
+- **Candados de aplicación.** Donde dos operaciones a la vez podrían chocar, los servicios Java toman un candado de SQL Server (`sp_getapplock`) que se suelta al terminar la transacción: security-service usa `login-lockout-{userId}` en el inicio de sesión, para que dos intentos fallidos simultáneos de la misma cuenta no se pisen el conteo de bloqueo (`LoginLockoutPersistenceAdapter.lock`); booking-service usa `booking-schedule` al crear o reprogramar una reserva y al cerrar las vencidas, y operations-service usa `operations-assignment` (desde el 21 de octubre de 2026) en la asignación manual y la automática, para que un operario no quede con dos servicios a la misma hora (`BookingPersistenceAdapter.lockSchedule`, `ExecutionPersistenceAdapter.lockAssignments`).
 - **Fechas en UTC.** Todos los valores por defecto usan `SYSUTCDATETIME()`.
 - **Catálogos con código.** Los estados y tipos son tablas con `code` único (`booking_status`, `payment_status`, `execution_status`, etc.) cargadas por changelogs semilla.
 
@@ -1882,6 +1882,7 @@ classDiagram
     +open(userId, startedAt, expiresAt, ipAddress, userAgent) long
     +revoke(sessionId, userId, revokedAt)
     +revokeAll(userId, revokedAt)
+    +revokeAllExcept(userId, keptSessionId, revokedAt)
     +isActive(sessionId, userId, now) boolean
   }
   class PasswordResetTokenRepository {
@@ -1935,6 +1936,7 @@ classDiagram
   }
   class LoginLockoutRepository {
     <<interface>>
+    +lock(userId)
     +findByUserId(userId) Optional~LoginLockout~
     +save(lockout)
     +clear(userId)

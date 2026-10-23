@@ -392,7 +392,7 @@ El administrador no puede ver ni fijar la contraseña de un usuario. Para recupe
 
 ### 9.6 Sesiones Activas
 
-Cada ingreso queda registrado en *security.user_session* (inicio, vencimiento, revocación, dirección IP y agente del navegador). Al cerrar sesión, la sesión queda marcada como revocada, y desactivar la cuenta revoca todas sus sesiones. Desde el 21 de octubre de 2026 el token de una sesión revocada deja de servir: security-service lo rechaza y el API Gateway lo corta antes de llegar a los demás servicios, con un margen de hasta 30 segundos (si security-service no responde, el token sirve hasta que vence, como antes). Ante la sospecha de un compromiso, desactivar la cuenta, cambiar el secreto JWT si el compromiso afecta a la plataforma y revisar las sesiones:
+Cada ingreso queda registrado en *security.user_session* (inicio, vencimiento, revocación, dirección IP y agente del navegador). Al cerrar sesión, la sesión queda marcada como revocada, y desactivar la cuenta revoca todas sus sesiones. Cambiar la contraseña desde **Perfil** revoca las demás sesiones de la persona (la del equipo desde el que la cambió sigue abierta) y recuperarla con el código enviado al correo revoca todas. Desde el 21 de octubre de 2026 el token de una sesión revocada deja de servir: security-service lo rechaza y el API Gateway lo corta antes de llegar a los demás servicios, con un margen de hasta 30 segundos (si security-service no responde, el token sirve hasta que vence, como antes). Ante la sospecha de un compromiso, desactivar la cuenta, cambiar el secreto JWT si el compromiso afecta a la plataforma y revisar las sesiones:
 
 ```sql
 SELECT TOP (50) s.user_session_id, u.username, s.started_at, s.expires_at,

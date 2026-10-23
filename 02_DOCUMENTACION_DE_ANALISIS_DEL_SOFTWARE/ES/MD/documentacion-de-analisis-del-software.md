@@ -626,7 +626,7 @@ sequenceDiagram
     U->>W: Contraseña nueva
     W->>S: POST /api/v1/auth/password/reset
     alt política cumplida y distinta de la actual
-        S->>DB: marca el código como usado, guarda la contraseña nueva y borra el bloqueo
+        S->>DB: marca el código como usado, guarda la contraseña nueva, borra el bloqueo y revoca todas las sesiones
         S-->>W: 204 (vuelve al inicio de sesión)
     else débil o igual a la actual
         S-->>W: 400 WEAK_PASSWORD o SAME_PASSWORD (el código no se gasta)
