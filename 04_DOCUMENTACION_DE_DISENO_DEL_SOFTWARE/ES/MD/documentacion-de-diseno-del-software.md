@@ -301,7 +301,7 @@ Hay dos estilos. Las consultas que necesitan respuesta inmediata van por REST s�
 | operations | security | Nombres de operarios y clientes, y si la cuenta sigue activa (ruta interna con llave compartida) | `SECURITY_SERVICE_URL`, `SECURITY_INTERNAL_URL`, `INTERNAL_API_KEY` |
 | payment | booking | Consultar la reserva y su valor a pagar | `BOOKING_SERVICE_URL` |
 | notification | security | Correo e idioma de cada cuenta y lista de administradores (`/internal/v1/users`) | `SECURITY_SERVICE_URL`, `INTERNAL_API_KEY` |
-| gateway | security | Confirmar que la sesión del token siga abierta (`GET /api/v1/auth/session`; la respuesta se guarda 30 segundos por token) | `ROUTE_SECURITY_URL` |
+| gateway | security | Confirmar que la sesión del token siga abierta (`GET /api/v1/auth/session`; la respuesta se guarda 30 segundos (si security-service no responde en 3 segundos, el gateway deja pasar la petición: *fail-open*) por token) | `ROUTE_SECURITY_URL` |
 
 > *Nota.* Fuente: `Backend/lavarapido-infra/docker-compose.yml` y, para el gateway, `SessionCheckConfig.java`.
 

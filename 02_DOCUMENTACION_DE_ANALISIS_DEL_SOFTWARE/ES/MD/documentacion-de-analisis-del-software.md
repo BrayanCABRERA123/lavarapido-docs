@@ -555,7 +555,7 @@ sequenceDiagram
     GW-->>W: 401 (booking-service no recibe la llamada)
 ```
 
-*Fuente:* `security-service` (`AuthenticationService.login / logout / isActive`, `ActiveSessionValidator`, `LoginLockout`, `PasswordRecoveryService`, migración `034-security-login-lockout.sql`) y gateway (`SessionCheckFilter`). El gateway guarda 30 segundos por token la respuesta de `/api/v1/auth/session`, así que una sesión abierta cuesta una llamada extra cada medio minuto y no una por petición. Una sesión también se cierra cuando el administrador desactiva la cuenta o el dueño la cierra; eso llega a los demás servicios en esos mismos 30 segundos.
+*Fuente:* `security-service` (`AuthenticationService.login / logout / isActive`, `ActiveSessionValidator`, `LoginLockout`, `PasswordRecoveryService`, migración `034-security-login-lockout.sql`) y gateway (`SessionCheckFilter`). El gateway guarda 30 segundos (si security-service no responde en 3 segundos, el gateway deja pasar la petición: *fail-open*) por token la respuesta de `/api/v1/auth/session`, así que una sesión abierta cuesta una llamada extra cada medio minuto y no una por petición. Una sesión también se cierra cuando el administrador desactiva la cuenta o el dueño la cierra; eso llega a los demás servicios en esos mismos 30 segundos.
 
 ### 2.9 Informe de inspección del vehículo (RF-036)
 

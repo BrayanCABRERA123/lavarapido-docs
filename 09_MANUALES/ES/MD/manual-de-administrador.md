@@ -370,7 +370,7 @@ Los operarios también se pueden crear desde **Operarios > Nuevo operario** (sec
 
 1. Ubicar la cuenta en **Gestión > Usuarios**.
 2. Elegir **Desactivar cuenta** (o **Activar cuenta** para reactivarla).
-3. Confirmar el mensaje que advierte que la persona ya no podrá iniciar sesión. Desde el 21 de octubre de 2026, si tenía una sesión abierta, esa sesión deja de funcionar en máximo 30 segundos en todos sus equipos.
+3. Confirmar el mensaje que advierte que la persona ya no podrá iniciar sesión. Desde el 21 de octubre de 2026, si tenía una sesión abierta, esa sesión deja de funcionar en máximo 30 segundos (si security-service no responde en 3 segundos, el gateway deja pasar la petición: *fail-open*) en todos sus equipos.
 4. Verificar que el estado cambie a **Inhabilitado** y, si la persona es un operario con servicios pendientes, reasignarlos (sección 12.4).
 
 Una cuenta de administrador no se puede desactivar: el botón aparece bloqueado con el mensaje "Una cuenta de administrador no se puede desactivar." Como el tipo de usuario no se cambia desde el panel (sección 10.3), retirar a un administrador requiere que el administrador de TI le quite ese rol en la base de datos y lo anote en la bitácora del equipo. Tampoco se puede desactivar la propia cuenta, ni desde esta tabla ni desde **Perfil**.
@@ -513,7 +513,7 @@ Las imágenes de los QR y los comprobantes se guardan dentro de la base de datos
 | Parámetro | Valor | Dónde se configura |
 |---|---|---|
 | Vigencia del token de acceso | 1 hora; no hay token de actualización | security-service (JWT_ACCESS_TOKEN_TTL). |
-| Sesión cerrada | El token de una sesión cerrada (cierre de sesión o cuenta desactivada) deja de servir en máximo 30 segundos (desde el 21 de octubre de 2026) | security-service y API Gateway (*SESSION_CHECK_\**). |
+| Sesión cerrada | El token de una sesión cerrada (cierre de sesión o cuenta desactivada) deja de servir en máximo 30 segundos (si security-service no responde en 3 segundos, el gateway deja pasar la petición: *fail-open*) (desde el 21 de octubre de 2026) | security-service y API Gateway (*SESSION_CHECK_\**). |
 | Bloqueo de cuenta por intentos fallidos | 5 intentos fallidos en 15 minutos bloquean la cuenta durante 15 minutos; restablecer la contraseña la desbloquea | security-service (*security.login_lockout*). |
 | Código de recuperación | 6 dígitos, válido 15 minutos, de un solo uso, 5 intentos fallidos | security-service. |
 | Contraseña | De 8 a 72 caracteres, una mayúscula, un número, un carácter especial, sin espacios | security-service e interfaz web. |
@@ -1194,7 +1194,7 @@ Todo incidente se debe registrar con la fecha, quién lo detectó, la descripci�
 | Bahía | Puesto físico de lavado; el número de bahías activas define la capacidad. |
 | BCrypt | Algoritmo con el que las contraseñas se guardan como hashes irreversibles. |
 | Cola de mensajes muertos (DLQ) | Cola donde se guardan los mensajes que fallaron después de los reintentos. |
-| Cupón | Descuento porcentual que el cliente desbloquea con puntos y canjea al pagar. |
+| Cupón | Descuento que el cliente desbloquea con puntos y canjea al pagar: porcentual desde la web y la app; por la API también puede ser un monto fijo (FIXED). |
 | Desactivar | Impedir que una cuenta ingrese conservando su historial. |
 | Excepción (de horario) | Día que no sigue el horario regular: festivo u horario especial. |
 | JWT | Token firmado que identifica al usuario y sus roles; dura una hora. |
