@@ -837,31 +837,34 @@ La documentación del proyecto no define una estrategia de respaldos, porque la 
 
 ### 14.3 Generación de un Respaldo Manual
 
-El respaldo se genera dentro del contenedor de SQL Server (servicio de Compose *sqlserver*, contenedor *lavarapido-sqlserver*) y luego se copia al equipo anfitrión. La contraseña de la cuenta *sa* es el valor de *DB_PASSWORD* del archivo *.env*; se debe leer de una variable de entorno y no escribirla en scripts compartidos.
+En el servidor el respaldo se hace con el script del equipo *lavarapido-infra/deploy/backup-db.sh*, el mismo que corren la tarea diaria y *update-server.sh* (Documento de Despliegue, sección 3.2). No se debe escribir un *BACKUP DATABASE* a mano: el servidor usa SQL Server **Express**, que no admite la opción *COMPRESSION* (el comando falla), y el script ya hace todo lo necesario: respaldo completo con suma de comprobación (*CHECKSUM*), *RESTORE VERIFYONLY*, compresión con *gzip* fuera de SQL Server, permisos restringidos y retención de los últimos 14. La contraseña de *sa* la lee el propio script de *lavarapido-infra/.env.production*, así que no hay que pasarla ni escribirla en ningún lado.
 
 1. Verificar que haya espacio libre en disco (un respaldo ocupa, como orden de magnitud, el tamaño de los datos).
-2. Generar el respaldo con suma de comprobación.
-3. Comprobar que el archivo se puede restaurar.
-4. Copiarlo al equipo anfitrión y luego a un almacenamiento seguro.
-5. Registrar el respaldo (fecha, archivo, tamaño, resultado de la verificación y responsable).
+2. Generar el respaldo y comprobar que se puede restaurar.
+3. Copiarlo a un almacenamiento seguro fuera de la máquina virtual.
+4. Registrar el respaldo (fecha, archivo, tamaño, resultado de la verificación y responsable); el script ya lo anota en *~/lavarapido/backups/backup.log*.
+
+```bash
+# 1) Respaldo: deja ~/lavarapido/backups/LavaRapido-AAAAMMDD-HHMMSS.bak.gz
+bash ~/lavarapido/lavarapido-infra/deploy/backup-db.sh
+
+# 2) Prueba de que el último respaldo se puede restaurar (lo restaura con otro nombre y lo borra)
+bash ~/lavarapido/lavarapido-infra/deploy/verify-backup.sh
+
+# 3) Resultado de ambos
+tail -n 5 ~/lavarapido/backups/backup.log
+```
+
+En una instalación local con el compose de desarrollo (SQL Server Developer y sin *.env.production*) el script no aplica; el respaldo se genera dentro del contenedor **sin** *COMPRESSION*, para que el mismo comando también sirva en Express:
 
 ```bash
 cd lavarapido-infra
-# 1) Respaldo completo dentro del contenedor
-docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
-  "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/backup_LavaRapido_2026-10-16_0200.bak' WITH INIT, CHECKSUM, COMPRESSION"
-
-# 2) Verificar que el archivo se puede restaurar
-docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
-  "RESTORE VERIFYONLY FROM DISK = N'/var/opt/mssql/data/backup_LavaRapido_2026-10-16_0200.bak' WITH CHECKSUM"
-
-# 3) Copiar al equipo anfitrión
-docker cp lavarapido-sqlserver:/var/opt/mssql/data/backup_LavaRapido_2026-10-16_0200.bak ./backups/
+docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$DB_PASSWORD" -C -b -Q \
+  "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/backup_LavaRapido.bak' WITH INIT, CHECKSUM"
+docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$DB_PASSWORD" -C -b -Q \
+  "RESTORE VERIFYONLY FROM DISK = N'/var/opt/mssql/data/backup_LavaRapido.bak' WITH CHECKSUM"
+docker cp lavarapido-sqlserver:/var/opt/mssql/data/backup_LavaRapido.bak ./backups/
 ```
-
-La opción *CHECKSUM* detecta páginas dañadas al respaldar y al verificar.
 
 **Figura 13**
 
@@ -871,27 +874,14 @@ La opción *CHECKSUM* detecta páginas dañadas al respaldar y al verificar.
 
 ### 14.4 Automatización del Respaldo Diario
 
-Un respaldo que depende de que alguien lo recuerde termina sin hacerse. En Linux se programa con *cron*; en Windows, con el Programador de tareas. El siguiente script de ejemplo genera el respaldo, lo verifica, lo copia y borra los archivos que superan la retención:
+Un respaldo que depende de que alguien lo recuerde termina sin hacerse. En el servidor no hay que escribir ningún script ni tarea de *cron*: *setup-server.sh* ya programa, todos los días y al arrancar la máquina virtual, *backup-db.sh* seguido de *verify-backup.sh*, y cada ejecución queda en *~/lavarapido/backups/backup.log*. La tarea lee la contraseña de *.env.production*, así que no depende de que *DB_PASSWORD* esté en el entorno de *cron* (por eso el script de ejemplo que había antes en esta sección fallaba al correr solo).
 
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-STAMP=$(date +%F_%H%M)
-FILE="backup_LavaRapido_${STAMP}.bak"
-DEST="$HOME/backups"
-SQL="docker compose -f $HOME/Backend/lavarapido-infra/docker-compose.yml exec -T sqlserver \
-     /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $DB_PASSWORD -C -b"
-$SQL -Q "BACKUP DATABASE [LavaRapido] TO DISK=N'/var/opt/mssql/data/$FILE' WITH INIT,CHECKSUM,COMPRESSION"
-$SQL -Q "RESTORE VERIFYONLY FROM DISK=N'/var/opt/mssql/data/$FILE' WITH CHECKSUM"
-docker cp lavarapido-sqlserver:/var/opt/mssql/data/$FILE "$DEST/"
-find "$DEST" -name 'backup_LavaRapido_*.bak' -mtime +14 -delete
-echo "$(date -Is) OK $FILE" >> "$DEST/backups.log"
-
-# crontab -e   (todos los días a las 2:00 a. m.; DB_PASSWORD viene del entorno del usuario)
-# 0 2 * * * /home/<USUARIO>/bin/backup.sh >> /home/<USUARIO>/backups/cron.log 2>&1
+crontab -l | grep backup-db.sh               # la tarea programada por setup-server.sh
+grep RESPALDO ~/lavarapido/backups/backup.log | tail -n 3
 ```
 
-El script se debe guardar con permisos restringidos y su resultado se debe vigilar: una alerta cuando no existe el archivo del día vale más que muchos respaldos que nadie revisa.
+Su resultado se debe vigilar: una alerta cuando no existe el archivo del día vale más que muchos respaldos que nadie revisa. Los respaldos quedan en el mismo disco de la máquina virtual; para tener una copia afuera, bajarlos al PC del equipo (Documento de Despliegue, sección 3.2).
 
 ### 14.5 Respaldo Antes de los Cambios
 

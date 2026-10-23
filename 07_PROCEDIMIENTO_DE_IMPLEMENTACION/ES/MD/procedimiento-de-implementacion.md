@@ -121,7 +121,7 @@ Establecer un procedimiento ordenado, verificable y reversible para poner en ope
 
 ### 6.1 Qué Cubre Este Procedimiento
 
-- La implementación de una versión etiquetada del backend (seis servicios y gateway), la base de datos, la mensajería y la aplicación web en un equipo con Docker de la red local o en el servidor público (una máquina virtual de Azure con Docker, Caddy y HTTPS que el equipo enciende cuando la necesita).
+- La implementación de una versión etiquetada del backend (seis servicios y gateway), la base de datos, la mensajería y la aplicación web en un equipo con Docker de la red local o en el servidor público (una máquina virtual de Azure con Docker, Caddy y HTTPS que el equipo enciende cuando la necesita). **Aviso:** el *docker-compose.yml* de desarrollo publica en el equipo los puertos 1433 (SQL Server con la cuenta *sa*), 5672 y 15672 (RabbitMQ), 1025 y 8025 (Mailpit) y 3001 a 3006 (cada servicio sin pasar por el gateway); en la red local cualquier equipo los alcanza. Para un uso real se recomienda el servidor público con *docker-compose.prod.yml*, que no publica ninguno; si se usa la red local, bloquear esos puertos en el firewall del equipo y dejar abiertos solo 8080 y 4200.
 - La implementación inicial (primera puesta en marcha en el lavadero o en el equipo de evaluación) y las implementaciones posteriores de nuevas versiones.
 - La carga de los datos maestros del negocio (horario, bahías, servicios, precios, puntos, cuentas de pago, operarios y promociones).
 - Las pruebas de humo, las pruebas de aceptación, la capacitación, la puesta en marcha, el soporte posterior y la reversión.
@@ -199,7 +199,7 @@ Se descarta la implementación paralela completa (operar a la vez en papel y en 
 
 ## 9. Entorno de Destino y Componentes
 
-El entorno de destino es un equipo o servidor con Docker (Windows 10 u 11 con WSL 2, Ubuntu 22.04 o posterior, o macOS) que ejecuta todos los componentes de la Tabla 4 con *docker compose --profile app*. Los requisitos de hardware y software y los puertos son los de las secciones 6 y 7 del Manual de Instalación (mínimo 4 núcleos, 8 GB de RAM con 5 GB para Docker y 20 GB de disco libre; recomendado 16 GB de RAM y SSD). En el servidor público se agrega *docker-compose.prod.yml*: la web se sirve compilada desde un contenedor con nginx, Caddy publica solo los puertos 80 y 443 con HTTPS y ningún servicio interno queda expuesto.
+El entorno de destino es un equipo o servidor con Docker (Windows 10 u 11 con WSL 2, Ubuntu 22.04 o posterior, o macOS) que ejecuta todos los componentes de la Tabla 4 con *docker compose --profile app*. Los requisitos de hardware y software y los puertos son los de las secciones 6 y 7 del Manual de Instalación (mínimo 4 núcleos, 8 GB de RAM con 5 GB para Docker y 20 GB de disco libre; recomendado 16 GB de RAM y SSD). En el servidor público se agrega *docker-compose.prod.yml*: la web se sirve compilada desde un contenedor con nginx, Caddy publica solo los puertos 80 y 443 con HTTPS y ningún servicio interno queda expuesto. Sin ese archivo (red local) quedan publicados 1433, RabbitMQ, Mailpit y 3001 a 3006: ver el aviso de la sección de alcance.
 
 **Tabla 4**
 
