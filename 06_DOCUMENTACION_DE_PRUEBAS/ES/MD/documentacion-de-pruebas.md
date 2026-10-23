@@ -68,7 +68,7 @@ Se prueban la aplicación web, la aplicación móvil y los siete servicios de ba
 
 ## 2. Inventario de pruebas automatizadas
 
-Al 21 de octubre de 2026 (noche) los repositorios tienen 602 métodos de prueba: 540 en el backend y 62 en la web. La app móvil no tiene pruebas automatizadas; se revisa con la compilación de TypeScript y el recorrido de pantallas (sección 3.2).
+Al 21 de octubre de 2026 (noche) los repositorios tenían 602 métodos de prueba: 540 en el backend y 62 en la web; al 23 de octubre la web tiene 115 pruebas en 50 archivos (ver los resultados del 23 de octubre). La app móvil no tiene pruebas automatizadas; se revisa con la compilación de TypeScript y el recorrido de pantallas (sección 3.2).
 
 **Tabla 4**
 
@@ -83,7 +83,7 @@ Al 21 de octubre de 2026 (noche) los repositorios tienen 602 métodos de prueba:
 | operations-service | 13 | 67 | Asignación manual y automática (con el candado de asignaciones), una sola regla para las reservas sin operario, reservas que terminaron y nadie cerró y lista "Por cerrar" (`FollowUpPolicyTest`, `FollowUpServiceTest`), operarios libres, ventana de inicio, ejecución, calificación, ausencias, métricas del operario, resumen del equipo, ficha del operario, informe de inspección y API web |
 | notification-service | 13 | 108 | Casos de uso de notificaciones, fábrica de mensajes por evento, avisos en el idioma de la cuenta, recordatorios, alertas de reservas sin operario, aviso de servicio sin registrar, campos `null` en el evento (`DomainEventEnvelopeTest`), aviso de versión nueva, tokens de dispositivo y controlador admin |
 | payment-service (.NET) | 9 | 112 | Pago y comprobante (máximo 2 MB), referencia reutilizada, historial con filtros, promociones, puntos de fidelización, política de pagos, servicios de comandos y consultas, y 7 pruebas de persistencia contra SQL Server |
-| Web (Angular) | 41 | 62 | Creación de componentes, guards y servicios (pruebas de humo `should create`), mensajes de error de la API, selección de la cuenta de pago, sesión entre pestañas, reservas sin operario y filtros, lista "Por cerrar", cuentas y roles fijos, reportes y barra de fidelización |
+| Web (Angular) | 50 | 115 | Creación de componentes, guards y servicios (pruebas de humo `should create`), mensajes de error de la API, selección de la cuenta de pago, sesión entre pestañas, reservas sin operario y filtros, lista "Por cerrar", cuentas y roles fijos, reportes y barra de fidelización |
 | Móvil | 0 | 0 | Sin pruebas automatizadas |
 
 > *Nota.* Los archivos de apoyo (`Fakes.java`, `InMemory*.java`, `InMemoryPorts.cs`, `DatabaseFixture.cs`) no se cuentan como pruebas. Las 7 pruebas de persistencia de payment se omiten solas si no está definida la variable `PAYMENT_INTEGRATION_DB` (`DatabaseFixture.cs:16-21`).
@@ -95,6 +95,25 @@ Las pruebas del backend son de dominio y de aplicación con dobles en memoria, m
 En la noche del 21 de octubre de 2026, con la rama *develop* de los diez repositorios actualizada ese día, el equipo ejecutó otra vez las ocho suites automatizadas: 707 pruebas, todas aprobadas y ninguna omitida, incluidas las 7 de persistencia de payment contra la base aislada `LavaRapidoPaymentIT`. Es la ejecución final del día y recoge el cambio de las reservas que terminaron y nadie cerró, hecho después de la revisión del equipo, y el arreglo de los campos `null` en los eventos de notification-service. La Tabla 5 muestra cada suite y lo que cambió frente a la ejecución de la madrugada.
 
 **Tabla 5**
+
+*Resultados reales por artefacto (23 de octubre de 2026, rama develop)*
+
+| Artefacto | Comando | Ejecutadas | Aprobadas | Fallidas | Omitidas | Frente a la noche del 21 de octubre (707) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Web (Angular) | `npx ng test --watch=false` | 115 | 115 | 0 | 0 | +53 (50 archivos de prueba, entre ellos los de los ViewModels) |
+| api-gateway | `./mvnw test` | 40 | 40 | 0 | 0 | Sin cambios |
+| security-service | `./mvnw test` | 158 | 158 | 0 | 0 | +3 |
+| customer-service | `./mvnw test` | 69 | 69 | 0 | 0 | Sin cambios |
+| booking-service | `./mvnw test` | 50 | 50 | 0 | 0 | Sin cambios |
+| operations-service | `./mvnw test` | 68 | 68 | 0 | 0 | +1 |
+| notification-service | `./mvnw test` | 114 | 114 | 0 | 0 | Sin cambios |
+| payment-service: dominio | `dotnet test PaymentService.sln` | 115 | 115 | 0 | 0 | Sin cambios |
+| payment-service: aplicación | (mismo comando) | 28 | 28 | 0 | 0 | Sin cambios |
+| payment-service: integración | (mismo comando) | 0 | 0 | 0 | 7 | Omitidas: se corrió sin `PAYMENT_INTEGRATION_DB` (sin la base aislada) |
+| Móvil | — | 0 | 0 | 0 | 0 | Sin pruebas automatizadas |
+| **Total** | | **757** | **757** | **0** | **7** | **+50 ejecutadas** |
+
+> *Nota.* Conteo de la salida de cada comando el 23 de octubre de 2026 sobre la rama *develop* de cada repositorio. Las pruebas de punta a punta de *lavarapido-infra/e2e* no se ejecutaron ese día.
 
 *Resultados reales por artefacto (21 de octubre de 2026, ejecución de la noche)*
 

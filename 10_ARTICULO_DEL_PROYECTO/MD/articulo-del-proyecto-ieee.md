@@ -253,22 +253,22 @@ De los 12 requisitos no funcionales, 5 están implementados y 7 son parciales [1
 
 ### D. Resultados de las Pruebas
 
-En la noche del 21 de octubre de 2026 se ejecutaron todas las suites automatizadas: 707 pruebas aprobadas, ninguna fallida ni omitida; las 7 pruebas de persistencia de payment-service corrieron contra una base de pruebas aislada (Tabla V). Ese mismo día pasaron las 19 pruebas de punta a punta de *lavarapido-infra/e2e*, que recorren el sistema completo: reserva con elección de operario y asignación automática, flujo de los tres roles con pago, aprobación, puntos, ejecución y calificación, informe de inspección con fotos y enlace público, y reglas de acceso por rol, ya con el chequeo de sesión del gateway activo. La SRS registraba 347 pruebas el 6 de octubre [1]; la diferencia corresponde a las pruebas que se agregaron con cada función nueva.
+El 23 de octubre de 2026, con la rama *develop* de cada repositorio, se ejecutaron todas las suites automatizadas: 757 pruebas aprobadas, ninguna fallida, y 7 omitidas (las de persistencia de payment-service, que se corrieron sin la base aislada). En la noche del 21 de octubre se habían aprobado 707, ninguna fallida ni omitida; las 7 pruebas de persistencia de payment-service corrieron contra una base de pruebas aislada (Tabla V). Ese mismo día pasaron las 19 pruebas de punta a punta de *lavarapido-infra/e2e*, que recorren el sistema completo: reserva con elección de operario y asignación automática, flujo de los tres roles con pago, aprobación, puntos, ejecución y calificación, informe de inspección con fotos y enlace público, y reglas de acceso por rol, ya con el chequeo de sesión del gateway activo. La SRS registraba 347 pruebas el 6 de octubre [1]; la diferencia corresponde a las pruebas que se agregaron con cada función nueva.
 
 **TABLA V**  
-*Resultados de la Ejecución de las Pruebas Automatizadas (21 de Octubre de 2026)*
+*Resultados de la Ejecución de las Pruebas Automatizadas (23 de Octubre de 2026)*
 
 | Componente | Casos | Aprobados | Fallidos | Omitidos |
 |---|---|---|---|---|
-| Aplicación web (Angular) | 62 | 62 | 0 | 0 |
+| Aplicación web (Angular) | 115 | 115 | 0 | 0 |
 | api-gateway | 40 | 40 | 0 | 0 |
-| security-service | 155 | 155 | 0 | 0 |
+| security-service | 158 | 158 | 0 | 0 |
 | customer-service | 69 | 69 | 0 | 0 |
 | booking-service | 50 | 50 | 0 | 0 |
-| operations-service | 67 | 67 | 0 | 0 |
+| operations-service | 68 | 68 | 0 | 0 |
 | notification-service | 114 | 114 | 0 | 0 |
-| payment-service (.NET) | 150 | 150 | 0 | 0 |
-| **Total** | **707** | **707** | **0** | **0** |
+| payment-service (.NET) | 150 | 143 | 0 | 7 |
+| **Total** | **764** | **757** | **0** | **7** |
 
 *Nota.* Ejecución con *./mvnw test* en cada servicio Java, *dotnet test* en payment-service y *npx ng test --watch=false* en la web. Las 19 pruebas de punta a punta no se incluyen en la tabla.
 
