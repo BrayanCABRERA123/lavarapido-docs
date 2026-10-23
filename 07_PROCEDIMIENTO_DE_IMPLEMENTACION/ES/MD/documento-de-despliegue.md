@@ -40,7 +40,7 @@
 | Duración real | ~2 h 30 min (aprovisionamiento, compilación de imágenes, configuración de HTTPS y pruebas) |
 | Interrupción a usuarios | No aplica: primer despliegue (no había usuarios en producción) |
 | Ventana para próximas actualizaciones | Fuera de horario de atención del lavadero (antes de las 07:00 o después de las 18:00) |
-| Última actualización | 21-10-2026, 05:21 (hora del servidor): imágenes reconstruidas con el código de `develop` del 20 de octubre y la infraestructura nueva (respaldos, encabezados de seguridad, chequeos de salud y registros limitados); ver 1.3.6. Los cambios del código del 21 de octubre aún no están en el servidor (1.3.7) |
+| Última actualización | 22-10-2026: se desplegaron los cambios del código del 21 de octubre (1.3.7); la semilla 112 y las migraciones 040 (operations-service) y 041 (notification-service) quedaron aplicadas. Respaldos de ese día: `LavaRapido-20261022-081543.bak.gz` y `LavaRapido-20261022-173855.bak.gz`. La actualización anterior (21-10-2026, 05:21) está en 1.3.6 |
 
 #### 1.1.3 Entorno de destino (VPS / Staging / Producción)
 
@@ -163,9 +163,9 @@ El 21-10-2026 a las 05:21 (hora del servidor) se reconstruyeron las imágenes co
 - **Infraestructura:** respaldos automáticos verificados (3.2); base en modelo de recuperación `SIMPLE`; chequeo de salud cada 30 segundos en los 11 contenedores, incluido Caddy (`docker compose ps` los muestra `healthy`); registros limitados a 3 archivos de 10 MB por contenedor; encabezados de seguridad y política de contenido (CSP) en Caddy (5.2.4).
 - **Backend y web:** los cambios que quedaron pendientes el 19-10 (mensajes de error con `spring.web.error` y ajustes de la web) y los del 19 y 20 de octubre: se retiró el cambio de rol de una cuenta, los datos de ejemplo del negocio se borran para que el negocio real los complete (semilla 111 de booking-service) y la web abre el detalle de cada reserva y aviso.
 
-#### 1.3.7 Cambios del 21-10-2026 pendientes de desplegar
+#### 1.3.7 Cambios del 21-10-2026 (desplegados el 22-10-2026)
 
-Están en `develop` desde el 21-10-2026 y entran con la próxima ejecución de `update-server.sh` o del flujo "Desplegar en Azure":
+Estaban en `develop` desde el 21-10-2026 y entraron al servidor el 22-10-2026 con `update-server.sh`; quedaron aplicadas la semilla 112 y las migraciones 040 y 041, y ese día se generaron los respaldos `LavaRapido-20261022-081543.bak.gz` y `LavaRapido-20261022-173855.bak.gz`:
 
 - **security-service y api-gateway:** el token de una sesión cerrada (logout, cuenta inhabilitada o desactivada) deja de servir; el gateway lo confirma con `GET /api/v1/auth/session` y guarda la respuesta 30 segundos por token.
 - **booking-service:** cada 5 minutos se cancela, con el motivo del sistema `EXPIRED` ("Venció sin confirmarse"), la reserva programada que siguió sin confirmarse una hora después de su fin; la semilla 112 agrega ese motivo, y booking-service la aplica al arrancar. La ruta interna `POST /internal/v1/bookings/{id}/no-show` deja en "No asistió" una reserva confirmada vencida, solo cuando la pide operations-service (409 `BOOKING_NOT_EXPIRED` si todavía no vence).
@@ -513,7 +513,7 @@ Las migraciones son **automáticas**:
 
 1. El contenedor `db-init` crea la base `LavaRapido` si no existe y la deja en modelo de recuperación `SIMPLE`.
 2. El contenedor `payment-migrate` (Liquibase 4.29) aplica los changelogs de payment-service (`db/changelog/db.changelog-master.yaml`) y termina.
-3. Cada servicio Java aplica sus propios changelogs al arrancar. La numeración es global: 001–041 más las semillas 1xx de catálogos (la 040 de operations-service y la 041 de notification-service son del 21-10-2026 y entran con la próxima actualización).
+3. Cada servicio Java aplica sus propios changelogs al arrancar. La numeración es global: 001–041 más las semillas 1xx de catálogos (la 040 de operations-service y la 041 de notification-service son del 21-10-2026 y se aplicaron en el servidor el 22-10-2026).
 4. Hibernate solo valida que el modelo coincida con las tablas (`ddl-auto: validate`); nunca altera tablas.
 
 Producción **no carga datos de prueba**: solo catálogos (roles, servicios, estados, horario y datos del negocio).
@@ -534,7 +534,7 @@ q "SELECT u.username, r.code FROM security.app_user u JOIN security.user_role ur
 
 Resultado esperado:
 - los 9 esquemas con sus tablas;
-- en cada servicio, `ok` igual a `changesets` (16-10-2026: 143 de 143; 19-10-2026: 144 de 144, con la 039); después de desplegar los cambios del 21-10-2026 deben aparecer también la 040 en `DATABASECHANGELOG_OPERATIONS` y la 041 en `DATABASECHANGELOG_NOTIFICATION`;
+- en cada servicio, `ok` igual a `changesets` (16-10-2026: 143 de 143; 19-10-2026: 144 de 144, con la 039); desde el 22-10-2026 aparecen también la 040 en `DATABASECHANGELOG_OPERATIONS` y la 041 en `DATABASECHANGELOG_NOTIFICATION`;
 - el administrador inicial creado (log de security: `First administrator created`).
 
 ### 4.3 Despliegue y Orquestación del Stack de Aplicación
