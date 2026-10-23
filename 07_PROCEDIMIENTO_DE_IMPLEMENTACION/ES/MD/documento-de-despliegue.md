@@ -698,7 +698,7 @@ nc -zv 64.236.160.129 1433    # desde afuera: debe FALLAR (puerto cerrado)
 
 #### 5.2.3 Pruebas de escritura y persistencia transaccional
 
-**Prueba automatizada de punta a punta:** `lavarapido-infra/e2e/full-flow.test.js` (`npm run flow`). Recorre los tres roles por el gateway:
+**Prueba automatizada de punta a punta:** `lavarapido-infra/e2e/full-flow.test.js` (`npm run flow`). Recorre los tres roles por el gateway. Estas pruebas corren solo en local, contra los contenedores de `docker compose --profile app` (`npm run flow` en `lavarapido-infra/e2e`); el CI de GitHub solo revisa su sintaxis (`node --check`) y no las ejecuta.
 
 | # | Paso | Resultado |
 |---|---|---|

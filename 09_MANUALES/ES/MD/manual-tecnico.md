@@ -1077,7 +1077,7 @@ La mensajería usa un solo exchange de tipo topic, *carwash.events*. La clave de
 
 ### 13.5 Salud y Verificación
 
-Cada servicio y el gateway exponen */actuator/health* (y payment-service también */health*). Todos comprueban la base de datos: payment-service espera como máximo 3 segundos a SQL Server y, si no responde, contesta DOWN con el código 503. En el servidor público, *docker-compose.prod.yml* revisa además la salud de todos los contenedores cada 30 segundos (*docker compose ps* los muestra *healthy* o *unhealthy*). Las verificaciones de integración recomendadas se describen en el Manual de Instalación, sección 16, y las pruebas de punta a punta de *lavarapido-infra/e2e* recorren los flujos completos contra los contenedores.
+Cada servicio y el gateway exponen */actuator/health* (y payment-service también */health*). Todos comprueban la base de datos: payment-service espera como máximo 3 segundos a SQL Server y, si no responde, contesta DOWN con el código 503. En el servidor público, *docker-compose.prod.yml* revisa además la salud de todos los contenedores cada 30 segundos (*docker compose ps* los muestra *healthy* o *unhealthy*). Las verificaciones de integración recomendadas se describen en el Manual de Instalación, sección 16, y las pruebas de punta a punta de *lavarapido-infra/e2e* (solo en local: el CI solo revisa su sintaxis) recorren los flujos completos contra los contenedores.
 
 ## 14. Seguridad
 
