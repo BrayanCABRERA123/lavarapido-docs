@@ -606,6 +606,8 @@ npm run publish:apk -- "qué cambió"             # lo publica en /app/ y avisa 
 npm run publish:update -- "qué cambió"          # cambios solo de pantallas: actualización por internet
 ```
 
+**Cuándo usar cada una.** EAS Update (*expo-updates*, canal *preview*, *runtimeVersion* por *fingerprint*) entrega por internet los cambios de pantallas y lógica: los APK instalados la bajan al abrir la app y ofrecen reiniciar (*AppUpdatesCheck.tsx*). Si cambió algo nativo (un paquete nativo, permisos, ícono o *app.json*), la *fingerprint* cambia y la actualización no llega a los APK anteriores: hay que compilar un APK nuevo, publicarlo con *publish:apk* (deja */app/LavaRapidoVehicular.apk* y */app/version.json*) y la app obliga a instalarlo. *publish-update.mjs* fija en la actualización la misma dirección del backend que el APK (*eas.json → build.preview.env*).
+
 ### 4.4 Configuración de Enrutamiento, Dominio y Certificados SSL/TLS
 
 1. **Dominio:** Azure → IP pública `vehiclecarwash-vm-ip` → Configuración → *Etiqueta de nombre DNS* = `lavarapidovehicular`. Queda `lavarapidovehicular.northcentralus.cloudapp.azure.com`.

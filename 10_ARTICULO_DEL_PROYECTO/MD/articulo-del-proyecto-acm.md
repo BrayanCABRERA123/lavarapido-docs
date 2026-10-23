@@ -121,6 +121,8 @@ La Tabla 1 resume la pila tecnológica, tomada de los archivos de construcción 
 | Pruebas | JUnit 5, Mockito y Spring Boot Test; xUnit; Vitest |
 | Contenedores y control de versiones | Docker y Docker Compose; Git y GitHub |
 
+Los dos clientes separan la vista de su lógica con el patrón MVVM: en la web cada página de Angular usa un ViewModel con señales (36 en total) y en la app cada pantalla usa un hook de React con el estado y las acciones; los cambios de la app que no tocan código nativo se entregan por internet con EAS Update.
+
 *Nota.* Elaborado a partir del manual técnico [Patiño Cabrera et al. 2026b]. La integración continua se hace con GitHub Actions en los 10 repositorios.
 
 ### 3.6. Procedimiento de Análisis

@@ -533,9 +533,25 @@ Front-end-proyecto-web/src/
 
 La aplicación no usa zonas (*zoneless*) y trabaja con señales; cada área tiene un módulo de carga diferida protegido por *authGuard* con el rol requerido (CLIENT, OPERATOR o ADMIN), y las páginas de autenticación usan *guestGuard*.
 
+**Patrón MVVM.** Cada página de *features/<área>/pages* es la vista: un componente *standalone* que solo muestra y reenvía eventos. Su lógica está en un ViewModel (*@Injectable*) de *features/<área>/viewmodels* o, si la comparten varias áreas (perfil, configuración, crear usuario, barra lateral), de *shared/viewmodels*: guarda el estado en señales (*signal*, *computed*), valida los formularios y llama a los servicios de *core/services*, que son el modelo. La página lo recibe por *providers* e *inject()*. Hay 36 ViewModels y cada uno se prueba con Vitest sin montar la vista (*\*.viewmodel.spec.ts*). Una regla nueva de una pantalla va en su ViewModel, no en la plantilla ni en el componente.
+
 ### 10.5 Estructura de la Aplicación Móvil
 
 La aplicación móvil se organiza en *src/modules* por rol (*auth*, *client*, *operator* y *admin*, cada uno con sus *screens*), *src/shared* (componentes y pantallas compartidas de notificaciones, perfil y configuración) y *src/app/config/locales* (es, en, fr y pt). Todas las llamadas van al gateway mediante *EXPO_PUBLIC_API_URL*.
+
+```text
+LavadoVehicular-Movil/src/
+|-- app/        config (i18n y locales), providers (sesión, tema, AppUpdatesCheck), theme
+|-- core/       api (cliente fetch y apiError), services (un cliente por servicio del backend),
+|               navigation (navegadores por rol), storage (sesión en almacenamiento seguro)
+|-- modules/    auth, client, operator, admin: cada uno con screens (vista), viewmodels (hooks
+|               use*.ts con el estado y las acciones), components, hooks, models y constants
+`-- shared/     components, screens compartidas, validators, utils, hooks, i18n, layouts
+```
+
+La app sigue la misma idea MVVM que la web con hooks de React: la pantalla de *screens* solo dibuja y llama a su hook de *viewmodels* (*useInspection*, *useSettings*, *useLoginViewModel*...), que guarda el estado y usa los servicios de *core/services*.
+
+**Actualizaciones (EAS Update).** La app usa *expo-updates* con *runtimeVersion* de política *fingerprint* y el canal *preview* de *eas.json*; revisa al abrirse (*checkAutomatically: ON_LOAD*). *app/providers/AppUpdatesCheck.tsx* decide: si el servidor publica un APK con *versionCode* mayor, bloquea la app hasta descargarlo (los cambios nativos solo llegan así); si no, baja la actualización por internet y ofrece reiniciar. Los cambios solo de pantallas y lógica se publican con *npm run publish:update -- "qué cambió"* (*scripts/publish-update.mjs*), y los nativos con un APK nuevo (*eas build -p android --profile preview* y *npm run publish:apk*). Una actualización por internet no aplica a un APK con otra *runtimeVersion*.
 
 El informe de inspección del administrador (RF-036) sigue la misma organización que el resto del módulo: *core/services/operations/InspectionService.ts* llama a los mismos endpoints que la web (*/admin/inspections/...*); *modules/admin/viewmodels/useInspection.ts* guarda el estado que devuelve el servidor; *modules/admin/services/inspectionPhotos.ts* toma o elige las fotos con *expo-image-picker* y las reduce con *expo-image-manipulator* (lado mayor de 1600 px, JPEG), porque el servidor acepta como máximo 2 MB por foto; *modules/admin/components/inspection* contiene la tarjeta de cada fase, el formulario de hallazgo y la foto ampliada; y *modules/admin/screens/AdminInspectionScreen.tsx* es la pantalla, que se abre desde el detalle de la reserva (ruta de navegación *AdminInspection*). Los textos de este módulo están en *modules/admin/constants/inspectionTexts.ts*, en los cuatro idiomas.
 
