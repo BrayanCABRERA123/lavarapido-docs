@@ -585,7 +585,7 @@ Esta regla reemplazó la primera versión del mismo día, que cerraba como No as
 
 Para cerrar las reservas pendientes:
 
-1. Ubicar la tarjeta **Por cerrar** en el **Dashboard** de la web o en el inicio de la app móvil. Solo aparece cuando hay alguna reserva pendiente y muestra las de la última semana.
+1. Ubicar la tarjeta **Por cerrar** en el **Dashboard** de la web o en el inicio de la app móvil. Solo aparece cuando hay alguna reserva pendiente y muestra las de los últimos 28 días.
 2. Confirmar con el operario si atendió el vehículo. Si todavía es el mismo día, el operario puede registrar el servicio con **Iniciar** y **Finalizar** aunque sea tarde; así se guardan sus horas reales y la reserva sale de la lista.
 3. Si el vehículo se atendió, hacer clic en **Se atendió**. La reserva queda Completada sin inventar horas: sin hora de inicio no cuenta para la puntualidad del operario y sin hora de fin no suma horas trabajadas, pero sí cuenta como servicio realizado y como ingreso. El cliente no recibe el aviso de que ya puede recoger el vehículo (llegaría horas tarde), pero sí puede calificar el servicio.
 4. Si el cliente no llegó, hacer clic en **No asistió**. Esta opción solo aplica a una reserva que nunca se inició y el estado es definitivo.
