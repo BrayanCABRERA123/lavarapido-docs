@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-21 de octubre de 2026
+23 de octubre de 2026
 
-Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.6
+Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.7
 
 ## Control de Versiones
 
@@ -38,6 +38,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.4 | 2026-10-20 | Se retiró el cambio de tipo de usuario desde Gestión > Usuarios, que el equipo revirtió en la web, la app y el servidor: el rol se elige al crear la cuenta (sección 10.3). Se quitó el filtro Registrados de la lista de usuarios (sección 9.2). Las notificaciones abren su detalle con un botón para ir a Reservas o al inicio (sección 12.7). | Equipo de desarrollo |
 | 4.5 | 2026-10-21 | Revisión contra el código y el servidor del 21 de octubre de 2026: al desactivar una cuenta su sesión deja de servir (secciones 9.4, 9.6 y 17.5); la pestaña de roles dice que el acceso lo decide el rol (sección 10.1); la cuenta de efectivo y su opción para el cliente (sección 11.4); reservas que se cierran solas, conteo único de reservas sin operario y candado de la asignación (secciones 12.3 y 12.4); comprobante de máximo 2 MB (sección 12.6); reportes con solo reservas completadas (sección 13); respaldos automáticos del servidor público (secciones 14.6 y 15.2) y encabezados de seguridad (sección 17.4). Se corrigieron la fecha y la versión de la portada y la fila de datos que antes se guardaban solo en el navegador (Tabla 12). | Equipo de desarrollo |
 | 4.6 | 2026-10-21 | Cambio de la regla de las reservas que terminan sin cerrarse, revisada por el equipo la noche del 21 de octubre: solo pasa sola a No asistió la reserva confirmada que nunca tuvo operario; la que tenía operario y nadie registró queda en la tarjeta **Por cerrar** del inicio (web y app móvil), donde el administrador elige **Se atendió** o **No asistió** (secciones 6.3, 8.3, 12.3 y 12.7). Reservas sin operario con una sola regla también en la app móvil (secciones 8.3 y 12.4); variables *FOLLOW_UP_\** (sección 11.6); nuevo incidente y término del glosario (Tablas 18 y 20). | Equipo de desarrollo |
+| 4.7 | 2026-10-23 | Revisión contra *develop* del 23 de octubre de 2026: respaldo manual con *backup-db.sh* y *verify-backup.sh* en lugar de un *BACKUP DATABASE* con *COMPRESSION*, que SQL Server Express no admite (14.3); la tarea diaria la programa *setup-server.sh* y lee la contraseña de *.env.production* (14.4); tarea de arranque del despliegue continuo, todavía sin probar (14.6); **Por cerrar** revisa los últimos 28 días (12.3); cambiar o recuperar la contraseña revoca sesiones y retirar un rol corta el token (9.4, 9.6 y 10.3); el descuento de un cupón va de 1 a 99 % (12.8); variables que ya pasa el compose (11.6); enlace roto de la tabla de contenido (10.3) y referencia a la app móvil (6.2). Incluye el contenido de las ramas *fix/A-03*, *fix/A-04*, *fix/A-05*, *fix/E-02*, *fix/E-07* y *fix/E-20* de Merari Urbano. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -75,7 +76,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 - [10. Gestión de Roles y Permisos](#10-gestión-de-roles-y-permisos)
   - [10.1 Los Tres Roles Fijos](#101-los-tres-roles-fijos)
   - [10.2 Control por Rol y por Propiedad](#102-control-por-rol-y-por-propiedad)
-  - [10.3 Cambio del Rol de una Persona](#103-cambio-del-rol-de-una-persona)
+  - [10.3 Rol de una Persona](#103-rol-de-una-persona)
 - [11. Configuración del Sistema](#11-configuración-del-sistema)
   - [11.1 Datos del Negocio](#111-datos-del-negocio)
   - [11.2 Horario de Atención y Excepciones](#112-horario-de-atención-y-excepciones)
@@ -168,7 +169,7 @@ Guiar al administrador en la gestión, configuración y supervisión del Sistema
 - El uso del sistema por parte de clientes y operarios (Manual de Usuario).
 - La arquitectura interna, el modelo de datos completo y los contratos de la API (Manual Técnico).
 - La instalación inicial del entorno (Manual de Instalación) y la puesta en operación de una versión (Procedimiento de Implementación).
-- Las pantallas de administración de la aplicación Android, que ofrece módulos equivalentes a los de la web y se descarga desde la página de inicio.
+- Las pantallas de administración de la aplicación Android, que ofrece módulos equivalentes a los de la web y se descarga desde la página de inicio: siguen las mismas reglas de este manual y su recorrido se resume en el Manual de Usuario, sección 10.3.6.
 - Los entornos de pruebas y de producción, que la documentación declara fuera del alcance académico; las recomendaciones de este manual para esos entornos son indicativas.
 
 ### 6.3 Estado de Implementación de las Funciones Administrativas
@@ -373,7 +374,7 @@ Los operarios también se pueden crear desde **Operarios > Nuevo operario** (sec
 3. Confirmar el mensaje que advierte que la persona ya no podrá iniciar sesión. Desde el 21 de octubre de 2026, si tenía una sesión abierta, esa sesión deja de funcionar en máximo 30 segundos en todos sus equipos.
 4. Verificar que el estado cambie a **Inhabilitado** y, si la persona es un operario con servicios pendientes, reasignarlos (sección 12.4).
 
-Una cuenta de administrador no se puede desactivar: el botón aparece bloqueado con el mensaje "Una cuenta de administrador no se puede desactivar." Como el tipo de usuario no se cambia desde el panel (sección 10.3), retirar a un administrador requiere que el administrador de TI le quite ese rol en la base de datos y lo anote en la bitácora del equipo. Tampoco se puede desactivar la propia cuenta, ni desde esta tabla ni desde **Perfil**.
+Una cuenta de administrador no se puede desactivar: el botón aparece bloqueado con el mensaje "Una cuenta de administrador no se puede desactivar." Como el tipo de usuario no se cambia desde el panel (sección 10.3), retirar a un administrador requiere que el administrador de TI le quite ese rol en la base de datos (*security.user_role*) y lo anote en la bitácora del equipo. Desde *develop* del 23 de octubre de 2026 (E-02, versión 1.1.0), en cuanto el rol desaparece de *security.user_role* el sistema revoca todas las sesiones de esa persona (*security.user_session.revoked_at*): el token que todavía decía Administrador deja de funcionar en máximo 30 segundos y, al entrar de nuevo, la persona solo tiene los roles que le quedan. Tampoco se puede desactivar la propia cuenta, ni desde esta tabla ni desde **Perfil**.
 
 ### 9.5 Restablecimiento de la Contraseña
 
@@ -392,7 +393,7 @@ El administrador no puede ver ni fijar la contraseña de un usuario. Para recupe
 
 ### 9.6 Sesiones Activas
 
-Cada ingreso queda registrado en *security.user_session* (inicio, vencimiento, revocación, dirección IP y agente del navegador). Al cerrar sesión, la sesión queda marcada como revocada, y desactivar la cuenta revoca todas sus sesiones. Desde el 21 de octubre de 2026 el token de una sesión revocada deja de servir: security-service lo rechaza y el API Gateway lo corta antes de llegar a los demás servicios, con un margen de hasta 30 segundos (si security-service no responde, el token sirve hasta que vence, como antes). Ante la sospecha de un compromiso, desactivar la cuenta, cambiar el secreto JWT si el compromiso afecta a la plataforma y revisar las sesiones:
+Cada ingreso queda registrado en *security.user_session* (inicio, vencimiento, revocación, dirección IP y agente del navegador). Al cerrar sesión, la sesión queda marcada como revocada, y desactivar la cuenta revoca todas sus sesiones. Cambiar la contraseña desde **Perfil** revoca las demás sesiones de la persona (la del equipo desde el que la cambió sigue abierta) y recuperarla con el código enviado al correo revoca todas. Desde el 21 de octubre de 2026 el token de una sesión revocada deja de servir: security-service lo rechaza y el API Gateway lo corta antes de llegar a los demás servicios, con un margen de hasta 30 segundos (si security-service no responde en 3 segundos, el gateway deja pasar la petición y el token sirve hasta que vence). Queda abierta la no conformidad SEC-01: si una petición trae el encabezado con *bearer* en minúscula, el gateway no revisa la sesión y los servicios distintos de security-service aceptan el token hasta que vence (documento de Acciones Correctivas). Ante la sospecha de un compromiso, desactivar la cuenta, cambiar el secreto JWT si el compromiso afecta a la plataforma y revisar las sesiones:
 
 ```sql
 SELECT TOP (50) s.user_session_id, u.username, s.started_at, s.expires_at,
@@ -436,7 +437,7 @@ Un rol válido no basta: cada servicio también verifica la propiedad del recurs
 
 Cada cuenta tiene un solo tipo de usuario (Cliente, Operario o Administrador), que se elige al crearla: Cliente cuando la persona se registra desde la pantalla pública, o el **Rol asignado** de **Crear usuario** (sección 9.3) cuando la crea el administrador. Desde el 20 de octubre de 2026 la web y la app no ofrecen cambiar el tipo de usuario de una cuenta ya creada: la columna **Tipo de usuario** de **Gestión > Usuarios** solo lo muestra, y el servidor no tiene una ruta para cambiarlo.
 
-Si de verdad una persona necesita otro rol, el administrador de TI lo ajusta en la base de datos (*security.user_role*, con el mismo procedimiento de la sección 8.4), le pide que cierre la sesión e ingrese de nuevo y registra quién pidió el cambio y el motivo en la bitácora del equipo. Si el nuevo rol es Operario, el servicio de operaciones crea su registro de operario la próxima vez que se listen los operarios; luego se le asignan turnos en **Operarios** (sección 12).
+Si de verdad una persona necesita otro rol, el administrador de TI lo ajusta en la base de datos (*security.user_role*, con el mismo procedimiento de la sección 8.4) y registra quién pidió el cambio y el motivo en la bitácora del equipo. Si se le quitó un rol, desde *develop* del 23 de octubre de 2026 (E-02) no hace falta pedirle que cierre la sesión: el sistema compara los roles del token con los de *security.user_role* y revoca todas sus sesiones en máximo 30 segundos. Si solo se le agregó un rol, debe cerrar la sesión e ingresar de nuevo para que su token lo incluya. Si el nuevo rol es Operario, el servicio de operaciones crea su registro de operario la próxima vez que se listen los operarios; luego se le asignan turnos en **Operarios** (sección 12).
 
 ## 11. Configuración del Sistema
 
@@ -525,7 +526,7 @@ Las imágenes de los QR y los comprobantes se guardan dentro de la base de datos
 
 ### 11.6 Variables de Entorno de Operación
 
-Las variables que cambian el comportamiento de la plataforma se leen del archivo *lavarapido-infra/.env* y requieren reiniciar los servicios afectados. Las más relevantes para el administrador de TI son *MESSAGING_ENABLED* (eventos de RabbitMQ, también en payment-service), *MAIL_ENABLED* y *MAIL_\** (correo), *PUSH_ENABLED* (notificaciones push), *REMINDER_LEADS* (recordatorios, por defecto 24 h y 1 h), *BOOKING_ZONE* (zona horaria del lavadero), *BOOKING_SLOT_MINUTES* y *BOOKING_MAX_DAYS_AHEAD* (rejilla y ventana de reservas), *INTERNAL_API_KEY* (llamadas internas entre servicios) y *SPRING_PROFILES_ACTIVE* (perfil de los servicios Java; *dev* crea cuentas de demostración). Las del 21 de octubre de 2026, *SESSION_CHECK_\** (chequeo de sesión del gateway), *BOOKING_EXPIRY_\** (reservas que terminaron sin cerrarse; *BOOKING_EXPIRY_GRACE_MINUTES* la usan booking-service y operations-service) y *FOLLOW_UP_\** (revisión de la lista **Por cerrar** en operations-service), tienen valor por defecto y todavía no pasan por el archivo de Compose, así que en Docker no se cambian desde *.env*. Sus valores y el procedimiento de cambio se describen en el Manual de Instalación.
+Las variables que cambian el comportamiento de la plataforma se leen del archivo *lavarapido-infra/.env* y requieren reiniciar los servicios afectados. Las más relevantes para el administrador de TI son *MESSAGING_ENABLED* (eventos de RabbitMQ, también en payment-service), *MAIL_ENABLED* y *MAIL_\** (correo), *PUSH_ENABLED* (notificaciones push), *REMINDER_LEADS* (recordatorios, por defecto 24 h y 1 h), *BOOKING_ZONE* (zona horaria del lavadero), *BOOKING_SLOT_MINUTES* y *BOOKING_MAX_DAYS_AHEAD* (rejilla y ventana de reservas), *INTERNAL_API_KEY* (llamadas internas entre servicios; desde *develop* del 23 de octubre de 2026 también la necesita el operario para iniciar y terminar servicios), *ALLOWED_EMAIL_DOMAINS* (dominios de correo que acepta el registro, por defecto *gmail.com*) y *SPRING_PROFILES_ACTIVE* (perfil de los servicios Java; con *dev* se crean las cuentas de demostración cuya contraseña esté en *DEMO_ADMIN_PASSWORD*, *DEMO_OPERATOR_PASSWORD* o *DEMO_CLIENT_PASSWORD*). Las del 21 de octubre de 2026, *SESSION_CHECK_\** (chequeo de sesión del gateway), *BOOKING_EXPIRY_\** (reservas que terminaron sin cerrarse; *BOOKING_EXPIRY_GRACE_MINUTES* la usan booking-service y operations-service) y *FOLLOW_UP_\** (revisión de la lista **Por cerrar** en operations-service, incluida *FOLLOW_UP_LOOK_BACK_DAYS*, 28 días), tienen valor por defecto y el archivo de Compose las pasa a los contenedores desde el 22 de octubre de 2026, así que se cambian desde *.env*. Sus valores y el procedimiento de cambio se describen en el Manual de Instalación.
 
 ## 12. Gestión de la Información Principal
 
@@ -585,7 +586,7 @@ Esta regla reemplazó la primera versión del mismo día, que cerraba como No as
 
 Para cerrar las reservas pendientes:
 
-1. Ubicar la tarjeta **Por cerrar** en el **Dashboard** de la web o en el inicio de la app móvil. Solo aparece cuando hay alguna reserva pendiente y muestra las de la última semana.
+1. Ubicar la tarjeta **Por cerrar** en el **Dashboard** de la web o en el inicio de la app móvil. Solo aparece cuando hay alguna reserva pendiente y muestra las de los últimos 28 días (*FOLLOW_UP_LOOK_BACK_DAYS*), porque el servidor puede pasar semanas apagado.
 2. Confirmar con el operario si atendió el vehículo. Si todavía es el mismo día, el operario puede registrar el servicio con **Iniciar** y **Finalizar** aunque sea tarde; así se guardan sus horas reales y la reserva sale de la lista.
 3. Si el vehículo se atendió, hacer clic en **Se atendió**. La reserva queda Completada sin inventar horas: sin hora de inicio no cuenta para la puntualidad del operario y sin hora de fin no suma horas trabajadas, pero sí cuenta como servicio realizado y como ingreso. El cliente no recibe el aviso de que ya puede recoger el vehículo (llegaría horas tarde), pero sí puede calificar el servicio.
 4. Si el cliente no llegó, hacer clic en **No asistió**. Esta opción solo aplica a una reserva que nunca se inició y el estado es definitivo.
@@ -707,7 +708,7 @@ Los avisos se envían con *POST /api/v1/admin/notifications* (rol ADMIN), que ac
 **Promociones.** La pestaña **Gestión > Promociones** administra los cupones de descuento que los clientes desbloquean con sus puntos (datos guardados en payment-service, *GET*, *POST*, *PUT*, *PATCH* y *DELETE /api/v1/admin/promotions*):
 
 1. Crear una promoción y escribir el **Nombre**, la **Descripción**, el código del **Cupón** (por ejemplo, PREMIUM20), el ícono, los beneficios y la **Fecha de inicio** (si es futura, la promoción queda programada hasta ese día).
-2. Escribir el **Descuento al canjear (%)**, entre 1 y 100 (100 = gratis), que se aplica al total de la reserva cuando el cliente canjea el cupón.
+2. Escribir el **Descuento al canjear (%)**, entre 1 y 99, que se aplica al total de la reserva cuando el cliente canjea el cupón. No hay cupones del 100 %: el pago exige un monto mayor que cero, así que el sistema siempre deja al menos 1 peso por pagar, también con un descuento fijo mayor que el total (desde *develop* del 23 de octubre de 2026, E-07).
 3. Escribir los **Puntos de fidelización necesarios** para desbloquear el cupón (0 = disponible para todos).
 4. Guardar. La tarjeta de la promoción muestra el descuento y los puntos necesarios (o "disponible para todos"). El estado se calcula a partir de la fecha de inicio y se puede pausar o reanudar desde la tarjeta.
 
@@ -837,31 +838,34 @@ La documentación del proyecto no define una estrategia de respaldos, porque la 
 
 ### 14.3 Generación de un Respaldo Manual
 
-El respaldo se genera dentro del contenedor de SQL Server (servicio de Compose *sqlserver*, contenedor *lavarapido-sqlserver*) y luego se copia al equipo anfitrión. La contraseña de la cuenta *sa* es el valor de *DB_PASSWORD* del archivo *.env*; se debe leer de una variable de entorno y no escribirla en scripts compartidos.
+En el servidor el respaldo se hace con el script del equipo *lavarapido-infra/deploy/backup-db.sh*, el mismo que corren la tarea diaria y *update-server.sh* (Documento de Despliegue, sección 3.2). No se debe escribir un *BACKUP DATABASE* a mano: el servidor usa SQL Server **Express**, que no admite la opción *COMPRESSION* (el comando falla), y el script ya hace todo lo necesario: respaldo completo con suma de comprobación (*CHECKSUM*), *RESTORE VERIFYONLY*, compresión con *gzip* fuera de SQL Server, permisos restringidos y retención de los últimos 14. La contraseña de *sa* la lee el propio script de *lavarapido-infra/.env.production* y se la entrega a *sqlcmd* en la variable *SQLCMDPASSWORD*, no con *-P*, así que no hay que pasarla ni escribirla en ningún lado.
 
 1. Verificar que haya espacio libre en disco (un respaldo ocupa, como orden de magnitud, el tamaño de los datos).
-2. Generar el respaldo con suma de comprobación.
-3. Comprobar que el archivo se puede restaurar.
-4. Copiarlo al equipo anfitrión y luego a un almacenamiento seguro.
-5. Registrar el respaldo (fecha, archivo, tamaño, resultado de la verificación y responsable).
+2. Generar el respaldo y comprobar que se puede restaurar.
+3. Copiarlo a un almacenamiento seguro fuera de la máquina virtual.
+4. Registrar el respaldo (fecha, archivo, tamaño, resultado de la verificación y responsable); el script ya lo anota en *~/lavarapido/backups/backup.log*.
+
+```bash
+# 1) Respaldo: deja ~/lavarapido/backups/LavaRapido-AAAAMMDD-HHMMSS.bak.gz
+bash ~/lavarapido/lavarapido-infra/deploy/backup-db.sh
+
+# 2) Prueba de que el último respaldo se puede restaurar (lo restaura con otro nombre y lo borra)
+bash ~/lavarapido/lavarapido-infra/deploy/verify-backup.sh
+
+# 3) Resultado de ambos
+tail -n 5 ~/lavarapido/backups/backup.log
+```
+
+En una instalación local con el compose de desarrollo (SQL Server Developer y sin *.env.production*) el script no aplica; el respaldo se genera dentro del contenedor **sin** *COMPRESSION*, para que el mismo comando también sirva en Express. La opción *CHECKSUM* detecta páginas dañadas al respaldar y al verificar:
 
 ```bash
 cd lavarapido-infra
-# 1) Respaldo completo dentro del contenedor
-docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
-  "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/backup_LavaRapido_2026-10-16_0200.bak' WITH INIT, CHECKSUM, COMPRESSION"
-
-# 2) Verificar que el archivo se puede restaurar
-docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
-  "RESTORE VERIFYONLY FROM DISK = N'/var/opt/mssql/data/backup_LavaRapido_2026-10-16_0200.bak' WITH CHECKSUM"
-
-# 3) Copiar al equipo anfitrión
-docker cp lavarapido-sqlserver:/var/opt/mssql/data/backup_LavaRapido_2026-10-16_0200.bak ./backups/
+docker compose exec -e SQLCMDPASSWORD="$DB_PASSWORD" sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -b -Q \
+  "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/backup_LavaRapido.bak' WITH INIT, CHECKSUM"
+docker compose exec -e SQLCMDPASSWORD="$DB_PASSWORD" sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -b -Q \
+  "RESTORE VERIFYONLY FROM DISK = N'/var/opt/mssql/data/backup_LavaRapido.bak' WITH CHECKSUM"
+docker cp lavarapido-sqlserver:/var/opt/mssql/data/backup_LavaRapido.bak ./backups/
 ```
-
-La opción *CHECKSUM* detecta páginas dañadas al respaldar y al verificar.
 
 **Figura 13**
 
@@ -871,27 +875,14 @@ La opción *CHECKSUM* detecta páginas dañadas al respaldar y al verificar.
 
 ### 14.4 Automatización del Respaldo Diario
 
-Un respaldo que depende de que alguien lo recuerde termina sin hacerse. En Linux se programa con *cron*; en Windows, con el Programador de tareas. El siguiente script de ejemplo genera el respaldo, lo verifica, lo copia y borra los archivos que superan la retención:
+Un respaldo que depende de que alguien lo recuerde termina sin hacerse. En el servidor no hay que escribir ningún script ni tarea de *cron*: *setup-server.sh* ya programa en el *crontab* de *azureuser*, todos los días a las 23:00 UTC y 5 minutos después de cada arranque de la máquina virtual, *backup-db.sh* seguido de *verify-backup.sh*, y cada ejecución queda en *~/lavarapido/backups/backup.log*. La tarea lee la contraseña de *.env.production*, así que no depende de que *DB_PASSWORD* esté en el entorno de *cron* ni la pasa con *-P* (el script de ejemplo que había antes en esta sección fallaba al correr solo y usaba *COMPRESSION*).
 
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-STAMP=$(date +%F_%H%M)
-FILE="backup_LavaRapido_${STAMP}.bak"
-DEST="$HOME/backups"
-SQL="docker compose -f $HOME/Backend/lavarapido-infra/docker-compose.yml exec -T sqlserver \
-     /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $DB_PASSWORD -C -b"
-$SQL -Q "BACKUP DATABASE [LavaRapido] TO DISK=N'/var/opt/mssql/data/$FILE' WITH INIT,CHECKSUM,COMPRESSION"
-$SQL -Q "RESTORE VERIFYONLY FROM DISK=N'/var/opt/mssql/data/$FILE' WITH CHECKSUM"
-docker cp lavarapido-sqlserver:/var/opt/mssql/data/$FILE "$DEST/"
-find "$DEST" -name 'backup_LavaRapido_*.bak' -mtime +14 -delete
-echo "$(date -Is) OK $FILE" >> "$DEST/backups.log"
-
-# crontab -e   (todos los días a las 2:00 a. m.; DB_PASSWORD viene del entorno del usuario)
-# 0 2 * * * /home/<USUARIO>/bin/backup.sh >> /home/<USUARIO>/backups/cron.log 2>&1
+crontab -l | grep backup-db.sh               # la tarea programada por setup-server.sh
+grep RESPALDO ~/lavarapido/backups/backup.log | tail -n 3
 ```
 
-El script se debe guardar con permisos restringidos y su resultado se debe vigilar: una alerta cuando no existe el archivo del día vale más que muchos respaldos que nadie revisa.
+En un equipo local con Windows, la misma idea se programa con el Programador de tareas, ejecutando el bloque local de la sección 14.3 con la contraseña tomada de *.env* y no escrita en el script. Su resultado se debe vigilar: una alerta cuando no existe el archivo del día vale más que muchos respaldos que nadie revisa. Los respaldos quedan en el mismo disco de la máquina virtual; para tener una copia afuera, bajarlos al PC del equipo (Documento de Despliegue, sección 3.2).
 
 ### 14.5 Respaldo Antes de los Cambios
 
@@ -909,6 +900,7 @@ Desde el 21 de octubre de 2026 el servidor público respalda la base sin interve
 - Cada respaldo, verificación y restauración queda en *~/lavarapido/backups/backup.log*: *tail -20* muestra lo último y *grep FALLÓ* solo los problemas.
 - La base usa el modelo de recuperación SIMPLE: con respaldos completos no hacen falta respaldos del registro de transacciones, y el registro no crece sin límite.
 - Los respaldos viven en el mismo disco de la máquina virtual: protegen de un error o de una migración mala, no de perder la máquina. Para cumplir la regla 3-2-1 de la Tabla 13, copiarlos al computador del administrador de TI con *scp* o tomar una instantánea del disco en Azure.
+- **Despliegue continuo (preparado el 23 de octubre de 2026, todavía sin fusionar ni probar en vivo).** Cuando se active, *setup-server.sh* agregará al mismo *crontab* una segunda tarea *@reboot*, *deploy/boot-update.sh*, que al encender la máquina baja lo que entró a *main* mientras estaba apagada y lo despliega con *update-server.sh*, que respalda antes. Su resultado queda en *~/lavarapido/backups/deploy.log* y se revisa con *crontab -l | grep boot-update*. Si el respaldo previo falla, no se actualiza. El detalle está en el Documento de Despliegue, sección 4.3.4.
 
 ## 15. Restauración de Datos
 
