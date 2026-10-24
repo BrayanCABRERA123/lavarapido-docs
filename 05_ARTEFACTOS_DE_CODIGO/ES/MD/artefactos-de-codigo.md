@@ -15,28 +15,28 @@
 | Aprendices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano Quintero |
 | Instructora | Karol Daniela Correa |
 | Centro de formación | Industria |
-| Fecha | 23 de octubre de 2026 |
+| Fecha | 24 de octubre de 2026 |
 
-El código del sistema está en 10 repositorios de GitHub: la aplicación web, la aplicación móvil y 8 del backend. Cada uno tiene un flujo de GitHub Actions (`.github/workflows/ci.yml`) que compila y corre sus pruebas en cada cambio (en `lavarapido-infra` valida los scripts de despliegue, los archivos de Docker Compose y la sintaxis de las pruebas de punta a punta); `lavarapido-infra` tiene además `deploy.yml`, un flujo que se lanza a mano para actualizar el servidor (en `main` desde el 23 de octubre de 2026, sin ejecutar todavía porque faltan sus secretos); el despliegue continuo quedó preparado ese día en ramas sin fusionar ni probar en vivo. El 23 de octubre de 2026 se etiquetó `v1.0.0` en 8 de los 10 repositorios; payment-service y la app móvil todavía no tienen versión, y `develop` ya tiene los arreglos de ese día para `v1.1.0`. Este documento inventaría los dos clientes y explica cómo compilarlos y ejecutarlos; el backend se describe solo en lo necesario para que los clientes funcionen. No se reproduce el código fuente.
+El código del sistema está en 10 repositorios de GitHub: la aplicación web, la aplicación móvil y 8 del backend. Cada uno tiene un flujo de GitHub Actions (`.github/workflows/ci.yml`) que compila y corre sus pruebas en cada cambio (en `lavarapido-infra` valida los scripts de despliegue, los archivos de Docker Compose y la sintaxis de las pruebas de punta a punta); `lavarapido-infra` tiene además `deploy.yml`, un flujo que se lanza a mano para actualizar el servidor (en `main` desde el 23 de octubre de 2026, sin ejecutar todavía porque faltan sus secretos). El 24 de octubre de 2026 se fusionó en `develop` el despliegue continuo: el job "Pedir despliegue" en el `ci.yml` de 8 repositorios y `cd.yml` en la app móvil, que publica la actualización por internet al llegar a `main`; falta crear sus secretos. El 23 de octubre de 2026 se etiquetó `v1.0.0` en 8 de los 10 repositorios; payment-service y la app móvil todavía no tienen versión, y `develop` ya tiene los arreglos del 23 y del 24 de octubre (128 ramas ese día) para `v1.1.0`; es lo que corre en el servidor público desde el 24 de octubre. La imagen de la web publicada corre nginx sin `root` en el puerto 8080. Este documento inventaría los dos clientes y explica cómo compilarlos y ejecutarlos; el backend se describe solo en lo necesario para que los clientes funcionen. No se reproduce el código fuente.
 
 ## 1. Inventario de repositorios
 
 **Tabla 2**
 
-*Repositorios del sistema (rama `develop`, corte 23 de octubre de 2026)*
+*Repositorios del sistema (rama `develop`, corte 24 de octubre de 2026)*
 
 | Artefacto | Repositorio | Tecnología | Commits | Último commit |
 | --- | --- | --- | --- | --- |
-| Aplicación web | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 530 | 2026-10-23 |
-| Aplicación móvil | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 248 | 2026-10-23 |
-| Infraestructura | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 96 | 2026-10-23 |
-| API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 28 | 2026-10-23 |
-| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 76 | 2026-10-23 |
-| customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 27 | 2026-10-23 |
-| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 72 | 2026-10-23 |
-| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 63 | 2026-10-23 |
-| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 57 | 2026-10-23 |
-| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 47 | 2026-10-23 |
+| Aplicación web | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 576 | 2026-10-24 |
+| Aplicación móvil | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 296 | 2026-10-24 |
+| Infraestructura | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 151 | 2026-10-24 |
+| API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 42 | 2026-10-24 |
+| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 100 | 2026-10-24 |
+| customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 41 | 2026-10-24 |
+| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 102 | 2026-10-24 |
+| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 93 | 2026-10-24 |
+| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 85 | 2026-10-24 |
+| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 65 | 2026-10-24 |
 
 **Tabla 3**
 
@@ -192,7 +192,7 @@ docker compose --profile app up -d --build   # todo el backend en contenedores
 | Mensajería | `MESSAGING_ENABLED`, `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD`; `AUTO_ASSIGN_ENABLED=false` (opcional) apaga solo la asignación automática |
 | Push | `PUSH_ENABLED` (y `EXPO_ACCESS_TOKEN` en el compose) |
 
-> *Nota.* Las variables del 21 de octubre de 2026 tienen valor por defecto, están comentadas en `.env.example` y el compose las pasa a los contenedores desde el 22 de octubre de 2026: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL` y `SESSION_CHECK_TIMEOUT` (chequeo de sesión del gateway: activo, 30 s y 3 s); `BOOKING_EXPIRY_CHECK_ENABLED` y `BOOKING_EXPIRY_CHECK_INTERVAL` (cancelación de las reservas programadas que vencieron sin confirmarse, en booking-service: activa y cada 5 minutos); `BOOKING_EXPIRY_GRACE_MINUTES` (60 minutos de margen después del fin de la reserva, que usan booking-service y operations-service), y `FOLLOW_UP_ENABLED`, `FOLLOW_UP_INTERVAL` y `FOLLOW_UP_LOOK_BACK_DAYS` (seguimiento de las reservas que terminaron y nadie cerró, en operations-service: activo, cada 5 minutos y revisando los últimos 28 días; necesita `INTERNAL_API_KEY`). Se cambian en `.env`. Desde el 23 de octubre de 2026 también están `ALLOWED_EMAIL_DOMAINS` (dominios de correo, por defecto `gmail.com`) y `DEMO_ADMIN_PASSWORD`, `DEMO_OPERATOR_PASSWORD` y `DEMO_CLIENT_PASSWORD` (cuentas demo del perfil `dev`; vacía, la cuenta no se crea).
+> *Nota.* Las variables del 21 de octubre de 2026 tienen valor por defecto, están comentadas en `.env.example` y el compose las pasa a los contenedores desde el 22 de octubre de 2026: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL` y `SESSION_CHECK_TIMEOUT` (chequeo de sesión del gateway: activo, 30 s y 3 s); `BOOKING_EXPIRY_CHECK_ENABLED` y `BOOKING_EXPIRY_CHECK_INTERVAL` (cancelación de las reservas programadas que vencieron sin confirmarse, en booking-service: activa y cada 5 minutos); `BOOKING_EXPIRY_GRACE_MINUTES` (60 minutos de margen después del fin de la reserva, que usan booking-service y operations-service), y `FOLLOW_UP_ENABLED`, `FOLLOW_UP_INTERVAL` y `FOLLOW_UP_LOOK_BACK_DAYS` (seguimiento de las reservas que terminaron y nadie cerró, en operations-service: activo, cada 5 minutos y revisando los últimos 28 días; necesita `INTERNAL_API_KEY`). Se cambian en `.env`. Desde el 23 de octubre de 2026 también están `ALLOWED_EMAIL_DOMAINS` (dominios de correo, por defecto `gmail.com`) y `DEMO_ADMIN_PASSWORD`, `DEMO_OPERATOR_PASSWORD` y `DEMO_CLIENT_PASSWORD` (cuentas demo del perfil `dev`; vacía, la cuenta no se crea). Desde el 24 de octubre de 2026 customer-service recibe `BOOKING_SERVICE_URL` (`http://booking-service:3003`) e `INTERNAL_API_KEY`; el gateway tiene `AUTH_RATE_LIMIT_*`, `TRUSTED_PROXIES` y `ROUTE_CONNECT_TIMEOUT`/`ROUTE_READ_TIMEOUT`, y operations-service `START_LATE_LIMIT` (4 h), con valor por defecto y todavía fuera del compose; y `BOOKING_EXPIRY_CHECK_*` ya no tienen efecto.
 
 Para correr un servicio Java desde la consola se usa su Maven Wrapper (`./mvnw spring-boot:run` dentro de la carpeta del servicio) con Java 21 (Spring, s.f.). payment-service se ejecuta con `dotnet run --project src/PaymentService.Api` y requiere el SDK de .NET 8 (Microsoft, s.f.). Al levantar con `--profile app`, las carpetas deben llamarse como sus repositorios (`lavarapido-security-service`, `lavarapido-operation-service`), porque así las referencia el compose.
 
@@ -208,7 +208,7 @@ Para correr un servicio Java desde la consola se usa su Maven Wrapper (`./mvnw s
 | RabbitMQ | Panel en `http://localhost:15672` |
 | Mailpit | Bandeja en `http://localhost:8025` |
 
-Con todo arriba, `lavarapido-infra/e2e` tiene tres tipos de scripts de Node 22: las 19 pruebas de punta a punta (`node --test "e2e/*.test.js"`: flujo de reserva entre servicios, flujo completo de los tres roles, informe de inspección y reglas de acceso), la medición de tiempos de respuesta (`node e2e/performance.js`) y la revisión de la web a 360 px de ancho (`node e2e/width-360.js`, después de `npm install --prefix e2e`). Necesitan `MESSAGING_ENABLED=true` e `INTERNAL_API_KEY` en el `.env`.
+Con todo arriba, `lavarapido-infra/e2e` tiene tres tipos de scripts de Node 22: las 19 pruebas de punta a punta (`node --test "e2e/*.test.js"`: flujo de reserva entre servicios, flujo completo de los tres roles, informe de inspección y reglas de acceso), la medición de tiempos de respuesta (`node e2e/performance.js`) y la revisión de la web a 360 px de ancho (`node e2e/width-360.js`, después de `npm install --prefix e2e`). Necesitan `MESSAGING_ENABLED=true` e `INTERNAL_API_KEY` en el `.env`. Desde el 24 de octubre de 2026 `e2e/remote` tiene además una batería de 44 casos que se corre contra el servidor público por la API (`node e2e/remote/run.js` o el flujo `e2e.yml`, a mano), con cuentas de prueba en variables `E2E_*`; todavía no se ha corrido contra Azure.
 
 ## Referencias
 
