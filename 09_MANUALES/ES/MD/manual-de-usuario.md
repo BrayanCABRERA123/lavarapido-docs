@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-21 de octubre de 2026
+23 de octubre de 2026
 
-Tipo de manual: Manual de usuario (roles Cliente y Operario) · Versión 4.6
+Tipo de manual: Manual de usuario (roles Cliente y Operario, en la web y en la aplicación móvil) · Versión 4.7
 
 ## Control de Versiones
 
@@ -39,6 +39,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 4.4 | 2026-10-20 | El historial del cliente y el del operario van de la reserva más reciente a la más antigua y abren el detalle al hacer clic, con los botones **Ir al pago** e **Ir a calificaciones**. Las notificaciones abren su detalle al hacer clic, con un botón para ir al apartado de donde viene el aviso. Con el pago aprobado, la pantalla de pago solo muestra el resumen. | Equipo de desarrollo |
 | 4.5 | 2026-10-21 | Revisión contra el código del 21 de octubre de 2026: el comprobante se reduce a menos de 2 MB antes de enviarlo y el QR se amplía con **Ampliar QR** (sección 10.1.5); Efectivo solo aparece si el lavadero tiene activa esa cuenta; las reservas que nadie inicia se cierran solas una hora después de su hora de fin (Tabla 7, sección 10.2.3 y preguntas frecuentes); al cerrar sesión, las demás pestañas también salen (sección 12); la aplicación móvil pide instalar el APK nuevo cuando se publica (sección 6.2). Se corrigieron la fecha y la versión de la portada. | Equipo de desarrollo |
 | 4.6 | 2026-10-21 | Cambio de la regla de las reservas que terminan sin registrarse, revisada por el equipo la noche del 21 de octubre: solo la reserva confirmada que nunca tuvo operario pasa sola a No asistió; si tenía operario, el operario recibe el aviso "¿Atendiste este servicio?" y el administrador la cierra (Tabla 7, secciones 10.2.3 y 10.2.4 y preguntas frecuentes). La agenda y los servicios asignados ya no muestran reservas canceladas ni en No asistió. | Equipo de desarrollo |
+| 4.7 | 2026-10-23 | Revisión contra *develop* del 23 de octubre de 2026: capítulo nuevo de la aplicación móvil Android para los tres roles (sección 10.3), hecho a partir de las 31 pantallas de la app; el operario puede iniciar desde 15 minutos antes de la hora reservada y no hay límite posterior (secciones 10.2.2 y 13); el cupón aplicado se quita con la **X** y el sistema anula el canje, y solo se acepta un cupón por reserva (sección 10.1.5). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -70,6 +71,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 - [10. Módulos del Sistema](#10-módulos-del-sistema)
   - [10.1 Módulos del Rol Cliente](#101-módulos-del-rol-cliente)
   - [10.2 Módulos del Rol Operario](#102-módulos-del-rol-operario)
+  - [10.3 Aplicación Móvil Android](#103-aplicación-móvil-android)
 - [11. Mensajes y Validaciones](#11-mensajes-y-validaciones)
 - [12. Cierre de Sesión](#12-cierre-de-sesión)
 - [13. Preguntas Frecuentes](#13-preguntas-frecuentes)
@@ -113,7 +115,7 @@ Explicar paso a paso cómo el cliente y el operario deben ingresar, navegar y us
 
 ### 6.1 Qué Cubre Este Manual
 
-- La aplicación web del sistema, usada desde un navegador en un computador, una tableta o un teléfono.
+- La aplicación web del sistema, usada desde un navegador en un computador, una tableta o un teléfono, y la aplicación móvil Android, con sus diferencias de uso para los tres roles (sección 10.3).
 - El rol **Cliente**: registro, inicio de sesión, recuperación de la contraseña, panel, vehículos, reservas, pagos, puntos de fidelización y cupones, historial, calificaciones, notificaciones, perfil y configuración.
 - El rol **Operario**: panel, agenda, servicios asignados, inicio y finalización de servicios, notificaciones, historial, calificaciones recibidas, perfil y configuración.
 - Las preferencias de apariencia (cuatro temas de color) e idioma (español, inglés, francés y portugués).
@@ -122,7 +124,7 @@ Explicar paso a paso cómo el cliente y el operario deben ingresar, navegar y us
 
 - Las funciones del rol **Administrador** (reservas, asignación de operarios, revisión de pagos, horarios y bahías, usuarios, servicios, promociones, reportes y configuración), que se explican en el Manual de Administrador.
 - La instalación, la configuración y la construcción interna del software, que se explican en el Manual de Instalación y en el Manual Técnico.
-- La aplicación móvil Android (React Native con Expo), que ofrece módulos equivalentes para los tres roles. Se descarga desde la página de inicio de la web con el botón de descarga o el código QR; este manual documenta solo la versión web. Desde el 21 de octubre de 2026, cuando el lavadero publica una versión nueva del APK, la aplicación muestra una pantalla que pide descargarla e instalarla antes de seguir.
+- El detalle de las reglas del rol Administrador en la aplicación móvil: la sección 10.3.6 resume sus pantallas, y las reglas son las del Manual de Administrador.
 - El lavado a domicilio: en la versión actual el cliente lleva el vehículo al lavadero en la fecha y la hora reservadas.
 - La facturación electrónica ante la DIAN, las pasarelas de pago y la gestión de insumos o inventario.
 
@@ -569,7 +571,7 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 **Pasos para utilizarlo:**
 
 1. Abrir **Pagar servicio** y revisar el **Resumen de la reserva**: servicio, vehículo, **Subtotal**, **Descuento aplicado** y **TOTAL A PAGAR** (IVA del 19 % incluido).
-2. Si se tiene un cupón desbloqueado, escribirlo en **Código del cupón** y hacer clic en **Aplicar**. Aparece el mensaje "Cupón aplicado: [nombre]" y el descuento se resta del total a pagar.
+2. Si se tiene un cupón desbloqueado, escribirlo en **Código del cupón** y hacer clic en **Aplicar**. Aparece el mensaje "Cupón aplicado: [nombre]" y el descuento se resta del total a pagar. Para quitarlo antes de reportar el pago, hacer clic en la **X** junto al cupón: desde el 23 de octubre de 2026 el sistema anula el canje y el total vuelve a ser el de la reserva. Si se recarga la página después de aplicar el cupón, la pantalla todavía muestra el total completo y no ofrece la **X** (no conformidad BIZ-02, abierta); el monto que se cobra es siempre el que calcula el sistema.
 3. En **Selecciona tu método de pago**, elegir Nequi, Daviplata, Transferencia o Efectivo.
 4. Para un método digital: escanear el código QR con la aplicación bancaria o la billetera, o copiar el número que aparece en **Llave / Cuenta autorizada** con **Copiar número**, y transferir exactamente el **Monto a pagar**. Si el código es difícil de leer, **Ampliar QR** lo muestra más grande, con **Acercar** y **Alejar** (también con la rueda del mouse o con doble clic).
 5. En **Confirma tu pago**, arrastrar la imagen del comprobante o hacer clic para buscarla (JPG o PNG de hasta 10 MB). La página la reduce a menos de 2 MB antes de enviarla; mientras tanto muestra "Preparando el comprobante...".
@@ -588,7 +590,7 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 - Si la imagen no se puede reducir a menos de 2 MB, aparece "No pudimos reducir la imagen a menos de 2 MB. Prueba con una captura de pantalla del comprobante."
 - Cuando el pago se aprueba, el cliente recibe el aviso de pago confirmado (bandeja y correo), los puntos de fidelización de la reserva ("Ganaste N puntos", solo en la bandeja) y, por cada cupón que esos puntos desbloquean, el aviso "¡Tienes un cupón canjeable!" con su código (bandeja y correo). Si el pago se rechaza o se reembolsa, el cliente recibe un aviso y un correo; un reembolso revierte los puntos ganados por esa reserva.
 - Cuando el pago queda aprobado, la pantalla **Pagar servicio** de esa reserva solo muestra el resumen: desaparecen el método de pago, el código QR, la carga del comprobante y el botón **Ya realicé el pago**, y el cupón usado (si lo hay) ya no se puede quitar.
-- Un cupón se acepta solo si está activo, está dentro de sus fechas y el cliente alcanzó los puntos que exige; se puede canjear una vez por reserva. El sistema responde "Ese cupón no existe.", "Ese cupón no está vigente o todavía no acumulas los puntos necesarios." o "Ya canjeaste este cupón en esta reserva." Un canje exitoso envía un aviso y un correo de confirmación.
+- Un cupón se acepta solo si está activo, está dentro de sus fechas y el cliente alcanzó los puntos que exige; solo se acepta un cupón por reserva (desde el 23 de octubre de 2026; antes se podían combinar cupones distintos). El sistema responde "Ese cupón no existe.", "Ese cupón no está vigente o todavía no acumulas los puntos necesarios." o "Ya canjeaste este cupón en esta reserva." Un canje exitoso envía un aviso y un correo de confirmación.
 
 **Tabla 9**
 
@@ -791,7 +793,7 @@ El operario recibe la cuenta del administrador del negocio. El operario solo pue
 
 **Resultado esperado:** El estado del servicio cambia y el cliente puede seguir su avance.
 
-**Observaciones o restricciones:** Un servicio solo se puede iniciar el día de la reserva, y solo puede haber un servicio en curso a la vez. Un servicio debe iniciarse antes de poder finalizarlo ("Primero debes iniciar el servicio."). Al finalizar, el sistema pregunta "¿Finalizar este servicio?" y lo pasa al historial.
+**Observaciones o restricciones:** Un servicio se puede iniciar desde 15 minutos antes de la hora reservada y no hay un límite posterior (un servicio que sí se hizo se puede registrar tarde), y solo puede haber un servicio en curso a la vez. Un servicio debe iniciarse antes de poder finalizarlo ("Primero debes iniciar el servicio."). Al finalizar, el sistema pregunta "¿Finalizar este servicio?" y lo pasa al historial.
 
 **Figura 26**
 
@@ -917,6 +919,67 @@ Las notificaciones del operario funcionan como las del cliente (sección 10.1.7)
 #### 10.2.7 Perfil y Configuración del Operario
 
 El operario consulta y edita sus datos personales y cambia la contraseña en **Perfil**, siguiendo los pasos de la sección 10.1.8. El tema, el idioma y el centro de ayuda están disponibles en **Configuración** (ruta */operator/settings*), como se explica en la sección 10.1.9. Si el administrador le entregó una contraseña temporal, debe cambiarla en el primer ingreso.
+
+### 10.3 Aplicación Móvil Android
+
+La aplicación LavaRapidoVehicular (versión 1.1.0, paquete *com.vehiclecarwash.app*) ofrece a los tres roles las mismas funciones que la web, con las mismas reglas y los mismos datos: lo que se hace en una se ve en la otra. Esta sección explica cómo instalarla y en qué cambia su uso; las reglas de cada módulo son las de las secciones 10.1 y 10.2, y las del administrador, las del Manual de Administrador. Se escribió a partir de las 31 pantallas del código de la app del 23 de octubre de 2026 (3 de ingreso, 8 del cliente, 8 del operario y 12 del administrador) y todavía no tiene capturas.
+
+#### 10.3.1 Instalación y Actualizaciones
+
+**Requisitos:** un teléfono Android con conexión a internet y espacio para instalar un APK. La app no está en Google Play: se instala desde la web del lavadero.
+
+1. En la página de inicio de la web, tocar el botón de descarga de la app o escanear el código QR (el archivo es */app/LavaRapidoVehicular.apk*).
+2. Abrir el archivo descargado y tocar **Instalar**. La primera vez, Android pide permitir que el navegador instale aplicaciones.
+3. Abrir **LavaRapidoVehicular**. Si había una versión anterior al cambio de paquete del 16 de octubre de 2026, desinstalarla una vez; las siguientes se instalan encima.
+
+Las actualizaciones llegan de dos formas:
+
+- **Actualización obligatoria.** Si el lavadero publica un APK nuevo, al abrir la app aparece la pantalla **Actualiza la app para continuar** con el botón **Descargar**. Cuando termine la descarga, abrir el archivo e instalarlo encima: no se pierden la cuenta ni los datos. Hasta instalarla no se puede seguir.
+- **Mejoras por internet.** Los cambios de pantallas llegan solos: al abrir la app aparece **Actualización lista**; **Reiniciar ahora** los muestra de inmediato y, si no, se aplican la próxima vez que se abra.
+
+#### 10.3.2 Ingreso, Registro y Cierre de Sesión
+
+La pantalla de ingreso pide el correo (terminado en @gmail.com) y la contraseña, con las mismas reglas de la sección 8: cinco intentos fallidos bloquean la cuenta 15 minutos. Desde ella se crea una cuenta de cliente (los mismos datos y la aceptación de los dos documentos legales de la sección 8.1) y se recupera la contraseña con el código de 6 dígitos que llega al correo (sección 8.3). La sesión se guarda cifrada en el teléfono y dura hasta que vence el token (una hora); entonces la app vuelve a pedir el ingreso. Para salir, abrir **Más** y tocar **Cerrar Sesión**, que pide confirmación; al cerrar, el teléfono deja de recibir las notificaciones de esa cuenta.
+
+#### 10.3.3 Navegación
+
+Cada rol ve solo sus pantallas. Abajo hay una barra con tres opciones principales y **Avisos**; el botón **Más** abre un panel con el resto de las opciones y **Cerrar Sesión**:
+
+- **Cliente:** barra con **Inicio**, **Reservar**, **Historial** y **Avisos**; en **Más**: **Mis vehículos**, **Perfil**, **Pagar servicio** y **Configuración**.
+- **Operario:** barra con **Inicio**, **Agenda**, **Asignados** y **Avisos**; en **Más**: **Historial**, **Perfil**, **Calificaciones** y **Configuración**.
+- **Administrador:** barra con **Inicio**, **Reservas**, **Pagos** y **Avisos**; en **Más**: **Operarios**, **Perfil**, **Gestión**, **Horarios y bahías**, **Reportes** y **Configuración**.
+
+#### 10.3.4 Uso por el Cliente
+
+- **Inicio:** saludo, tarjetas de **Mis reservas activas**, **Mis vehículos**, **Lavados realizados** y **Notificaciones**, el bloque **Tu próximo servicio** (estado, operario y avance), los **Accesos rápidos** (**Agendar lavado**, **Pagar servicio**, **Mis vehículos** y **Notificaciones**) y **Tus beneficios y promociones**, con el progreso de fidelidad y los cupones desbloqueados (sección 10.1.1).
+- **Reservar:** cuatro pasos en una sola pantalla: **Elige tu vehículo**, **Tipo de servicio** (con la duración estimada y los puntos que suma), **Fecha y hora** (los días cerrados y las horas ocupadas no se ofrecen) y **Operario (opcional)**, con **Sin preferencia** por defecto. **Reservar Ahora** muestra **¡Reserva creada!** con el resumen y el botón **Ir a pagar** (sección 10.1.3).
+- **Pagar servicio:** se elige la cuenta del lavadero (o **Pago en efectivo**, si el lavadero la tiene activa), se amplía el QR con **Ampliar QR**, se aplica un cupón (y se quita con la **X**), se adjunta el comprobante, que la app reduce a menos de 2 MB, y se escribe la referencia de la transacción. El **Monto a pagar** lo calcula el sistema. Al enviar aparece **¡Pago enviado!** y el pago queda en revisión; desde esta pantalla también se cancela la reserva (sección 10.1.5).
+- **Historial:** filtros **Todos**, **Activas**, **Completadas** y **Canceladas**, búsqueda por servicio, vehículo o código, y el detalle de cada reserva con **Pagar ahora**, **Cancelar reserva** y **Calificar Servicio** (sección 10.1.6).
+- **Mis vehículos**, **Avisos**, **Perfil** y **Configuración** funcionan como en las secciones 10.1.2, 10.1.7, 10.1.8 y 10.1.9.
+
+#### 10.3.5 Uso por el Operario
+
+- **Inicio:** "Tienes N servicios pendientes para hoy", el botón **Ver servicios asignados** y los indicadores de reservas asignadas, en progreso, notificaciones y calificación (sección 10.2.1).
+- **Agenda:** vistas **Día**, **Semana** y **Realizados**, con el **Próximo servicio** y los botones **Iniciar** y **Finalizar**. Antes de tiempo la app indica "Podrás iniciarlo desde las HH:MM (15 minutos antes de la reserva)" (secciones 10.2.2 y 10.2.3).
+- **Asignados:** totales de servicios pendientes, en progreso y finalizados hoy, con filtros por fecha, tipo de servicio y búsqueda (sección 10.2.3).
+- **Historial**, **Calificaciones** (promedio, total recibido y nivel de satisfacción de los últimos 12 meses, con el detalle de cada calificación), **Avisos**, **Perfil** y **Configuración** funcionan como en las secciones 10.2.4 a 10.2.7. Si llega el aviso "¿Atendiste este servicio?", se sigue la sección 10.2.4.
+
+#### 10.3.6 Uso por el Administrador
+
+Las reglas son las del Manual de Administrador; la app reúne sus funciones así:
+
+- **Inicio** (**Panel de control general**): reservas de hoy, servicios en progreso, pagos por revisar, ingresos del día y bahías activas, los ingresos de los últimos 7 días, el estado de los operarios y las tarjetas **Pagos pendientes de revisión** (con **Revisar**), **Reservas sin operario** (con la asignación) y **Por cerrar**, donde se confirma si la reserva se atendió o el cliente no asistió.
+- **Reservas** (**Gestión de Reservas**): **Nueva Reserva**, **Asignar operario**, el detalle de cada reserva con su informe de inspección del vehículo y **Exportar**, que genera un archivo CSV.
+- **Pagos** (**Gestión y Verificación de Pagos**): **Revisar** cada comprobante para aprobarlo o rechazarlo, **Registrar pago manual** cuando el cliente pagó en caja, reembolsar un pago aprobado y **Exportar conciliación**.
+- **Operarios**: lista, detalle con habilidades, estado del día y calendario; las cuentas nuevas de operario se crean en **Gestión**.
+- **Gestión**: pestañas **Usuarios**, **Roles** (los 3 roles son fijos), **Servicios** y **Promociones**.
+- **Horarios y bahías**: horario semanal, excepciones y bahías. **Reportes**: servicios realizados, servicios más vendidos, gráficas y **Exportar reporte** con vista previa.
+
+#### 10.3.7 Notificaciones Push y Diferencias con la Web
+
+- Al ingresar, la app pide permiso para enviar notificaciones. Si se acepta, el teléfono recibe por push los mismos avisos de la bandeja (recordatorios 24 horas y 1 hora antes, operario asignado, servicio iniciado y terminado, pagos, puntos y cupones, entre otros) y tocar uno abre la pantalla relacionada. Android los agrupa en los canales **Recordatorios**, **Promociones y puntos**, **Confirmaciones**, **Cancelaciones**, **Mensajes del servicio** y **Sistema**, que se pueden silenciar desde los ajustes del teléfono.
+- Los datos son los mismos de la web: una reserva hecha en la app aparece en la web y al revés.
+- Limitaciones conocidas al 23 de octubre de 2026, registradas en el documento de Acciones Correctivas: si se vuelve a abrir la pantalla de pago después de aplicar un cupón, la app muestra el total completo y no deja quitarlo (BIZ-02); algunos errores del servidor aparecen como un mensaje general en lugar del motivo exacto, y en el formulario de reserva del administrador hay estados que el servidor rechaza, porque no se permite ese cambio de estado.
 
 ## 11. Mensajes y Validaciones
 
@@ -1065,7 +1128,7 @@ La opción **Desactivar mi cuenta** desactiva la cuenta, no la borra: no podrá 
 
 ##### Soy operario y no puedo iniciar un servicio. ¿Por qué?
 
-Un servicio solo se puede iniciar el día de la reserva, solo si está asignado a usted y solo cuando no tiene otro servicio en curso. Si el servicio es suyo y el problema continúa, informe al administrador.
+Un servicio se puede iniciar desde 15 minutos antes de la hora reservada (antes, el sistema responde que todavía es muy temprano), solo si está asignado a usted y solo cuando no tiene otro servicio en curso. Si el servicio es suyo y el problema continúa, informe al administrador.
 
 ##### Atendí un vehículo y olvidé marcar Iniciar. ¿Qué hago?
 

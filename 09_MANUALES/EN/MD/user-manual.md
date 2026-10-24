@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 21, 2026
+October 23, 2026
 
-Manual Type: User Manual (Customer and Operator Roles) · Version 4.6
+Manual Type: User Manual (Customer and Operator Roles, on the web and in the mobile application) · Version 4.7
 
 ## Version Control
 
@@ -39,6 +39,7 @@ Table 1 records the change history of this document. Each time the development t
 | 4.4 | 2026-10-20 | The customer's and the operator's history go from the newest booking to the oldest and open the detail on click, with the **Go to payment** and **Go to ratings** buttons. Notifications open their detail on click, with a button to go to the section the notice comes from. Once the payment is approved, the payment screen only shows the summary. | Development team |
 | 4.5 | 2026-10-21 | Review against the code of October 21, 2026: the receipt is reduced below 2 MB before it is sent and the QR can be enlarged with **Enlarge QR** (section 10.1.5); Cash only appears if the business keeps that account active; bookings nobody starts close on their own one hour after their end time (Table 7, section 10.2.3, and frequently asked questions); when signing out, the other tabs sign out too (section 12); the mobile app asks to install the new APK when it is published (section 6.2). The date and the version of the cover were corrected. | Development team |
 | 4.6 | 2026-10-21 | Change of the rule for bookings that end without being recorded, reviewed by the team on the night of October 21: only a confirmed booking that never had an operator becomes No show on its own; if it had an operator, the operator receives the notice "¿Atendiste este servicio?" (did you serve this booking?) and the administrator closes it (Table 7, sections 10.2.3 and 10.2.4, and frequently asked questions). The schedule and the assigned services no longer show cancelled or No show bookings. | Development team |
+| 4.7 | 2026-10-23 | Review against *develop* of October 23, 2026: new chapter on the Android mobile application for the three roles (section 10.3), written from the app's 31 screens; the operator can start from 15 minutes before the booked time and there is no later limit (sections 10.2.2 and 13); the applied coupon is removed with the **X** and the system cancels the redemption, and only one coupon is accepted per booking (section 10.1.5). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -70,6 +71,7 @@ Table 1 records the change history of this document. Each time the development t
 - [10. System Modules](#10-system-modules)
   - [10.1 Customer Role Modules](#101-customer-role-modules)
   - [10.2 Operator Role Modules](#102-operator-role-modules)
+  - [10.3 Android Mobile Application](#103-android-mobile-application)
 - [11. Messages and Validations](#11-messages-and-validations)
 - [12. Logging Out](#12-logging-out)
 - [13. Frequently Asked Questions](#13-frequently-asked-questions)
@@ -113,7 +115,7 @@ To explain step by step how the customer and the operator must log in, navigate,
 
 ### 6.1 What This Manual Covers
 
-- The web application of the system, used from a browser on a computer, tablet, or phone.
+- The web application of the system, used from a browser on a computer, tablet, or phone, and the Android mobile application, with its differences of use for the three roles (section 10.3).
 - The **Customer** role: registration, login, password recovery, dashboard, vehicles, bookings, payments, loyalty points and coupons, history, ratings, notifications, profile, and settings.
 - The **Operator** role: dashboard, schedule, assigned services, starting and finishing services, notifications, history, ratings received, profile, and settings.
 - Appearance preferences (four color themes) and language (Spanish, English, French, and Portuguese).
@@ -122,7 +124,7 @@ To explain step by step how the customer and the operator must log in, navigate,
 
 - The functions of the **Administrator** role (bookings, operator assignment, payment review, schedules and bays, users, services, reports, and configuration), which are explained in the Administrator Manual.
 - The installation, configuration, and internal construction of the software, which are explained in the Installation Manual and the Technical Manual.
-- The Android mobile application (React Native with Expo), which offers equivalent modules for the three roles. It is downloaded from the home page of the web with the download button or the QR code; this manual documents only the web version. Since October 21, 2026, when the business publishes a new version of the APK, the app shows a screen that asks to download and install it before going on.
+- The detail of the Administrator role rules in the mobile application: section 10.3.6 summarizes its screens, and the rules are those of the Administrator Manual.
 - At-home washing: in the current version the customer brings the vehicle to the business on the booked date and time.
 - Electronic invoicing with the DIAN (Colombian tax authority), payment gateways, and the management of supplies or inventory.
 
@@ -569,7 +571,7 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 **Steps to use it:**
 
 1. Open **Pay service** and review the **Booking summary**: service, vehicle, **Subtotal**, **Discount applied**, and **TOTAL TO PAY** (VAT of 19% included).
-2. If you have an unlocked coupon, type it in **Coupon code** and click **Apply**. The message "Coupon applied: [name]" appears, and the discount is subtracted from the total to pay.
+2. If you have an unlocked coupon, type it in **Coupon code** and click **Apply**. The message "Coupon applied: [name]" appears, and the discount is subtracted from the total to pay. To remove it before reporting the payment, click the **X** next to the coupon: since October 23, 2026 the system cancels the redemption and the total goes back to the booking's. If the page is reloaded after applying the coupon, the screen still shows the full total and does not offer the **X** (nonconformity BIZ-02, open); the amount charged is always the one the system calculates.
 3. In **Select your payment method**, choose Nequi, Daviplata, Transfer, or Cash.
 4. For a digital method: scan the QR code with the banking or wallet app, or copy the number shown in **Authorized key / account** with **Copy number**, and transfer exactly the **Amount to pay**. If the code is hard to read, **Enlarge QR** shows it bigger, with **Zoom in** and **Zoom out** (also with the mouse wheel or a double click).
 5. In **Confirm your payment**, drag the image of the receipt or click to browse for it (JPG or PNG of up to 10 MB). The page reduces it below 2 MB before sending it; meanwhile it shows "Preparing the receipt...".
@@ -588,7 +590,7 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 - If the image cannot be reduced below 2 MB, the message "We could not reduce the image below 2 MB. Try a screenshot of the receipt." appears.
 - When the payment is approved, the customer receives the notice "Payment confirmed" (inbox and email), the loyalty points of the booking ("You earned N points", inbox only), and, for each coupon those points unlock, the notice "You have a redeemable coupon!" with its code (inbox and email). If the payment is rejected or refunded, the customer receives a notice and an email; a refund reverses the points earned by that booking.
 - Once the payment is approved, the **Pay service** screen of that booking only shows the summary: the payment method, the QR code, the receipt upload, and the **I've made the payment** button disappear, and the coupon used (if any) can no longer be removed.
-- A coupon is accepted only if it is active, is within its dates, and the customer has reached the points it requires; it can be redeemed once per booking. The system answers "That coupon doesn't exist.", "That coupon isn't active, or you haven't reached the points it needs yet.", or "You already redeemed this coupon on this booking." A successful redemption sends a confirmation notice and email.
+- A coupon is accepted only if it is active, is within its dates, and the customer has reached the points it requires; only one coupon is accepted per booking (since October 23, 2026; before, different coupons could be combined). The system answers "That coupon doesn't exist.", "That coupon isn't active, or you haven't reached the points it needs yet.", or "You already redeemed this coupon on this booking." A successful redemption sends a confirmation notice and email.
 
 **Table 9**
 
@@ -791,7 +793,7 @@ The operator receives the account from the business administrator. The operator 
 
 **Expected result:** The status of the service changes and the customer can follow its progress.
 
-**Notes or restrictions:** A service can only be started on the day of the booking, and only one service can be in progress at a time. A service must be started before it can be finished ("You must start the service first."). When finishing, the system asks "Finish this service?" and moves it to the history.
+**Notes or restrictions:** A service can be started from 15 minutes before the booked time and there is no later limit (a service that was actually done can be recorded late), and only one service can be in progress at a time. A service must be started before it can be finished ("You must start the service first."). When finishing, the system asks "Finish this service?" and moves it to the history.
 
 **Figure 26**
 
@@ -917,6 +919,67 @@ The operator's notifications work like the customer's (section 10.1.7). The most
 #### 10.2.7 Operator Profile and Settings
 
 The operator views and edits the personal data and changes the password in **Profile**, following the steps of section 10.1.8. The theme, the language, and the help center are available in **Settings** (route */operator/settings*), as explained in section 10.1.9. If the administrator provided a temporary password, it should be changed at the first login.
+
+### 10.3 Android Mobile Application
+
+The LavaRapidoVehicular application (version 1.1.0, package *com.vehiclecarwash.app*) offers the three roles the same functions as the web, with the same rules and the same data: what is done in one is seen in the other. This section explains how to install it and how its use differs; the rules of each module are those of sections 10.1 and 10.2, and the administrator's are those of the Administrator Manual. It was written from the 31 screens in the app's code of October 23, 2026 (3 for sign-in, 8 for the customer, 8 for the operator, and 12 for the administrator) and has no screenshots yet.
+
+#### 10.3.1 Installation and Updates
+
+**Requirements:** an Android phone with an internet connection and room to install an APK. The app is not on Google Play: it is installed from the business's website.
+
+1. On the home page of the web, tap the app download button or scan the QR code (the file is */app/LavaRapidoVehicular.apk*).
+2. Open the downloaded file and tap **Install**. The first time, Android asks to allow the browser to install applications.
+3. Open **LavaRapidoVehicular**. If there was a version older than the package change of October 16, 2026, uninstall it once; the following ones install over it.
+
+Updates arrive in two ways:
+
+- **Mandatory update.** If the business publishes a new APK, when the app opens the screen **Update the app to continue** appears with the **Download** button. When the download finishes, open the file and install it over the current one: the account and data are kept. Until it is installed, the app cannot be used.
+- **Improvements over the internet.** Screen changes arrive on their own: when the app opens, **Update ready** appears; **Restart now** shows them right away and, otherwise, they apply the next time the app is opened.
+
+#### 10.3.2 Sign-in, Sign-up, and Sign-out
+
+The sign-in screen asks for the email (ending in @gmail.com) and the password, with the same rules as section 8: five failed attempts lock the account for 15 minutes. From it a customer account is created (the same data and the acceptance of the two legal documents of section 8.1) and the password is recovered with the 6-digit code sent by email (section 8.3). The session is stored encrypted on the phone and lasts until the token expires (one hour); then the app asks to sign in again. To leave, open **More** and tap **Log Out**, which asks for confirmation; after signing out, the phone stops receiving that account's notifications.
+
+#### 10.3.3 Navigation
+
+Each role sees only its screens. At the bottom there is a bar with three main options and **Alerts**; the **More** button opens a panel with the rest of the options and **Log Out**:
+
+- **Customer:** bar with **Home**, **Book**, **History**, and **Alerts**; in **More**: **My vehicles**, **Profile**, **Pay service**, and **Settings**.
+- **Operator:** bar with **Home**, **Schedule**, **Assigned**, and **Alerts**; in **More**: **History**, **Profile**, **Ratings**, and **Settings**.
+- **Administrator:** bar with **Home**, **Bookings**, **Payments**, and **Alerts**; in **More**: **Operators**, **Profile**, **Management**, **Hours & Bays**, **Reports**, and **Settings**.
+
+#### 10.3.4 Use by the Customer
+
+- **Home:** greeting, cards for active bookings, vehicles, washes done, and notifications, the next service block (status, operator, and progress), the quick access buttons (book a wash, pay service, my vehicles, and notifications), and the benefits and promotions block, with the loyalty progress and the unlocked coupons (section 10.1.1).
+- **Book:** four steps on one screen: choose the vehicle, the type of service (with the estimated duration and the points it adds), the date and time (closed days and taken times are not offered), and the operator (optional), with no preference by default. **Book Now** shows the booking summary and the **Go to payment** button (section 10.1.3).
+- **Pay service:** choose the business's account (or cash, if the business has it active), enlarge the QR, apply a coupon (and remove it with the **X**), attach the receipt, which the app reduces to less than 2 MB, and type the transaction reference. The amount to pay is calculated by the system. After sending, the payment is under review; the booking can also be cancelled from this screen (section 10.1.5).
+- **History:** filters for all, active, completed, and cancelled bookings, search by service, vehicle, or code, and the detail of each booking with pay now, cancel booking, and rate service (section 10.1.6).
+- **My vehicles**, **Alerts**, **Profile**, and **Settings** work as in sections 10.1.2, 10.1.7, 10.1.8, and 10.1.9.
+
+#### 10.3.5 Use by the Operator
+
+- **Home:** the number of services pending for today, the button to see the assigned services, and the indicators of assigned bookings, in progress, notifications, and rating (section 10.2.1).
+- **Schedule:** **Day**, **Week**, and **Completed** views, with the next service and the **Start** and **Finish** buttons. Before time, the app says "You can start it from HH:MM (15 minutes before the booking)" (sections 10.2.2 and 10.2.3).
+- **Assigned:** totals of services pending, in progress, and finished today, with filters by date, type of service, and search (section 10.2.3).
+- **History**, **Ratings** (average, total received, and satisfaction level of the last 12 months, with the detail of each rating), **Alerts**, **Profile**, and **Settings** work as in sections 10.2.4 to 10.2.7. If the notice "Did you serve this booking?" arrives, follow section 10.2.4.
+
+#### 10.3.6 Use by the Administrator
+
+The rules are those of the Administrator Manual; the app groups its functions as follows:
+
+- **Home** (general control panel): today's bookings, services in progress, payments to review, revenue of the day, and active bays, the revenue of the last 7 days, the status of the operators, and the cards for payments pending review (with **Review**), bookings without an operator (with the assignment), and **To close**, where the administrator confirms whether the booking was served or the customer did not show up.
+- **Bookings** (booking management): **New Booking**, **Assign operator**, the detail of each booking with its vehicle inspection report, and **Export**, which produces a CSV file.
+- **Payments** (payment management and verification): **Review** each receipt to approve or reject it, **Register manual payment** when the customer paid at the counter, refund an approved payment, and **Export reconciliation**.
+- **Operators**: list, detail with skills, status of the day, and calendar; new operator accounts are created in **Management**.
+- **Management**: **Users**, **Roles** (the 3 roles are fixed), **Services**, and **Promotions** tabs.
+- **Hours & Bays**: weekly schedule, exceptions, and bays. **Reports**: services done, best-selling services, charts, and **Export report** with a preview.
+
+#### 10.3.7 Push Notifications and Differences from the Web
+
+- When signing in, the app asks for permission to send notifications. If it is granted, the phone receives by push the same notices as the inbox (reminders 24 hours and 1 hour before, operator assigned, service started and finished, payments, points, and coupons, among others), and tapping one opens the related screen. Android groups them in the channels **Reminders**, **Promotions and points**, **Confirmations**, **Cancellations**, **Service messages**, and **System**, which can be muted from the phone's settings.
+- The data are the same as on the web: a booking made in the app appears on the web and vice versa.
+- Known limitations as of October 23, 2026, recorded in the Corrective Actions document: if the payment screen is opened again after applying a coupon, the app shows the full total and does not let the customer remove it (BIZ-02); some server errors appear as a general message instead of the exact reason, and the administrator's booking form offers statuses that the server rejects, because that status change is not allowed.
 
 ## 11. Messages and Validations
 
@@ -1065,7 +1128,7 @@ The **Deactivate my account** option deactivates the account, without erasing it
 
 ##### I am an operator and cannot start a service. Why?
 
-A service can only be started on the day of the booking, only if it is assigned to you, and only when you do not have another service in progress. If the service is yours and the problem continues, inform the administrator.
+A service can be started from 15 minutes before the booked time (earlier, the system answers that it is still too early), only if it is assigned to you, and only when you do not have another service in progress. If the service is yours and the problem continues, inform the administrator.
 
 ##### I served a vehicle and forgot to press Start. What do I do?
 
