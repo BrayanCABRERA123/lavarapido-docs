@@ -8,7 +8,7 @@ Software Analysis and Development Technologist program (ADSO), group (ficha) 314
 
 Instructor: Karol Daniela Correa
 
-Version 2.4, October 21, 2026
+Version 2.5, October 23, 2026
 
 ---
 
@@ -21,7 +21,7 @@ This document shows how LavaRápido behaves when someone uses it: what happens, 
 3. **Activity diagrams** of the business processes.
 4. **State diagrams** of the entities that change status (booking, payment, service execution, promotion and inspection report).
 
-On October 21, 2026, the following were updated against the code of that day: the sign-out that voids the token (section 2.8), the lock on operator assignment (section 2.4), the receipt of at most 2 MB and the cash option that only appears while its account is active (sections 2.5 and 3.4), and the handling of bookings that ended without anyone closing them (sections 4.1 and 4.3): the system only changes the status when there is no doubt, and the rest goes to the administrator's "To close" list. On October 20, 2026, the content was checked again against the code: the client only cancels (the administrator reschedules), the role change of accounts was removed, the sequences and states that did not match were corrected, and the use case and other diagrams were redrawn with straight lines and no crossings. On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end.
+On October 21, 2026, the following were updated against the code of that day: the sign-out that voids the token (section 2.8), the lock on operator assignment (section 2.4), the receipt of at most 2 MB and the cash option that only appears while its account is active (sections 2.5 and 3.4), and the handling of bookings that ended without anyone closing them (sections 4.1 and 4.3): the system only changes the status when there is no doubt, and the rest goes to the administrator's "To close" list. On October 20, 2026, the content was checked again against the code: the client only cancels (the administrator reschedules), the role change of accounts was removed, the sequences and states that did not match were corrected, and the use case and other diagrams were redrawn with straight lines and no crossings. On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end. On October 23, 2026 (version 2.5) it was added that recovering the password revokes all sessions (section 2.10) and that, if security-service does not answer, the gateway lets the request through (*fail-open*); the rest of the analysis still holds against *develop* of that day.
 
 The full specification of each requirement and use case (actors, precondition, main flow, alternative flows and postcondition) is in the *Software Requirements Specification*, sections 5 and 7.3; here they are cited by their identifier (RF-XXX, CUXX).
 
@@ -555,7 +555,7 @@ sequenceDiagram
     GW-->>W: 401 (booking-service never gets the call)
 ```
 
-*Source:* `security-service` (`AuthenticationService.login / logout / isActive`, `ActiveSessionValidator`, `LoginLockout`, `PasswordRecoveryService`, migration `034-security-login-lockout.sql`) and the gateway (`SessionCheckFilter`). The gateway keeps each answer of `/api/v1/auth/session` for 30 seconds per token, so an open session costs one extra call every half minute, not one per request. A session also closes when the administrator deactivates the account or the owner closes it; that reaches the other services within the same 30 seconds.
+*Source:* `security-service` (`AuthenticationService.login / logout / isActive`, `ActiveSessionValidator`, `LoginLockout`, `PasswordRecoveryService`, migration `034-security-login-lockout.sql`) and the gateway (`SessionCheckFilter`). The gateway keeps each answer of `/api/v1/auth/session` (if security-service does not answer within 3 seconds, it lets the request through: *fail-open*) for 30 seconds per token, so an open session costs one extra call every half minute, not one per request. A session also closes when the administrator deactivates the account or the owner closes it; that reaches the other services within the same 30 seconds.
 
 ### 2.9 Vehicle inspection report (RF-036)
 
@@ -626,7 +626,7 @@ sequenceDiagram
     U->>W: New password
     W->>S: POST /api/v1/auth/password/reset
     alt policy met and different from the current one
-        S->>DB: marks the code as used, stores the new password and clears the lockout
+        S->>DB: marks the code as used, stores the new password, clears the lockout, and revokes all sessions
         S-->>W: 204 (back to sign-in)
     else weak or same as the current one
         S-->>W: 400 WEAK_PASSWORD or SAME_PASSWORD (the code is not spent)
