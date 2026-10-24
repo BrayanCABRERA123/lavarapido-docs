@@ -4,6 +4,16 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-10-24 (tarde) — Migración 048 de notification-service
+
+**Contenido** (español e inglés). Corrección encontrada al probar producción después del despliegue de las 15:10: notification-service no podía leer `notification.pending_delivery` (migración 047), porque `channel` y `language` eran VARCHAR y Hibernate (`use_nationalized_character_data: true`) las lee como NCHAR, y no envió push ni correos hasta la migración 048 (NVARCHAR; commit `612417a`, merge `3f99df4`), desplegada sola el 24 de octubre a las 17:12 UTC; las 2 entregas atascadas salieron a las 17:13.
+
+- 08 Acciones 2.9: AC-87 cerrada (detección, causa, corrección, despliegue y verificación); Tabla 10: 87 de 103 (84 %); lección L-19 (pruebas de integración contra SQL Server, RNF-003); Anexo C con AC-87 en R-003.
+- 07 Despliegue 1.9: subsección 1.3.10 con la actualización de notification de las 17:12 UTC y su resultado; última actualización (1.1.2).
+- 06 Pruebas: brecha 9 con la 048 y la falla de la 047 que no vieron las pruebas unitarias.
+- 04 Diseño 1.8: `pending_delivery` con `channel` y `language` NVARCHAR desde la 048.
+- **PDF y Word: pendientes de regenerar** para 04, 06, 07 (despliegue) y 08. Esta entrada solo cambia los Markdown.
+
 ## 2026-10-24 — Correcciones del 24 de octubre en producción, despliegue con reversión y no conformidades cerradas
 
 **Contenido** (español e inglés). Revisión contra `develop` del 24 de octubre de 2026 en los 10 repositorios de código (128 ramas fusionadas ese día, CI en verde) y contra el despliegue en Azure de ese día; fuentes: la auditoría de cierre del 24 de octubre, los informes por área de la flota del 23 y el 24 de octubre y el último CI de `develop`.

@@ -40,7 +40,7 @@
 | Actual duration | ~2 h 30 min (provisioning, image builds, HTTPS setup and testing) |
 | User downtime | Not applicable: first deployment (no users in production yet) |
 | Window for future updates | Outside the car wash's business hours (before 07:00 or after 18:00) |
-| Latest update | 2026-10-24, around 15:10: the complete `develop` of the 10 repositories (fixes of October 23 and 24, 1.3.8 and 1.3.9), in two runs over SSH; 11 healthy containers, migrations 044, 045, and seed 113 (booking), 047 and seed 116 (notification), and 022 and 023 (payment) applied, and 0 errors in the logs. The previous update (2026-10-22) is in 1.3.7 |
+| Latest update | 2026-10-24 at 17:12 UTC: notification-service only, with migration 048, which fixes reading `pending_delivery` (1.3.10). Before that, the same day around 15:10: the complete `develop` of the 10 repositories (fixes of October 23 and 24, 1.3.8 and 1.3.9), in two runs over SSH; 11 healthy containers, migrations 044, 045, and seed 113 (booking), 047 and seed 116 (notification), and 022 and 023 (payment) applied, and 0 errors in the logs. The previous update (2026-10-22) is in 1.3.7 |
 
 #### 1.1.3 Target environment (VPS / Staging / Production)
 
@@ -78,6 +78,7 @@
 | 1.6 | 2026-10-21 | Development team | Evening changes of 2026-10-21 in 1.3.7: confirmed bookings with an operator that nobody registered are no longer closed as "No-show" on their own and go to "To close", migrations 040 (operations) and 041 (notification), `FOLLOW_UP_*` variables, fix for `null` fields in notification-service events, and mobile app adjustments |
 | 1.8 | 2026-10-24 | Development team | Deployment of 2026-10-24 with `develop` (1.1.1, 1.1.2, and 1.3.9): two runs, health wait, `:prev` images, `rollback.sh`, and the protection that prevents downgrading; the web on port 8080 (2.2.3); new variables `AUTH_RATE_LIMIT_*`, `TRUSTED_PROXIES`, `ROUTE_*_TIMEOUT`, `START_LATE_LIMIT`, and `INTERNAL_API_KEY` and `BOOKING_SERVICE_URL` in customer-service (3.3.2); rollback with `rollback.sh` and restore with `payment-migrate` (3.2.4 and 3.4); continuous deployment merged into `develop`, without secrets (4.3.4); mobile OTA with `cd.yml`; CI of 2026-10-24 (4.3.3) |
 | 1.7 | 2026-10-23 | Development team | Version `v1.0.0` in 8 repositories and what is pending for payment and mobile (1.1.1); deployment of 2026-10-22 (1.3.7); fixes of 2026-10-23 in `develop` for `v1.1.0` (1.3.8); the variables the compose file already passes, `FOLLOW_UP_LOOK_BACK_DAYS` and `ALLOWED_EMAIL_DOMAINS` (3.3.2); a rollback that works (3.4); `setup-server.sh` from `main` (4.3.1); continuous deployment prepared and not yet tested live (4.3.4); QA and DBA owners (1.1.4). Includes the content of Merari Urbano's `fix/A-06`, `fix/A-07`, and `fix/A-08` branches |
+| 1.9 | 2026-10-24 | Development team | notification-service update of 2026-10-24 at 17:12 UTC with migration 048 and its result (1.3.10); latest update (1.1.2) |
 
 ### 1.3 Change Summary (Release Notes)
 
@@ -219,6 +220,14 @@ On 2026-10-24, 128 fix branches of the 10 repositories were merged into `develop
 Result: 11 `healthy` containers; migrations and seeds 044, 045, 113, 047, 116, 022, and 023 applied; the `operations-service.booking-confirmed` queue and its `.dlq` created; 8 `:prev` images; 0 errors in the logs, and the web and API routes answering. **Until `v1.1.0` is released**, every manual update is done with `BRANCH=develop bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh`. When the machine is turned on, `boot-update.sh` pulls `main` by default and the protection stops it without touching anything (it is logged in `backups/deploy.log`): the server keeps what it had.
 
 **Before releasing `v1.1.0`**, in the production database: look for the duplicate open payments that migration 023 rejected (`rejection_reason LIKE 'Pago duplicado%'`) and count the COMPLETED bookings with open lines (they generate false "not started" notices, ACO-35). ACO-33 to ACO-40 remain open in the Corrective Actions document, Table 7, among them the web's unpaginated payment queue (ACO-33).
+
+#### 1.3.10 notification-service update of 2026-10-24 (17:12 UTC)
+
+While testing production after the 15:10 deployment (1.3.9), notification-service turned out to be unable to read the new table `notification.pending_delivery` (migration 047): `channel` and `language` were `VARCHAR`, Hibernate reads them as `NCHAR` (`use_nationalized_character_data: true`), and the SQL Server driver does not support that conversion. Since the deployment, notification-service had sent no push notification or email at all (welcome, bookings, payments, and reminders); the inbox notices and the password-recovery email (sent by security-service) still worked. 2 deliveries were stuck: 1 push and 1 welcome email.
+
+- **Fix:** migration `048-notification-pending-delivery-nvarchar.sql` (commit `612417a`, merged into `develop` as `3f99df4`): `channel` NVARCHAR(10) NOT NULL and `language` NVARCHAR(5) NULL, with `uq_pending_delivery_channel` and `ck_pending_delivery_channel` re-created; `MARK_RAN` precondition and rollback. It was first tested in `tempdb` with the data kept, and the notification suite passed.
+- **Deployment:** notification-service only, on 2026-10-24 at 17:12 UTC.
+- **Result:** migration 048 applied; the 2 stuck deliveries went out at 17:13:50 (push) and 17:13:52 (email), and there have been no errors since. It is recorded as AC-87 in the Corrective Actions document.
 
 ---
 
