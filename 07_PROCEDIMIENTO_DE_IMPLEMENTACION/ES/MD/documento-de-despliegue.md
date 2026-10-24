@@ -40,7 +40,7 @@
 | Duración real | ~2 h 30 min (aprovisionamiento, compilación de imágenes, configuración de HTTPS y pruebas) |
 | Interrupción a usuarios | No aplica: primer despliegue (no había usuarios en producción) |
 | Ventana para próximas actualizaciones | Fuera de horario de atención del lavadero (antes de las 07:00 o después de las 18:00) |
-| Última actualización | 24-10-2026, hacia las 15:10: `develop` completo de los 10 repositorios (arreglos del 23-10 y del 24-10, 1.3.8 y 1.3.9), en dos corridas por SSH; 11 contenedores sanos, migraciones 044, 045 y semilla 113 (booking), 047 y semilla 116 (notification) y 022 y 023 (payment) aplicadas, y 0 errores en los registros. La actualización anterior (22-10-2026) está en 1.3.7 |
+| Última actualización | 24-10-2026 a las 17:12 UTC: solo notification-service, con la migración 048, que corrige la lectura de `pending_delivery` (1.3.10). Antes, ese mismo día hacia las 15:10: `develop` completo de los 10 repositorios (arreglos del 23-10 y del 24-10, 1.3.8 y 1.3.9), en dos corridas por SSH; 11 contenedores sanos, migraciones 044, 045 y semilla 113 (booking), 047 y semilla 116 (notification) y 022 y 023 (payment) aplicadas, y 0 errores en los registros. La actualización anterior (22-10-2026) está en 1.3.7 |
 
 #### 1.1.3 Entorno de destino (VPS / Staging / Producción)
 
@@ -78,6 +78,7 @@
 | 1.6 | 2026-10-21 | Equipo de desarrollo | Cambios de la noche del 21-10-2026 en 1.3.7: las reservas confirmadas con operario que nadie registró ya no se cierran solas como "No asistió" y pasan a "Por cerrar", migraciones 040 (operations) y 041 (notification), variables `FOLLOW_UP_*`, arreglo de los campos `null` en los eventos de notification-service y ajustes de la app móvil |
 | 1.8 | 2026-10-24 | Equipo de desarrollo | Despliegue del 24-10-2026 con `develop` (1.1.1, 1.1.2 y 1.3.9): dos corridas, espera de salud, imágenes `:prev`, `rollback.sh` y la protección que impide bajar de versión; la web en el puerto 8080 (2.2.3); variables nuevas `AUTH_RATE_LIMIT_*`, `TRUSTED_PROXIES`, `ROUTE_*_TIMEOUT`, `START_LATE_LIMIT`, e `INTERNAL_API_KEY` y `BOOKING_SERVICE_URL` en customer-service (3.3.2); reversión con `rollback.sh` y restauración con `payment-migrate` (3.2.4 y 3.4); despliegue continuo fusionado en `develop`, sin secretos (4.3.4); OTA del móvil con `cd.yml`; CI del 24-10-2026 (4.3.3) |
 | 1.7 | 2026-10-23 | Equipo de desarrollo | Versión `v1.0.0` en 8 repositorios y pendientes de payment y móvil (1.1.1); despliegue del 22-10-2026 (1.3.7); arreglos del 23-10-2026 en `develop` para `v1.1.0` (1.3.8); las variables que el compose ya pasa, `FOLLOW_UP_LOOK_BACK_DAYS` y `ALLOWED_EMAIL_DOMAINS` (3.3.2); reversión que funciona (3.4); `setup-server.sh` desde `main` (4.3.1); despliegue continuo preparado y todavía sin probar en vivo (4.3.4); responsables de QA y DBA (1.1.4). Incluye el contenido de las ramas `fix/A-06`, `fix/A-07` y `fix/A-08` de Merari Urbano |
+| 1.9 | 2026-10-24 | Equipo de desarrollo | Actualización de notification-service del 24-10-2026 a las 17:12 UTC con la migración 048 y su resultado (1.3.10); última actualización (1.1.2) |
 
 ### 1.3 Resumen de Cambios (Release Notes)
 
@@ -219,6 +220,14 @@ El 24-10-2026 se fusionaron a `develop` 128 ramas de correcciones de los 10 repo
 Resultado: 11 contenedores `healthy`; migraciones y semillas 044, 045, 113, 047, 116, 022 y 023 aplicadas; colas `operations-service.booking-confirmed` y su `.dlq` creadas; 8 imágenes `:prev`; 0 errores en los registros y las rutas de la web y la API respondiendo. **Hasta liberar `v1.1.0`**, toda actualización a mano se hace con `BRANCH=develop bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh`. Al encender la máquina, `boot-update.sh` baja `main` por defecto y la protección lo detiene sin tocar nada (queda anotado en `backups/deploy.log`): el servidor sigue con lo que tenía.
 
 **Antes de liberar `v1.1.0`**, en la base de producción: buscar los pagos abiertos duplicados que rechazó la migración 023 (`rejection_reason LIKE 'Pago duplicado%'`) y contar las reservas COMPLETED con líneas abiertas (generan avisos falsos de "no se inició", ACO-35). Quedan abiertas en el documento de Acciones Correctivas, Tabla 7, ACO-33 a ACO-40, entre ellas la cola de pagos de la web sin paginar (ACO-33).
+
+#### 1.3.10 Actualización de notification-service del 24-10-2026 (17:12 UTC)
+
+Al probar producción después del despliegue de las 15:10 (1.3.9) se vio que notification-service no podía leer la tabla nueva `notification.pending_delivery` (migración 047): `channel` y `language` eran `VARCHAR`, Hibernate las lee como `NCHAR` (`use_nationalized_character_data: true`) y el controlador de SQL Server no admite esa conversión. Desde el despliegue no salía ninguna push ni ningún correo de notification-service (bienvenida, reservas, pagos y recordatorios); la bandeja de avisos y el correo de recuperación de contraseña (lo envía security-service) sí funcionaban. Quedaron 2 entregas atascadas: 1 push y 1 correo de bienvenida.
+
+- **Corrección:** migración `048-notification-pending-delivery-nvarchar.sql` (commit `612417a`, merge a `develop` `3f99df4`): `channel` NVARCHAR(10) NOT NULL y `language` NVARCHAR(5) NULL, con `uq_pending_delivery_channel` y `ck_pending_delivery_channel` recreados; precondición `MARK_RAN` y rollback. Antes se probó en `tempdb` con los datos conservados, y la suite de notification pasó.
+- **Despliegue:** solo notification-service, el 24-10-2026 a las 17:12 UTC.
+- **Resultado:** migración 048 aplicada; las 2 entregas atascadas salieron a las 17:13:50 (push) y a las 17:13:52 (correo), y desde entonces no hay errores. Queda registrada como AC-87 en el documento de Acciones Correctivas.
 
 ---
 
