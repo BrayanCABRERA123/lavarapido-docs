@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 23, 2026
+October 24, 2026
 
-Manual Type: User Manual (Customer and Operator Roles, on the web and in the mobile application) · Version 4.7
+Manual Type: User Manual (Customer and Operator Roles, on the web and in the mobile application) · Version 4.8
 
 ## Version Control
 
@@ -40,6 +40,7 @@ Table 1 records the change history of this document. Each time the development t
 | 4.5 | 2026-10-21 | Review against the code of October 21, 2026: the receipt is reduced below 2 MB before it is sent and the QR can be enlarged with **Enlarge QR** (section 10.1.5); Cash only appears if the business keeps that account active; bookings nobody starts close on their own one hour after their end time (Table 7, section 10.2.3, and frequently asked questions); when signing out, the other tabs sign out too (section 12); the mobile app asks to install the new APK when it is published (section 6.2). The date and the version of the cover were corrected. | Development team |
 | 4.6 | 2026-10-21 | Change of the rule for bookings that end without being recorded, reviewed by the team on the night of October 21: only a confirmed booking that never had an operator becomes No show on its own; if it had an operator, the operator receives the notice "¿Atendiste este servicio?" (did you serve this booking?) and the administrator closes it (Table 7, sections 10.2.3 and 10.2.4, and frequently asked questions). The schedule and the assigned services no longer show cancelled or No show bookings. | Development team |
 | 4.7 | 2026-10-23 | Review against *develop* of October 23, 2026: new chapter on the Android mobile application for the three roles (section 10.3), written from the app's 31 screens; the operator can start from 15 minutes before the booked time and there is no later limit (sections 10.2.2 and 13); the applied coupon is removed with the **X** and the system cancels the redemption, and only one coupon is accepted per booking (section 10.1.5). | Development team |
+| 4.8 | 2026-10-24 | Review against *develop* of October 24, 2026, which runs on the public server since that day: the screens refresh on their own, without reloading (4.1 and 10.3.4); sign-in accepts any email domain and sign-up still requires @gmail.com (8.1, 8.2, and 10.3.2); the server requires the consent, limits repeated attempts, and voids the recovery code at the 5th mistake (8.1 to 8.3); the amount to pay and the coupon come from the server and are kept after reloading (10.1.5); a vehicle with active bookings is not removed (10.1.2); the operator sees the administrator's notes and can start up to 4 hours after the end time (10.2.2, 10.2.3, and 13); payment notices for a cancelled booking and read-only permissions for the administrator in the app (10.3.6); new error messages (Tables 11 and 12). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -98,6 +99,8 @@ The document follows the structure of the guide for writing software manuals of 
 ### 4.1 Sources and Conventions of This Manual
 
 The screens, routes, buttons, and messages described here correspond to the *develop* branch of the web application as of October 17, 2026. In the interface the system appears under its trade name, **LavaRápido**. The names of buttons, menus, and messages are written in **bold** or between quotation marks exactly as they appear when the interface language is English; the interface is also available in Spanish, French, and Portuguese. A route such as */client/vehicles* is the part of the web address that follows the domain of the system (for example, *http://localhost:4200/client/vehicles* in the local environment).
+
+**Data always up to date (since October 24, 2026).** Reloading the page is no longer needed to see a change made by someone else: the web refreshes the screen on entering, on returning to the tab or window, and whenever a new notification arrives, and the screens that wait for another person (for example, **Pay service** while the administrator reviews the payment) refresh every 45 seconds while the tab is visible. The mobile app refreshes on returning to the screen and when a push notification arrives. So when the administrator approves a payment or assigns an operator, the customer sees it in less than a minute.
 
 ## 5. Objective
 
@@ -223,7 +226,7 @@ Every person must have an account to use the functions of the system. Customers 
 2. Click **Register** on the top bar (or **Get started**).
 3. Type the **ID Number**: only digits, between 5 and 20.
 4. Type the **First Names** (minimum 3 characters) and the **Last Names** (minimum 2 characters).
-5. Type the **Email Address**, which must end in @gmail.com. The field does not allow spaces.
+5. Type the **Email Address**, which must end in @gmail.com (sign-up only accepts Gmail; the server checks it too). The field does not allow spaces.
 6. Type the **Phone Number**: a 10-digit Colombian mobile number starting with 3. The field only accepts digits.
 7. Type the **Password** and watch the list of requirements, which are checked as they are met: minimum 8 characters, at least one uppercase letter, at least one number, and at least one special character. **All four requirements are mandatory**; spaces are not allowed.
 8. Repeat the password in **Confirm Password**. The eye icon shows or hides what was typed.
@@ -232,7 +235,7 @@ Every person must have an account to use the functions of the system. Customers 
 
 **Expected result:** The system shows the message "Registration successful!" and, after clicking **Go to login**, takes the person to the login screen.
 
-**Notes or restrictions:** It is not possible to register two accounts with the same email address or the same ID number. In those cases, the system shows "An account with this email already exists" or "An account with this ID number already exists" and does not create the account.
+**Notes or restrictions:** It is not possible to register two accounts with the same email address or the same ID number. In those cases, the system shows "An account with this email already exists" or "An account with this ID number already exists" and does not create the account. Since October 24, 2026 the server also requires both acceptance checkboxes: without them it answers "You must accept the personal data policy (Law 1581) to sign up."
 
 **Figure 2**
 
@@ -264,13 +267,13 @@ Every person must have an account to use the functions of the system. Customers 
 
 1. Open the browser and enter the web address of the system.
 2. Click **Login**.
-3. Type the registered **Email Address** (ending in @gmail.com).
+3. Type the registered **Email Address**. Since October 24, 2026 sign-in accepts an email of any domain (only the email format is checked), so accounts created earlier with another provider can get in; sign-up still requires @gmail.com.
 4. Type the **Password**.
 5. Click **Login**. While the request is processed, the button shows "Signing in...".
 
 **Expected result:** The system opens the home screen of the person's role: */client* for the customer, */operator* for the operator, or */admin* for the administrator.
 
-**Notes or restrictions:** If the email or the password is wrong, the system shows "Incorrect email or password" and does not reveal which of the two failed. After five failed attempts within 15 minutes, the account is locked for 15 minutes and the system shows "Too many failed attempts. Your account is locked for 15 minutes; wait or use "Forgot your password?" to get in now." If the person resets the password, they can log in right away. The session lasts one hour; when it expires, the system returns to the login screen with the message "Your session expired. Please sign in again." A deactivated account cannot log in and receives the message "Your account is disabled. Contact the administrator."
+**Notes or restrictions:** If the email or the password is wrong, the system shows "Incorrect email or password" and does not reveal which of the two failed. After five failed attempts within 15 minutes, the account is locked for 15 minutes and the system shows "Too many failed attempts. Your account is locked for 15 minutes; wait or use "Forgot your password?" to get in now." If the person resets the password, they can log in right away. The session lasts one hour; when it expires, the system returns to the login screen with the message "Your session expired. Please sign in again." A deactivated account cannot log in and receives the message "Your account is disabled. Contact the administrator." Since October 24, 2026, if too many attempts are made in a row from the same device (more than 60 in a minute across sign-in, sign-up, and recovery), the system answers "Too many attempts in a row. Wait a moment and try again."
 
 **Figure 4**
 
@@ -301,7 +304,7 @@ Every person must have an account to use the functions of the system. Customers 
 
 **Expected result:** The password is changed and the code used cannot be used again.
 
-**Notes or restrictions:** For security, the system shows the same screen whether the email is registered or not, so it does not reveal which accounts exist. Each new code invalidates the previous one ("We sent you a new code. The previous one no longer works."). After five incorrect attempts the code stops working and a new one must be requested. A three-step indicator at the top shows the stage of the process.
+**Notes or restrictions:** For security, the system shows the same screen whether the email is registered or not, so it does not reveal which accounts exist. Each new code invalidates the previous one ("We sent you a new code. The previous one no longer works."). After five incorrect attempts the code stops working and the system shows "Too many failed attempts. Wait a few minutes or request another code to try again." (since October 24, 2026): request a new one with **Resend** (in the app, **Request another code**). A three-step indicator at the top shows the stage of the process.
 
 **Figure 5**
 
@@ -435,7 +438,7 @@ Each module is documented with the same format: name, description, role that can
 4. In the "Register new vehicle" window, select the **Vehicle type** (Car, Sedan, SUV, Pickup, Truck, or Motorcycle) and type the **Brand**, the **Model**, the **Plate**, and the **Color**.
 5. Click **Save vehicle** and verify that the vehicle appears in the list with the message "Vehicle registered!".
 6. To correct the data of a vehicle, use the edit option of its card, change the fields, and click **Save changes**.
-7. To remove a vehicle, use the delete option of its card and confirm in the "Delete vehicle?" window.
+7. To remove a vehicle, use the delete option of its card and confirm in the "Delete vehicle?" window. Since October 24, 2026, if the vehicle has active or upcoming bookings, the system does not remove it and shows "This vehicle has active or upcoming bookings: cancel them before removing it."
 
 **Expected result:** The vehicle is registered and available to be selected when booking a wash.
 
@@ -573,7 +576,7 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 **Steps to use it:**
 
 1. Open **Pay service** and review the **Booking summary**: service, vehicle, **Subtotal**, **Discount applied**, and **TOTAL TO PAY** (VAT of 19% included).
-2. If you have an unlocked coupon, type it in **Coupon code** and click **Apply**. The message "Coupon applied: [name]" appears, and the discount is subtracted from the total to pay. To remove it before reporting the payment, click the **X** next to the coupon: since October 23, 2026 the system cancels the redemption and the total goes back to the booking's. If the page is reloaded after applying the coupon, the screen still shows the full total and does not offer the **X** (nonconformity BIZ-02, open); the amount charged is always the one the system calculates.
+2. If you have an unlocked coupon, type it in **Coupon code** and click **Apply**. The message "Coupon applied: [name]" appears, and the discount is subtracted from the total to pay. To remove it before reporting the payment, click the **X** next to the coupon: the system cancels the redemption and the total goes back to the booking's. Since October 24, 2026 the **TOTAL TO PAY** is the one the server calculates: if the page is reloaded or opened again after applying the coupon, the screen still shows the coupon, the discount, and the **X**. If the system cannot get the total, it shows "—" and the notice "We couldn't get the amount to pay. Check your connection and come back in a few seconds."; in that case, do not pay until the amount appears.
 3. In **Select your payment method**, choose Nequi, Daviplata, Transfer, or Cash.
 4. For a digital method: scan the QR code with the banking or wallet app, or copy the number shown in **Authorized key / account** with **Copy number**, and transfer exactly the **Amount to pay**. If the code is hard to read, **Enlarge QR** shows it bigger, with **Zoom in** and **Zoom out** (also with the mouse wheel or a double click).
 5. In **Confirm your payment**, drag the image of the receipt or click to browse for it (JPG or PNG of up to 10 MB). The page reduces it below 2 MB before sending it; meanwhile it shows "Preparing the receipt...".
@@ -587,12 +590,13 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 
 - The amount due is always calculated by the system (booking total minus the coupon applied, if any); the customer cannot change it. The amount paid that the customer declares is compared by the administrator with the receipt and the bank.
 - Only bookings in Confirmed, In progress, or Completed status can be paid.
-- While a payment is in review, another one cannot be reported for the same booking; a booking admits a single approved payment.
+- While a payment is in review, another one cannot be reported for the same booking ("There is already a payment under review for this booking."); a booking admits a single approved payment. A reference already used in another payment is rejected ("That reference was already used in another payment. Check your receipt number.").
+- If the booking changes after the payment is reported (for example, the administrator changes its services), the reported payment can no longer be approved with the old amount: the administrator rejects it and the customer reports it again with the new amount shown on screen.
 - If the administrator rejects the payment, the customer can report it again with a correct receipt.
 - If the image cannot be reduced below 2 MB, the message "We could not reduce the image below 2 MB. Try a screenshot of the receipt." appears.
 - When the payment is approved, the customer receives the notice "Payment confirmed" (inbox and email), the loyalty points of the booking ("You earned N points", inbox only), and, for each coupon those points unlock, the notice "You have a redeemable coupon!" with its code (inbox and email). If the payment is rejected or refunded, the customer receives a notice and an email; a refund reverses the points earned by that booking.
 - Once the payment is approved, the **Pay service** screen of that booking only shows the summary: the payment method, the QR code, the receipt upload, and the **I've made the payment** button disappear, and the coupon used (if any) can no longer be removed.
-- A coupon is accepted only if it is active, is within its dates, and the customer has reached the points it requires; only one coupon is accepted per booking (since October 23, 2026; before, different coupons could be combined). The system answers "That coupon doesn't exist.", "That coupon isn't active, or you haven't reached the points it needs yet.", or "You already redeemed this coupon on this booking." A successful redemption sends a confirmation notice and email.
+- A coupon is accepted only if it is active, is within its dates, and the customer has reached the points it requires; only one coupon is accepted per booking (since October 23, 2026; before, different coupons could be combined; if there is already one, the system answers "This booking already has a coupon. Remove it if you want to use another one."). A percentage coupon is recalculated if the booking total changes; a fixed discount is shown in pesos. The system answers "That coupon doesn't exist.", "That coupon isn't active, or you haven't reached the points it needs yet.", or "You already redeemed this coupon on this booking." A successful redemption sends a confirmation notice and email.
 
 **Table 9**
 
@@ -795,7 +799,7 @@ The operator receives the account from the business administrator. The operator 
 
 **Expected result:** The status of the service changes and the customer can follow its progress.
 
-**Notes or restrictions:** A service can be started from 15 minutes before the booked time and there is no later limit (a service that was actually done can be recorded late), and only one service can be in progress at a time. A service must be started before it can be finished ("You must start the service first."). When finishing, the system asks "Finish this service?" and moves it to the history.
+**Notes or restrictions:** A service can be started from 15 minutes before the booked time and up to 4 hours after its end time (a service that was actually done can be recorded late within that period; since October 24, 2026). After that, the **Start** button is disabled with the notice "It can no longer be started: more than 4 h have passed since the end time" and the administrator closes the service. Only one service can be in progress at a time. A service must be started before it can be finished ("You must start the service first."). When finishing, the system asks "Finish this service?" and moves it to the history.
 
 **Figure 26**
 
@@ -819,14 +823,14 @@ The operator receives the account from the business administrator. The operator 
 2. Review the cards: **Total Services**, **Pending**, **In Progress**, and **Completed Today**.
 3. Use **Filter by date**, **Filter by service type**, or the search box, and click **Filter**.
 4. In the table, read the **ID**, **Service type**, **Date & time**, **Vehicle**, **Client**, and **Status** of each service.
-5. Click a service to open **Service information**: client, vehicle, service type, scheduled time, and payment method.
+5. Click a service to open **Service information**: client, vehicle, service type, scheduled time, and payment method. Since October 24, 2026, if the administrator wrote instructions when assigning or reassigning the service, they appear in **Notes from the administrator** (on the web and in the app).
 6. Click **Start Service** when beginning the wash and confirm with **Start**.
 7. When the wash is finished, click **Finish Service** and confirm with **Finish**.
 8. If it is necessary to communicate with the customer, use **Contact client** in **Additional options**.
 
 **Expected result:** The status changes to In progress and then to Completed ("Service finished!"). The customer receives the notices and can rate the service.
 
-**Notes or restrictions:** The service can be started from 15 minutes before the booked time. The operator can only update the services assigned to them. Every service must be recorded with **Start** and **Finish**, even if late: if the time of the service has already passed, it can still be started and finished on the same day, and the real hours count. If an assigned service was not started when its time ended, or was started and not finished one hour after its end time, the operator receives the notice "¿Atendiste este servicio?" (did you serve this booking?) and the administrator sees the booking in the list of bookings to close; if it can no longer be recorded, the operator tells the administrator whether the vehicle was served, and the administrator closes it. The schedule and the assigned services list do not show cancelled bookings or those left as No show.
+**Notes or restrictions:** The service can be started from 15 minutes before the booked time. The operator can only update the services assigned to them. Every service must be recorded with **Start** and **Finish**, even if late: if the time of the service has already passed, it can still be started and finished up to 4 hours after its end time, and the real hours count; afterwards the system answers "This service can no longer be started: more than 4 hours have passed since its end time. Ask the administrator to close it." If an assigned service was not started when its time ended, or was started and not finished one hour after its end time, the operator receives the notice "¿Atendiste este servicio?" (did you serve this booking?) and the administrator sees the booking in the list of bookings to close; if it can no longer be recorded, the operator tells the administrator whether the vehicle was served, and the administrator closes it. The schedule and the assigned services list do not show cancelled bookings or those left as No show.
 
 **Table 10**
 
@@ -834,7 +838,7 @@ The operator receives the account from the business administrator. The operator 
 
 | Status | Meaning | Available action |
 |---|---|---|
-| Pending | The service was assigned and has not started yet. | Start Service (from 15 minutes before the booked time). |
+| Pending | The service was assigned and has not started yet. | Start Service (from 15 minutes before the booked time and up to 4 hours after its end time). |
 | In progress | The operator started the wash. | Finish Service. |
 | Completed | The wash is finished and the customer can rate it. | View only. |
 
@@ -941,7 +945,7 @@ Updates arrive in two ways:
 
 #### 10.3.2 Sign-in, Sign-up, and Sign-out
 
-The sign-in screen asks for the email (ending in @gmail.com) and the password, with the same rules as section 8: five failed attempts lock the account for 15 minutes. From it a customer account is created (the same data and the acceptance of the two legal documents of section 8.1) and the password is recovered with the 6-digit code sent by email (section 8.3). The session is stored encrypted on the phone and lasts until the token expires (one hour); then the app asks to sign in again. To leave, open **More** and tap **Log Out**, which asks for confirmation; after signing out, the phone stops receiving that account's notifications.
+The sign-in screen asks for the email and the password, with the same rules as section 8: since October 24, 2026 it accepts an email of any domain (sign-up still requires @gmail.com), and five failed attempts lock the account for 15 minutes. If the recovery code is mistyped five times, the app offers **Request another code**. From it a customer account is created (the same data and the acceptance of the two legal documents of section 8.1) and the password is recovered with the 6-digit code sent by email (section 8.3). The session is stored encrypted on the phone and lasts until the token expires (one hour); then the app asks to sign in again. To leave, open **More** and tap **Log Out**, which asks for confirmation; after signing out, the phone stops receiving that account's notifications.
 
 #### 10.3.3 Navigation
 
@@ -955,14 +959,14 @@ Each role sees only its screens. At the bottom there is a bar with three main op
 
 - **Home:** greeting, cards for active bookings, vehicles, washes done, and notifications, the next service block (status, operator, and progress), the quick access buttons (book a wash, pay service, my vehicles, and notifications), and the benefits and promotions block, with the loyalty progress and the unlocked coupons (section 10.1.1).
 - **Book:** four steps on one screen: choose the vehicle, the type of service (with the estimated duration and the points it adds), the date and time (closed days and taken times are not offered), and the operator (optional), with no preference by default. **Book Now** shows the booking summary and the **Go to payment** button (section 10.1.3).
-- **Pay service:** choose the business's account (or cash, if the business has it active), enlarge the QR, apply a coupon (and remove it with the **X**), attach the receipt, which the app reduces to less than 2 MB, and type the transaction reference. The amount to pay is calculated by the system. After sending, the payment is under review; the booking can also be cancelled from this screen (section 10.1.5).
+- **Pay service:** choose the business's account (or cash, if the business has it active), enlarge the QR, apply a coupon (and remove it with the **X**), attach the receipt, which the app reduces to less than 2 MB, and type the transaction reference. The amount to pay is calculated by the server and, since October 24, 2026, the applied coupon is still shown after leaving and returning to the screen. After sending, the payment is under review; when the administrator approves it, the screen refreshes on its own with the push notification. The booking can also be cancelled from this screen (section 10.1.5).
 - **History:** filters for all, active, completed, and cancelled bookings, search by service, vehicle, or code, and the detail of each booking with pay now, cancel booking, and rate service (section 10.1.6).
 - **My vehicles**, **Alerts**, **Profile**, and **Settings** work as in sections 10.1.2, 10.1.7, 10.1.8, and 10.1.9.
 
 #### 10.3.5 Use by the Operator
 
 - **Home:** the number of services pending for today, the button to see the assigned services, and the indicators of assigned bookings, in progress, notifications, and rating (section 10.2.1).
-- **Schedule:** **Day**, **Week**, and **Completed** views, with the next service and the **Start** and **Finish** buttons. Before time, the app says "You can start it from HH:MM (15 minutes before the booking)" (sections 10.2.2 and 10.2.3).
+- **Schedule:** **Day**, **Week**, and **Completed** views, with the next service and the **Start** and **Finish** buttons. Before time, the app says "You can start it from HH:MM (15 minutes before the booking)" and, since October 24, 2026, more than 4 hours after the end time the **Start** button is disabled with "it can no longer be started" (sections 10.2.2 and 10.2.3). The service detail shows the administrator's notes.
 - **Assigned:** totals of services pending, in progress, and finished today, with filters by date, type of service, and search (section 10.2.3).
 - **History**, **Ratings** (average, total received, and satisfaction level of the last 12 months, with the detail of each rating), **Alerts**, **Profile**, and **Settings** work as in sections 10.2.4 to 10.2.7. If the notice "Did you serve this booking?" arrives, follow section 10.2.4.
 
@@ -972,16 +976,17 @@ The rules are those of the Administrator Manual; the app groups its functions as
 
 - **Home** (general control panel): today's bookings, services in progress, payments to review, revenue of the day, and active bays, the revenue of the last 7 days, the status of the operators, and the cards for payments pending review (with **Review**), bookings without an operator (with the assignment), and **To close**, where the administrator confirms whether the booking was served or the customer did not show up.
 - **Bookings** (booking management): **New Booking**, **Assign operator**, the detail of each booking with its vehicle inspection report, and **Export**, which produces a CSV file.
-- **Payments** (payment management and verification): **Review** each receipt to approve or reject it, **Register manual payment** when the customer paid at the counter, refund an approved payment, and **Export reconciliation**.
+- **Payments** (payment management and verification): **Review** each receipt to approve or reject it (the queue is loaded by pages and the receipt image is requested when it is opened), **Register manual payment** when the customer paid at the counter (the cash account appears even if it is deactivated for customers), refund an approved payment, and **Export reconciliation**. Since October 24, 2026, if a payment's booking was cancelled, the payment shows a notice to **refund** it (if approved) or **reject** it (if in review); on the web the notice says "Booking cancelled: refund" or "Booking cancelled: reject".
 - **Operators**: list, detail with skills, status of the day, and calendar; new operator accounts are created in **Management**.
-- **Management**: **Users**, **Roles** (the 3 roles are fixed), **Services**, and **Promotions** tabs.
+- **Management**: **Users**, **Roles** (the 3 roles are fixed; since October 24, 2026 the permission matrix is read-only, on the web and in the app: "This table shows each role's reference permissions and is read-only."), **Services**, and **Promotions** tabs.
 - **Hours & Bays**: weekly schedule, exceptions, and bays. **Reports**: services done, best-selling services, charts, and **Export report** with a preview.
 
 #### 10.3.7 Push Notifications and Differences from the Web
 
 - When signing in, the app asks for permission to send notifications. If it is granted, the phone receives by push the same notices as the inbox (reminders 24 hours and 1 hour before, operator assigned, service started and finished, payments, points, and coupons, among others), and tapping one opens the related screen. Android groups them in the channels **Reminders**, **Promotions and points**, **Confirmations**, **Cancellations**, **Service messages**, and **System**, which can be muted from the phone's settings.
 - The data are the same as on the web: a booking made in the app appears on the web and vice versa.
-- Known limitations as of October 23, 2026, recorded in the Corrective Actions document: if the payment screen is opened again after applying a coupon, the app shows the full total and does not let the customer remove it (BIZ-02); some server errors appear as a general message instead of the exact reason, and the administrator's booking form offers statuses that the server rejects, because that status change is not allowed.
+- Since October 24, 2026 the app shows the exact reason of the server errors (in the four languages), the administrator's booking form only offers the allowed status changes, and the coupon is kept when returning to the payment screen.
+- Known limitation as of October 24, 2026, recorded in the Corrective Actions document (ACO-39): if the session expires while the app is in the background, the phone may keep receiving that account's notifications until signing in again or logging out from **More**.
 
 ## 11. Messages and Validations
 
@@ -994,7 +999,7 @@ The system validates the information while the person types. When a piece of dat
 | System message | Meaning | User action |
 |---|---|---|
 | Email is required | The email field is empty. | Type the email address. |
-| Please enter a valid @gmail.com email | The email does not have a valid format or does not end in @gmail.com. | Correct the email. |
+| Please enter a valid email | On sign-in or recovery, the email does not have an email format (since October 24, 2026 any domain is accepted). | Correct the email. |
 | Only @gmail.com emails are allowed | In registration, an email from another provider was typed. | Use a Gmail account. |
 | ID number is required / Must have between 5 and 20 digits | The ID number is empty or has an invalid length. | Type the ID number with digits only. |
 | Name is required / Must contain at least 3 characters | The first names are empty or too short. | Type the first names. |
@@ -1005,6 +1010,9 @@ The system validates the information while the person types. When a piece of dat
 | You must confirm the password / Passwords do not match | The confirmation is empty or different from the password. | Type the same password in both fields. |
 | The password does not meet the security requirements | One of the four requirements is missing. | Follow the list of requirements. |
 | You must accept the Terms and the Data Policy to continue | One of the two legal documents was not accepted. | Read and accept both documents. |
+| You must accept the personal data policy (Law 1581) to sign up. | The server received the sign-up without both acceptances (since October 24, 2026). | Check both boxes and sign up again. |
+| Too many attempts in a row. Wait a moment and try again. | More than 60 attempts were made in a minute from the same device (since October 24, 2026). | Wait a minute and try again. |
+| Too many failed attempts. Wait a few minutes or request another code to try again. | The recovery code or the current password was mistyped five times (since October 24, 2026). | Request another code; if it was the current password, wait 15 minutes. |
 | An account with this email already exists | The email is already registered. | Log in or recover the password. |
 | An account with this ID number already exists | The ID number is already registered. | Verify the data or contact the business. |
 | Incorrect email or password | The credentials do not match any account. | Check the data and try again, or recover the password. |
@@ -1031,16 +1039,23 @@ The system validates the information while the person types. When a piece of dat
 | That time has already passed. Choose a later time. | The chosen time is already in the past. | Choose a later time. |
 | Too many failed attempts. Your account is locked for 15 minutes... | The password was typed wrong five times within 15 minutes. | Wait 15 minutes or use Forgot your password?. |
 | That vehicle already has a booking at that time. | The vehicle is already booked in that slot. | Choose another time. |
+| This vehicle has active or upcoming bookings: cancel them before removing it. | An attempt was made to remove a vehicle with pending bookings (since October 24, 2026). | Cancel those bookings or wait for them to finish. |
 | That date cannot be booked. | The date is in the past or beyond the booking window. | Choose a valid date. |
 | This booking can no longer be changed. | The booking already started or was closed. | Contact the business. |
 | Invalid file | The receipt is not a JPG or PNG image of up to 10 MB. | Attach a valid image. |
 | Only a completed service can be rated. / This service was already rated. | The rating is not allowed. | Wait until the service is completed; a booking is rated only once. |
 | You must start the service first. / This service was already started. | The operator tried an action out of order. | Start the service before finishing it. |
+| This service can no longer be started: more than 4 hours have passed since its end time. Ask the administrator to close it. | The operator tried to start a service past the deadline (since October 24, 2026). | Tell the administrator whether the vehicle was served. |
+| The data clashes with an existing record or someone changed it while you were editing. Open it again and retry. | Someone else changed the same thing at the same time. | Open the screen again and repeat the change. |
+| The booking service is not responding. / The database is not responding right now. | A part of the system is stopped for a moment. | Try again in a few minutes. |
 | We could not reduce the image below 2 MB. Try a screenshot of the receipt. | The photo of the receipt is too heavy even after reducing it. | Attach a screenshot of the receipt. |
 | To confirm the payment you still need to: ... | Data of the payment is missing (receipt, reference, or amount). | Complete the items listed under the button. |
 | That coupon doesn't exist. | The coupon code is wrong. | Check the code shown in the coupon notice. |
 | That coupon isn't active, or you haven't reached the points it needs yet. | The coupon is paused, outside its dates, or locked. | Check the points in the dashboard. |
 | You already redeemed this coupon on this booking. | The coupon was already used on that booking. | Pay without the coupon or use another one. |
+| This booking already has a coupon. Remove it if you want to use another one. | Only one coupon is accepted per booking. | Remove the coupon with the **X** before applying another one. |
+| We couldn't get the amount to pay. Check your connection and come back in a few seconds. | The system could not calculate the amount (since October 24, 2026 the total comes from the server). | Wait and open the screen again; do not pay while the total shows "—". |
+| There is already a payment under review for this booking. / That reference was already used in another payment. Check your receipt number. | The payment was already reported or the reference exists in another payment. | Wait for the review or correct the reference. |
 | Cannot reach the server. Please try again in a moment. | There is no connection with the system. | Check the internet connection and try again. |
 
 *Note.* Texts taken from the English translation file of the web application.
@@ -1130,11 +1145,11 @@ The **Deactivate my account** option deactivates the account, without erasing it
 
 ##### I am an operator and cannot start a service. Why?
 
-A service can be started from 15 minutes before the booked time (earlier, the system answers that it is still too early), only if it is assigned to you, and only when you do not have another service in progress. If the service is yours and the problem continues, inform the administrator.
+A service can be started from 15 minutes before the booked time (earlier, the system answers that it is still too early) and up to 4 hours after its end time (afterwards it answers that it can no longer be started), only if it is assigned to you, and only when you do not have another service in progress. If the service is yours and the problem continues, inform the administrator.
 
 ##### I served a vehicle and forgot to press Start. What do I do?
 
-If it is still the same day, open the service and press **Start** and then **Finish**; the system accepts it even if it is late. If you can no longer do it, tell the administrator that the vehicle was served, so the booking is closed as attended and not as No show.
+If no more than 4 hours have passed since the end time, open the service and press **Start** and then **Finish**; the system accepts it even if it is late. If you can no longer do it, tell the administrator that the vehicle was served, so the booking is closed as attended and not as No show.
 
 ## 14. Glossary
 
