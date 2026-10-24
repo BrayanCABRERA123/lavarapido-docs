@@ -83,6 +83,8 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 
 <!-- /toc -->
 
+*Nota.* La numeración empieza en 4 porque las secciones 1 a 3 son la portada, el control de versiones y la tabla de contenido, que no llevan número en el título. Se conserva así para que sigan valiendo las referencias entre documentos por número de sección (por ejemplo, "Manual de Instalación, sección 10").
+
 ## 4. Introducción
 
 El Sistema de Gestión de Lavado Vehicular (Vehicle Washing) es una plataforma web que permite a los clientes de un lavadero reservar un turno desde el teléfono o el computador, y que organiza en un solo lugar el trabajo de los operarios, la verificación de los pagos y el seguimiento de cada servicio.

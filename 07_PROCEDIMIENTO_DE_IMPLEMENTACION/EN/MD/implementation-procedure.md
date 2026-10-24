@@ -90,6 +90,8 @@ Table 1 records the change history of this document. Each time the implementatio
 
 <!-- /toc -->
 
+*Note.* Numbering starts at 4 because sections 1 to 3 are the cover, the version control, and the table of contents, which have no number in their title. It is kept this way so that the cross-references between documents by section number (for example, "Installation Manual, section 10") remain valid.
+
 ## 4. Introduction
 
 The Vehicle Washing Management System (Vehicle Washing), internally called *LavaRapido*, replaces the manual procedure of a car wash (a paper schedule, work distributed at the manager's discretion, and payments without a record) with a digital platform for bookings, operator assignment, execution and rating of services, verification of payments by QR code, and a loyalty points program. Technically, it consists of a gateway, six microservices (five in Java 21 with Spring Boot 4 and one in C# with .NET 8), a SQL Server 2022 database, a RabbitMQ message broker, and two clients: an Angular 21 web application and an Android application in React Native with Expo (Vehicle Washing Development Team, 2026a).

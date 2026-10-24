@@ -130,6 +130,8 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 
 <!-- /toc -->
 
+*Nota.* La numeración empieza en 4 porque las secciones 1 a 3 son la portada, el control de versiones y la tabla de contenido, que no llevan número en el título. Se conserva así para que sigan valiendo las referencias entre documentos por número de sección (por ejemplo, "Manual de Instalación, sección 10").
+
 ## 4. Introducción
 
 El Sistema de Gestión de Lavado Vehicular (Vehicle Washing) gestiona las reservas, la asignación de operarios, la ejecución de los servicios, la verificación de los pagos y la fidelización de los clientes de un lavadero. Dentro del sistema, el administrador es la persona que dirige el negocio en el día a día y que además responde por la seguridad de las cuentas, la integridad de los datos y la continuidad del servicio.

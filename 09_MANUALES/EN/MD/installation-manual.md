@@ -115,6 +115,8 @@ Table 1 records the change history of this document. Each time the installation 
 
 <!-- /toc -->
 
+*Note.* Numbering starts at 4 because sections 1 to 3 are the cover, the version control, and the table of contents, which have no number in their title. It is kept this way so that the cross-references between documents by section number (for example, "Installation Manual, section 10") remain valid.
+
 ## 4. Introduction
 
 The Vehicle Washing Management System (Vehicle Washing), internally called *LavaRapido*, is made up of a gateway (API Gateway), six backend microservices (five in Java 21 with Spring Boot 4 and one in C# with .NET 8), a Microsoft SQL Server 2022 database, a RabbitMQ message broker, a development mail server (Mailpit), and two clients: an Angular 21 web application and an Android application in React Native with Expo. This manual covers the local installation with Docker, which is the one the team uses to develop and test. The public server on Azure, which is turned on when it is needed to present the system, is set up with the scripts in the *deploy* folder of *lavarapido-infra* and is explained in the Deployment Document.

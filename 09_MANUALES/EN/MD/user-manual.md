@@ -83,6 +83,8 @@ Table 1 records the change history of this document. Each time the development t
 
 <!-- /toc -->
 
+*Note.* Numbering starts at 4 because sections 1 to 3 are the cover, the version control, and the table of contents, which have no number in their title. It is kept this way so that the cross-references between documents by section number (for example, "Installation Manual, section 10") remain valid.
+
 ## 4. Introduction
 
 The Vehicle Washing Management System (Vehicle Washing) is a web platform that lets the customers of a vehicle washing business book a slot from a phone or a computer, and that organizes in a single place the work of the operators, the verification of payments, and the follow-up of each service.

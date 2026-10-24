@@ -90,6 +90,8 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 
 <!-- /toc -->
 
+*Nota.* La numeración empieza en 4 porque las secciones 1 a 3 son la portada, el control de versiones y la tabla de contenido, que no llevan número en el título. Se conserva así para que sigan valiendo las referencias entre documentos por número de sección (por ejemplo, "Manual de Instalación, sección 10").
+
 ## 4. Introducción
 
 El Sistema de Gestión de Lavado Vehicular (Vehicle Washing), llamado internamente *LavaRapido*, reemplaza el procedimiento manual de un lavadero (agenda en papel, asignación del trabajo a criterio del encargado y pagos sin registro) por una plataforma digital de reservas, asignación de operarios, ejecución y calificación de servicios, verificación de pagos por código QR y un programa de puntos de fidelización. Técnicamente está formado por un gateway, seis microservicios (cinco en Java 21 con Spring Boot 4 y uno en C# con .NET 8), una base de datos SQL Server 2022, un intermediario de mensajes RabbitMQ y dos clientes: una aplicación web en Angular 21 y una aplicación Android en React Native con Expo (Equipo de Desarrollo Vehicle Washing, 2026a).
