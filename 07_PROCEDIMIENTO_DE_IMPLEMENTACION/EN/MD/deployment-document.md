@@ -25,8 +25,8 @@
 |---|---|
 | System | LavaRápido Vehicular — bookings, payments and operations management for a car wash |
 | Components | 6 backend microservices, API Gateway, web application, Android mobile app |
-| Version (Release Tag) | `v1.0.0`, created on 2026-10-23 in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra), where `main` was made equal to `develop` at that moment. **Pending:** payment-service (PR #2 `develop` → `main` open; its `main` is the skeleton of 2026-09-30) and the mobile app (no PR; its `main` dates from 2026-07-06). After the tag, `develop` moved ahead again with the fixes of 2026-10-23 (1.3.8), which will ship in `v1.1.0` |
-| Deployed branch | `develop` on the server (the latest deployment is `develop` of 2026-10-21, deployed on 2026-10-22). With continuous deployment (4.3.4) the server will move to `main`, except payment-service, which stays on `develop` until its first release |
+| Version (Release Tag) | `v1.0.0`, created on 2026-10-23 in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra), where `main` was made equal to `develop` at that moment. **Pending:** payment-service (PR #2 `develop` → `main` approved and not merged; its `main` is the skeleton of 2026-09-30) and the mobile app (no PR; its `main` dates from 2026-07-06). After the tag, `develop` moved ahead again with the fixes of 2026-10-23 (1.3.8) and the 128 branches of 2026-10-24 (1.3.9), which will ship in `v1.1.0`. payment's PR #2 was approved on 2026-10-24, with the CI and SonarCloud green, and is not merged |
+| Deployed branch | `develop` of 2026-10-24 in the server's 9 repositories, deployed that day (1.3.9). Until `v1.1.0` is released, every update is launched with `BRANCH=develop`: with `main`, the protection in `setup-server.sh` stops without touching anything, because `main` does not contain what is deployed. With `v1.1.0` the server moves to `main`, except payment-service while it stays in `DEVELOP_ONLY` |
 | Mobile app version | **1.1.0** (versionCode **5**), APK published on 2026-10-19 + over-the-air updates (EAS Update) |
 | Repositories | `lavarapido-infra`, `lavarapido-api-gateway`, `lavarapido-security-service`, `lavarapido-customer-service`, `lavarapido-booking-service`, `lavarapido-operation-service`, `lavarapido-notification-service`, `lavarapido-payment-service`, `Front-end-proyecto-web`, `LavadoVehicular-Movil` |
 | Public address | https://lavarapidovehicular.northcentralus.cloudapp.azure.com |
@@ -40,7 +40,7 @@
 | Actual duration | ~2 h 30 min (provisioning, image builds, HTTPS setup and testing) |
 | User downtime | Not applicable: first deployment (no users in production yet) |
 | Window for future updates | Outside the car wash's business hours (before 07:00 or after 18:00) |
-| Latest update | 2026-10-22: the code changes of October 21 (1.3.7) were deployed with `update-server.sh`; seed 112 and migrations 040 (operations-service) and 041 (notification-service) were applied, with backups `LavaRapido-20261022-081543.bak.gz` and `LavaRapido-20261022-173855.bak.gz`. The previous update (2026-10-21, 05:21) is in 1.3.6. Version `v1.0.0` and the fixes of 2026-10-23 are not on the server yet (1.3.8) |
+| Latest update | 2026-10-24, around 15:10: the complete `develop` of the 10 repositories (fixes of October 23 and 24, 1.3.8 and 1.3.9), in two runs over SSH; 11 healthy containers, migrations 044, 045, and seed 113 (booking), 047 and seed 116 (notification), and 022 and 023 (payment) applied, and 0 errors in the logs. The previous update (2026-10-22) is in 1.3.7 |
 
 #### 1.1.3 Target environment (VPS / Staging / Production)
 
@@ -76,6 +76,7 @@
 | 1.4 | 2026-10-20 | Development team | Topology diagram: customer-service also connects to RabbitMQ (it consumes `security.user_registered` to create the customer profile) |
 | 1.5 | 2026-10-21 | Brayan Cabrera | Verified automatic backups (3.2), security headers and CSP (2.2.3 and 5.2.4), health checks and capped logs in every container, `SIMPLE` recovery model, update of 2026-10-21 (1.3.6), code changes of 2026-10-21 pending deployment (1.3.7), and removal of the Hostinger VPS |
 | 1.6 | 2026-10-21 | Development team | Evening changes of 2026-10-21 in 1.3.7: confirmed bookings with an operator that nobody registered are no longer closed as "No-show" on their own and go to "To close", migrations 040 (operations) and 041 (notification), `FOLLOW_UP_*` variables, fix for `null` fields in notification-service events, and mobile app adjustments |
+| 1.8 | 2026-10-24 | Development team | Deployment of 2026-10-24 with `develop` (1.1.1, 1.1.2, and 1.3.9): two runs, health wait, `:prev` images, `rollback.sh`, and the protection that prevents downgrading; the web on port 8080 (2.2.3); new variables `AUTH_RATE_LIMIT_*`, `TRUSTED_PROXIES`, `ROUTE_*_TIMEOUT`, `START_LATE_LIMIT`, and `INTERNAL_API_KEY` and `BOOKING_SERVICE_URL` in customer-service (3.3.2); rollback with `rollback.sh` and restore with `payment-migrate` (3.2.4 and 3.4); continuous deployment merged into `develop`, without secrets (4.3.4); mobile OTA with `cd.yml`; CI of 2026-10-24 (4.3.3) |
 | 1.7 | 2026-10-23 | Development team | Version `v1.0.0` in 8 repositories and what is pending for payment and mobile (1.1.1); deployment of 2026-10-22 (1.3.7); fixes of 2026-10-23 in `develop` for `v1.1.0` (1.3.8); the variables the compose file already passes, `FOLLOW_UP_LOOK_BACK_DAYS` and `ALLOWED_EMAIL_DOMAINS` (3.3.2); a rollback that works (3.4); `setup-server.sh` from `main` (4.3.1); continuous deployment prepared and not yet tested live (4.3.4); QA and DBA owners (1.1.4). Includes the content of Merari Urbano's `fix/A-06`, `fix/A-07`, and `fix/A-08` branches |
 
 ### 1.3 Change Summary (Release Notes)
@@ -178,7 +179,7 @@ They were in `develop` since 2026-10-21 and reached the server on 2026-10-22 wit
 
 The new variables (`SESSION_CHECK_*`, `BOOKING_EXPIRY_*`, and `FOLLOW_UP_*`, nine in total, including `FOLLOW_UP_LOOK_BACK_DAYS`) have defaults, are commented out in `.env.example` and `.env.production.example`, and `docker-compose.yml` passes them to the containers since 2026-10-22 (commit `70b990c` of `lavarapido-infra`): they are only written in `.env.production` to change their value. `FOLLOW_UP_*` needs `INTERNAL_API_KEY`, which is already in `.env.production`.
 
-#### 1.3.8 Version v1.0.0 and fixes of 2026-10-23 (pending deployment)
+#### 1.3.8 Version v1.0.0 and fixes of 2026-10-23 (deployed on 2026-10-24)
 
 On 2026-10-23 `develop` was merged into `main` and tagged `v1.0.0` in 8 repositories. payment-service and the mobile app do not have that version yet: payment's PR #2 is open, without review and with the SonarCloud quality gate failing on four false positives, and the app has no PR. That same day, after the tag, these fixes from the audit of 2026-10-22 entered `develop` and will ship in `v1.1.0` (CI green in the 10 repositories):
 
@@ -193,7 +194,31 @@ On 2026-10-23 `develop` was merged into `main` and tagged `v1.0.0` in 8 reposito
 - **Mobile app:** E-07, E-08, A-01, and A-13, and the first automated tests with `jest-expo` in the CI (F-01). They are JavaScript changes: they reach the installed APKs with `npm run publish:update`.
 - **lavarapido-infra:** `ALLOWED_EMAIL_DOMAINS` and `DEMO_ADMIN_PASSWORD`, `DEMO_OPERATOR_PASSWORD`, and `DEMO_CLIENT_PASSWORD` (`dev` profile only) in the compose file and in `.env.example`, with no real passwords committed (E-05), and `INTERNAL_API_KEY` documented as required for the operator to start and finish services (E-01).
 
-**Before deploying them:** `INTERNAL_API_KEY` is already in `.env.production`, so change E-01 needs nothing new; the demo accounts do not exist in production; and payment's migration 021 has the precondition `onFail: CONTINUE`: if the database already has a booking with two redeemed coupons, the unique index is not created and there is no warning, so it is worth checking the database before updating. It is also worth checking whether there are accounts with an email that is not @gmail.com (the web and the app no longer let them sign in) and plates longer than 6 characters in `customer.customer_vehicle` (customer-service can no longer read that vehicle). Still open, among others: SEC-01 (the gateway does not check the session if the header says `bearer` in lowercase), BIZ-01 and BIZ-02 (amount of a paid booking that is rescheduled and amount the customer sees), and OPS-01 (finishing a service is not atomic); they are in the Corrective Actions document, Table 7.
+**Before deploying them:** `INTERNAL_API_KEY` is already in `.env.production`, so change E-01 needs nothing new; the demo accounts do not exist in production; and payment's migration 021 has the precondition `onFail: CONTINUE`: if the database already has a booking with two redeemed coupons, the unique index is not created and there is no warning, so it is worth checking the database before updating. It is also worth checking whether there are accounts with an email that is not @gmail.com (the web and the app no longer let them sign in) and plates longer than 6 characters in `customer.customer_vehicle` (customer-service can no longer read that vehicle). SEC-01, BIZ-01, BIZ-02, and OPS-01, still open that day, were fixed on 2026-10-24 (1.3.9). Since sign-in accepts any domain (A-01, 1.3.9), the query for accounts with another domain is no longer needed.
+
+#### 1.3.9 Fixes of 2026-10-24 (deployed that day)
+
+On 2026-10-24, 128 fix branches of the 10 repositories were merged into `develop` (author brayan, no co-authors, `--no-ff`). Before pushing each repository, its branches were merged onto `develop` in a separate copy, the full suite was run, and it was checked that what was pushed was identical to what was tested. The `develop` CI was green in all 10 (1,192 tests). The main points:
+
+- **api-gateway:** checks the session with any header scheme (SEC-01); 60 requests per minute per IP on `/api/v1/auth/**`, with 429 `RATE_LIMITED` and `Retry-After`, taking the client's real IP only from trusted proxies (SEC-04, SEC-11); 5 s to connect and 60 s to read on each route (SEC-16).
+- **security-service:** mandatory consent when signing up (SEC-07); 5 attempts for the recovery code and the current password (423 `TOO_MANY_ATTEMPTS`, SEC-05, SEC-12); even timing for emails that do not exist (SEC-04); passwords of up to 72 bytes (SEC-11).
+- **booking-service:** the customer only changes the date and time (BIZ-01); price greater than 0 (BIZ-04, migration 044); optimistic locking on the booking (BIZ-09, migration 045); schedule or bay changes that clash with bookings answer 409 (BIZ-10); `/bookings/**` routes only for customers (BIZ-12); the task that expired bookings was removed (B-07); seed 113 clears the sample data of the business (E-19).
+- **customer-service:** does not allow removing a vehicle with active bookings (BIZ-08; it calls booking-service with `BOOKING_SERVICE_URL` and `INTERNAL_API_KEY`); `/vehicles/**` routes only for customers (BIZ-12); reads the long plates already stored (E-16).
+- **operations-service:** starting and finishing do not leave the operator blocked (OPS-01, OPS-03, OPS-11); retries and the dead-letter queue `operations-service.booking-confirmed.dlq` (OPS-04; the old `operations-service.events` queue is drained and deleted on startup); a service can be started up to 4 hours after its end time (A-12, `START_LATE_LIMIT`); the operator sees the notes (B-01).
+- **notification-service:** pending deliveries with retries (OPS-05, migration 047); the administrator's status changes cancel the reminders and NO_SHOW has its notice (A-11, seed 116); notice to the operator and the administrators when a booking is left without an operator (E-12).
+- **payment-service:** the customer's amount and coupon (`GET /loyalty/redemptions/{bookingId}`, BIZ-02); 409 `AMOUNT_CHANGED` when approving an old amount (BIZ-01); percentage coupon with the current total (BIZ-05, migration 022); a single open payment and a unique reference (A-16, migration 023); the administrator's paged queue (E-10); cancelled-booking notice (BIZ-07); inactive cash for the administrator (C-04); SonarCloud green.
+- **Web:** the server's amount and a coupon that survives a reload; fresh data without reloading (on entering, on returning to the tab, with each notification, and every 45 s on screens that wait for another person); the 216 error codes translated; read-only permission matrix (H-05); sign-in with any domain and sign-up only with gmail.com (A-01); the operator's notes and start window; nginx without `root` on port **8080** (H-19).
+- **Mobile app:** the same as the web for the payment, the refresh (on returning to the screen and with each push), the errors, and the operator, plus the HTTPS URL in the `production` profile (MOV-08), the paged payment queue, and `cd.yml` to publish the over-the-air update (OTA) when it reaches `main`.
+- **lavarapido-infra:** continuous deployment (4.3.4), `:prev` images and `rollback.sh`, image cleanup and backup retention, `restore-db.sh` with a lock and `payment-migrate`, the fix for the user of the backup `cron`, Caddy pointing to `web:8080`, the remote e2e battery (`e2e.yml`), and the protection that prevents downgrading (`setup-server.sh`, commit `d5d6909`).
+
+**How it was deployed (2026-10-24, around 15:10).** Over SSH, in two consecutive runs:
+
+1. **First run**, with the scripts the server had: it pulled `develop`, backed up the database, rebuilt, and applied the migrations. Since those old scripts do not restart Caddy, the new web (which already listens on 8080) would have stayed behind a Caddy still pointing to `web:80`; that is why the second run was launched right away.
+2. **Second run**, with `BRANCH=develop` and the new scripts the first run brought: it kept the running version as `:prev` (8 images), restarted Caddy because the `Caddyfile` changed, waited up to 8 minutes for the 11 containers to be healthy, wrote `backups/deployed-heads`, and installed the `@reboot` task for `boot-update.sh`.
+
+Result: 11 `healthy` containers; migrations and seeds 044, 045, 113, 047, 116, 022, and 023 applied; the `operations-service.booking-confirmed` queue and its `.dlq` created; 8 `:prev` images; 0 errors in the logs, and the web and API routes answering. **Until `v1.1.0` is released**, every manual update is done with `BRANCH=develop bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh`. When the machine is turned on, `boot-update.sh` pulls `main` by default and the protection stops it without touching anything (it is logged in `backups/deploy.log`): the server keeps what it had.
+
+**Before releasing `v1.1.0`**, in the production database: look for the duplicate open payments that migration 023 rejected (`rejection_reason LIKE 'Pago duplicado%'`) and count the COMPLETED bookings with open lines (they generate false "not started" notices, ACO-35). ACO-33 to ACO-40 remain open in the Corrective Actions document, Table 7, among them the web's unpaginated payment queue (ACO-33).
 
 ---
 
@@ -252,7 +277,7 @@ flowchart TB
     M[Android app]
     subgraph VM["vehiclecarwash-vm · Ubuntu 24.04 · 2 vCPU · 8 GB"]
       C[Caddy :80/:443]
-      W[web nginx :80]
+      W[web nginx :8080]
       D[(deploy/downloads<br/>APK + version.json)]
       G[api-gateway :8080]
       subgraph SVC["Microservices"]
@@ -297,7 +322,7 @@ flowchart TB
 |---|---|---|
 | `https://<domain>/api/*` | `api-gateway:8080` | REST API v1 for the web and the app |
 | `https://<domain>/app/*` | `deploy/downloads` folder | APK and `version.json` (no cache) |
-| `https://<domain>/*` | `web:80` | Angular SPA (routes → `index.html`) |
+| `https://<domain>/*` | `web:8080` | Angular SPA (routes → `index.html`). Since 2026-10-24 the web runs `nginx-unprivileged`, without `root`, on port 8080; its health check also uses 8080 |
 | `http://<domain>/*` | 308 redirect to HTTPS | Automatic (Caddy) |
 
 - **Certificate:** Let's Encrypt, issued and renewed automatically by Caddy (expires on 2027-01-14 and is renewed before). It is stored in the `caddy-data` volume.
@@ -402,7 +427,7 @@ The stack configuration (`docker-compose.yml`, `docker-compose.prod.yml`, `deplo
 
 **Automatic check.** After every scheduled backup, `deploy/verify-backup.sh` runs: it restores the latest backup under another name (`LavaRapido_verificacion`), checks that it has the tables of the real database and can be read, and drops it. This proves every day that the backups work, **without touching the real database**.
 
-**Restore.** It is never automatic: going back to a backup erases what happened afterwards, so a person always decides it.
+**Restore.** It is never automatic: going back to a backup erases what happened afterwards, so a person always decides it. Since 2026-10-24 `restore-db.sh` takes the same lock as the deployment, requires a terminal, shows the backup's date and the steps before asking for confirmation, runs `payment-migrate` at the end, and never leaves the services stopped. The `LavaRapido-pre-update-*` backups that each update makes are kept separately (the last 10), besides the 14 regular ones. *Open risk (ACO-37):* the safety backup it makes before restoring applies the 14-file retention and could delete the file about to be restored if it is the oldest one; it is better to restore a recent backup or copy it to another folder first.
 
 ```bash
 bash ~/lavarapido/lavarapido-infra/deploy/restore-db.sh <file.bak.gz> --as LavaRapido_prueba   # inspect a backup without touching the database
@@ -459,7 +484,18 @@ Read it with `tail -20 ~/lavarapido/backups/backup.log`; only problems with `gre
 | `PUBLIC_URL` / `SITE_ADDRESS` | Public address (CORS, email links) and Caddy domain |
 | `PUSH_ENABLED` / `MESSAGING_ENABLED` | `true`: push with Expo and events with RabbitMQ |
 
-The variables of 2026-10-21 are not required in `.env.production`: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL`, and `SESSION_CHECK_TIMEOUT` (gateway session check: on, 30 s, and 3 s), `BOOKING_EXPIRY_CHECK_ENABLED` and `BOOKING_EXPIRY_CHECK_INTERVAL` (cancellation of scheduled bookings that expired without confirmation: on and every 5 minutes), `BOOKING_EXPIRY_GRACE_MINUTES` (60-minute grace, used by booking-service and operations-service), and `FOLLOW_UP_ENABLED`, `FOLLOW_UP_INTERVAL`, and `FOLLOW_UP_LOOK_BACK_DAYS` (follow-up of bookings that ended and nobody closed: on, every 5 minutes, and looking back 28 days, because the machine can stay off for weeks) keep their defaults if they are not written; `docker-compose.yml` does pass them to the containers, so they can be changed in `.env.production`. The same applies to `ALLOWED_EMAIL_DOMAINS` (email domains security-service accepts, `gmail.com` by default; it ships with `v1.1.0`). `ADMIN_DOCUMENT` and `ADMIN_PHONE` complete the ID number and mobile phone of the first administrator, next to `ADMIN_EMAIL` and `ADMIN_PASSWORD`. The `DEMO_*_PASSWORD` variables are not used in production: they only exist in the `dev` profile.
+The variables of 2026-10-21 are not required in `.env.production`: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL`, and `SESSION_CHECK_TIMEOUT` (gateway session check: on, 30 s, and 3 s), `BOOKING_EXPIRY_CHECK_ENABLED` and `BOOKING_EXPIRY_CHECK_INTERVAL` (cancellation of scheduled bookings that expired without confirmation: on and every 5 minutes), `BOOKING_EXPIRY_GRACE_MINUTES` (60-minute grace, used by booking-service and operations-service), and `FOLLOW_UP_ENABLED`, `FOLLOW_UP_INTERVAL`, and `FOLLOW_UP_LOOK_BACK_DAYS` (follow-up of bookings that ended and nobody closed: on, every 5 minutes, and looking back 28 days, because the machine can stay off for weeks) keep their defaults if they are not written; `docker-compose.yml` does pass them to the containers, so they can be changed in `.env.production`. The same applies to `ALLOWED_EMAIL_DOMAINS` (email domains security-service accepts at sign-up, when creating users, and when changing the email, `gmail.com` by default; in production since 2026-10-24).
+
+Variables of 2026-10-24, all with a default value in the service; the compose file does not pass them, so to change them they must be added to the service's `environment` block in `docker-compose.yml`:
+
+| Variable | Service | Default value | Purpose |
+|---|---|---|---|
+| `AUTH_RATE_LIMIT_ENABLED`, `AUTH_RATE_LIMIT_REQUESTS`, `AUTH_RATE_LIMIT_WINDOW` | api-gateway | `true`, `60`, `1m` | Request limit per IP on `/api/v1/auth/**` (429 `RATE_LIMITED`). If the gateway log shows every request coming from a `172.x` IP, all users share the same bucket: check how `X-Forwarded-For` arrives |
+| `TRUSTED_PROXIES` | api-gateway | Private and local networks (`127.0.0.0/8`, `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `::1`, `fc00::/7`) | Only the `X-Forwarded-For` coming from these networks (Caddy) is trusted |
+| `ROUTE_CONNECT_TIMEOUT`, `ROUTE_READ_TIMEOUT` | api-gateway | `5s`, `60s` | Time to connect and to read the answer of each service; if exceeded, it answers 500 |
+| `START_LATE_LIMIT` | operations-service | `PT4H` | How long after the end time the operator can still start (409 `SERVICE_TOO_LATE`) |
+
+In addition, since 2026-10-24 **customer-service** receives `BOOKING_SERVICE_URL` (fixed in the compose file: `http://booking-service:3003`, the service root, without `/api/v1`) and `INTERNAL_API_KEY` (the same as the others; in production it is mandatory and, without it, the compose file does not start), to ask booking-service whether a vehicle has active bookings before removing it. Optional: `BOOKING_SERVICE_TIMEOUT` (3 s). In booking-service, `BOOKING_EXPIRY_CHECK_ENABLED` and `BOOKING_EXPIRY_CHECK_INTERVAL` no longer exist (the task was removed, B-07); the compose file still passes them with no effect (ACO-40). `ADMIN_DOCUMENT` and `ADMIN_PHONE` complete the ID number and mobile phone of the first administrator, next to `ADMIN_EMAIL` and `ADMIN_PASSWORD`. The `DEMO_*_PASSWORD` variables are not used in production: they only exist in the `dev` profile.
 
 #### 3.3.3 Memory and runtime limits (JVM -Xmx, ASPNETCORE_ENVIRONMENT)
 
@@ -479,10 +515,10 @@ The variables of 2026-10-21 are not required in `.env.production`: `SESSION_CHEC
 3. **Start:** "deployment started" is announced. `update-server.sh` backs up the database before updating (section 3.2).
 4. **Execution:** runbook in section 4.
 5. **Verification:** smoke tests in section 5. QA confirms each role.
-6. **Closing:** "deployment finished" is announced with the version and the evidence. If it fails, **rollback**. `update-server.sh` pulls the tip of each repository's branch again (it calls `setup-server.sh`), so a `git checkout` made by hand on the server is lost on the next update. Therefore:
+6. **Closing:** "deployment finished" is announced with the version and the evidence. If it fails, **rollback**. `update-server.sh` pulls the tip of each repository's branch again (it calls `setup-server.sh`), so a `git checkout` made by hand on the server is lost on the next update. Since 2026-10-24 `setup-server.sh` never downgrades: if what is deployed is not contained in the requested branch, it stops without touching anything (`ALLOW_DOWNGRADE=1` allows it on purpose). Therefore:
    - **On GitHub (the normal way):** revert the change on the branch being deployed (`git revert` of the commit, or `git revert -m 1` of the merge, in a `fix/…` branch with its PR) and deploy again: with continuous deployment, merging the revert into `main` is enough.
-   - **Emergency on the server:** before updating, keep the image that works (`sudo docker tag lavarapido/<service>:local lavarapido/<service>:prev`); to go back, `sudo docker tag lavarapido/<service>:prev lavarapido/<service>:local` and `sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production --profile app up -d --no-build <service>`, without `update-server.sh`. Then revert on GitHub, because the next update goes back to the tip of the branch. This step is manual: the scripts do not keep the previous image yet (action CD-11).
-   - **Data:** if the migration damaged data, restore the backup taken before the update with `restore-db.sh` (section 3.2.4); it returns the **whole** database to that moment and does not run `payment-migrate`.
+   - **Emergency on the server:** before rebuilding, `update-server.sh` keeps the running version as `:prev` on its own (if the last update failed, it does not overwrite it). To go back: `ssh -t` into the server and `bash ~/lavarapido/lavarapido-infra/deploy/rollback.sh` (all) or `rollback.sh web` (some). It shows the date of each service's previous version, asks to type `VOLVER`, waits if another update is running (same lock), recreates those containers without building, waits up to 8 minutes for them to be healthy, and logs it in `backups/deploy.log`. It does not touch the database or the repositories: then revert on GitHub. *Open risk (ACO-37):* `rollback.sh` uses the current compose file and `Caddyfile`; if a contract changed between the two versions (like the web's port 80 → 8080), going back may leave that service down, and `update-server.sh` run by hand does not take the lock.
+   - **Data:** if the migration damaged data, restore the `LavaRapido-pre-update-…` backup taken before the update with `restore-db.sh` (section 3.2.4); it returns the **whole** database to that moment and, since 2026-10-24, runs `payment-migrate` at the end.
 7. **Standard window:** outside the car wash's business hours (before 07:00 or after 18:00, Colombia time).
 
 ---
@@ -574,7 +610,7 @@ curl -fsSL https://raw.githubusercontent.com/BrayanCABRERA123/lavarapido-infra/m
 bash setup-server.sh
 ```
 
-The script is downloaded from `main` (version `v1.0.0`). In that version it clones and updates the `develop` branch of each repository (variable `BRANCH`); with the continuous deployment of section 4.3.4 it clones `main` instead, except the repositories in `DEVELOP_ONLY` (today payment-service, which has no release in `main` yet). To choose another branch: `BRANCH=develop bash setup-server.sh`.
+The script is downloaded from `main` (version `v1.0.0`). In that version it clones and updates the `develop` branch of each repository (variable `BRANCH`). The one in `develop` (running on the server since 2026-10-24) clones `main` by default, except the repositories in `DEVELOP_ONLY` (today payment-service, which has no release in `main` yet), and never downgrades: if a repository already pulled has something the requested branch does not contain, it stops without touching it. Until `v1.1.0` is released, use `BRANCH=develop bash setup-server.sh`.
 
 **With Portainer:** Stacks → Add stack → *Repository*. The images are built from 9 sibling repositories, so the recommended flow is:
 1. build the images with the CLI (step 4.3.3);
@@ -609,28 +645,40 @@ bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh web             # onl
 bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh security-service notification-service
 ```
 
-**From GitHub, without SSH:** with the machine on, in the `lavarapido-infra` repository → *Actions → Desplegar en Azure → Run workflow*. The button exists since 2026-10-23, when `deploy.yml` reached `main` (the default branch) with version `v1.0.0`; in that version the workflow calls `update-server.sh`, which deploys `develop`. In *Servicios*, leave it empty to update everything or write the names (`web payment-service`). At the end, the workflow checks that the web and the API answer 200. It uses its own GitHub key (secret `AZURE_SSH_KEY`) that on the server can only run `deploy/ci-deploy.sh`, which validates the names and does not let two updates run at the same time. **As of 2026-10-23 the workflow has never run** (0 runs) and the repository has no secrets, so it would fail until `AZURE_SSH_KEY` is created and its line installed in the server's `authorized_keys`; meanwhile, the SSH option above is used.
+**Until `v1.1.0` is released**, manual updates are prefixed with `BRANCH=develop` (`BRANCH=develop bash …/update-server.sh`); without it, the protection in `setup-server.sh` stops. If everything is healthy, the script deletes unused images (the current one and `:prev` are kept) and build cache older than 7 days.
 
-**Continuous integration:** since 2026-10-19 the 10 repositories have `.github/workflows/ci.yml`, which runs on every push or pull request to `develop` and `main`, and the result appears as ✓ or ✗ next to each commit. As of 2026-10-23 (night), the latest `develop` run is green in all 10:
+**From GitHub, without SSH:** with the machine on, in the `lavarapido-infra` repository → *Actions → Desplegar en Azure → Run workflow*. The button exists since 2026-10-23, when `deploy.yml` reached `main` (the default branch) with version `v1.0.0`; in that version the workflow calls `update-server.sh`, which deploys `develop`. In *Servicios*, leave it empty to update everything or write the names (`web payment-service`). At the end, the workflow checks that the web and the API answer 200. It uses its own GitHub key (secret `AZURE_SSH_KEY`) that on the server can only run `deploy/ci-deploy.sh`, which validates the names and does not let two updates run at the same time. **As of 2026-10-24 the workflow has never run** (that day's deployment was done over SSH) and the repository has no secrets, so it would fail until `AZURE_SSH_KEY` is created and its line installed in the server's `authorized_keys`; meanwhile, the SSH option above is used.
+
+**Continuous integration:** since 2026-10-19 the 10 repositories have `.github/workflows/ci.yml`, which runs on every push or pull request to `develop` and `main`, and the result appears as ✓ or ✗ next to each commit. As of 2026-10-24, the latest `develop` run is green in all 10 (1,192 tests):
 
 | Repository | What it checks |
 |---|---|
 | Java services and api-gateway | `./mvnw verify`: builds and runs the tests (Java 21) |
 | payment-service | `dotnet build` and `dotnet test` (.NET 8; integration tests are skipped without SQL Server) |
 | Front-end-proyecto-web | Production build and `ng test` |
-| LavadoVehicular-Movil | `tsc --noEmit` and, since 2026-10-23, `jest` (`jest-expo`, 3 files and 13 tests). The APK is still built with EAS |
-| lavarapido-infra | Syntax and `shellcheck` of `deploy/*.sh`, `docker compose config`, and `e2e/` syntax (the end-to-end tests run only locally) |
+| LavadoVehicular-Movil | `tsc --noEmit` and `jest` (`jest-expo`, 25 suites and 73 tests). The APK is still built with EAS; `cd.yml` publishes the over-the-air update when it reaches `main` (4.3.4) |
+| lavarapido-infra | Syntax and `shellcheck` of `deploy/*.sh`, `docker compose config`, `actionlint` of the workflows, and syntax of `e2e/` and `e2e/remote/`. The remote battery is run by hand with `e2e.yml` (not yet run against the server) |
 
-#### 4.3.4 Continuous deployment (prepared, not yet tested live)
+#### 4.3.4 Continuous deployment (merged into develop, the secrets are missing)
 
-On 2026-10-23 continuous deployment was prepared, so that an approved version reaches the server without anyone logging in over SSH. **It is not active yet:** the changes are in the local branch `ci/continuous-deployment` of `lavarapido-infra` and in the local `ci/request-deploy` branches of the web, api-gateway, security, operations, and notification, not merged, and they have never run against the virtual machine. This is how it will work once they are merged:
+Continuous deployment has been merged into `develop` since 2026-10-24: `lavarapido-infra` (`006b5b0`) and the **Pedir despliegue** (request deployment) job in the 8 repositories deployed to Azure (web, api-gateway, security, customer, booking, operations, notification, and payment), plus `cd.yml` in the mobile app. **It has not run on its own yet:** the secrets are missing and it reaches `main` with `v1.1.0`. This is how it works:
 
-1. When an approved PR enters `main`, the repository's `ci.yml` runs the CI and, if it passes, its **Pedir despliegue** (request deployment) job launches the **Desplegar en Azure** workflow of `lavarapido-infra` with `automatic=true` (secret `DEPLOY_DISPATCH_TOKEN`: a fine-grained token with access only to `lavarapido-infra` and the *Actions: Read and write* permission). A merge into `main` of `lavarapido-infra` also deploys.
-2. The workflow logs in over SSH (`AZURE_SSH_KEY`), backs up the database, pulls `main` of every repository (payment-service stays on `develop` through `DEVELOP_ONLY`), and rebuilds what changed. If another update is already running, for example the one at machine start-up, it waits up to 20 minutes and then updates. Then it waits up to 8 minutes for **all** containers to become healthy: if one does not start, the workflow ends red and says which one. If the `Caddyfile` changed, it restarts Caddy. At the end it checks that the web and the API answer 200.
-3. If the machine is **off**, the automatic workflow leaves a notice and does not fail. When it is turned on, `deploy/boot-update.sh` (an `@reboot` task installed by `setup-server.sh`) pulls what is new in `main` and updates if something is not deployed, comparing with `~/lavarapido/backups/deployed-heads`, which is only written when a full update ends well. The result is in `~/lavarapido/backups/deploy.log`.
-4. customer-service, booking-service, and payment-service do not have the **Pedir despliegue** job yet: their changes arrive with the next deployment of any repository or by hand. To add it, the owner copies the job from the web's `ci.yml` and creates the secret in their repository.
+1. When an approved PR enters `main`, the repository's `ci.yml` runs the CI and, if it passes, its **Pedir despliegue** job launches the **Desplegar en Azure** workflow of `lavarapido-infra` with `automatic=true` (secret `DEPLOY_DISPATCH_TOKEN`: a *fine-grained* token with access only to `lavarapido-infra` and *Actions: Read and write* permission). A merge into `main` of `lavarapido-infra` also deploys. The ✓ of **Pedir despliegue** only says the request arrived; the result is in *Actions → Desplegar en Azure* of `lavarapido-infra`.
+2. The workflow logs in over SSH (`AZURE_SSH_KEY`), backs up the database, pulls `main` of every repository (payment-service stays on `develop` through `DEVELOP_ONLY`), and rebuilds what changed, first keeping the running version as `:prev`. If another update is already running, for example the one at machine startup, it waits up to 20 minutes and then updates. Then it waits up to 8 minutes for **all** containers to be healthy: if one does not start, the workflow ends red and says which. If the `Caddyfile` changed, it restarts Caddy. At the end it checks that the web and the API answer 200 and, if not, shows what the API answered.
+3. If the machine is **off** (neither SSH nor the site answers), the automatic workflow leaves a notice and does not fail; if the site answers but SSH does not, it ends red. When it is turned on, `deploy/boot-update.sh` (an `@reboot` task, installed on the server since 2026-10-24) pulls what is new in `main` and updates if something is not deployed, comparing with `~/lavarapido/backups/deployed-heads`, which is only written when a complete update ends well. While the server is on `develop` (until `v1.1.0`), the protection against downgrading stops that update without touching anything. The result is in `~/lavarapido/backups/deploy.log`.
+4. **Mobile app (OTA):** it is not deployed to Azure. Its `cd.yml` runs on each push to `main` (not for changes to `.md` or `docs/` only) or by hand, but only publishes from `main`: it repeats the CI (`tsc` and `jest`), compares the native fingerprint of the code with that of the published APK and, if it matches, runs `eas update --channel preview`; if it changed, it fails asking for a new APK (`eas build` and `publish:apk`, still manual). It uses the `EXPO_TOKEN` secret. Since MOV-08 changed `eas.json`, the mobile app's first step to `main` will ask for a new APK.
 
-**To activate it (pending, action CD-01 of the Corrective Actions document):** merge `lavarapido-infra` first (the new workflow accepts the `automatic` input; if the web arrives earlier, its request fails with *422 Unexpected inputs*), create `AZURE_SSH_KEY` and `DEPLOY_DISPATCH_TOKEN`, install the line `restrict,command="bash …/deploy/ci-deploy.sh"` in the server's `~/.ssh/authorized_keys` and, with the machine on, run the workflow by hand **twice**: the first run uses the server's old scripts (they pull `develop`); the second already uses the new ones, moves the server to `main`, and installs the start-up task. Check it with `crontab -l | grep boot-update` and `git -C ~/lavarapido/Front-end-proyecto-web branch --show-current` (it must say `main`). If `DEPLOY_DISPATCH_TOKEN` is missing, the repository's **Pedir despliegue** job ends red.
+**To activate it (action ACO-19 of the Corrective Actions document):**
+
+| Repository | Secret | Created by |
+|---|---|---|
+| `lavarapido-infra` | `AZURE_SSH_KEY` (and its `restrict,command="bash …/deploy/ci-deploy.sh"` line in the server's `~/.ssh/authorized_keys`) | Brayan Patiño |
+| web, api-gateway, security, operations, and notification | `DEPLOY_DISPATCH_TOKEN` | Brayan Patiño |
+| customer and booking | `DEPLOY_DISPATCH_TOKEN` (the same token) | Juan Camilo Guilombo or someone with the Admin role |
+| payment | `DEPLOY_DISPATCH_TOKEN` | Merari Urbano or someone with the Admin role |
+| LavadoVehicular-Movil | `EXPO_TOKEN` (the project's Expo account) | Merari Urbano or someone with the Admin role |
+
+If `DEPLOY_DISPATCH_TOKEN` is missing, that repository's **Pedir despliegue** job ends red even if the CI passes. **Order of the `v1.1.0` release:** first the web, the services, and payment (their deployment request fails with *422* while `deploy.yml` in infra's `main` does not accept `automatic`, with no harm) and `lavarapido-infra` last; then payment is removed from `DEVELOP_ONLY`. It is checked with `crontab -l | grep boot-update` and `git -C ~/lavarapido/Front-end-proyecto-web branch --show-current` (it must say `main`).
 
 **Publishing the mobile app**, from the PC, in the app folder:
 
