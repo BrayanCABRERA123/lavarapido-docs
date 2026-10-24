@@ -8,7 +8,7 @@ Software Analysis and Development Technologist program (ADSO), group (ficha) 314
 
 Instructor: Karol Daniela Correa
 
-Version 2.5, October 23, 2026
+Version 2.6, October 24, 2026
 
 ---
 
@@ -21,7 +21,7 @@ This document shows how LavaRápido behaves when someone uses it: what happens, 
 3. **Activity diagrams** of the business processes.
 4. **State diagrams** of the entities that change status (booking, payment, service execution, promotion and inspection report).
 
-On October 21, 2026, the following were updated against the code of that day: the sign-out that voids the token (section 2.8), the lock on operator assignment (section 2.4), the receipt of at most 2 MB and the cash option that only appears while its account is active (sections 2.5 and 3.4), and the handling of bookings that ended without anyone closing them (sections 4.1 and 4.3): the system only changes the status when there is no doubt, and the rest goes to the administrator's "To close" list. On October 20, 2026, the content was checked again against the code: the client only cancels (the administrator reschedules), the role change of accounts was removed, the sequences and states that did not match were corrected, and the use case and other diagrams were redrawn with straight lines and no crossings. On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end. On October 23, 2026 (version 2.5) it was added that recovering the password revokes all sessions (section 2.10) and that, if security-service does not answer, the gateway lets the request through (*fail-open*); the rest of the analysis still holds against *develop* of that day.
+On October 21, 2026, the following were updated against the code of that day: the sign-out that voids the token (section 2.8), the lock on operator assignment (section 2.4), the receipt of at most 2 MB and the cash option that only appears while its account is active (sections 2.5 and 3.4), and the handling of bookings that ended without anyone closing them (sections 4.1 and 4.3): the system only changes the status when there is no doubt, and the rest goes to the administrator's "To close" list. On October 20, 2026, the content was checked again against the code: the client only cancels (the administrator reschedules), the role change of accounts was removed, the sequences and states that did not match were corrected, and the use case and other diagrams were redrawn with straight lines and no crossings. On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end. On October 23, 2026 (version 2.5) it was added that recovering the password revokes all sessions (section 2.10) and that, if security-service does not answer, the gateway lets the request through (*fail-open*); the rest of the analysis still holds against *develop* of that day. On October 24, 2026 (version 2.6), against *develop* of that day, the permission matrix became read-only (sections 2.7 and 3.6 and the screen inventory) and the automatic cancellation of expired scheduled bookings was removed, because every booking is created confirmed (section 4.1).
 
 The full specification of each requirement and use case (actors, precondition, main flow, alternative flows and postcondition) is in the *Software Requirements Specification*, sections 5 and 7.3; here they are cited by their identifier (RF-XXX, CUXX).
 
@@ -499,14 +499,7 @@ sequenceDiagram
     W->>S: GET /api/v1/admin/roles-permissions
     S->>DB: SELECT permission catalog + permissions of each role
     S-->>W: 200 {permissions[], roles: [{role, permissions[]}]}, 3 fixed roles: ADMIN, OPERATOR, CLIENT
-    A->>W: Checks or unchecks permissions of a role and saves
-    W->>S: PUT /api/v1/admin/roles-permissions/{role} {permissionIds[]}
-    alt all permissionIds exist in the catalog
-        S->>DB: replaces exactly those permissions for the role (transaction)
-        S-->>W: 200 updated permissions of the role
-    else some id does not exist in the catalog
-        S-->>W: 400 UNKNOWN_PERMISSION (unknown permission, nothing is saved)
-    end
+    W-->>A: Read-only matrix (since October 24, 2026 the web no longer offers checking or saving)
     Note over S: Roles cannot be created or deleted (ADR-010).<br/>This matrix is informational: real authorization still comes<br/>from the roles claim in the JWT, not from this table (open decision, section 11.3 of the SRS)
 ```
 
@@ -823,13 +816,7 @@ flowchart TD
     start0((Start)) --> start
     start([Admin opens Management → Roles]) --> load[Load the 3 fixed roles + permission catalog]
     load --> view[View the current permissions of each role: Administrator, Operator, Customer]
-    view --> edit[Admin checks or unchecks permissions of a role]
-    edit --> save[Save]
-    save --> valid{Do all permission<br/>ids exist in the catalog?}
-    valid -->|No| reject[Reject the save explicitly]
-    reject --> edit
-    valid -->|Yes| replace[Replace exactly those permissions for the role]
-    replace --> stop([Permissions saved; roles are not created or deleted])
+    view --> stop([View only since October 24, 2026: permissions are not edited and roles are not created or deleted])
     stop --> stopx((End))
 ```
 
@@ -843,7 +830,7 @@ flowchart TD
 stateDiagram-v2
     [*] --> CONFIRMED : create (a free bay is assigned immediately, RF-006)
     SCHEDULED --> CONFIRMED : confirm (needs a bay)
-    SCHEDULED --> CANCELLED : cancel or expired
+    SCHEDULED --> CANCELLED : cancel
     CONFIRMED --> CONFIRMED : reschedule (admin, new time/bay, prices are kept)
     CONFIRMED --> IN_PROGRESS : start or Attended (admin)
     CONFIRMED --> NO_SHOW : no show, or ended without operator
@@ -854,7 +841,7 @@ stateDiagram-v2
     NO_SHOW --> [*]
 ```
 
-*Source:* `booking-service` (`Booking.moveTo`, `Booking.cancel`, `Booking.expire`, `BookingStatus`, `ExpiredBookingsJob`) and `operations-service` (`FollowUpJob`, `FollowUpPolicy`). *Bookings that ended and nobody closed:* the system only decides on its own when there is no doubt. Every 5 minutes, `ExpiredBookingsJob` cancels a booking still `SCHEDULED` (never confirmed) one hour after its end time, with the system reason `EXPIRED` ("Expired without confirmation"), which the administrator cannot pick by hand, and publishes `BookingCancelled`. Also every 5 minutes, the operations `FollowUpJob` asks booking (`POST /internal/v1/bookings/{id}/no-show`) to set to `NO_SHOW` a `CONFIRMED` booking that never had an operator and ended more than an hour ago; booking checks again that it expired and, if not, answers 409 `BOOKING_NOT_EXPIRED`. A `CONFIRMED` booking with an operator that nobody started (`NOT_STARTED`) and an `IN_PROGRESS` one that nobody finished one hour after its end (`NOT_FINISHED`) **never** change status on their own: they go to the administrator's "To close" list, and the administrator resolves them with "Attended" (the booking goes through `IN_PROGRESS` and ends `COMPLETED`, without publishing `ServiceCompleted`) or with "No-show" (only if it was never started). This avoids recording as a no-show a service that was actually done and that the operator forgot to mark. There is never an automatic refund: payments are reviewed by the administrator. Only `SCHEDULED` and `CONFIRMED` can be rescheduled or cancelled (RF-007). The customer only cancels, before the start time and without writing a reason (the booking stores `CUSTOMER_REQUEST`); the administrator reschedules (CU29) and may choose the cancellation reason. `SCHEDULED` exists in the model, but the current flow always creates the booking directly as `CONFIRMED`.
+*Source:* `booking-service` (`Booking.moveTo`, `Booking.cancel`, `BookingStatus`) and `operations-service` (`FollowUpJob`, `FollowUpPolicy`). *Bookings that ended and nobody closed:* the system only decides on its own when there is no doubt. Until October 23, 2026 `ExpiredBookingsJob` cancelled bookings still `SCHEDULED`; it was removed on October 24 (B-07) because it never acted: every booking is created and rescheduled as `CONFIRMED`. Every 5 minutes, the operations `FollowUpJob` asks booking (`POST /internal/v1/bookings/{id}/no-show`) to set to `NO_SHOW` a `CONFIRMED` booking that never had an operator and ended more than an hour ago; booking checks again that it expired and, if not, answers 409 `BOOKING_NOT_EXPIRED`. A `CONFIRMED` booking with an operator that nobody started (`NOT_STARTED`) and an `IN_PROGRESS` one that nobody finished one hour after its end (`NOT_FINISHED`) **never** change status on their own: they go to the administrator's "To close" list, and the administrator resolves them with "Attended" (the booking goes through `IN_PROGRESS` and ends `COMPLETED`, without publishing `ServiceCompleted`) or with "No-show" (only if it was never started). This avoids recording as a no-show a service that was actually done and that the operator forgot to mark. There is never an automatic refund: payments are reviewed by the administrator. Only `SCHEDULED` and `CONFIRMED` can be rescheduled or cancelled (RF-007). The customer only cancels, before the start time and without writing a reason (the booking stores `CUSTOMER_REQUEST`); the administrator reschedules (CU29) and may choose the cancellation reason. `SCHEDULED` exists in the model, but the current flow always creates the booking directly as `CONFIRMED`.
 
 ### 4.2 Payment life cycle (RF-013b, RF-014, ADR-008)
 
@@ -960,7 +947,7 @@ Screen by screen and by role, including the create and edit modals of each modul
 | Management → Users | ![Users](capturas/05_admin_usuarios.png) |
 | Modal: Create user | ![Create user modal](capturas/29_modal_crear_usuario.png) |
 | Management → Roles | ![Roles](capturas/06_admin_roles.png) |
-| Modal: Edit role permissions | ![Edit permissions modal](capturas/30_modal_editar_permisos.png) |
+| Modal: Edit role permissions (removed on October 24, 2026: the matrix is read-only) | ![Edit permissions modal](capturas/30_modal_editar_permisos.png) |
 | Management → Services (catalog) | ![Catalog](capturas/07_admin_catalogo.png) |
 | Modal: Add service | ![Add service modal](capturas/31_modal_crear_servicio.png) |
 | Management → Promotions | ![Promotions](capturas/08_admin_promociones.png) |
