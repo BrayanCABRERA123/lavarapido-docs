@@ -25,8 +25,8 @@
 |---|---|
 | Sistema | LavaRápido Vehicular — gestión de reservas, pagos y operación de un lavadero |
 | Componentes | 6 microservicios backend, API Gateway, aplicación web, aplicación móvil Android |
-| Versión (Release Tag) | `v1.0.0` *(pendiente: crear la etiqueta al pasar `develop` a `main`)* |
-| Rama desplegada | `develop` (en todos los repositorios) |
+| Versión (Release Tag) | `v1.0.0`, creada el 23-10-2026 en 8 repositorios (web, api-gateway, security, customer, booking, operations, notification e infra), donde `main` quedó igual a `develop` en ese momento. **Pendientes:** payment-service (PR #2 `develop` → `main` abierto; su `main` es el esqueleto del 30-09-2026) y la app móvil (sin PR; su `main` es del 06-07-2026). Después de la etiqueta, `develop` volvió a avanzar con los arreglos del 23-10-2026 (1.3.8), que saldrán en `v1.1.0` |
+| Rama desplegada | `develop` en el servidor (lo último desplegado es `develop` del 21-10-2026, el 22-10-2026). Con el despliegue continuo (4.3.4) el servidor pasará a `main`, salvo payment-service, que sigue en `develop` hasta su primera versión |
 | Versión de la app móvil | **1.1.0** (versionCode **5**), APK publicado el 19-10-2026 + actualizaciones por internet (EAS Update) |
 | Repositorios | `lavarapido-infra`, `lavarapido-api-gateway`, `lavarapido-security-service`, `lavarapido-customer-service`, `lavarapido-booking-service`, `lavarapido-operation-service`, `lavarapido-notification-service`, `lavarapido-payment-service`, `Front-end-proyecto-web`, `LavadoVehicular-Movil` |
 | Dirección pública | https://lavarapidovehicular.northcentralus.cloudapp.azure.com |
@@ -40,7 +40,7 @@
 | Duración real | ~2 h 30 min (aprovisionamiento, compilación de imágenes, configuración de HTTPS y pruebas) |
 | Interrupción a usuarios | No aplica: primer despliegue (no había usuarios en producción) |
 | Ventana para próximas actualizaciones | Fuera de horario de atención del lavadero (antes de las 07:00 o después de las 18:00) |
-| Última actualización | 21-10-2026, 05:21 (hora del servidor): imágenes reconstruidas con el código de `develop` del 20 de octubre y la infraestructura nueva (respaldos, encabezados de seguridad, chequeos de salud y registros limitados); ver 1.3.6. Los cambios del código del 21 de octubre aún no están en el servidor (1.3.7) |
+| Última actualización | 22-10-2026: se desplegaron con `update-server.sh` los cambios del código del 21 de octubre (1.3.7); quedaron aplicadas la semilla 112 y las migraciones 040 (operations-service) y 041 (notification-service), con los respaldos `LavaRapido-20261022-081543.bak.gz` y `LavaRapido-20261022-173855.bak.gz`. La actualización anterior (21-10-2026, 05:21) está en 1.3.6. La versión `v1.0.0` y los arreglos del 23-10-2026 todavía no están en el servidor (1.3.8) |
 
 #### 1.1.3 Entorno de destino (VPS / Staging / Producción)
 
@@ -54,14 +54,14 @@
 
 #### 1.1.4 Matriz de roles y responsables (DevOps, Tech Lead, QA, DBA)
 
-> Responsables según los servicios que cada integrante mantiene en GitHub. **Por confirmar con el equipo.**
+> Responsables según los servicios que cada integrante mantiene en GitHub (dueño de cada repositorio). Los roles QA y DBA no tienen una persona fija: los asigna el líder de proyecto y, mientras tanto, los cubre quien se indica.
 
 | Rol | Responsable | Responsabilidades en el despliegue |
 |---|---|---|
 | DevOps | Brayan Cabrera | Servidor, Docker Compose, Caddy/HTTPS, scripts de despliegue y actualización |
 | Tech Lead | Brayan Cabrera | Aprobación del release, revisión de cambios, coordinación del equipo |
-| QA | *(por asignar)* | Pruebas de humo y validación funcional por rol (cliente, operario, administrador) |
-| DBA | *(por asignar)* | Migraciones, respaldos y verificación de la base de datos |
+| QA | Sin persona fija (la asigna Brayan Cabrera); mientras tanto, cada dueño prueba lo suyo y el DevOps corre la sección 5 | Pruebas de humo y validación funcional por rol (cliente, operario, administrador) |
+| DBA | Sin persona fija (la asigna Brayan Cabrera); mientras tanto, el DevOps con los scripts de la sección 3.2 | Migraciones, respaldos y verificación de la base de datos |
 | Responsable booking-service y customer-service | Camilo Guilombo | Cambios y verificación de sus servicios |
 | Responsable payment-service y app móvil | Merari Urbano Quintero | Cambios y verificación de pagos y de la app |
 
@@ -76,6 +76,7 @@
 | 1.4 | 2026-10-20 | Equipo de desarrollo | Diagrama de topología: customer-service también se conecta a RabbitMQ (consume `security.user_registered` para crear el perfil del cliente) |
 | 1.5 | 2026-10-21 | Brayan Cabrera | Respaldos automáticos verificados (3.2), encabezados de seguridad y CSP (2.2.3 y 5.2.4), chequeos de salud y registros limitados en todos los contenedores, modelo de recuperación `SIMPLE`, actualización del 21-10-2026 (1.3.6), cambios del código del 21-10-2026 pendientes de desplegar (1.3.7) y retiro del VPS de Hostinger |
 | 1.6 | 2026-10-21 | Equipo de desarrollo | Cambios de la noche del 21-10-2026 en 1.3.7: las reservas confirmadas con operario que nadie registró ya no se cierran solas como "No asistió" y pasan a "Por cerrar", migraciones 040 (operations) y 041 (notification), variables `FOLLOW_UP_*`, arreglo de los campos `null` en los eventos de notification-service y ajustes de la app móvil |
+| 1.7 | 2026-10-23 | Equipo de desarrollo | Versión `v1.0.0` en 8 repositorios y pendientes de payment y móvil (1.1.1); despliegue del 22-10-2026 (1.3.7); arreglos del 23-10-2026 en `develop` para `v1.1.0` (1.3.8); las variables que el compose ya pasa, `FOLLOW_UP_LOOK_BACK_DAYS` y `ALLOWED_EMAIL_DOMAINS` (3.3.2); reversión que funciona (3.4); `setup-server.sh` desde `main` (4.3.1); despliegue continuo preparado y todavía sin probar en vivo (4.3.4); responsables de QA y DBA (1.1.4). Incluye el contenido de las ramas `fix/A-06`, `fix/A-07` y `fix/A-08` de Merari Urbano |
 
 ### 1.3 Resumen de Cambios (Release Notes)
 
@@ -163,9 +164,9 @@ El 21-10-2026 a las 05:21 (hora del servidor) se reconstruyeron las imágenes co
 - **Infraestructura:** respaldos automáticos verificados (3.2); base en modelo de recuperación `SIMPLE`; chequeo de salud cada 30 segundos en los 11 contenedores, incluido Caddy (`docker compose ps` los muestra `healthy`); registros limitados a 3 archivos de 10 MB por contenedor; encabezados de seguridad y política de contenido (CSP) en Caddy (5.2.4).
 - **Backend y web:** los cambios que quedaron pendientes el 19-10 (mensajes de error con `spring.web.error` y ajustes de la web) y los del 19 y 20 de octubre: se retiró el cambio de rol de una cuenta, los datos de ejemplo del negocio se borran para que el negocio real los complete (semilla 111 de booking-service) y la web abre el detalle de cada reserva y aviso.
 
-#### 1.3.7 Cambios del 21-10-2026 pendientes de desplegar
+#### 1.3.7 Cambios del 21-10-2026 (desplegados el 22-10-2026)
 
-Están en `develop` desde el 21-10-2026 y entran con la próxima ejecución de `update-server.sh` o del flujo "Desplegar en Azure":
+Estaban en `develop` desde el 21-10-2026 y entraron al servidor el 22-10-2026 con `update-server.sh`; quedaron aplicadas la semilla 112 y las migraciones 040 y 041, y ese día se generaron los respaldos `LavaRapido-20261022-081543.bak.gz` y `LavaRapido-20261022-173855.bak.gz` (este último, al volver a desplegar operations-service a las 12:38):
 
 - **security-service y api-gateway:** el token de una sesión cerrada (logout, cuenta inhabilitada o desactivada) deja de servir; el gateway lo confirma con `GET /api/v1/auth/session` y guarda la respuesta 30 segundos por token.
 - **booking-service:** cada 5 minutos se cancela, con el motivo del sistema `EXPIRED` ("Venció sin confirmarse"), la reserva programada que siguió sin confirmarse una hora después de su fin; la semilla 112 agrega ese motivo, y booking-service la aplica al arrancar. La ruta interna `POST /internal/v1/bookings/{id}/no-show` deja en "No asistió" una reserva confirmada vencida, solo cuando la pide operations-service (409 `BOOKING_NOT_EXPIRED` si todavía no vence).
@@ -175,7 +176,24 @@ Están en `develop` desde el 21-10-2026 y entran con la próxima ejecución de `
 - **Web:** sesión sincronizada entre pestañas, comprobante comprimido, lupa para el QR, reportes que cuentan solo reservas completadas, textos de la pestaña de roles y tarjeta "Por cerrar" en el inicio del administrador.
 - **App móvil:** comprobante comprimido, lupa para el QR, pantalla de actualización obligatoria del APK, tarjeta "Por cerrar" y conteo de reservas sin asignar con la regla de operations-service; el formulario de reserva del administrador guarda el operario y el estado elegidos, la barra de puntos del cliente queda completa cuando no queda nada por desbloquear y no muestra "0% OFF", el operario ve "—" cuando no tiene calificaciones, la pestaña de roles indica que los 3 roles son fijos y los avisos nuevos abren la pantalla de servicios del operario o el inicio del administrador. No agregan dependencias nativas, así que llegan con `npm run publish:update`.
 
-Las variables nuevas (`SESSION_CHECK_*`, `BOOKING_EXPIRY_*` y `FOLLOW_UP_*`) tienen valor por defecto y el compose no las pasa: no se agregan a `.env.production`. `FOLLOW_UP_*` necesita `INTERNAL_API_KEY`, que ya está en `.env.production`.
+Las variables nuevas (`SESSION_CHECK_*`, `BOOKING_EXPIRY_*` y `FOLLOW_UP_*`, nueve en total, incluida `FOLLOW_UP_LOOK_BACK_DAYS`) tienen valor por defecto, están comentadas en `.env.example` y `.env.production.example`, y `docker-compose.yml` las pasa a los contenedores desde el 22-10-2026 (commit `70b990c` de `lavarapido-infra`): solo se escriben en `.env.production` para cambiar su valor. `FOLLOW_UP_*` necesita `INTERNAL_API_KEY`, que ya está en `.env.production`.
+
+#### 1.3.8 Versión v1.0.0 y arreglos del 23-10-2026 (pendientes de desplegar)
+
+El 23-10-2026 se pasó `develop` a `main` y se etiquetó `v1.0.0` en 8 repositorios. payment-service y la app móvil no tienen todavía esa versión: el PR #2 de payment está abierto, sin revisión y con el *quality gate* de SonarCloud en error por cuatro falsos positivos, y la app no tiene PR. Ese mismo día, después de la etiqueta, entraron a `develop` estos arreglos de la auditoría del 22-10-2026, que saldrán en `v1.1.0` (CI verde en los 10 repositorios):
+
+- **api-gateway:** deja de publicar `/api/v1/operator/bookings/**` (E-01).
+- **booking-service:** las rutas del operario solo aceptan a operations-service con la llave interna y aplican la regla de los 15 minutos (E-01); el administrador elige el motivo de la cancelación (A-20); un cambio de estado hecho por el administrador publica un evento para el cliente (A-11); los puntos de fidelización quedan congelados en cada línea de la reserva (A-09, migración 043).
+- **operations-service:** envía la llave interna a booking-service (E-01), guarda las notas de la asignación (B-01, migración 042) y revisa que la cuenta del operario siga activa al asignar y al reprogramar (A-13, E-12).
+- **security-service:** valida en el servidor los dominios de correo permitidos (`ALLOWED_EMAIL_DOMAINS`, por defecto `gmail.com`, A-01); el token que todavía dice un rol que la cuenta ya no tiene deja de servir y sus sesiones se revocan (E-02); ya no arranca en perfil `dev` por defecto ni guarda contraseñas demo en el código (E-05).
+- **customer-service:** rechaza las placas de más de 6 caracteres en lugar de recortarlas (E-16).
+- **notification-service:** avisa al cliente cuando el administrador cambia el estado de su reserva (A-11).
+- **payment-service:** el descuento porcentual va de 1 a 99 % y siempre queda un monto por pagar (E-07); quitar el cupón anula el canje en el servidor (`DELETE /api/v1/loyalty/redemptions/{bookingId}/{promotionId}`) y solo se permite una promoción por reserva (migración 021, E-08 y E-09); sin contraseña por defecto en su base aislada (E-05).
+- **Web:** E-07, E-08 y A-01 como arriba; reasignar el operario (A-02), notas al asignar (B-01), motivo de cancelación (A-20), datos reales en el historial y los servicios del operario (A-18), ingresos por fecha de aprobación y estado "En servicio" (A-17, A-19), mensaje de cuenta de operario desactivada (A-13) y pruebas del guard, el interceptor y varios ViewModels (F-02).
+- **App móvil:** E-07, E-08, A-01 y A-13, y las primeras pruebas automáticas con `jest-expo` en el CI (F-01). Son cambios de JavaScript: llegan a los APK instalados con `npm run publish:update`.
+- **lavarapido-infra:** `ALLOWED_EMAIL_DOMAINS` y `DEMO_ADMIN_PASSWORD`, `DEMO_OPERATOR_PASSWORD` y `DEMO_CLIENT_PASSWORD` (solo perfil `dev`) en el compose y en `.env.example`, sin contraseñas reales versionadas (E-05), e `INTERNAL_API_KEY` documentada como obligatoria para que el operario inicie y termine servicios (E-01).
+
+**Antes de desplegarlos:** `INTERNAL_API_KEY` ya está en `.env.production`, así que el cambio E-01 no pide nada nuevo; las cuentas demo no existen en producción; y la migración 021 de payment tiene la precondición `onFail: CONTINUE`: si la base ya tiene una reserva con dos cupones canjeados, el índice único no se crea y no avisa, así que conviene revisarlo en la base antes de actualizar. También conviene consultar si hay cuentas con un correo que no sea @gmail.com (la web y la app ya no las dejan iniciar sesión) y placas de más de 6 caracteres en `customer.customer_vehicle` (customer-service ya no puede leer ese vehículo). Siguen abiertos, entre otros, SEC-01 (el gateway no revisa la sesión si el encabezado dice `bearer` en minúscula), BIZ-01 y BIZ-02 (monto de una reserva pagada que se reprograma y monto que ve el cliente) y OPS-01 (terminar un servicio no es atómico); están en el documento de Acciones Correctivas, Tabla 7.
 
 ---
 
@@ -441,7 +459,7 @@ Se consulta con `tail -20 ~/lavarapido/backups/backup.log`; solo los problemas, 
 | `PUBLIC_URL` / `SITE_ADDRESS` | Dirección pública (CORS, enlaces de correo) y dominio de Caddy |
 | `PUSH_ENABLED` / `MESSAGING_ENABLED` | `true`: push con Expo y eventos con RabbitMQ |
 
-Las variables del 21-10-2026 no van en `.env.production`: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL` y `SESSION_CHECK_TIMEOUT` (chequeo de sesión del gateway: activo, 30 s y 3 s), `BOOKING_EXPIRY_CHECK_ENABLED` y `BOOKING_EXPIRY_CHECK_INTERVAL` (cancelación de las reservas programadas que vencieron sin confirmarse: activa y cada 5 minutos), `BOOKING_EXPIRY_GRACE_MINUTES` (60 minutos de margen, que usan booking-service y operations-service) y `FOLLOW_UP_ENABLED` y `FOLLOW_UP_INTERVAL` (seguimiento de las reservas que terminaron y nadie cerró: activo y cada 5 minutos) quedan con su valor por defecto, porque el compose no las pasa a los contenedores.
+Las variables del 21-10-2026 no son obligatorias en `.env.production`: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL` y `SESSION_CHECK_TIMEOUT` (chequeo de sesión del gateway: activo, 30 s y 3 s), `BOOKING_EXPIRY_CHECK_ENABLED` y `BOOKING_EXPIRY_CHECK_INTERVAL` (cancelación de las reservas programadas que vencieron sin confirmarse: activa y cada 5 minutos), `BOOKING_EXPIRY_GRACE_MINUTES` (60 minutos de margen, que usan booking-service y operations-service) y `FOLLOW_UP_ENABLED`, `FOLLOW_UP_INTERVAL` y `FOLLOW_UP_LOOK_BACK_DAYS` (seguimiento de las reservas que terminaron y nadie cerró: activo, cada 5 minutos y revisando los últimos 28 días, porque la máquina puede pasar semanas apagada) quedan con su valor por defecto si no se escriben; `docker-compose.yml` sí las pasa a los contenedores, así que se pueden cambiar en `.env.production`. Lo mismo vale para `ALLOWED_EMAIL_DOMAINS` (dominios de correo que acepta security-service, por defecto `gmail.com`; entra con `v1.1.0`). `ADMIN_DOCUMENT` y `ADMIN_PHONE` completan la cédula y el celular del primer administrador junto a `ADMIN_EMAIL` y `ADMIN_PASSWORD`. Las variables `DEMO_*_PASSWORD` no se usan en producción: solo existen en el perfil `dev`.
 
 #### 3.3.3 Límites de memoria y runtime (JVM -Xmx, ASPNETCORE_ENVIRONMENT)
 
@@ -457,11 +475,14 @@ Las variables del 21-10-2026 no van en `.env.production`: `SESSION_CHECK_ENABLED
 ### 3.4 Protocolo de Comunicación y Ventana de Mantenimiento
 
 1. **Aviso previo (24 h):** el DevOps informa al equipo por el grupo del proyecto la fecha, la ventana y los cambios (release notes).
-2. **Congelamiento:** no se suben cambios a la rama a desplegar durante la ventana.
+2. **Congelamiento:** no se fusiona nada a la rama que se despliega durante la ventana. Con el despliegue continuo (4.3.4) cada fusión a `main` despliega sola y recrea contenedores durante 1 o 2 minutos, así que `main` también se congela el día de la exposición (27-10-2026).
 3. **Inicio:** se informa "inicio de despliegue". `update-server.sh` toma el respaldo de la base antes de actualizar (sección 3.2).
 4. **Ejecución:** runbook de la sección 4.
 5. **Verificación:** pruebas de humo de la sección 5. El QA confirma cada rol.
-6. **Cierre:** se informa "despliegue terminado" con la versión y las evidencias. Si falla, **rollback**: `git checkout` del commit anterior en `lavarapido-infra` y en los servicios, `update-server.sh`, y si la migración dañó datos, restaurar el respaldo con `restore-db.sh` (sección 3.2.4).
+6. **Cierre:** se informa "despliegue terminado" con la versión y las evidencias. Si falla, **rollback**. `update-server.sh` vuelve a bajar la punta de la rama de cada repositorio (llama a `setup-server.sh`), así que un `git checkout` hecho a mano en el servidor se pierde en la siguiente actualización. Por eso:
+   - **En GitHub (lo normal):** revertir el cambio en la rama que se despliega (`git revert` del commit, o `git revert -m 1` de la fusión, en una rama `fix/…` con su PR) y volver a desplegar: con el despliegue continuo basta con fusionar la reversión a `main`.
+   - **De urgencia en el servidor:** antes de actualizar, guardar la imagen que funciona (`sudo docker tag lavarapido/<servicio>:local lavarapido/<servicio>:prev`); para volver, `sudo docker tag lavarapido/<servicio>:prev lavarapido/<servicio>:local` y `sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production --profile app up -d --no-build <servicio>`, sin `update-server.sh`. Después se revierte en GitHub, porque la siguiente actualización vuelve a la punta de la rama. Este paso es manual: los scripts todavía no guardan la imagen anterior (acción CD-11).
+   - **Datos:** si la migración dañó datos, restaurar el respaldo tomado antes de actualizar con `restore-db.sh` (sección 3.2.4); devuelve **toda** la base a ese momento y no corre `payment-migrate`.
 7. **Ventana estándar:** fuera del horario de atención del lavadero (antes de las 07:00 o después de las 18:00, hora de Colombia).
 
 ---
@@ -513,7 +534,7 @@ Las migraciones son **automáticas**:
 
 1. El contenedor `db-init` crea la base `LavaRapido` si no existe y la deja en modelo de recuperación `SIMPLE`.
 2. El contenedor `payment-migrate` (Liquibase 4.29) aplica los changelogs de payment-service (`db/changelog/db.changelog-master.yaml`) y termina.
-3. Cada servicio Java aplica sus propios changelogs al arrancar. La numeración es global: 001–041 más las semillas 1xx de catálogos (la 040 de operations-service y la 041 de notification-service son del 21-10-2026 y entran con la próxima actualización).
+3. Cada servicio Java aplica sus propios changelogs al arrancar. La numeración es global: 001–041 más las semillas 1xx de catálogos (la 040 de operations-service y la 041 de notification-service son del 21-10-2026 y se aplicaron en el servidor el 22-10-2026). En `develop` del 23-10-2026 se agregaron la 042 (operations-service, notas de la asignación) y la 043 (booking-service, puntos de fidelización por línea de reserva), que entran con `v1.1.0` junto con la 021 de payment-service (una promoción por reserva); la siguiente libre es la 044.
 4. Hibernate solo valida que el modelo coincida con las tablas (`ddl-auto: validate`); nunca altera tablas.
 
 Producción **no carga datos de prueba**: solo catálogos (roles, servicios, estados, horario y datos del negocio).
@@ -534,7 +555,7 @@ q "SELECT u.username, r.code FROM security.app_user u JOIN security.user_role ur
 
 Resultado esperado:
 - los 9 esquemas con sus tablas;
-- en cada servicio, `ok` igual a `changesets` (16-10-2026: 143 de 143; 19-10-2026: 144 de 144, con la 039); después de desplegar los cambios del 21-10-2026 deben aparecer también la 040 en `DATABASECHANGELOG_OPERATIONS` y la 041 en `DATABASECHANGELOG_NOTIFICATION`;
+- en cada servicio, `ok` igual a `changesets` (16-10-2026: 143 de 143; 19-10-2026: 144 de 144, con la 039); desde el 22-10-2026 aparecen también la 040 en `DATABASECHANGELOG_OPERATIONS` y la 041 en `DATABASECHANGELOG_NOTIFICATION`;
 - el administrador inicial creado (log de security: `First administrator created`).
 
 ### 4.3 Despliegue y Orquestación del Stack de Aplicación
@@ -549,9 +570,11 @@ El stack se define con dos archivos versionados en `lavarapido-infra`:
 
 ```bash
 # 1. Bajar los 9 repositorios (y preparar Docker y swap la primera vez)
-curl -fsSL https://raw.githubusercontent.com/BrayanCABRERA123/lavarapido-infra/develop/deploy/setup-server.sh -o setup-server.sh
+curl -fsSL https://raw.githubusercontent.com/BrayanCABRERA123/lavarapido-infra/main/deploy/setup-server.sh -o setup-server.sh
 bash setup-server.sh
 ```
+
+El script se baja de `main` (versión `v1.0.0`). En esa versión clona y actualiza la rama `develop` de cada repositorio (variable `BRANCH`); con el despliegue continuo de la sección 4.3.4 pasa a clonar `main`, salvo los repositorios de `DEVELOP_ONLY` (hoy payment-service, que todavía no tiene versión en `main`). Para elegir otra rama: `BRANCH=develop bash setup-server.sh`.
 
 **Con Portainer:** Stacks → Add stack → *Repository*. Las imágenes se construyen desde 9 repositorios hermanos, así que el flujo recomendado es:
 1. compilar las imágenes con el CLI (paso 4.3.3);
@@ -586,17 +609,28 @@ bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh web             # sol
 bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh security-service notification-service
 ```
 
-**Desde GitHub, sin SSH:** con la máquina encendida, en el repositorio `lavarapido-infra` → *Actions → Desplegar en Azure → Run workflow*. En *Servicios* se deja vacío para actualizar todo o se escriben los nombres (`web payment-service`). Al terminar, el flujo comprueba que la web y la API respondan 200. Usa una llave propia de GitHub (secreto `AZURE_SSH_KEY`) que en el servidor solo puede ejecutar `deploy/ci-deploy.sh`, que valida los nombres y no deja correr dos actualizaciones a la vez.
+**Desde GitHub, sin SSH:** con la máquina encendida, en el repositorio `lavarapido-infra` → *Actions → Desplegar en Azure → Run workflow*. El botón existe desde el 23-10-2026, cuando `deploy.yml` llegó a `main` (la rama por defecto) con la versión `v1.0.0`; en esa versión el flujo llama a `update-server.sh`, que despliega `develop`. En *Servicios* se deja vacío para actualizar todo o se escriben los nombres (`web payment-service`). Al terminar, el flujo comprueba que la web y la API respondan 200. Usa una llave propia de GitHub (secreto `AZURE_SSH_KEY`) que en el servidor solo puede ejecutar `deploy/ci-deploy.sh`, que valida los nombres y no deja correr dos actualizaciones a la vez. **Al 23-10-2026 el flujo no se ha ejecutado nunca** (0 corridas) y el repositorio no tiene ningún secreto, así que fallaría hasta crear `AZURE_SSH_KEY` e instalar su línea en `authorized_keys` del servidor; mientras tanto se usa la opción por SSH de arriba.
 
-**Integración continua:** desde el 19-10-2026 los 10 repositorios tienen `.github/workflows/ci.yml`, que corre en cada push o pull request a `develop` y `main`, y el resultado aparece como ✓ o ✗ junto a cada commit:
+**Integración continua:** desde el 19-10-2026 los 10 repositorios tienen `.github/workflows/ci.yml`, que corre en cada push o pull request a `develop` y `main`, y el resultado aparece como ✓ o ✗ junto a cada commit. Al 23-10-2026 (noche) la última corrida de `develop` está en verde en los 10:
 
 | Repositorio | Qué revisa |
 |---|---|
 | Servicios Java y api-gateway | `./mvnw verify`: compila y corre las pruebas (Java 21) |
 | payment-service | `dotnet build` y `dotnet test` (.NET 8; las de integración se omiten sin SQL Server) |
 | Front-end-proyecto-web | Compilación de producción y `ng test` |
-| LavadoVehicular-Movil | `tsc --noEmit` (el APK se sigue generando con EAS) |
-| lavarapido-infra | Sintaxis y `shellcheck` de `deploy/*.sh`, `docker compose config` y sintaxis de `e2e/` |
+| LavadoVehicular-Movil | `tsc --noEmit` y, desde el 23-10-2026, `jest` (`jest-expo`, 3 archivos y 13 pruebas). El APK se sigue generando con EAS |
+| lavarapido-infra | Sintaxis y `shellcheck` de `deploy/*.sh`, `docker compose config` y sintaxis de `e2e/` (las pruebas de punta a punta corren solo en local) |
+
+#### 4.3.4 Despliegue continuo (preparado, todavía sin probar en vivo)
+
+El 23-10-2026 quedó preparado el despliegue continuo, para que una versión aprobada llegue al servidor sin que nadie entre por SSH. **Todavía no está activo:** los cambios están en la rama local `ci/continuous-deployment` de `lavarapido-infra` y en las ramas locales `ci/request-deploy` de la web, api-gateway, security, operations y notification, sin fusionar, y nunca se han ejecutado contra la máquina virtual. Así funcionará cuando se fusionen:
+
+1. Cuando un PR aprobado entra a `main`, el `ci.yml` del repositorio corre el CI y, si pasa, su job **Pedir despliegue** lanza el flujo **Desplegar en Azure** de `lavarapido-infra` con `automatic=true` (secreto `DEPLOY_DISPATCH_TOKEN`: un token *fine-grained* con acceso solo a `lavarapido-infra` y permiso *Actions: Read and write*). Una fusión a `main` de `lavarapido-infra` también despliega.
+2. El flujo entra por SSH (`AZURE_SSH_KEY`), respalda la base, baja `main` de todos los repositorios (payment-service sigue en `develop` por `DEVELOP_ONLY`) y reconstruye lo que cambió. Si ya hay otra actualización corriendo, por ejemplo la del arranque de la máquina, espera hasta 20 minutos y después actualiza. Luego espera hasta 8 minutos a que **todos** los contenedores queden sanos: si alguno no arranca, el flujo termina en rojo y dice cuál. Si cambió el `Caddyfile`, reinicia Caddy. Al final comprueba que la web y la API respondan 200.
+3. Si la máquina está **apagada**, el flujo automático deja un aviso y no falla. Al encenderla, `deploy/boot-update.sh` (tarea `@reboot` que instala `setup-server.sh`) baja lo nuevo de `main` y actualiza si hay algo sin desplegar, comparando con `~/lavarapido/backups/deployed-heads`, que solo se escribe cuando una actualización completa termina bien. El resultado queda en `~/lavarapido/backups/deploy.log`.
+4. customer-service, booking-service y payment-service todavía no tienen el job **Pedir despliegue**: sus cambios llegan con el siguiente despliegue de cualquier repositorio o a mano. Para agregarlo, su dueño copia el job del `ci.yml` de la web y crea el secreto en su repositorio.
+
+**Para activarlo (pendiente, acción CD-01 del documento de Acciones Correctivas):** fusionar primero `lavarapido-infra` (el flujo nuevo acepta el dato `automatic`; si la web llega antes, su pedido falla con *422 Unexpected inputs*), crear `AZURE_SSH_KEY` y `DEPLOY_DISPATCH_TOKEN`, instalar la línea `restrict,command="bash …/deploy/ci-deploy.sh"` en `~/.ssh/authorized_keys` del servidor y, con la máquina encendida, correr el flujo a mano **dos veces**: la primera corre los scripts viejos del servidor (bajan `develop`); la segunda ya usa los nuevos, pasa el servidor a `main` e instala la tarea de arranque. Se revisa con `crontab -l | grep boot-update` y `git -C ~/lavarapido/Front-end-proyecto-web branch --show-current` (debe decir `main`). Si falta `DEPLOY_DISPATCH_TOKEN`, el job **Pedir despliegue** del repositorio sale en rojo.
 
 **Publicación de la app móvil**, desde el PC, en la carpeta de la app:
 
@@ -698,7 +732,7 @@ nc -zv 64.236.160.129 1433    # desde afuera: debe FALLAR (puerto cerrado)
 
 #### 5.2.3 Pruebas de escritura y persistencia transaccional
 
-**Prueba automatizada de punta a punta:** `lavarapido-infra/e2e/full-flow.test.js` (`npm run flow`). Recorre los tres roles por el gateway:
+**Prueba automatizada de punta a punta:** `lavarapido-infra/e2e/full-flow.test.js` (`npm run flow`). Corre solo en local, contra los contenedores de `docker compose --profile app` (lee el `.env` local y usa `docker exec`); el CI de GitHub solo revisa su sintaxis (`node --check`) y no la ejecuta contra el servidor. Recorre los tres roles por el gateway:
 
 | # | Paso | Resultado |
 |---|---|---|

@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 21, 2026
+October 23, 2026
 
-Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.6
+Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.7
 
 ## Version Control
 
@@ -38,6 +38,7 @@ Table 1 records the change history of this document. Each time an administrative
 | 4.4 | 2026-10-20 | The user type change from Management > Users was removed, since the team reverted it in the web, the app, and the server: the role is chosen when the account is created (section 10.3). The Registered filter was removed from the users list (section 9.2). Notifications open their detail with a button to go to Bookings or home (section 12.7). | Development team |
 | 4.5 | 2026-10-21 | Review against the code and the server of October 21, 2026: deactivating an account makes its session stop working (sections 9.4, 9.6, and 17.5); the roles tab says that the role decides the access (section 10.1); the cash account and its option for the customer (section 11.4); bookings that close on their own, single count of bookings without an operator, and the assignment lock (sections 12.3 and 12.4); receipt of at most 2 MB (section 12.6); reports with only completed bookings (section 13); automatic backups of the public server (sections 14.6 and 15.2) and security headers (section 17.4). The date and the version of the cover and the row of data that used to be stored only in the browser (Table 12) were corrected. | Development team |
 | 4.6 | 2026-10-21 | Change of the rule for bookings that end without being closed, reviewed by the team on the night of October 21: only a confirmed booking that never had an operator becomes No-show on its own; one that had an operator and nobody recorded goes to the **To close** card of the home screen (web and mobile app), where the administrator chooses **Attended** or **No-show** (sections 6.3, 8.3, 12.3, and 12.7). Bookings without an operator with a single rule in the mobile app too (sections 8.3 and 12.4); *FOLLOW_UP_\** variables (section 11.6); new incident and glossary term (Tables 18 and 20). | Development team |
+| 4.7 | 2026-10-23 | Review against *develop* of October 23, 2026: manual backup with *backup-db.sh* and *verify-backup.sh* instead of a *BACKUP DATABASE* with *COMPRESSION*, which SQL Server Express does not support (14.3); the daily task is scheduled by *setup-server.sh* and reads the password from *.env.production* (14.4); start-up task of the continuous deployment, not yet tested (14.6); **To close** looks back 28 days (12.3); changing or recovering the password revokes sessions and removing a role cuts the token (9.4, 9.6, and 10.3); a coupon discount goes from 1 to 99 % (12.8); variables the compose file already passes (11.6); broken link in the table of contents (10.3) and reference to the mobile app (6.2). Includes the content of Merari Urbano's *fix/A-03*, *fix/A-04*, *fix/A-05*, *fix/E-02*, *fix/E-07*, and *fix/E-20* branches. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -75,7 +76,7 @@ Table 1 records the change history of this document. Each time an administrative
 - [10. Role and Permission Management](#10-role-and-permission-management)
   - [10.1 The Three Fixed Roles](#101-the-three-fixed-roles)
   - [10.2 Control by Role and by Ownership](#102-control-by-role-and-by-ownership)
-  - [10.3 Changing a Person's Role](#103-changing-a-persons-role)
+  - [10.3 A Person's Role](#103-a-persons-role)
 - [11. System Configuration](#11-system-configuration)
   - [11.1 Business Data](#111-business-data)
   - [11.2 Opening Hours and Exceptions](#112-opening-hours-and-exceptions)
@@ -129,6 +130,8 @@ Table 1 records the change history of this document. Each time an administrative
 
 <!-- /toc -->
 
+*Note.* Numbering starts at 4 because sections 1 to 3 are the cover, the version control, and the table of contents, which have no number in their title. It is kept this way so that the cross-references between documents by section number (for example, "Installation Manual, section 10") remain valid.
+
 ## 4. Introduction
 
 The Vehicle Washing Management System (Vehicle Washing) manages the bookings, the assignment of operators, the execution of services, and the verification of payments of a vehicle washing business. Within the system, the administrator is the person who runs the business day to day and who is also responsible for the security of the accounts, the integrity of the data, and the continuity of the service.
@@ -168,7 +171,7 @@ To guide the administrator in the management, configuration, and supervision of 
 - The use of the system by customers and operators (User Manual).
 - The internal architecture, the complete data model, and the API contracts (Technical Manual).
 - The initial installation of the environment (Installation Manual).
-- The administration screens of the Android application, which offers modules equivalent to those of the web and is downloaded from the home page.
+- The administration screens of the Android application, which offers modules equivalent to those of the web and is downloaded from the home page: they follow the same rules of this manual and their walkthrough is summarized in the User Manual, section 10.3.6.
 - Staging and production environments, which the documentation declares outside the academic scope; the recommendations of this manual for those environments are indicative.
 
 ### 6.3 Implementation Status of the Administrative Functions
@@ -373,7 +376,7 @@ Operators can also be created from **Operators > New operator** (section 12.1), 
 3. Confirm the message "Deactivate [name]? They will no longer be able to log in." Since October 21, 2026, if the person had an open session, that session stops working within 30 seconds on all their devices.
 4. Verify that the status changes to **Disabled** and, if the person is an operator with pending services, reassign them (section 12.4).
 
-An administrator account cannot be deactivated: the button appears blocked with the message "An administrator account cannot be disabled." Since the user type is not changed from the panel (section 10.3), removing an administrator requires the IT administrator to take that role away in the database and write it down in the team's log. Nobody can deactivate their own account either, from this table or from **Profile**.
+An administrator account cannot be deactivated: the button appears blocked with the message "An administrator account cannot be disabled." Since the user type is not changed from the panel (section 10.3), removing an administrator requires the IT administrator to take that role away in the database (*security.user_role*) and write it down in the team's log. Since *develop* of October 23, 2026 (E-02, version 1.1.0), as soon as the role disappears from *security.user_role* the system revokes all of that person's sessions (*security.user_session.revoked_at*): the token that still said Administrator stops working within 30 seconds and, when signing in again, the person only has the roles left. Nobody can deactivate their own account either, from this table or from **Profile**.
 
 ### 9.5 Password Reset
 
@@ -392,7 +395,7 @@ The administrator cannot see or set a user's password. To regain access, the per
 
 ### 9.6 Active Sessions
 
-Each login is recorded in *security.user_session* (start, expiry, revocation, IP address, and browser agent). Logging out marks the session as revoked, and deactivating the account revokes all its sessions. Since October 21, 2026 the token of a revoked session stops working: security-service rejects it and the API Gateway cuts it before it reaches the other services, with a margin of up to 30 seconds (if security-service does not answer, the token works until it expires, as before). When a compromise is suspected, deactivate the account, change the JWT secret if the compromise affects the platform, and review the sessions:
+Each login is recorded in *security.user_session* (start, expiry, revocation, IP address, and browser agent). Logging out marks the session as revoked, and deactivating the account revokes all its sessions. Changing the password from **Profile** revokes the person's other sessions (the one on the device where it was changed stays open) and recovering it with the code sent by email revokes all of them. Since October 21, 2026 the token of a revoked session stops working: security-service rejects it and the API Gateway cuts it before it reaches the other services, with a margin of up to 30 seconds (if security-service does not answer within 3 seconds, the gateway lets the request through and the token works until it expires). Nonconformity SEC-01 remains open: if a request carries the header with *bearer* in lowercase, the gateway does not check the session and the services other than security-service accept the token until it expires (Corrective Actions document). When a compromise is suspected, deactivate the account, change the JWT secret if the compromise affects the platform, and review the sessions:
 
 ```sql
 SELECT TOP (50) s.user_session_id, u.username, s.started_at, s.expires_at,
@@ -436,7 +439,7 @@ A valid role is not enough: each service also verifies the ownership of the reso
 
 Each account has one user type (Client, Operator, or Administrator), chosen when it is created: Client when the person signs up from the public screen, or the **Assigned role** of **Create user** (section 9.3) when the administrator creates it. Since October 20, 2026, the web and the app do not offer changing the user type of an existing account: the **User type** column of **Management > Users** only shows it, and the server has no route to change it.
 
-If a person really needs another role, the IT administrator adjusts it in the database (*security.user_role*, with the same procedure as section 8.4), asks the person to sign out and sign in again, and records who asked for the change and why in the team's log. If the new role is Operator, the operations service creates their operator record the next time the operators are listed; then give them shifts in **Operators** (section 12).
+If a person really needs another role, the IT administrator adjusts it in the database (*security.user_role*, with the same procedure as section 8.4) and records who asked for the change and why in the team's log. If a role was removed, since *develop* of October 23, 2026 (E-02) there is no need to ask the person to sign out: the system compares the token's roles with *security.user_role* and revokes all their sessions within 30 seconds. If a role was only added, the person must sign out and sign in again so the token includes it. If the new role is Operator, the operations service creates their operator record the next time the operators are listed; then give them shifts in **Operators** (section 12).
 
 ## 11. System Configuration
 
@@ -525,7 +528,7 @@ The QR images and the receipts are stored inside the database as images (data UR
 
 ### 11.6 Operating Environment Variables
 
-The variables that change the behavior of the platform are read from the file *lavarapido-infra/.env* and require restarting the affected services. The most relevant for the IT administrator are *MESSAGING_ENABLED* (RabbitMQ events), *MAIL_ENABLED* and *MAIL_\** (email), *PUSH_ENABLED* (push notifications), *REMINDER_LEADS* (reminders, by default 24 h and 1 h), *BOOKING_ZONE* (time zone of the business), *BOOKING_SLOT_MINUTES* and *BOOKING_MAX_DAYS_AHEAD* (booking grid and window), and *INTERNAL_API_KEY* (internal calls between services). Those of October 21, 2026, *SESSION_CHECK_\** (gateway session check), *BOOKING_EXPIRY_\** (bookings that ended without being closed; *BOOKING_EXPIRY_GRACE_MINUTES* is used by booking-service and operations-service), and *FOLLOW_UP_\** (check of the **To close** list in operations-service), have defaults and do not go through the Compose file yet, so in Docker they are not changed from *.env*. Their values and the change procedure are described in the Installation Manual.
+The variables that change the behavior of the platform are read from the file *lavarapido-infra/.env* and require restarting the affected services. The most relevant for the IT administrator are *MESSAGING_ENABLED* (RabbitMQ events, also in payment-service), *MAIL_ENABLED* and *MAIL_\** (email), *PUSH_ENABLED* (push notifications), *REMINDER_LEADS* (reminders, by default 24 h and 1 h), *BOOKING_ZONE* (time zone of the business), *BOOKING_SLOT_MINUTES* and *BOOKING_MAX_DAYS_AHEAD* (booking grid and window), *INTERNAL_API_KEY* (internal calls between services; since *develop* of October 23, 2026 the operator also needs it to start and finish services), *ALLOWED_EMAIL_DOMAINS* (email domains accepted by sign-up, *gmail.com* by default), and *SPRING_PROFILES_ACTIVE* (profile of the Java services; with *dev*, the demonstration accounts whose password is in *DEMO_ADMIN_PASSWORD*, *DEMO_OPERATOR_PASSWORD*, or *DEMO_CLIENT_PASSWORD* are created). Those of October 21, 2026, *SESSION_CHECK_\** (gateway session check), *BOOKING_EXPIRY_\** (bookings that ended without being closed; *BOOKING_EXPIRY_GRACE_MINUTES* is used by booking-service and operations-service), and *FOLLOW_UP_\** (check of the **To close** list in operations-service, including *FOLLOW_UP_LOOK_BACK_DAYS*, 28 days), have defaults and the Compose file passes them to the containers since October 22, 2026, so they are changed from *.env*. Their values and the change procedure are described in the Installation Manual.
 
 ## 12. Management of Core Information
 
@@ -585,7 +588,7 @@ This rule replaced the first version of the same day, which closed as No-show ev
 
 To close the pending bookings:
 
-1. Find the **To close** card on the web **Dashboard** or on the home screen of the mobile app. It only appears when there is a pending booking and shows those of the last week.
+1. Find the **To close** card on the web **Dashboard** or on the home screen of the mobile app. It only appears when there is a pending booking and shows those of the last 28 days (*FOLLOW_UP_LOOK_BACK_DAYS*), because the server can stay off for weeks.
 2. Check with the operator whether the vehicle was served. If it is still the same day, the operator can record the service with **Start** and **Finish** even if it is late; this keeps the real hours and the booking leaves the list.
 3. If the vehicle was served, click **Attended**. The booking becomes Completed without made-up hours: without a start time it does not count toward the operator's punctuality and without an end time it does not add worked hours, but it does count as a service done and as income. The customer does not receive the notice that the vehicle is ready for pickup (it would arrive hours late), but can still rate the service.
 4. If the customer did not come, click **No-show**. This option only applies to a booking that was never started, and the status is final.
@@ -707,7 +710,7 @@ Announcements are sent with *POST /api/v1/admin/notifications* (ADMIN role), whi
 **Promotions.** The **Management > Promotions** tab manages the discount coupons that customers unlock with their points (data saved in payment-service, *GET*, *POST*, *PUT*, *PATCH*, and *DELETE /api/v1/admin/promotions*):
 
 1. Click to create a promotion and type the **Name**, the **Description**, the **Coupon** code (for example, PREMIUM20), the icon, the benefits, and the **Start date** (if it is in the future, the promotion stays scheduled until that day).
-2. Type the **Discount on redemption (%)**, between 1 and 100 (100 = free), which is applied to the booking total when the customer redeems the coupon.
+2. Type the **Discount on redemption (%)**, between 1 and 99, which is applied to the booking total when the customer redeems the coupon. There are no 100 % coupons: the payment requires an amount greater than zero, so the system always leaves at least 1 peso to pay, also with a fixed discount larger than the total (since *develop* of October 23, 2026, E-07).
 3. Type the **Loyalty points required** to unlock the coupon (0 = available to everyone).
 4. Save. The card of the promotion shows the discount ("N% off") and the points needed ("unlocks at N points" or "available to everyone"). The status is calculated from the start date and can be paused or resumed from the card.
 
@@ -837,31 +840,34 @@ The project documentation does not define a backup strategy, because production 
 
 ### 14.3 Generating a Manual Backup
 
-The backup is generated inside the SQL Server container (Compose service *sqlserver*, container *lavarapido-sqlserver*) and then copied to the host. The password of the *sa* account is the value of *DB_PASSWORD* in the *.env* file; it must be read from an environment variable and not typed in shared scripts.
+On the server the backup is made with the team's script *lavarapido-infra/deploy/backup-db.sh*, the same one the daily task and *update-server.sh* run (Deployment Document, section 3.2). Do not write a *BACKUP DATABASE* by hand: the server uses SQL Server **Express**, which does not support the *COMPRESSION* option (the command fails), and the script already does everything needed: full backup with a checksum (*CHECKSUM*), *RESTORE VERIFYONLY*, compression with *gzip* outside SQL Server, restricted permissions, and retention of the last 14. The script itself reads the *sa* password from *lavarapido-infra/.env.production* and gives it to *sqlcmd* in the *SQLCMDPASSWORD* variable, not with *-P*, so there is no need to pass it or write it anywhere.
 
 1. Verify that there is free disk space (a backup occupies, as an order of magnitude, the size of the data).
-2. Generate the backup with a checksum.
-3. Check that the file is restorable.
-4. Copy it to the host and then to secure storage.
-5. Record the backup (date, file, size, verification result, and person responsible).
+2. Generate the backup and check that it can be restored.
+3. Copy it to secure storage outside the virtual machine.
+4. Record the backup (date, file, size, verification result, and person responsible); the script already writes it to *~/lavarapido/backups/backup.log*.
+
+```bash
+# 1) Backup: leaves ~/lavarapido/backups/LavaRapido-YYYYMMDD-HHMMSS.bak.gz
+bash ~/lavarapido/lavarapido-infra/deploy/backup-db.sh
+
+# 2) Proof that the latest backup can be restored (restores it under another name and drops it)
+bash ~/lavarapido/lavarapido-infra/deploy/verify-backup.sh
+
+# 3) Result of both
+tail -n 5 ~/lavarapido/backups/backup.log
+```
+
+On a local installation with the development compose file (SQL Server Developer and no *.env.production*) the script does not apply; the backup is generated inside the container **without** *COMPRESSION*, so the same command also works on Express. The *CHECKSUM* option detects damaged pages when backing up and when verifying:
 
 ```bash
 cd lavarapido-infra
-# 1) Full backup inside the container
-docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
-  "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/backup_LavaRapido_2026-10-07_0200.bak' WITH INIT, CHECKSUM, COMPRESSION"
-
-# 2) Verify that the file is restorable
-docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
-  "RESTORE VERIFYONLY FROM DISK = N'/var/opt/mssql/data/backup_LavaRapido_2026-10-07_0200.bak' WITH CHECKSUM"
-
-# 3) Copy to the host
-docker cp lavarapido-sqlserver:/var/opt/mssql/data/backup_LavaRapido_2026-10-07_0200.bak ./backups/
+docker compose exec -e SQLCMDPASSWORD="$DB_PASSWORD" sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -b -Q \
+  "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/backup_LavaRapido.bak' WITH INIT, CHECKSUM"
+docker compose exec -e SQLCMDPASSWORD="$DB_PASSWORD" sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -b -Q \
+  "RESTORE VERIFYONLY FROM DISK = N'/var/opt/mssql/data/backup_LavaRapido.bak' WITH CHECKSUM"
+docker cp lavarapido-sqlserver:/var/opt/mssql/data/backup_LavaRapido.bak ./backups/
 ```
-
-The *CHECKSUM* option detects damaged pages when backing up and when verifying.
 
 **Figure 13**
 
@@ -871,27 +877,14 @@ The *CHECKSUM* option detects damaged pages when backing up and when verifying.
 
 ### 14.4 Automating the Daily Backup
 
-A backup that depends on someone remembering it ends up not being made. On Linux it is scheduled with *cron*; on Windows, with the Task Scheduler. The following sample script generates the backup, verifies it, copies it, and deletes the files that exceed the retention:
+A backup that depends on someone remembering it ends up not being made. On the server there is no script or *cron* task to write: *setup-server.sh* already schedules in the *azureuser* *crontab*, every day at 23:00 UTC and 5 minutes after each start of the virtual machine, *backup-db.sh* followed by *verify-backup.sh*, and each run is written to *~/lavarapido/backups/backup.log*. The task reads the password from *.env.production*, so it does not depend on *DB_PASSWORD* being in the *cron* environment and does not pass it with *-P* (the sample script that used to be in this section failed when it ran on its own and used *COMPRESSION*).
 
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-STAMP=$(date +%F_%H%M)
-FILE="backup_LavaRapido_${STAMP}.bak"
-DEST="$HOME/backups"
-SQL="docker compose -f $HOME/Backend/lavarapido-infra/docker-compose.yml exec -T sqlserver \
-     /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $DB_PASSWORD -C -b"
-$SQL -Q "BACKUP DATABASE [LavaRapido] TO DISK=N'/var/opt/mssql/data/$FILE' WITH INIT,CHECKSUM,COMPRESSION"
-$SQL -Q "RESTORE VERIFYONLY FROM DISK=N'/var/opt/mssql/data/$FILE' WITH CHECKSUM"
-docker cp lavarapido-sqlserver:/var/opt/mssql/data/$FILE "$DEST/"
-find "$DEST" -name 'backup_LavaRapido_*.bak' -mtime +14 -delete
-echo "$(date -Is) OK $FILE" >> "$DEST/backups.log"
-
-# crontab -e   (every day at 2:00 a.m.; DB_PASSWORD comes from the environment of the user)
-# 0 2 * * * /home/<USER>/bin/backup.sh >> /home/<USER>/backups/cron.log 2>&1
+crontab -l | grep backup-db.sh               # the task scheduled by setup-server.sh
+grep RESPALDO ~/lavarapido/backups/backup.log | tail -n 3
 ```
 
-The script must be stored with restricted permissions and its result must be monitored: an alert when the file of the day does not exist is worth more than many backups that nobody checks.
+On a local Windows computer the same idea is scheduled with the Task Scheduler, running the local block of section 14.3 with the password taken from *.env* and not written in the script. Its result must be monitored: an alert when the file of the day does not exist is worth more than many backups that nobody checks. The backups stay on the same disk as the virtual machine; to have a copy outside, download them to the team's PC (Deployment Document, section 3.2).
 
 ### 14.5 Backup Before Changes
 
@@ -909,6 +902,7 @@ Since October 21, 2026 the public server backs up the database without intervent
 - Every backup, check, and restore is written to *~/lavarapido/backups/backup.log*: *tail -20* shows the latest and *grep FALLÓ* only the problems.
 - The database uses the SIMPLE recovery model: with full backups no transaction log backups are needed, and the log does not grow without limit.
 - The backups live on the same disk as the virtual machine: they protect against an error or a bad migration, not against losing the machine. To meet the 3-2-1 rule of Table 13, copy them to the IT administrator's computer with *scp* or take a disk snapshot in Azure.
+- **Continuous deployment (prepared on October 23, 2026, not yet merged or tested live).** When it is activated, *setup-server.sh* will add a second *@reboot* task to the same *crontab*, *deploy/boot-update.sh*, which, when the machine is turned on, pulls what entered *main* while it was off and deploys it with *update-server.sh*, which backs up first. Its result is written to *~/lavarapido/backups/deploy.log* and is checked with *crontab -l | grep boot-update*. If the prior backup fails, nothing is updated. The details are in the Deployment Document, section 4.3.4.
 
 ## 15. Data Restoration
 

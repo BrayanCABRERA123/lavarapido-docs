@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 21, 2026
+October 23, 2026
 
-Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.5
+Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.6
 
 ## Version Control
 
@@ -37,6 +37,7 @@ Table 1 records the change history of this document. Each time the installation 
 | 4.3 | 2026-10-20 | Review against the code of October 20, 2026: the *notification.notification_type* catalog has 24 rows (migrations 031 and 038 added the alert for a booking without an operator and the new app version notice). | Development team |
 | 4.4 | 2026-10-21 | Review against the code of October 21, 2026: optional variables of the gateway session check and of the close of expired bookings (section 10.2), booking-service seeds 110 to 112 (section 11.2), cancellation reasons (Table 9), automatic backups of the public server (section 11.6), check of the token of a closed session (sections 16.3 and 16.4), and new errors (Table 14). | Development team |
 | 4.5 | 2026-10-21 | Change of the rule for bookings that end without being closed, reviewed by the team on the night of October 21: booking-service only cancels expired scheduled bookings and operations-service reviews the confirmed and started ones. Added the *FOLLOW_UP_ENABLED* and *FOLLOW_UP_INTERVAL* variables, *BOOKING_EXPIRY_GRACE_MINUTES* shared by booking-service and operations-service, and the services that use *INTERNAL_API_KEY* (section 10.2); changelogs 040 of operations-service and 041 of notification-service (section 11.2); 26 notification types (Table 9); check of the "To close" card (section 16.4); a new error (Table 14) and Annex B. | Development team |
+| 4.6 | 2026-10-23 | Review against *develop* of October 23, 2026 and version *v1.0.0*: branches and tags of each repository (8.1); variables the Compose file already passes, including *FOLLOW_UP_LOOK_BACK_DAYS*, *ALLOWED_EMAIL_DOMAINS*, *DEMO_\*_PASSWORD*, *ADMIN_DOCUMENT*, and *ADMIN_PHONE*, and *INTERNAL_API_KEY* required for the operator (10.2); the global script *lavarapido-6-services-sqlserver.sql* is not versioned (11.3); the APK used to test push notifications is built with the EAS *preview* profile, because *development* does not exist (13.2); demonstration accounts through variables (15.1). Includes the content of Merari Urbano's *fix/A-05* and *fix/B-02* branches. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -113,6 +114,8 @@ Table 1 records the change history of this document. Each time the installation 
   - [Annex E. Delivery Checklist](#annex-e-delivery-checklist)
 
 <!-- /toc -->
+
+*Note.* Numbering starts at 4 because sections 1 to 3 are the cover, the version control, and the table of contents, which have no number in their title. It is kept this way so that the cross-references between documents by section number (for example, "Installation Manual, section 10") remain valid.
 
 ## 4. Introduction
 
@@ -277,7 +280,7 @@ The project is distributed in one repository per component. All the backend repo
 
 ### 8.1 Cloning the Repositories
 
-The integration branch of the team is *develop*; the most recent version of every service is there (the *main* branches are older). For an evaluation installation, use *develop* or the tag of the delivered version.
+The integration branch of the team is *develop*; the most recent version of every service is there. Since October 23, 2026, *main* has the delivered version *v1.0.0* in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra), and *develop* is a few commits ahead with that day's fixes, which will ship in *v1.1.0*. payment-service and the mobile app have no release yet: their *main* is old (September 30 and July 6, 2026) and they are installed from *develop*. For an evaluation installation, use tag *v1.0.0* (and *develop* in payment-service and the app) or *develop* in all of them to see the latest.
 
 ```bash
 mkdir Backend && cd Backend
@@ -402,20 +405,23 @@ If *git check-ignore* prints nothing, the file is not excluded and must not be f
 | DB_URL | Java services run from the IDE | jdbc:sqlserver://localhost:1433;databaseName=LavaRapido;encrypt=true;trustServerCertificate=true |
 | JWT_SECRET | All services | HS256 signing key shared by all services; at least 32 bytes. Required. |
 | CORS_ALLOWED_ORIGINS | Services and gateway | Origins allowed to call from a browser: the web application and Expo web; *http://localhost:4200,http://localhost:8081*. |
-| SPRING_PROFILES_ACTIVE | Java services in Docker | *dev* by default (Swagger and demonstration accounts); use another value, such as *prod*, in any shared environment. |
+| SPRING_PROFILES_ACTIVE | Java services in Docker | *dev* by default in the Compose file (Swagger and demonstration accounts); use another value, such as *prod*, in any shared environment. Since *develop* of October 23, 2026, security-service without this variable starts in *prod* (E-05). |
+| DEMO_ADMIN_PASSWORD, DEMO_OPERATOR_PASSWORD, DEMO_CLIENT_PASSWORD | security-service (*dev* profile) | Passwords of the demonstration accounts *admin@gmail.com*, *operador@gmail.com*, and *cliente@gmail.com* (since *develop* of October 23, 2026, E-05). Empty: that account is not created. Each person chooses them in their *.env*; they are not in the code or in the documents. |
+| ALLOWED_EMAIL_DOMAINS | security-service | Email domains allowed when signing up, creating users, and changing the email, comma separated; *gmail.com* by default (since *develop* of October 23, 2026, A-01). With another domain the server answers 400 *EMAIL_DOMAIN_NOT_ALLOWED*. |
+| ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_DOCUMENT, ADMIN_PHONE | security-service (production) | First administrator, created only if the database has none; *ADMIN_DOCUMENT* and *ADMIN_PHONE* are their ID number and mobile phone (without them the profile keeps placeholder values). They go in *.env.production* and *docker-compose.prod.yml* passes them. |
 | MAIL_ENABLED | security-service and notification-service | *true* sends emails; *false* writes the recovery code in the log of security-service. |
 | MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM | security-service and notification-service | SMTP server. Locally Mailpit: localhost, 1025, any user and password. Gmail requires an app password. |
 | MAIL_DOCKER_HOST | Services in Docker | SMTP host seen from the containers; *mailpit* by default. |
 | MESSAGING_ENABLED | Java services and payment-service | *true* publishes and consumes RabbitMQ events; *false* (default) only writes them in the log. Without events, there are no notifications, payment notices, or point notices. |
 | RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_USERNAME, RABBITMQ_PASSWORD | Java services and payment-service | localhost, 5672, guest, guest in the local environment. |
 | PUSH_ENABLED, EXPO_ACCESS_TOKEN | notification-service | *true* sends push notifications through Expo; *false* only writes them in the log. |
-| INTERNAL_API_KEY | security-service, booking-service, operations-service, and notification-service | Key of the internal routes; without it, booking, payment, and coupon notices and reminders are not sent by email, the notification switches of each user cannot be read, and operations-service cannot close as No-show the confirmed bookings that ended without an operator. |
+| INTERNAL_API_KEY | security-service, booking-service, operations-service, and notification-service | Key of the internal routes; without it, booking, payment, and coupon notices and reminders are not sent by email, the notification switches of each user cannot be read, there is no automatic assignment, and operations-service cannot close as No-show the confirmed bookings that ended without an operator. Since *develop* of October 23, 2026 (E-01) it is also required for the operator to start and finish services: booking-service only accepts those routes from operations-service with this key. |
 | REMINDER_LEADS | notification-service | Advance of the reminders; *24h,1h* by default. |
 | BOOKING_ZONE, BOOKING_SLOT_MINUTES, BOOKING_MAX_DAYS_AHEAD | booking-service and operations-service | America/Bogota, 30, and 60 by default. |
-| SESSION_CHECK_ENABLED, SESSION_CHECK_CACHE_TTL, SESSION_CHECK_TIMEOUT | api-gateway | Check of the token session (since October 21, 2026): *true*, *30s*, and *3s* by default. They are not in *.env.example* or in the Compose file: in Docker they keep their defaults and only change if the gateway runs from the IDE (action ACO-14). |
-| BOOKING_EXPIRY_CHECK_ENABLED, BOOKING_EXPIRY_CHECK_INTERVAL | booking-service | Automatic cancellation of the scheduled bookings that were never confirmed (reason *EXPIRED*): *true* and *PT5M* (every 5 minutes) by default. Like the previous ones, they do not go through the Compose file. |
-| BOOKING_EXPIRY_GRACE_MINUTES | booking-service and operations-service | Minutes after the end time before an expired booking is closed; *60* by default. Both services use it, so if it is changed it must have the same value in both. It does not go through the Compose file. |
-| FOLLOW_UP_ENABLED, FOLLOW_UP_INTERVAL | operations-service | Review of the bookings that ended without being closed (since the night of October 21, 2026): a confirmed booking that never had an operator becomes No-show, and one that had an operator and nobody recorded stays in "To close". *true* and *PT5M* by default; needs *INTERNAL_API_KEY*. They do not go through the Compose file. |
+| SESSION_CHECK_ENABLED, SESSION_CHECK_CACHE_TTL, SESSION_CHECK_TIMEOUT | api-gateway | Check of the token session (since October 21, 2026): *true*, *30s*, and *3s* by default. They are commented out in *.env.example* and the Compose file passes them to the container. |
+| BOOKING_EXPIRY_CHECK_ENABLED, BOOKING_EXPIRY_CHECK_INTERVAL | booking-service | Automatic cancellation of the scheduled bookings that were never confirmed (reason *EXPIRED*): *true* and *PT5M* (every 5 minutes) by default. Like the previous ones, they go through the Compose file. |
+| BOOKING_EXPIRY_GRACE_MINUTES | booking-service and operations-service | Minutes after the end time before an expired booking is closed; *60* by default. Both services use it, so if it is changed it must have the same value in both; the Compose file passes it to both. |
+| FOLLOW_UP_ENABLED, FOLLOW_UP_INTERVAL, FOLLOW_UP_LOOK_BACK_DAYS | operations-service | Review of the bookings that ended without being closed (since the night of October 21, 2026): a confirmed booking that never had an operator becomes No-show, and one that had an operator and nobody recorded stays in "To close". *true*, *PT5M*, and *28* (days it looks back, because the server can stay off for weeks) by default; needs *INTERNAL_API_KEY*. They go through the Compose file. |
 | SECURITY_SERVICE_URL, CUSTOMER_SERVICE_URL, BOOKING_SERVICE_URL | Services that call others | Addresses of the services; they have defaults for the local environment. payment-service needs BOOKING_SERVICE_URL to read the total and to credit the points of a booking. |
 
 *Note.* Prepared by the authors from *.env.example*, *docker-compose.yml*, and the configuration files of the services.
@@ -520,7 +526,7 @@ The Java services apply their migrations automatically when they start (*spring.
 
 ### 11.3 Alternative Method: Global Script
 
-The documentation repository keeps the script *lavarapido-6-services-sqlserver.sql*, with the full model for people who create the database by hand. Because every changeset has a precondition, the services can start afterwards on a database created with that script: Liquibase marks as run the objects that already exist. The script is run on the empty database:
+**As of October 23, 2026 the script *lavarapido-6-services-sqlserver.sql* is not versioned in any of the repositories** (not in their history either), so this method cannot be followed: the database is created only with the Liquibase changelogs each service applies on startup (section 11.2). If the team publishes the script again, it is run on the empty database and, because every changeset has a precondition, Liquibase marks as run the objects that already exist:
 
 ```bash
 sqlcmd -S localhost,1433 -U sa -P "<SA_PASSWORD>" -C -d LavaRapido -b -i lavarapido-6-services-sqlserver.sql
@@ -713,11 +719,11 @@ The command opens the Metro development server (port 8081) and shows a QR code. 
 
 **New native dependencies.** Since October 17, 2026, the app uses *expo-image-picker* (camera and gallery) and *expo-image-manipulator* (shrinking the photos) for the inspection report. After *git pull*, run *npm install* in *Frontend/LavadoVehicular-Movil*. Expo Go already includes these modules, but an APK built before that date does not: a new version must be built and published with EAS, as explained in the Deployment Document (section 4.3.3, "Publishing the mobile app"). The camera and photo permissions are declared in the *expo-image-picker* plugin inside *app.json*. The changes of October 21, 2026 (compressed receipt, QR magnifier, and mandatory APK update screen) add no native dependencies.
 
-**Push notifications.** Expo Go does not receive remote push notifications. To test them, build a development version with EAS and set *PUSH_ENABLED=true* in the backend:
+**Push notifications.** Expo Go does not receive remote push notifications. To test them, build the APK with the EAS *preview* profile (the only one defined in *eas.json* besides *production*; there is no *development* profile) and set *PUSH_ENABLED=true* in the backend:
 
 ```bash
 npx eas-cli login
-npx eas-cli build --profile development --platform android
+npx eas-cli build --profile preview --platform android
 ```
 
 **Figure 8**
@@ -762,7 +768,7 @@ Once all the components are started, people access the system through the web or
 
 ### 15.1 Demonstration Accounts
 
-When security-service starts with the *dev* profile (the default one in local), it creates one demonstration account per role (administrator, operator, and customer) if they do not exist. Their emails and passwords are documented in section 5 of the team guide (*lavarapido-infra/GUIA-EQUIPO.md*). This manual does not reproduce them, because the security policy forbids publishing credentials; those accounts must never exist in a shared environment.
+When security-service starts with the *dev* profile (the default one in local), it creates one demonstration account per role (administrator *admin@gmail.com*, operator *operador@gmail.com*, and customer *cliente@gmail.com*) if they do not exist. Since *develop* of October 23, 2026 (E-05) their passwords are not in the code or in any document: each person defines them in their *lavarapido-infra/.env* with *DEMO_ADMIN_PASSWORD*, *DEMO_OPERATOR_PASSWORD*, and *DEMO_CLIENT_PASSWORD*, and the account whose variable is empty is not created (team guide, *lavarapido-infra/GUIA-EQUIPO.md*, section 5). Accounts already created with the old passwords keep working until they are changed. Those accounts must never exist in a shared environment.
 
 ### 15.2 Rules for Accounts
 
@@ -982,7 +988,8 @@ The figures in this manual were taken on October 16, 2026, on a Windows 11 compu
 | Topic | What is missing | Section |
 |---|---|---|
 | One database login per service | The services use sa. | 11.4 |
-| Variables of October 21, 2026 | *SESSION_CHECK_\**, *BOOKING_EXPIRY_\**, and *FOLLOW_UP_\** are not in *.env.example* or in *docker-compose.yml* (action ACO-14). | 10.2 |
+| Variables of October 21, 2026 | Resolved on October 22, 2026: the nine of them (*SESSION_CHECK_\**, *BOOKING_EXPIRY_\**, and *FOLLOW_UP_\**) are in *.env.example* and *docker-compose.yml* (action ACO-14, closed). | 10.2 |
+| Global database script | *lavarapido-6-services-sqlserver.sql* is not versioned; the database is only created with Liquibase. | 11.3 |
 
 *Note.* Prepared by the authors from the verification of the repositories and the technical backlog.
 

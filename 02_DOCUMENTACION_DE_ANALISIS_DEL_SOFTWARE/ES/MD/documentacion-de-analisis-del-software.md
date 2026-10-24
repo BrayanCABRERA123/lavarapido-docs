@@ -8,7 +8,7 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 2.4, 21 de octubre de 2026
+Versión 2.5, 23 de octubre de 2026
 
 ---
 
@@ -21,7 +21,7 @@ Este documento muestra cómo se comporta LavaRápido cuando alguien lo usa: qué
 3. **Diagramas de actividades** de los procesos de negocio.
 4. **Diagramas de estados** de las entidades que cambian de estado (reserva, pago, ejecución del servicio, promoción e informe de inspección).
 
-El 21 de octubre de 2026 se actualizaron, contra el código de ese día, el cierre de sesión que deja sin efecto el token (sección 2.8), el candado de la asignación de operarios (sección 2.4), el comprobante de máximo 2 MB y el efectivo que solo aparece si su cuenta está activa (secciones 2.5 y 3.4), y el tratamiento de las reservas que terminaron sin que nadie las cerrara (secciones 4.1 y 4.3): el sistema solo cambia el estado cuando no hay duda y lo demás pasa a la lista "Por cerrar" del administrador. El 20 de octubre de 2026 el contenido se revisó otra vez contra el código: el cliente solo cancela (la reprogramación la hace el administrador), se quitó el cambio de rol de las cuentas, se corrigieron las secuencias y los estados que no coincidían, y los casos de uso y diagramas se dibujaron de nuevo con líneas rectas y sin cruces. El 19 de octubre de 2026 se agregaron los casos de uso CU31 y CU32, la recuperación de la contraseña (sección 2.10) y el ciclo de vida de la cuenta (sección 4.6), y las capturas del inventario de pantallas se tomaron de nuevo con datos de demostración. El 17 de octubre de 2026 se agregaron el consentimiento de los documentos legales en el registro (sección 2.1) y el informe de inspección desde la aplicación móvil (sección 2.9). Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol.
+El 21 de octubre de 2026 se actualizaron, contra el código de ese día, el cierre de sesión que deja sin efecto el token (sección 2.8), el candado de la asignación de operarios (sección 2.4), el comprobante de máximo 2 MB y el efectivo que solo aparece si su cuenta está activa (secciones 2.5 y 3.4), y el tratamiento de las reservas que terminaron sin que nadie las cerrara (secciones 4.1 y 4.3): el sistema solo cambia el estado cuando no hay duda y lo demás pasa a la lista "Por cerrar" del administrador. El 20 de octubre de 2026 el contenido se revisó otra vez contra el código: el cliente solo cancela (la reprogramación la hace el administrador), se quitó el cambio de rol de las cuentas, se corrigieron las secuencias y los estados que no coincidían, y los casos de uso y diagramas se dibujaron de nuevo con líneas rectas y sin cruces. El 19 de octubre de 2026 se agregaron los casos de uso CU31 y CU32, la recuperación de la contraseña (sección 2.10) y el ciclo de vida de la cuenta (sección 4.6), y las capturas del inventario de pantallas se tomaron de nuevo con datos de demostración. El 17 de octubre de 2026 se agregaron el consentimiento de los documentos legales en el registro (sección 2.1) y el informe de inspección desde la aplicación móvil (sección 2.9). Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol. El 23 de octubre de 2026 (versión 2.5) se agregó que recuperar la contraseña revoca todas las sesiones (sección 2.10) y que, si security-service no responde, el gateway deja pasar la petición (*fail-open*); el resto del análisis sigue vigente contra *develop* de ese día.
 
 La especificación completa de cada requisito y caso de uso (actores, precondición, flujo normal, flujos alternos y postcondición) está en el *Informe de especificación de requisitos*, secciones 5 y 7.3; aquí se citan por su identificador (RF-XXX, CUXX).
 
@@ -555,7 +555,7 @@ sequenceDiagram
     GW-->>W: 401 (booking-service no recibe la llamada)
 ```
 
-*Fuente:* `security-service` (`AuthenticationService.login / logout / isActive`, `ActiveSessionValidator`, `LoginLockout`, `PasswordRecoveryService`, migración `034-security-login-lockout.sql`) y gateway (`SessionCheckFilter`). El gateway guarda 30 segundos por token la respuesta de `/api/v1/auth/session`, así que una sesión abierta cuesta una llamada extra cada medio minuto y no una por petición. Una sesión también se cierra cuando el administrador desactiva la cuenta o el dueño la cierra; eso llega a los demás servicios en esos mismos 30 segundos.
+*Fuente:* `security-service` (`AuthenticationService.login / logout / isActive`, `ActiveSessionValidator`, `LoginLockout`, `PasswordRecoveryService`, migración `034-security-login-lockout.sql`) y gateway (`SessionCheckFilter`). El gateway guarda 30 segundos (si security-service no responde en 3 segundos, el gateway deja pasar la petición: *fail-open*) por token la respuesta de `/api/v1/auth/session`, así que una sesión abierta cuesta una llamada extra cada medio minuto y no una por petición. Una sesión también se cierra cuando el administrador desactiva la cuenta o el dueño la cierra; eso llega a los demás servicios en esos mismos 30 segundos.
 
 ### 2.9 Informe de inspección del vehículo (RF-036)
 
@@ -626,7 +626,7 @@ sequenceDiagram
     U->>W: Contraseña nueva
     W->>S: POST /api/v1/auth/password/reset
     alt política cumplida y distinta de la actual
-        S->>DB: marca el código como usado, guarda la contraseña nueva y borra el bloqueo
+        S->>DB: marca el código como usado, guarda la contraseña nueva, borra el bloqueo y revoca todas las sesiones
         S-->>W: 204 (vuelve al inicio de sesión)
     else débil o igual a la actual
         S-->>W: 400 WEAK_PASSWORD o SAME_PASSWORD (el código no se gasta)
