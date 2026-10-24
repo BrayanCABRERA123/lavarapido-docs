@@ -276,7 +276,7 @@ flowchart TB
 | Mobile frontend | React Native, Expo, React, React Navigation, i18next; expo-image-picker and expo-image-manipulator (inspection photos) | 0.86.3, SDK 57, 19.2, 7, 26; 57.0; TypeScript 6.0 |
 | Containers | Docker and Docker Compose | Docker 24 or later; Compose v2 |
 | Testing | JUnit 5 and Spring Boot Test (Java), xUnit (.NET), Vitest (web), Jest with *jest-expo* (mobile, since October 23, 2026) | Through the Maven Wrapper, *dotnet test*, *ng test*, and *npm test* |
-| Version control | Git and GitHub | Branches *main* (tagged version *v1.0.0* in 8 repositories since October 23, 2026), *develop*, *feature/\**, and *fix/\** |
+| Version control | Git and GitHub | Branches *main* (tagged version *v1.0.0* in 8 repositories since October 23, 2026 and in payment-service since the 24th), *develop*, *feature/\**, and *fix/\** |
 | Continuous integration | GitHub Actions | `ci.yml` in the 10 repositories: builds and runs the tests on every push or pull request to *develop* and *main*; `lavarapido-infra` also has the manual "Desplegar en Azure" workflow (not run yet) and the continuous deployment prepared in an unmerged branch (section 15.4) |
 | Diagrams and contracts | Mermaid (C4 and UML diagrams), OpenAPI 3 | Folders 08-uml and 07-api of the documentation |
 
@@ -1186,7 +1186,7 @@ The processing of personal data must comply with Statutory Law 1581 of 2012 (Con
 
 ### 15.1 Source Code
 
-The project uses Git with repositories on GitHub. Work is done on *feature/\**, *feat/\**, or *fix/\** branches that are merged into *develop* (integration); *main* holds stable versions. On October 23, 2026 *develop* was merged into *main* and tagged *v1.0.0* in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra); payment-service (PR #2 open) and the mobile app have no release yet, and that same day *develop* moved ahead again with the audit fixes, which will ship in *v1.1.0*. Commits follow the format *type(scope): description* (for example, *feat(payment): JWT auth, payment accounts with QR, admin review and manual payments*). The conventions are in *00-governance/git-conventions.md*.
+The project uses Git with repositories on GitHub. Work is done on *feature/\**, *feat/\**, or *fix/\** branches that are merged into *develop* (integration); *main* holds stable versions. On October 23, 2026 *develop* was merged into *main* and tagged *v1.0.0* in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra); payment-service got it on October 24 (PR #2 merged) and the mobile app does not have it yet (PR #1 open), and that same day *develop* moved ahead again with the audit fixes, which will ship in *v1.1.0*. Commits follow the format *type(scope): description* (for example, *feat(payment): JWT auth, payment accounts with QR, admin review and manual payments*). The conventions are in *00-governance/git-conventions.md*.
 
 ### 15.2 Database Schema
 

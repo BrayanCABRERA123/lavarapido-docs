@@ -281,7 +281,7 @@ The project is distributed in one repository per component. All the backend repo
 
 ### 8.1 Cloning the Repositories
 
-The integration branch of the team is *develop*; the most recent version of every service is there. Since October 23, 2026, *main* has the delivered version *v1.0.0* in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra), and *develop* is ahead with the fixes of October 23 and 24 (128 branches that day), which will ship in *v1.1.0*; *develop* is what runs on the public server since October 24, 2026. payment-service and the mobile app have no release yet: their *main* is old (September 30 and July 6, 2026) and they are installed from *develop*. For an evaluation installation, use tag *v1.0.0* (and *develop* in payment-service and the app) or *develop* in all of them to see the latest.
+The integration branch of the team is *develop*; the most recent version of every service is there. Since October 23, 2026, *main* has the delivered version *v1.0.0* in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra), and *develop* is ahead with the fixes of October 23 and 24 (128 branches that day), which will ship in *v1.1.0*; *develop* is what runs on the public server since October 24, 2026. payment-service has *v1.0.0* since October 24, 2026 (its PR #2 was merged and its *main* includes the whole *develop*); the mobile app has no release yet (PR #1 open; its *main* dates from July 6, 2026) and is installed from *develop*. For an evaluation installation, use tag *v1.0.0* (and *develop* in the app) or *develop* in all of them to see the latest, which is what runs on the public server.
 
 ```bash
 mkdir Backend && cd Backend

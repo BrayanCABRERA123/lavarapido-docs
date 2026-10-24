@@ -276,7 +276,7 @@ flowchart TB
 | Frontend móvil | React Native, Expo, React, React Navigation, i18next; expo-image-picker y expo-image-manipulator (fotos de la inspección) | 0.86.3, SDK 57, 19.2, 7, 26; 57.0; TypeScript 6.0 |
 | Contenedores | Docker y Docker Compose | Docker 24 o posterior; Compose v2 |
 | Pruebas | JUnit 5 y Spring Boot Test (Java), xUnit (.NET), Vitest (web), Jest con *jest-expo* (móvil, desde el 23 de octubre de 2026) | Mediante el Maven Wrapper, *dotnet test*, *ng test* y *npm test* |
-| Control de versiones | Git y GitHub | Ramas *main* (versión etiquetada *v1.0.0* en 8 repositorios desde el 23 de octubre de 2026), *develop*, *feature/\** y *fix/\** |
+| Control de versiones | Git y GitHub | Ramas *main* (versión etiquetada *v1.0.0* en 8 repositorios desde el 23 de octubre de 2026 y en payment-service desde el 24), *develop*, *feature/\** y *fix/\** |
 | Integración continua | GitHub Actions | `ci.yml` en los 10 repositorios: compila y corre las pruebas en cada push o pull request a *develop* y *main*; `lavarapido-infra` tiene además el flujo manual "Desplegar en Azure" (sin ejecutar todavía) y el despliegue continuo preparado en una rama sin fusionar (sección 15.4) |
 | Diagramas y contratos | Mermaid (C4 y diagramas UML), OpenAPI 3 | Carpetas 08-uml y 07-api de la documentación |
 
@@ -1186,7 +1186,7 @@ El tratamiento de datos personales debe cumplir la Ley Estatutaria 1581 de 2012 
 
 ### 15.1 Código Fuente
 
-El proyecto usa Git con repositorios en GitHub. Se trabaja en ramas *feature/\**, *feat/\** o *fix/\** que se integran en *develop* (integración); *main* guarda las versiones estables. El 23 de octubre de 2026 se pasó *develop* a *main* y se etiquetó *v1.0.0* en 8 repositorios (web, api-gateway, security, customer, booking, operations, notification e infra); payment-service (PR #2 abierto) y la app móvil todavía no tienen versión, y ese mismo día *develop* volvió a avanzar con los arreglos de la auditoría, que saldrán en *v1.1.0*. Los commits siguen el formato *tipo(alcance): descripción* (por ejemplo, *feat(loyalty): publish the points earned and the coupons they unlock when a payment is approved*). Las convenciones están en *00-governance/git-conventions.md*.
+El proyecto usa Git con repositorios en GitHub. Se trabaja en ramas *feature/\**, *feat/\** o *fix/\** que se integran en *develop* (integración); *main* guarda las versiones estables. El 23 de octubre de 2026 se pasó *develop* a *main* y se etiquetó *v1.0.0* en 8 repositorios (web, api-gateway, security, customer, booking, operations, notification e infra); payment-service la tuvo el 24 de octubre (PR #2 fusionado) y la app móvil todavía no (PR #1 abierto), y ese mismo día *develop* volvió a avanzar con los arreglos de la auditoría, que saldrán en *v1.1.0*. Los commits siguen el formato *tipo(alcance): descripción* (por ejemplo, *feat(loyalty): publish the points earned and the coupons they unlock when a payment is approved*). Las convenciones están en *00-governance/git-conventions.md*.
 
 ### 15.2 Esquema de la Base de Datos
 
