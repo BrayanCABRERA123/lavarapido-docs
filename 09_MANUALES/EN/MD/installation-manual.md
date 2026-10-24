@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 23, 2026
+October 24, 2026
 
-Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.6
+Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.7
 
 ## Version Control
 
@@ -38,6 +38,7 @@ Table 1 records the change history of this document. Each time the installation 
 | 4.4 | 2026-10-21 | Review against the code of October 21, 2026: optional variables of the gateway session check and of the close of expired bookings (section 10.2), booking-service seeds 110 to 112 (section 11.2), cancellation reasons (Table 9), automatic backups of the public server (section 11.6), check of the token of a closed session (sections 16.3 and 16.4), and new errors (Table 14). | Development team |
 | 4.5 | 2026-10-21 | Change of the rule for bookings that end without being closed, reviewed by the team on the night of October 21: booking-service only cancels expired scheduled bookings and operations-service reviews the confirmed and started ones. Added the *FOLLOW_UP_ENABLED* and *FOLLOW_UP_INTERVAL* variables, *BOOKING_EXPIRY_GRACE_MINUTES* shared by booking-service and operations-service, and the services that use *INTERNAL_API_KEY* (section 10.2); changelogs 040 of operations-service and 041 of notification-service (section 11.2); 26 notification types (Table 9); check of the "To close" card (section 16.4); a new error (Table 14) and Annex B. | Development team |
 | 4.6 | 2026-10-23 | Review against *develop* of October 23, 2026 and version *v1.0.0*: branches and tags of each repository (8.1); variables the Compose file already passes, including *FOLLOW_UP_LOOK_BACK_DAYS*, *ALLOWED_EMAIL_DOMAINS*, *DEMO_\*_PASSWORD*, *ADMIN_DOCUMENT*, and *ADMIN_PHONE*, and *INTERNAL_API_KEY* required for the operator (10.2); the global script *lavarapido-6-services-sqlserver.sql* is not versioned (11.3); the APK used to test push notifications is built with the EAS *preview* profile, because *development* does not exist (13.2); demonstration accounts through variables (15.1). Includes the content of Merari Urbano's *fix/A-05* and *fix/B-02* branches. | Development team |
+| 4.7 | 2026-10-24 | Review against *develop* of October 24, 2026, which runs on the public server since that day (8.1); new variables of the gateway (*AUTH_RATE_LIMIT_\**, *TRUSTED_PROXIES*, *ROUTE_CONNECT_TIMEOUT*, *ROUTE_READ_TIMEOUT*) and of operations-service (*START_LATE_LIMIT*), *INTERNAL_API_KEY* and *BOOKING_SERVICE_URL* in customer-service, and *BOOKING_EXPIRY_CHECK_\** with no effect (10.2); the published web listens on port 8080 (Annex B). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -280,7 +281,7 @@ The project is distributed in one repository per component. All the backend repo
 
 ### 8.1 Cloning the Repositories
 
-The integration branch of the team is *develop*; the most recent version of every service is there. Since October 23, 2026, *main* has the delivered version *v1.0.0* in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra), and *develop* is a few commits ahead with that day's fixes, which will ship in *v1.1.0*. payment-service and the mobile app have no release yet: their *main* is old (September 30 and July 6, 2026) and they are installed from *develop*. For an evaluation installation, use tag *v1.0.0* (and *develop* in payment-service and the app) or *develop* in all of them to see the latest.
+The integration branch of the team is *develop*; the most recent version of every service is there. Since October 23, 2026, *main* has the delivered version *v1.0.0* in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra), and *develop* is ahead with the fixes of October 23 and 24 (128 branches that day), which will ship in *v1.1.0*; *develop* is what runs on the public server since October 24, 2026. payment-service and the mobile app have no release yet: their *main* is old (September 30 and July 6, 2026) and they are installed from *develop*. For an evaluation installation, use tag *v1.0.0* (and *develop* in payment-service and the app) or *develop* in all of them to see the latest.
 
 ```bash
 mkdir Backend && cd Backend
@@ -415,14 +416,18 @@ If *git check-ignore* prints nothing, the file is not excluded and must not be f
 | MESSAGING_ENABLED | Java services and payment-service | *true* publishes and consumes RabbitMQ events; *false* (default) only writes them in the log. Without events, there are no notifications, payment notices, or point notices. |
 | RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_USERNAME, RABBITMQ_PASSWORD | Java services and payment-service | localhost, 5672, guest, guest in the local environment. |
 | PUSH_ENABLED, EXPO_ACCESS_TOKEN | notification-service | *true* sends push notifications through Expo; *false* only writes them in the log. |
-| INTERNAL_API_KEY | security-service, booking-service, operations-service, and notification-service | Key of the internal routes; without it, booking, payment, and coupon notices and reminders are not sent by email, the notification switches of each user cannot be read, there is no automatic assignment, and operations-service cannot close as No-show the confirmed bookings that ended without an operator. Since *develop* of October 23, 2026 (E-01) it is also required for the operator to start and finish services: booking-service only accepts those routes from operations-service with this key. |
+| INTERNAL_API_KEY | security-service, customer-service, booking-service, operations-service, and notification-service | Key of the internal routes; without it, booking, payment, and coupon notices and reminders are not sent by email, the notification switches of each user cannot be read, there is no automatic assignment, and operations-service cannot close as No-show the confirmed bookings that ended without an operator. Since *develop* of October 23, 2026 (E-01) it is also required for the operator to start and finish services: booking-service only accepts those routes from operations-service with this key. Since October 24, 2026 customer-service also uses it to ask booking-service whether a vehicle has active bookings before removing it: without it, removing a vehicle answers 503 *BOOKING_SERVICE_UNAVAILABLE*; in production the compose file does not start if it is missing. |
 | REMINDER_LEADS | notification-service | Advance of the reminders; *24h,1h* by default. |
 | BOOKING_ZONE, BOOKING_SLOT_MINUTES, BOOKING_MAX_DAYS_AHEAD | booking-service and operations-service | America/Bogota, 30, and 60 by default. |
-| SESSION_CHECK_ENABLED, SESSION_CHECK_CACHE_TTL, SESSION_CHECK_TIMEOUT | api-gateway | Check of the token session (since October 21, 2026): *true*, *30s*, and *3s* by default. They are commented out in *.env.example* and the Compose file passes them to the container. |
-| BOOKING_EXPIRY_CHECK_ENABLED, BOOKING_EXPIRY_CHECK_INTERVAL | booking-service | Automatic cancellation of the scheduled bookings that were never confirmed (reason *EXPIRED*): *true* and *PT5M* (every 5 minutes) by default. Like the previous ones, they go through the Compose file. |
+| SESSION_CHECK_ENABLED, SESSION_CHECK_CACHE_TTL, SESSION_CHECK_TIMEOUT | api-gateway | Check of the token session (since October 21, 2026): *true*, *30s*, and *3s* by default. They are commented out in *.env.example* and the Compose file passes them to the container. Since October 24 the session is checked with any header scheme. |
+| AUTH_RATE_LIMIT_ENABLED, AUTH_RATE_LIMIT_REQUESTS, AUTH_RATE_LIMIT_WINDOW | api-gateway | Request limit per IP on */api/v1/auth/\** (since October 24, 2026): *true*, *60*, and *1m* by default; beyond it, it answers 429 *RATE_LIMITED* with *Retry-After*. They have a default value in the service and the compose file does not pass them: to change them, add them to the gateway's *environment* block. |
+| TRUSTED_PROXIES | api-gateway | Networks from which the *X-Forwarded-For* header is trusted (by default the private and local ones: *127.0.0.0/8*, *10.0.0.0/8*, *172.16.0.0/12*, *192.168.0.0/16*, *::1*, and *fc00::/7*). With Caddy in front, it does not need to be changed. |
+| ROUTE_CONNECT_TIMEOUT, ROUTE_READ_TIMEOUT | api-gateway | Time to connect and to read the answer of each service (since October 24, 2026): *5s* and *60s* by default; if exceeded, the gateway answers 500. |
+| BOOKING_EXPIRY_CHECK_ENABLED, BOOKING_EXPIRY_CHECK_INTERVAL | booking-service | **No effect since October 24, 2026** (B-07): the task that cancelled expired scheduled bookings was removed, because every booking is created and rescheduled as confirmed. The Compose file still passes them; they can be deleted from *.env*. |
 | BOOKING_EXPIRY_GRACE_MINUTES | booking-service and operations-service | Minutes after the end time before an expired booking is closed; *60* by default. Both services use it, so if it is changed it must have the same value in both; the Compose file passes it to both. |
 | FOLLOW_UP_ENABLED, FOLLOW_UP_INTERVAL, FOLLOW_UP_LOOK_BACK_DAYS | operations-service | Review of the bookings that ended without being closed (since the night of October 21, 2026): a confirmed booking that never had an operator becomes No-show, and one that had an operator and nobody recorded stays in "To close". *true*, *PT5M*, and *28* (days it looks back, because the server can stay off for weeks) by default; needs *INTERNAL_API_KEY*. They go through the Compose file. |
-| SECURITY_SERVICE_URL, CUSTOMER_SERVICE_URL, BOOKING_SERVICE_URL | Services that call others | Addresses of the services; they have defaults for the local environment. payment-service needs BOOKING_SERVICE_URL to read the total and to credit the points of a booking. |
+| START_LATE_LIMIT | operations-service | How long after the end time the operator can start a service (since October 24, 2026): *PT4H* by default; afterwards it answers 409 *SERVICE_TOO_LATE*. It does not go through the compose file. |
+| SECURITY_SERVICE_URL, CUSTOMER_SERVICE_URL, BOOKING_SERVICE_URL | Services that call others | Addresses of the services; they have defaults for the local environment. payment-service needs BOOKING_SERVICE_URL to read the total and to credit the points of a booking. Since October 24, 2026 customer-service also uses it, but with the service root (*http://booking-service:3003* in Docker, *http://localhost:3003* locally, without */api/v1*), fixed in the compose file; optional, *BOOKING_SERVICE_TIMEOUT* (3 s). |
 
 *Note.* Prepared by the authors from *.env.example*, *docker-compose.yml*, and the configuration files of the services.
 
@@ -989,6 +994,8 @@ The figures in this manual were taken on October 16, 2026, on a Windows 11 compu
 |---|---|---|
 | One database login per service | The services use sa. | 11.4 |
 | Variables of October 21, 2026 | Resolved on October 22, 2026: the nine of them (*SESSION_CHECK_\**, *BOOKING_EXPIRY_\**, and *FOLLOW_UP_\**) are in *.env.example* and *docker-compose.yml* (action ACO-14, closed). | 10.2 |
+| Variables of October 24, 2026 | *AUTH_RATE_LIMIT_\**, *TRUSTED_PROXIES*, *ROUTE_\*_TIMEOUT*, and *START_LATE_LIMIT* have a default value but are not yet in *.env.example* or the compose file (ACO-40). | 10.2 |
+| Published web | Since October 24, 2026 the web image runs nginx without *root* on port 8080 (formerly 80); Caddy points to *web:8080*. Nothing changes locally: *ng serve* stays on 4200. | 9 |
 | Global database script | *lavarapido-6-services-sqlserver.sql* is not versioned; the database is only created with Liquibase. | 11.3 |
 
 *Note.* Prepared by the authors from the verification of the repositories and the technical backlog.
