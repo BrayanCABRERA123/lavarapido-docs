@@ -584,7 +584,7 @@ Las reglas del ciclo de vida son las mismas para todos: una reserva no puede que
 
 **Reservas que terminaron sin cerrarse (desde el 21 de octubre de 2026).** El sistema solo cierra una reserva por su cuenta cuando no hay duda de lo que pasó; en los demás casos la decisión es del administrador:
 
-- Una reserva **Programada** que nunca se confirmó se cancela sola una hora después de su hora de fin, con el motivo "Venció sin confirmarse", que no aparece en la lista de motivos para cancelar a mano.
+- Desde el 24 de octubre de 2026 todas las reservas nacen y se reprograman **Confirmadas**, así que ya no hay una tarea que cancele las **Programadas** vencidas (se quitó, B-07). Una reserva vieja que siga Programada pasa a Confirmada si se reprograma.
 - Una reserva **Confirmada** que nunca tuvo operario pasa sola a **No asistió** una hora después de su fin, porque nadie pudo atenderla.
 - Una reserva **Confirmada con operario** a la que nadie le dio **Iniciar** cuando terminó su hora, o una reserva **En progreso** que nadie finalizó una hora después de su fin, nunca se marca sola: pasa a la tarjeta **Por cerrar** del inicio. El operario recibe el aviso "¿Atendiste este servicio?" y cada administrador activo el aviso "Servicio sin registrar" (sección 12.7).
 
@@ -608,7 +608,7 @@ Para cerrar las reservas pendientes:
 | CONFIRMED (Confirmada) | Con turno y bahía. Las reservas que hacen los clientes empiezan aquí. | Asignar o cambiar el operario, reprogramar o cancelar. |
 | IN_PROGRESS (En progreso) | El operario inició el lavado. | Supervisar; ya no se puede cancelar. |
 | COMPLETED (Completada) | Servicio terminado. | Verificar o registrar el pago. |
-| CANCELLED (Cancelada) | Anulada por el cliente o por el lavadero, o cerrada por el sistema porque pasó una hora de su fin sin confirmarse. | Consultar el motivo. |
+| CANCELLED (Cancelada) | Anulada por el cliente o por el lavadero (hasta el 23 de octubre de 2026 el sistema también cerraba así las programadas vencidas). | Consultar el motivo. |
 | NO_SHOW (No asistió) | El cliente no llegó (lo marca el administrador), o la reserva confirmada terminó sin operario hace una hora (lo marca el sistema). | Registrarlo, revisar patrones y, si el cliente había pagado, decidir el reembolso. |
 
 *Nota.* Códigos de la base de datos según ADR-010; la interfaz los traduce.

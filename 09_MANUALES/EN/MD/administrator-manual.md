@@ -584,7 +584,7 @@ The life cycle rules are the same for everyone: a booking cannot fall outside th
 
 **Bookings that ended without being closed (since October 21, 2026).** The system only closes a booking on its own when there is no doubt about what happened; in the other cases the administrator decides:
 
-- A **Scheduled** booking that was never confirmed is cancelled on its own one hour after its end time, with the reason "Venció sin confirmarse" (expired without confirmation), which does not appear in the list of reasons for cancelling by hand.
+- Since October 24, 2026 every booking is created and rescheduled as **Confirmed**, so there is no longer a task that cancels expired **Scheduled** bookings (it was removed, B-07). An old booking still Scheduled becomes Confirmed if it is rescheduled.
 - A **Confirmed** booking that never had an operator becomes **No-show** on its own one hour after its end, because nobody could serve it.
 - A **Confirmed booking with an operator** that nobody started when its time ended, or an **In progress** booking that nobody finished one hour after its end, is never marked on its own: it goes to the **To close** card of the home screen. The operator receives the notice "¿Atendiste este servicio?" (did you serve this booking?) and every active administrator the notice "Servicio sin registrar" (service not recorded) (section 12.7).
 
@@ -608,7 +608,7 @@ To close the pending bookings:
 | CONFIRMED | With a slot and a bay. Bookings made by customers start here. | Assign or change the operator, reschedule, or cancel. |
 | IN_PROGRESS | The operator started the wash. | Supervise; it can no longer be canceled. |
 | COMPLETED | Service finished. | Verify or record the payment. |
-| CANCELLED | Voided by the customer or the business, or closed by the system because one hour passed after its end without being confirmed. | Check the reason. |
+| CANCELLED | Voided by the customer or the business (until October 23, 2026 the system also closed expired scheduled bookings this way). | Check the reason. |
 | NO_SHOW | The customer did not arrive (marked by the administrator), or the confirmed booking ended one hour ago without an operator (marked by the system). | Record it, review patterns and, if the customer had paid, decide on the refund. |
 
 *Note.* Database codes according to ADR-010; the interface translates them.
