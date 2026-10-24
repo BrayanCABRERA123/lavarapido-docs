@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-23 de octubre de 2026
+24 de octubre de 2026
 
-Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.7
+Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.8
 
 ## Control de Versiones
 
@@ -39,6 +39,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.5 | 2026-10-21 | Revisión contra el código y el servidor del 21 de octubre de 2026: al desactivar una cuenta su sesión deja de servir (secciones 9.4, 9.6 y 17.5); la pestaña de roles dice que el acceso lo decide el rol (sección 10.1); la cuenta de efectivo y su opción para el cliente (sección 11.4); reservas que se cierran solas, conteo único de reservas sin operario y candado de la asignación (secciones 12.3 y 12.4); comprobante de máximo 2 MB (sección 12.6); reportes con solo reservas completadas (sección 13); respaldos automáticos del servidor público (secciones 14.6 y 15.2) y encabezados de seguridad (sección 17.4). Se corrigieron la fecha y la versión de la portada y la fila de datos que antes se guardaban solo en el navegador (Tabla 12). | Equipo de desarrollo |
 | 4.6 | 2026-10-21 | Cambio de la regla de las reservas que terminan sin cerrarse, revisada por el equipo la noche del 21 de octubre: solo pasa sola a No asistió la reserva confirmada que nunca tuvo operario; la que tenía operario y nadie registró queda en la tarjeta **Por cerrar** del inicio (web y app móvil), donde el administrador elige **Se atendió** o **No asistió** (secciones 6.3, 8.3, 12.3 y 12.7). Reservas sin operario con una sola regla también en la app móvil (secciones 8.3 y 12.4); variables *FOLLOW_UP_\** (sección 11.6); nuevo incidente y término del glosario (Tablas 18 y 20). | Equipo de desarrollo |
 | 4.7 | 2026-10-23 | Revisión contra *develop* del 23 de octubre de 2026: respaldo manual con *backup-db.sh* y *verify-backup.sh* en lugar de un *BACKUP DATABASE* con *COMPRESSION*, que SQL Server Express no admite (14.3); la tarea diaria la programa *setup-server.sh* y lee la contraseña de *.env.production* (14.4); tarea de arranque del despliegue continuo, todavía sin probar (14.6); **Por cerrar** revisa los últimos 28 días (12.3); cambiar o recuperar la contraseña revoca sesiones y retirar un rol corta el token (9.4, 9.6 y 10.3); el descuento de un cupón va de 1 a 99 % (12.8); variables que ya pasa el compose (11.6); enlace roto de la tabla de contenido (10.3) y referencia a la app móvil (6.2). Incluye el contenido de las ramas *fix/A-03*, *fix/A-04*, *fix/A-05*, *fix/E-02*, *fix/E-07* y *fix/E-20* de Merari Urbano. | Equipo de desarrollo |
+| 4.8 | 2026-10-24 | Revisión contra *develop* del 24 de octubre de 2026, que corre en el servidor público desde ese día: la matriz de permisos es de solo lectura (6.3, 7.3, 10.1 y 17.5); las pantallas se actualizan solas (4.1); límite de solicitudes en el inicio de sesión y tope de intentos del código de recuperación (11.5 y 17.5); variables nuevas (11.6); cambios de horario o de bahías que chocan con reservas (11.2 y 11.3); efectivo inactivo en el pago en caja (11.4 y 12.6); precio mayor que 0 (12.2); aviso al cambiar los servicios de una reserva con pago, cambios de estado que cancelan los recordatorios y ventana de 4 horas para que el operario registre (12.3); notas visibles para el operario (12.4); monto que cambió (*AMOUNT_CHANGED*), aviso de reserva cancelada y referencia única (12.6); descuento fijo en pesos (12.8); imágenes *:prev*, *rollback.sh*, retención de respaldos y despliegue continuo fusionado (14.6, 15.2 y 15.4); Anexo B al día. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -142,7 +143,7 @@ Este manual está dirigido a los administradores del negocio y a los administrad
 
 El manual se verificó contra el código fuente de la aplicación web y de los servicios (Equipo de Desarrollo Vehicle Washing, 2026b, 2026c, 2026d) y contra la documentación del proyecto actualizada al 21 de octubre de 2026 (Equipo de Desarrollo Vehicle Washing, 2026a). La aplicación web incluye un módulo de administración completo bajo la ruta */admin*, restringido al rol ADMIN. Los nombres de las pantallas, botones y mensajes se escriben tal como aparecen cuando el idioma de la interfaz es el español.
 
-Casi todas las pantallas del módulo guardan sus datos en el servidor. Las excepciones son los reportes, que se calculan en el navegador a partir de las reservas y los pagos, y la matriz de permisos, que se guarda en el servidor pero todavía no cambia lo que puede hacer cada rol. La sección 6.3 indica el estado de cada función para que el administrador sepa qué datos son oficiales. Cuando la documentación no define un valor (por ejemplo, una política de retención o un objetivo de recuperación), el manual lo presenta como **recomendación** y lo lista en el Anexo B para que el equipo lo apruebe, como exige la guía para elaborar manuales (Servicio Nacional de Aprendizaje [SENA], 2026).
+Casi todas las pantallas del módulo guardan sus datos en el servidor. Las excepciones son los reportes, que se calculan en el navegador a partir de las reservas y los pagos, y la matriz de permisos, que es informativa y, desde el 24 de octubre de 2026, de solo lectura. Desde ese día las pantallas se actualizan solas: al entrar, al volver a la pestaña, con cada notificación nueva y, en las que esperan a otra persona (por ejemplo, **Pagos** y **Reservas**), cada 45 segundos mientras la pestaña está visible; ya no hace falta recargar la página para ver un pago nuevo o un cambio de estado. La sección 6.3 indica el estado de cada función para que el administrador sepa qué datos son oficiales. Cuando la documentación no define un valor (por ejemplo, una política de retención o un objetivo de recuperación), el manual lo presenta como **recomendación** y lo lista en el Anexo B para que el equipo lo apruebe, como exige la guía para elaborar manuales (Servicio Nacional de Aprendizaje [SENA], 2026).
 
 ## 5. Objetivo
 
@@ -186,7 +187,7 @@ La Tabla 2 resume el estado real de cada función en la versión del 21 de octub
 |---|---|---|---|
 | Panel de control con indicadores | Dashboard | Completa (datos del servidor). | 8.3 |
 | Crear cuentas y activarlas o desactivarlas | Gestión > Usuarios | Completa. | 9 |
-| Roles y permisos | Gestión > Roles | Completa en cuanto a la matriz de permisos: el servidor aplica los tres roles fijos y los permisos marcados para cada rol se guardan en el servidor (ADR-015). La matriz es informativa: todavía no cambia lo que puede hacer cada rol, y desde el 21 de octubre de 2026 la pestaña lo dice. | 10 |
+| Roles y permisos | Gestión > Roles | Completa: el servidor aplica los tres roles fijos (ADR-015). La matriz de permisos es informativa y, desde el 24 de octubre de 2026, de solo lectura: muestra los permisos de cada rol, pero no se edita, porque el acceso lo decide el rol del token. | 10 |
 | Servicios, precios, duraciones por tipo de vehículo y puntos de fidelización | Gestión > Servicios | Completa. | 12.2 |
 | Promociones y cupones | Gestión > Promociones | Completa: cupones porcentuales guardados en payment-service, desbloqueables con puntos y aplicados cuando el cliente paga. | 12.8 |
 | Horario semanal, excepciones y bahías | Horarios y bahías | Completa. | 11.2 y 11.3 |
@@ -244,7 +245,7 @@ El sistema define tres roles fijos: Administrador (código ADMIN), Operario (OPE
 | Revisa, aprueba, rechaza o reembolsa pagos y registra pagos manuales. | Una reserva admite un solo pago aprobado; un pago en revisión no se puede duplicar; un reembolso no se puede deshacer. |
 | Ve la información de clientes, vehículos y reservas necesaria para operar. | Debe tratarla conforme a la Ley 1581 de 2012 y a la política de seguridad. |
 | Crea cuentas con su tipo de usuario y las activa o desactiva. | Las cuentas se desactivan, no se borran; el tipo de usuario no se cambia después de crear la cuenta; una cuenta de administrador no se desactiva y nadie desactiva la suya. |
-| Consulta los roles y marca los permisos de cada uno. | No puede crear ni eliminar roles; la matriz de permisos todavía no cambia el acceso real. |
+| Consulta los roles y los permisos de cada uno. | No puede crear ni eliminar roles ni editar la matriz de permisos, que es de solo lectura. |
 
 *Nota.* Todas las rutas bajo */admin* requieren el rol ADMIN; una persona con otro rol que intente abrirlas vuelve a la pantalla de inicio de su propio rol.
 
@@ -409,7 +410,7 @@ ORDER BY s.started_at DESC;
 
 ### 10.1 Los Tres Roles Fijos
 
-El servidor aplica solo los tres roles fijos ADMIN, OPERATOR y CLIENT (Tabla 7). La pestaña **Gestión > Roles** lista los tres roles con sus permisos y el número de usuarios de cada uno. **Permisos del rol** permite al administrador elegir uno de los tres roles (no hay un nombre de texto libre) y marcar o desmarcar sus permisos a partir del catálogo de *security.permission*; los cambios se guardan en el servidor en *security.role_permission* (*GET* y *PUT /api/v1/admin/roles-permissions*). **La matriz es informativa**: la autorización real sigue dependiendo del rol del token, por lo que marcar o desmarcar un permiso no concede ni quita acceso a ninguna pantalla ni endpoint (ADR-015). Desde el 21 de octubre de 2026 la pestaña y el diálogo de permisos lo explican en pantalla: los roles son fijos y el acceso lo decide el rol. Si un permiso ya no existe, el sistema responde "Uno de los permisos elegidos ya no existe. Recarga la página e inténtalo de nuevo."
+El servidor aplica solo los tres roles fijos ADMIN, OPERATOR y CLIENT (Tabla 7). La pestaña **Gestión > Roles** lista los tres roles con sus permisos y el número de usuarios de cada uno. **La matriz es informativa y de solo lectura** (desde el 24 de octubre de 2026): muestra los permisos de cada rol que guarda *security.role_permission* (*GET /api/v1/admin/roles-permissions*), pero ya no tiene el diálogo para marcarlos ni desmarcarlos. La autorización real depende del rol del token (ADR-015), así que cambiar la matriz no concedería ni quitaría acceso; la pestaña lo explica en pantalla.
 
 **Tabla 7**
 
@@ -470,7 +471,7 @@ La pantalla **Horarios y bahías** (ruta */admin/schedule*) tiene dos pestañas:
 3. En **Excepciones y días especiales**, hacer clic en **Agregar excepción** para registrar un festivo (cerrado todo el día) o un horario especial: elegir la **Fecha**, el **Tipo**, las horas de **Apertura** y **Cierre** si aplican y el **Motivo / descripción**, y hacer clic en **Guardar excepción**.
 4. Usar el botón **Historial** para ver los últimos cambios del horario, que quedan registrados en *booking.schedule_history*.
 
-Un cambio aplica a la disponibilidad futura; las reservas ya confirmadas no se reubican automáticamente. Antes de registrar un cierre, consultar las reservas de ese día en **Reservas** (filtro por fecha) y contactar a los clientes para reprogramarlas o cancelarlas (sección 12.3).
+Un cambio aplica a la disponibilidad futura; las reservas ya confirmadas no se reubican automáticamente. Desde el 24 de octubre de 2026, si el horario nuevo o la excepción dejaría fuera alguna reserva activa, el sistema no guarda el cambio y muestra cuántas reservas chocan y sus códigos (*SCHEDULE_CONFLICTS_BOOKINGS*): primero hay que reprogramarlas o cancelarlas en **Reservas** (sección 12.3), contactando a los clientes, y después guardar el horario.
 
 **Figura 6**
 
@@ -485,12 +486,12 @@ Una bahía es un puesto físico de lavado, y el número de bahías activas defin
 1. Abrir **Horarios y bahías > Bahías de lavado**.
 2. Para crear una bahía, hacer clic en **Agregar bahía**, escribir el **Nombre de la bahía**, elegir el **Estado** y guardar.
 3. Para una reparación, editar la bahía y cambiar su estado a **En mantenimiento**; deja de recibir reservas nuevas.
-4. Antes de poner una bahía en mantenimiento o inactiva, revisar las reservas futuras asignadas a ella y reprogramarlas.
+4. Antes de poner una bahía en mantenimiento o inactiva, revisar las reservas futuras asignadas a ella y reprogramarlas. Desde el 24 de octubre de 2026, si quedan reservas activas en esa bahía, el sistema no guarda el cambio y muestra las reservas que chocan.
 5. Al terminar la reparación, volver el estado a **Activa**.
 
 ### 11.4 Medios de Pago y Códigos QR
 
-**Configuración > Medios de pago** gestiona las cuentas de pago del lavadero: para cada cuenta, el método (Nequi, Daviplata o transferencia bancaria), el titular, el número de cuenta, la imagen del QR (solo PNG o JPG), las instrucciones y si está activa. Los clientes ven solo las cuentas activas. La cuenta de efectivo (*Caja del establecimiento*) aparece en la misma lista y no tiene código QR; desde el 21 de octubre de 2026, si se desactiva, la opción Efectivo desaparece de la pantalla de pago del cliente. Un código QR o una cuenta equivocados envían el dinero del lavadero a un tercero, por lo que esta información se debe revisar con cuidado.
+**Configuración > Medios de pago** gestiona las cuentas de pago del lavadero: para cada cuenta, el método (Nequi, Daviplata o transferencia bancaria), el titular, el número de cuenta, la imagen del QR (solo PNG o JPG), las instrucciones y si está activa. Los clientes ven solo las cuentas activas. La cuenta de efectivo (*Caja del establecimiento*) aparece en la misma lista y no tiene código QR; desde el 21 de octubre de 2026, si se desactiva, la opción Efectivo desaparece de la pantalla de pago del cliente; desde el 24 de octubre el administrador la sigue viendo en **Registrar pago manual** para cobrar en caja. Un código QR o una cuenta equivocados envían el dinero del lavadero a un tercero, por lo que esta información se debe revisar con cuidado.
 
 1. Abrir **Configuración > Medios de pago**.
 2. Agregar una cuenta o editar una existente: método, titular, número de cuenta, imagen del QR e instrucciones.
@@ -518,7 +519,10 @@ Las imágenes de los QR y los comprobantes se guardan dentro de la base de datos
 | Vigencia del token de acceso | 1 hora; no hay token de actualización | security-service (JWT_ACCESS_TOKEN_TTL). |
 | Sesión cerrada | El token de una sesión cerrada (cierre de sesión o cuenta desactivada) deja de servir en máximo 30 segundos (desde el 21 de octubre de 2026) | security-service y API Gateway (*SESSION_CHECK_\**). |
 | Bloqueo de cuenta por intentos fallidos | 5 intentos fallidos en 15 minutos bloquean la cuenta durante 15 minutos; restablecer la contraseña la desbloquea | security-service (*security.login_lockout*). |
-| Código de recuperación | 6 dígitos, válido 15 minutos, de un solo uso, 5 intentos fallidos | security-service. |
+| Código de recuperación | 6 dígitos, válido 15 minutos, de un solo uso. Desde el 24 de octubre de 2026, el 5.º intento fallido anula el código y responde *TOO_MANY_ATTEMPTS*: hay que pedir otro | security-service. |
+| Contraseña actual | Desde el 24 de octubre de 2026, los errores al escribir la contraseña actual (cambiar la contraseña o el correo, desactivar la cuenta) cuentan en el mismo bloqueo del inicio de sesión: al 5.º, la cuenta queda bloqueada 15 minutos | security-service. |
+| Límite de solicitudes | Desde el 24 de octubre de 2026, 60 peticiones por minuto por dirección IP en el inicio de sesión, el registro y la recuperación; al pasarse, responde *RATE_LIMITED* con el tiempo de espera | API Gateway (*AUTH_RATE_LIMIT_\**). |
+| Consentimiento | Desde el 24 de octubre de 2026 el servidor rechaza un registro sin las dos casillas de la política de datos (*CONSENT_REQUIRED*) | security-service. |
 | Contraseña | De 8 a 72 caracteres, una mayúscula, un número, un carácter especial, sin espacios | security-service e interfaz web. |
 | Almacenamiento de la contraseña | BCrypt con factor de costo 12 | security-service. |
 | Firma del token | HS256 con un secreto compartido de al menos 32 bytes | JWT_SECRET en el archivo .env. |
@@ -528,7 +532,7 @@ Las imágenes de los QR y los comprobantes se guardan dentro de la base de datos
 
 ### 11.6 Variables de Entorno de Operación
 
-Las variables que cambian el comportamiento de la plataforma se leen del archivo *lavarapido-infra/.env* y requieren reiniciar los servicios afectados. Las más relevantes para el administrador de TI son *MESSAGING_ENABLED* (eventos de RabbitMQ, también en payment-service), *MAIL_ENABLED* y *MAIL_\** (correo), *PUSH_ENABLED* (notificaciones push), *REMINDER_LEADS* (recordatorios, por defecto 24 h y 1 h), *BOOKING_ZONE* (zona horaria del lavadero), *BOOKING_SLOT_MINUTES* y *BOOKING_MAX_DAYS_AHEAD* (rejilla y ventana de reservas), *INTERNAL_API_KEY* (llamadas internas entre servicios; desde *develop* del 23 de octubre de 2026 también la necesita el operario para iniciar y terminar servicios), *ALLOWED_EMAIL_DOMAINS* (dominios de correo que acepta el registro, por defecto *gmail.com*) y *SPRING_PROFILES_ACTIVE* (perfil de los servicios Java; con *dev* se crean las cuentas de demostración cuya contraseña esté en *DEMO_ADMIN_PASSWORD*, *DEMO_OPERATOR_PASSWORD* o *DEMO_CLIENT_PASSWORD*). Las del 21 de octubre de 2026, *SESSION_CHECK_\** (chequeo de sesión del gateway), *BOOKING_EXPIRY_\** (reservas que terminaron sin cerrarse; *BOOKING_EXPIRY_GRACE_MINUTES* la usan booking-service y operations-service) y *FOLLOW_UP_\** (revisión de la lista **Por cerrar** en operations-service, incluida *FOLLOW_UP_LOOK_BACK_DAYS*, 28 días), tienen valor por defecto y el archivo de Compose las pasa a los contenedores desde el 22 de octubre de 2026, así que se cambian desde *.env*. Sus valores y el procedimiento de cambio se describen en el Manual de Instalación.
+Las variables que cambian el comportamiento de la plataforma se leen del archivo *lavarapido-infra/.env* y requieren reiniciar los servicios afectados. Las más relevantes para el administrador de TI son *MESSAGING_ENABLED* (eventos de RabbitMQ, también en payment-service), *MAIL_ENABLED* y *MAIL_\** (correo), *PUSH_ENABLED* (notificaciones push), *REMINDER_LEADS* (recordatorios, por defecto 24 h y 1 h), *BOOKING_ZONE* (zona horaria del lavadero), *BOOKING_SLOT_MINUTES* y *BOOKING_MAX_DAYS_AHEAD* (rejilla y ventana de reservas), *INTERNAL_API_KEY* (llamadas internas entre servicios; desde *develop* del 23 de octubre de 2026 también la necesita el operario para iniciar y terminar servicios), *ALLOWED_EMAIL_DOMAINS* (dominios de correo que acepta el registro, por defecto *gmail.com*; el inicio de sesión acepta cualquier dominio desde el 24 de octubre de 2026) y *SPRING_PROFILES_ACTIVE* (perfil de los servicios Java; con *dev* se crean las cuentas de demostración cuya contraseña esté en *DEMO_ADMIN_PASSWORD*, *DEMO_OPERATOR_PASSWORD* o *DEMO_CLIENT_PASSWORD*). Las del 21 de octubre de 2026, *SESSION_CHECK_\** (chequeo de sesión del gateway), *BOOKING_EXPIRY_\** (reservas que terminaron sin cerrarse; *BOOKING_EXPIRY_GRACE_MINUTES* la usan booking-service y operations-service) y *FOLLOW_UP_\** (revisión de la lista **Por cerrar** en operations-service, incluida *FOLLOW_UP_LOOK_BACK_DAYS*, 28 días), tienen valor por defecto y el archivo de Compose las pasa a los contenedores desde el 22 de octubre de 2026, así que se cambian desde *.env*. Desde el 24 de octubre de 2026 existen además *AUTH_RATE_LIMIT_\** y *TRUSTED_PROXIES* (límite de solicitudes del inicio de sesión y redes de confianza del gateway), *ROUTE_CONNECT_TIMEOUT* y *ROUTE_READ_TIMEOUT* (5 y 60 segundos por ruta) y *START_LATE_LIMIT* (hasta cuánto después de la hora de fin el operario puede iniciar, 4 horas); tienen valor por defecto y el compose todavía no las pasa. customer-service recibe *INTERNAL_API_KEY* y *BOOKING_SERVICE_URL* para revisar las reservas activas de un vehículo antes de retirarlo. Sus valores y el procedimiento de cambio se describen en el Manual de Instalación.
 
 ## 12. Gestión de la Información Principal
 
@@ -559,7 +563,7 @@ El catálogo se organiza en categorías (lavado, polichado, detallado, interior 
 1. Abrir **Gestión > Servicios**.
 2. Hacer clic en **Agregar servicio** o editar un servicio existente.
 3. Escribir el **Nombre del Servicio**, la **Descripción** y la **Categoría**.
-4. En **Precio y duración por tipo de vehículo**, definir el precio en pesos colombianos (COP) y la duración estimada para cada tipo de vehículo (automóvil, sedán, SUV, pickup, camión y motocicleta).
+4. En **Precio y duración por tipo de vehículo**, definir el precio en pesos colombianos (COP) y la duración estimada para cada tipo de vehículo (automóvil, sedán, SUV, pickup, camión y motocicleta). El precio debe ser mayor que 0: desde el 24 de octubre de 2026 el servidor rechaza un precio en 0 (*INVALID_PRICE*).
 5. En **Puntos de fidelización**, escribir los puntos que gana el cliente cuando se aprueba el pago de este servicio (número entero; 0 = no suma puntos). La tabla de servicios los muestra en la columna **Puntos**.
 6. Hacer clic en **Guardar Servicio**.
 7. Para dejar de ofrecer un servicio, desactivarlo (deja de estar disponible para reservar); las reservas existentes no se alteran.
@@ -573,14 +577,14 @@ La pantalla **Reservas** (ruta */admin/reservations*) lista las reservas con **C
 
 1. Usar la búsqueda por cliente o placa, la fecha (**Hoy**) y los filtros de estado y operario; **Limpiar** los quita.
 2. Para crear una reserva a nombre de un cliente, hacer clic en **Nueva Reserva**, buscar el vehículo por placa, elegir los servicios, la fecha y una hora libre, y confirmar.
-3. Abrir una reserva para ver su detalle. Desde allí el administrador puede reprogramarla (otra fecha u hora libre), cambiar su estado (confirmar, iniciar, completar, marcar como **No asistió**) o cancelarla eligiendo un **Motivo de cancelación**. Cada cambio pide confirmación.
+3. Abrir una reserva para ver su detalle. Desde allí el administrador puede reprogramarla (otra fecha u hora libre, y también otros servicios), cambiar su estado (confirmar, iniciar, completar, marcar como **No asistió**) o cancelarla eligiendo un **Motivo de cancelación**. Cada cambio pide confirmación. Desde el 24 de octubre de 2026: si la reserva ya tiene un pago, al cambiar sus servicios la ventana avisa que el monto del pago dejará de coincidir (el pago viejo no se podrá aprobar, sección 12.6); poner la reserva **En progreso**, **Completada** o **No asistió** cancela los recordatorios pendientes del cliente, y **No asistió** le envía un aviso; y si otra persona cambió la reserva mientras estaba abierta, el sistema rechaza el cambio y hay que actualizar la pantalla.
 4. Hacer clic en **Exportar** para descargar la lista en Excel, PDF o CSV.
 
 Las reglas del ciclo de vida son las mismas para todos: una reserva no puede quedar fuera del horario de atención ni ocupar una bahía que ya está tomada, y una reserva que ya empezó no se puede cancelar (Tabla 9). Cuando una reserva se crea, se reprograma o se cancela, todos los administradores activos reciben un aviso en la bandeja.
 
 **Reservas que terminaron sin cerrarse (desde el 21 de octubre de 2026).** El sistema solo cierra una reserva por su cuenta cuando no hay duda de lo que pasó; en los demás casos la decisión es del administrador:
 
-- Una reserva **Programada** que nunca se confirmó se cancela sola una hora después de su hora de fin, con el motivo "Venció sin confirmarse", que no aparece en la lista de motivos para cancelar a mano.
+- Desde el 24 de octubre de 2026 todas las reservas nacen y se reprograman **Confirmadas**, así que ya no hay una tarea que cancele las **Programadas** vencidas (se quitó, B-07). Una reserva vieja que siga Programada pasa a Confirmada si se reprograma.
 - Una reserva **Confirmada** que nunca tuvo operario pasa sola a **No asistió** una hora después de su fin, porque nadie pudo atenderla.
 - Una reserva **Confirmada con operario** a la que nadie le dio **Iniciar** cuando terminó su hora, o una reserva **En progreso** que nadie finalizó una hora después de su fin, nunca se marca sola: pasa a la tarjeta **Por cerrar** del inicio. El operario recibe el aviso "¿Atendiste este servicio?" y cada administrador activo el aviso "Servicio sin registrar" (sección 12.7).
 
@@ -589,7 +593,7 @@ Esta regla reemplazó la primera versión del mismo día, que cerraba como No as
 Para cerrar las reservas pendientes:
 
 1. Ubicar la tarjeta **Por cerrar** en el **Dashboard** de la web o en el inicio de la app móvil. Solo aparece cuando hay alguna reserva pendiente y muestra las de los últimos 28 días (*FOLLOW_UP_LOOK_BACK_DAYS*), porque el servidor puede pasar semanas apagado.
-2. Confirmar con el operario si atendió el vehículo. Si todavía es el mismo día, el operario puede registrar el servicio con **Iniciar** y **Finalizar** aunque sea tarde; así se guardan sus horas reales y la reserva sale de la lista.
+2. Confirmar con el operario si atendió el vehículo. Hasta 4 horas después de la hora de fin (*START_LATE_LIMIT*, desde el 24 de octubre de 2026), el operario puede registrar el servicio con **Iniciar** y **Finalizar** aunque sea tarde; así se guardan sus horas reales y la reserva sale de la lista. Pasado ese plazo su botón **Iniciar** queda deshabilitado y la cierra el administrador.
 3. Si el vehículo se atendió, hacer clic en **Se atendió**. La reserva queda Completada sin inventar horas: sin hora de inicio no cuenta para la puntualidad del operario y sin hora de fin no suma horas trabajadas, pero sí cuenta como servicio realizado y como ingreso. El cliente no recibe el aviso de que ya puede recoger el vehículo (llegaría horas tarde), pero sí puede calificar el servicio.
 4. Si el cliente no llegó, hacer clic en **No asistió**. Esta opción solo aplica a una reserva que nunca se inició y el estado es definitivo.
 5. Si aparece un mensaje de que la reserva ya no está por cerrar, es porque otro administrador o el operario la cerraron antes; basta con actualizar la pantalla.
@@ -604,7 +608,7 @@ Para cerrar las reservas pendientes:
 | CONFIRMED (Confirmada) | Con turno y bahía. Las reservas que hacen los clientes empiezan aquí. | Asignar o cambiar el operario, reprogramar o cancelar. |
 | IN_PROGRESS (En progreso) | El operario inició el lavado. | Supervisar; ya no se puede cancelar. |
 | COMPLETED (Completada) | Servicio terminado. | Verificar o registrar el pago. |
-| CANCELLED (Cancelada) | Anulada por el cliente o por el lavadero, o cerrada por el sistema porque pasó una hora de su fin sin confirmarse. | Consultar el motivo. |
+| CANCELLED (Cancelada) | Anulada por el cliente o por el lavadero (hasta el 23 de octubre de 2026 el sistema también cerraba así las programadas vencidas). | Consultar el motivo. |
 | NO_SHOW (No asistió) | El cliente no llegó (lo marca el administrador), o la reserva confirmada terminó sin operario hace una hora (lo marca el sistema). | Registrarlo, revisar patrones y, si el cliente había pagado, decidir el reembolso. |
 
 *Nota.* Códigos de la base de datos según ADR-010; la interfaz los traduce.
@@ -621,7 +625,7 @@ Cuando se confirma una reserva, **el sistema asigna el operario automáticamente
 
 1. En el **Dashboard** (bloque **Reservas sin operario**) o en **Reservas**, hacer clic en **Asignar** en la reserva.
 2. La ventana de asignación muestra los detalles de la cita y la lista de operarios. Los operarios disponibles aparecen primero; los demás indican por qué no pueden tomar la reserva: **Inactivo**, **Sin turno a esa hora**, **Ausente** u **Ocupado a esa hora**.
-3. Seleccionar un operario disponible y, si se desea, escribir instrucciones para el operario.
+3. Seleccionar un operario disponible y, si se desea, escribir instrucciones para el operario. Desde el 24 de octubre de 2026 el operario ve esas notas en el detalle del servicio, en la web y en la app; si se reasigna sin escribir notas, se conservan las anteriores.
 4. Hacer clic en **Confirmar Asignación**. Aparece el mensaje "Operario asignado" y el operario recibe una notificación. Si la reserva ya tenía otro operario, ese operario recibe el aviso de que el servicio se reasignó.
 
 La lista de asignaciones muestra la bahía de cada reserva junto a su operario, de modo que el administrador ve qué operario trabaja en qué bahía. Los operarios no quedan ligados a una bahía durante todo el turno: la bahía se elige por reserva (ADR-010 y ADR-015).
@@ -665,11 +669,12 @@ El sistema no integra una pasarela de pagos (ADR-008). El cliente paga por fuera
 
 | Control | Cómo lo aplica el sistema | Qué debe hacer el administrador |
 |---|---|---|
-| Monto | El monto a pagar es el total de la reserva calculado por el servidor menos el cupón canjeado, si lo hay; el cliente declara el monto pagado y la ventana de revisión compara ambos. | Comparar el monto declarado y el comprobante con el monto a pagar. |
-| Un solo pago aprobado | Una reserva no admite más de un pago aprobado, y no se puede reportar un segundo pago mientras uno está en revisión. | No intentar aprobar un segundo pago para la misma reserva. |
-| Referencia de la transacción | El sistema rechaza una referencia ya usada en otro pago (*TRANSACTION_REFERENCE_REUSED*). | Verificar que la referencia del comprobante coincida con el movimiento del banco. |
+| Monto | El monto a pagar es el total de la reserva calculado por el servidor menos el cupón canjeado, si lo hay; el cliente declara el monto pagado y la ventana de revisión compara ambos. Desde el 24 de octubre de 2026, si la reserva cambió después de que el cliente reportó el pago (otros servicios u otro total), aprobar responde *AMOUNT_CHANGED*. | Comparar el monto declarado y el comprobante con el monto a pagar; ante *AMOUNT_CHANGED*, rechazar el pago para que el cliente lo reporte de nuevo con el monto actual. |
+| Un solo pago aprobado | Una reserva no admite más de un pago aprobado, y no se puede reportar un segundo pago mientras uno está en revisión; desde el 24 de octubre de 2026 la base lo garantiza también ante dos reportes simultáneos. | No intentar aprobar un segundo pago para la misma reserva. |
+| Referencia de la transacción | El sistema rechaza una referencia ya usada en otro pago (*TRANSACTION_REFERENCE_REUSED*); desde el 24 de octubre de 2026 la base lo garantiza entre los pagos vigentes. | Verificar que la referencia del comprobante coincida con el movimiento del banco. |
 | Verificación real | El sistema no consulta al banco. | Confirmar en la aplicación o el extracto del lavadero que el dinero llegó; no confiar solo en la imagen. |
 | Historial | Los pagos rechazados se conservan con su motivo. | No borrar los intentos rechazados. |
+| Reserva cancelada | Desde el 24 de octubre de 2026, si la reserva de un pago se canceló, el pago muestra el aviso "Reserva cancelada": **reembolsar** si está aprobado o **rechazar** si está en revisión. | Devolver el dinero o rechazar el pago, según el aviso. |
 | Tamaño del comprobante | El servidor rechaza comprobantes de más de 2 MB (*RECEIPT_TOO_LARGE*); la web y la app los reducen antes de enviarlos. | Si una imagen se ve borrosa, pedir al cliente una captura de pantalla del comprobante. |
 
 *Nota.* Elaborado por los autores a partir del servicio de pagos y de ADR-008.
@@ -683,7 +688,7 @@ El sistema no integra una pasarela de pagos (ADR-008). El cliente paga por fuera
 
 **Rechazo de un pago.** Si el dinero no llegó, el comprobante es ilegible o el monto no coincide, hacer clic en **Rechazar**, escribir el **Motivo del rechazo** (máximo 200 caracteres) y confirmar. El cliente recibe un aviso y un correo con el motivo y puede reportar el pago de nuevo.
 
-**Registro de un pago en efectivo o en el local.** Hacer clic en **Registrar pago manual**, elegir la reserva y el método, y confirmar. La ventana muestra el monto real a pagar de la reserva (con el descuento del cupón, si lo hay), y el pago manual queda aprobado de inmediato con ese monto y acredita los puntos. Usarlo solo cuando se recibió el dinero.
+**Registro de un pago en efectivo o en el local.** Hacer clic en **Registrar pago manual**, elegir la reserva y el método, y confirmar. La cuenta de efectivo aparece aunque esté desactivada para los clientes (desde el 24 de octubre de 2026). La ventana muestra el monto real a pagar de la reserva (con el descuento del cupón, si lo hay), y el pago manual queda aprobado de inmediato con ese monto y acredita los puntos. Usarlo solo cuando se recibió el dinero.
 
 **Reembolso de un pago.** Abrir un pago aprobado y hacer clic en **Reembolsar**. Confirmar que se devolvió el dinero al cliente: el pago cambia a Reembolsado, se revierten los puntos que ganó la reserva y el cliente recibe un aviso y un correo. El reembolso no se puede deshacer.
 
@@ -710,7 +715,7 @@ Los avisos se envían con *POST /api/v1/admin/notifications* (rol ADMIN), que ac
 **Promociones.** La pestaña **Gestión > Promociones** administra los cupones de descuento que los clientes desbloquean con sus puntos (datos guardados en payment-service, *GET*, *POST*, *PUT*, *PATCH* y *DELETE /api/v1/admin/promotions*):
 
 1. Crear una promoción y escribir el **Nombre**, la **Descripción**, el código del **Cupón** (por ejemplo, PREMIUM20), el ícono, los beneficios y la **Fecha de inicio** (si es futura, la promoción queda programada hasta ese día).
-2. Escribir el **Descuento al canjear (%)**, entre 1 y 99, que se aplica al total de la reserva cuando el cliente canjea el cupón. No hay cupones del 100 %: el pago exige un monto mayor que cero, así que el sistema siempre deja al menos 1 peso por pagar, también con un descuento fijo mayor que el total (desde *develop* del 23 de octubre de 2026, E-07).
+2. Escribir el **Descuento al canjear (%)**, entre 1 y 99 (si la promoción tiene un descuento fijo en pesos, *FIXED*, la tarjeta lo muestra en pesos y al editarla se conserva el tipo, desde el 24 de octubre de 2026), que se aplica al total de la reserva cuando el cliente canjea el cupón. No hay cupones del 100 %: el pago exige un monto mayor que cero, así que el sistema siempre deja al menos 1 peso por pagar, también con un descuento fijo mayor que el total (desde *develop* del 23 de octubre de 2026, E-07).
 3. Escribir los **Puntos de fidelización necesarios** para desbloquear el cupón (0 = disponible para todos).
 4. Guardar. La tarjeta de la promoción muestra el descuento y los puntos necesarios (o "disponible para todos"). El estado se calcula a partir de la fecha de inicio y se puede pausar o reanudar desde la tarjeta.
 
@@ -902,7 +907,8 @@ Desde el 21 de octubre de 2026 el servidor público respalda la base sin interve
 - Cada respaldo, verificación y restauración queda en *~/lavarapido/backups/backup.log*: *tail -20* muestra lo último y *grep FALLÓ* solo los problemas.
 - La base usa el modelo de recuperación SIMPLE: con respaldos completos no hacen falta respaldos del registro de transacciones, y el registro no crece sin límite.
 - Los respaldos viven en el mismo disco de la máquina virtual: protegen de un error o de una migración mala, no de perder la máquina. Para cumplir la regla 3-2-1 de la Tabla 13, copiarlos al computador del administrador de TI con *scp* o tomar una instantánea del disco en Azure.
-- **Despliegue continuo (preparado el 23 de octubre de 2026, todavía sin fusionar ni probar en vivo).** Cuando se active, *setup-server.sh* agregará al mismo *crontab* una segunda tarea *@reboot*, *deploy/boot-update.sh*, que al encender la máquina baja lo que entró a *main* mientras estaba apagada y lo despliega con *update-server.sh*, que respalda antes. Su resultado queda en *~/lavarapido/backups/deploy.log* y se revisa con *crontab -l | grep boot-update*. Si el respaldo previo falla, no se actualiza. El detalle está en el Documento de Despliegue, sección 4.3.4.
+- Desde el 24 de octubre de 2026 los respaldos *LavaRapido-pre-update-…* que hace cada actualización se guardan aparte (los últimos 10), además de los 14 normales, y tras una actualización sana se borran las imágenes de Docker sin uso, para que el disco no se llene.
+- **Despliegue continuo (fusionado en *develop* el 24 de octubre de 2026; falta crear los secretos).** Desde ese día *setup-server.sh* agrega al mismo *crontab* una segunda tarea *@reboot*, *deploy/boot-update.sh*, que al encender la máquina baja lo que entró a *main* mientras estaba apagada y lo despliega con *update-server.sh*, que respalda antes. Mientras el servidor esté en *develop* (hasta *v1.1.0*), esa tarea no actualiza: la protección que impide bajar de versión la detiene sin tocar nada. Su resultado queda en *~/lavarapido/backups/deploy.log* y se revisa con *crontab -l | grep boot-update*. Si el respaldo previo falla, no se actualiza. El detalle está en el Documento de Despliegue, sección 4.3.4.
 
 ## 15. Restauración de Datos
 
@@ -950,7 +956,7 @@ docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd \
    ALTER DATABASE [LavaRapido] SET MULTI_USER;"
 ```
 
-En el servidor público se usa *bash ~/lavarapido/lavarapido-infra/deploy/restore-db.sh `<ARCHIVO>`.bak.gz*: pide escribir RESTAURAR, guarda antes un respaldo de cómo estaba la base, detiene los siete servicios, restaura y los vuelve a levantar (de 2 a 3 minutos sin servicio). Con *--as LavaRapido_prueba* la restaura con otro nombre, sin tocar la base real, para revisar un respaldo. La opción *WITH REPLACE* sobrescribe la base de datos existente: usarla solo cuando se esté seguro del respaldo elegido. Si el comando falla a mitad de camino, la base de datos puede quedar en estado de restauración o en modo de un solo usuario; no reiniciar el contenedor sin revisar el registro de SQL Server.
+En el servidor público se usa *bash ~/lavarapido/lavarapido-infra/deploy/restore-db.sh `<ARCHIVO>`.bak.gz*: pide escribir RESTAURAR, guarda antes un respaldo de cómo estaba la base, detiene los siete servicios, restaura y los vuelve a levantar (de 2 a 3 minutos sin servicio). Desde el 24 de octubre de 2026 exige una terminal, toma el mismo candado que las actualizaciones, muestra la fecha del respaldo antes de confirmar, corre *payment-migrate* al final y nunca deja los servicios detenidos. Conviene restaurar un respaldo reciente: el respaldo de seguridad que hace antes aplica la retención de 14 y podría borrar el archivo elegido si es el más viejo (ACO-37). Con *--as LavaRapido_prueba* la restaura con otro nombre, sin tocar la base real, para revisar un respaldo. La opción *WITH REPLACE* sobrescribe la base de datos existente: usarla solo cuando se esté seguro del respaldo elegido. Si el comando falla a mitad de camino, la base de datos puede quedar en estado de restauración o en modo de un solo usuario; no reiniciar el contenedor sin revisar el registro de SQL Server.
 
 ### 15.3 Verificación Posterior a la Restauración
 
@@ -965,6 +971,8 @@ Los pagos transferidos a la cuenta del lavadero y no registrados por causa de la
 ### 15.4 Reversión de una Migración
 
 Los changesets de Liquibase solo avanzan. Deshacer una migración significa, por lo tanto, restaurar el respaldo anterior y corregir el cambio con un nuevo changeset; un changeset ya ejecutado nunca se edita.
+
+**Volver a la versión anterior de los servicios (desde el 24 de octubre de 2026).** Antes de reconstruir, *update-server.sh* guarda la versión que corre como *:prev*. Si una actualización deja algo roto, el administrador de TI entra al servidor con *ssh -t* y corre *bash ~/lavarapido/lavarapido-infra/deploy/rollback.sh* (todos los servicios) o *rollback.sh web* (solo algunos): muestra de qué fecha es la versión anterior, pide escribir VOLVER, recrea los contenedores sin compilar, espera hasta 8 minutos a que queden sanos y lo anota en *backups/deploy.log*. No toca la base: si la versión mala aplicó una migración, además hay que restaurar el respaldo *LavaRapido-pre-update-…* (sección 15.2). Después se revierte el cambio en GitHub. Si entre las dos versiones cambió un contrato (por ejemplo, el puerto de la web), la vuelta atrás puede dejar ese servicio caído (ACO-37).
 
 **Figura 14**
 
@@ -1079,9 +1087,9 @@ El sistema trata datos personales (número de documento, nombres, teléfono, cor
 |---|---|
 | El token de una sesión cerrada todavía sirve hasta 30 segundos (o hasta que vence, si security-service no responde). | Desactivar la cuenta, que cierra todas sus sesiones, y, si es grave, rotar el secreto JWT. |
 | Firma HS256 con un secreto compartido entre servicios. | Proteger el archivo .env y rotar el secreto periódicamente. |
-| Sin límite de solicitudes en el gateway. | Contraseñas fuertes; vigilar los registros de Caddy y del gateway en busca de ráfagas de solicitudes. |
-| Permisos por rol editables pero no aplicados (ADR-015). | No usar la matriz como control de acceso; el acceso real depende del rol. |
-| Sin Outbox, un evento se puede perder entre el commit y su publicación. | Revisar las notificaciones faltantes y las colas de mensajes muertos. |
+| El límite de solicitudes del inicio de sesión vive en la memoria del gateway: se reinicia con el gateway y cuenta por dirección IP. | Vigilar los registros del gateway ("Demasiadas peticiones… desde X"): si X es una IP interna (172.x), todos los usuarios comparten el límite y hay que avisar al equipo. |
+| Matriz de permisos informativa (ADR-015), de solo lectura desde el 24 de octubre de 2026. | No usar la matriz como control de acceso; el acceso real depende del rol. |
+| Sin Outbox, un evento se puede perder entre el commit y su publicación (desde el 24 de octubre de 2026 los correos y las push que fallan se reintentan hasta 5 veces y la cola de operations tiene cola de errores). | Revisar las notificaciones faltantes y las colas de mensajes muertos (*.dlq*). |
 | Auditoría no poblada. | Usar las trazas de la sección 16 y solicitar los disparadores de auditoría. |
 | Instancia de SQL Server compartida por todos los servicios. | Respaldar con frecuencia y limitar quién accede a la instancia. |
 | Verificación manual de los pagos. | Confirmar siempre contra el extracto bancario del lavadero. |
@@ -1242,12 +1250,13 @@ Las figuras de este manual se tomaron el 16 de octubre de 2026 sobre la versión
 
 | Tema | Qué falta o qué es contradictorio | Sección |
 |---|---|---|
-| Permisos por rol | Se guardan en el servidor, pero no se aplican (ADR-015). | 10 |
+| Permisos por rol | La matriz es informativa y de solo lectura (ADR-015); aplicarla queda como mejora. | 10 |
 | Auditoría | audit.audit_log no se alimenta. | 16 |
 | Política de respaldos y objetivos RPO y RTO | En el servidor público los respaldos son automáticos y se verifican cada día (sección 14.6); faltan aprobar los objetivos RPO y RTO y una copia fuera de la máquina virtual. | 14 |
 | Retención de trazas | No hay una política definida. | 16.3 |
 | Un inicio de sesión por servicio | Los servicios se conectan con la cuenta sa. | 17.3 |
-| Límite de solicitudes | El gateway y Caddy no limitan las solicitudes por cliente. | 17.4 |
+| Límite de solicitudes | Desde el 24 de octubre de 2026 el gateway limita el inicio de sesión, el registro y la recuperación (60 por minuto por IP); el resto de la API no tiene límite. | 17.4 |
+| Cola de pagos | La web todavía pide la cola de pagos completa, con las imágenes, cada 45 segundos; con muchos pagos puede ir lenta (ACO-33). | 12.6 |
 
 *Nota.* Elaborado por los autores a partir de la verificación del código fuente y del backlog técnico del proyecto.
 

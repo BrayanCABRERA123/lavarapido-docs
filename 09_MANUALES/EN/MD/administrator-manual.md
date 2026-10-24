@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 23, 2026
+October 24, 2026
 
-Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.7
+Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.8
 
 ## Version Control
 
@@ -39,6 +39,7 @@ Table 1 records the change history of this document. Each time an administrative
 | 4.5 | 2026-10-21 | Review against the code and the server of October 21, 2026: deactivating an account makes its session stop working (sections 9.4, 9.6, and 17.5); the roles tab says that the role decides the access (section 10.1); the cash account and its option for the customer (section 11.4); bookings that close on their own, single count of bookings without an operator, and the assignment lock (sections 12.3 and 12.4); receipt of at most 2 MB (section 12.6); reports with only completed bookings (section 13); automatic backups of the public server (sections 14.6 and 15.2) and security headers (section 17.4). The date and the version of the cover and the row of data that used to be stored only in the browser (Table 12) were corrected. | Development team |
 | 4.6 | 2026-10-21 | Change of the rule for bookings that end without being closed, reviewed by the team on the night of October 21: only a confirmed booking that never had an operator becomes No-show on its own; one that had an operator and nobody recorded goes to the **To close** card of the home screen (web and mobile app), where the administrator chooses **Attended** or **No-show** (sections 6.3, 8.3, 12.3, and 12.7). Bookings without an operator with a single rule in the mobile app too (sections 8.3 and 12.4); *FOLLOW_UP_\** variables (section 11.6); new incident and glossary term (Tables 18 and 20). | Development team |
 | 4.7 | 2026-10-23 | Review against *develop* of October 23, 2026: manual backup with *backup-db.sh* and *verify-backup.sh* instead of a *BACKUP DATABASE* with *COMPRESSION*, which SQL Server Express does not support (14.3); the daily task is scheduled by *setup-server.sh* and reads the password from *.env.production* (14.4); start-up task of the continuous deployment, not yet tested (14.6); **To close** looks back 28 days (12.3); changing or recovering the password revokes sessions and removing a role cuts the token (9.4, 9.6, and 10.3); a coupon discount goes from 1 to 99 % (12.8); variables the compose file already passes (11.6); broken link in the table of contents (10.3) and reference to the mobile app (6.2). Includes the content of Merari Urbano's *fix/A-03*, *fix/A-04*, *fix/A-05*, *fix/E-02*, *fix/E-07*, and *fix/E-20* branches. | Development team |
+| 4.8 | 2026-10-24 | Review against *develop* of October 24, 2026, which runs on the public server since that day: the permission matrix is read-only (6.3, 7.3, 10.1, and 17.5); the screens refresh on their own (4.1); request limit on sign-in and attempt cap on the recovery code (11.5 and 17.5); new variables (11.6); schedule or bay changes that clash with bookings (11.2 and 11.3); inactive cash in the counter payment (11.4 and 12.6); price greater than 0 (12.2); warning when changing the services of a booking with a payment, status changes that cancel the reminders, and a 4-hour window for the operator to record (12.3); notes visible to the operator (12.4); changed amount (*AMOUNT_CHANGED*), cancelled-booking notice, and unique reference (12.6); fixed discount in pesos (12.8); *:prev* images, *rollback.sh*, backup retention, and merged continuous deployment (14.6, 15.2, and 15.4); Annex B up to date. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -142,7 +143,7 @@ This manual is addressed to business administrators and information technology (
 
 The manual was verified against the source code of the web application and of the services (Vehicle Washing Development Team, 2026b, 2026c, 2026d) and against the project documentation updated on October 21, 2026 (Vehicle Washing Development Team, 2026a). The web application includes a complete administration module under the route */admin*, restricted to the ADMIN role. The names of the screens, buttons, and messages are written exactly as they appear when the interface language is English.
 
-Almost every screen of the module saves its data on the server. The exceptions are the reports, which are calculated in the browser from the bookings and payments, and the permission matrix, which is saved on the server but does not yet change what each role can do. Section 6.3 states the status of each function so that the administrator knows which data are official. When the documentation does not define a value (for example, a retention policy or a recovery objective), the manual presents it as a **recommendation** and lists it in Annex B so that the team approves it, as the guide for writing manuals requires (Servicio Nacional de Aprendizaje [SENA], 2026).
+Almost every screen of the module saves its data on the server. The exceptions are the reports, which are calculated in the browser from the bookings and payments, and the permission matrix, which is informative and, since October 24, 2026, read-only. Since that day the screens refresh on their own: on entering, on returning to the tab, with each new notification, and, on those that wait for another person (for example, **Payments** and **Bookings**), every 45 seconds while the tab is visible; reloading the page is no longer needed to see a new payment or a status change. Section 6.3 states the status of each function so that the administrator knows which data are official. When the documentation does not define a value (for example, a retention policy or a recovery objective), the manual presents it as a **recommendation** and lists it in Annex B so that the team approves it, as the guide for writing manuals requires (Servicio Nacional de Aprendizaje [SENA], 2026).
 
 ## 5. Objective
 
@@ -186,7 +187,7 @@ Table 2 summarizes the real status of each function in the version of October 21
 |---|---|---|---|
 | Control panel with indicators | Dashboard | Complete (data from the server). | 8.3 |
 | Create accounts and activate or deactivate them | Management > Users | Complete. | 9 |
-| Roles and permissions | Management > Roles | Complete for the permission matrix: the three fixed roles are applied by the server, and the permissions checked for each role are saved on the server (ADR-015). The matrix is informative: it does not yet change what each role can do, and since October 21, 2026 the tab says so. | 10 |
+| Roles and permissions | Management > Roles | Complete: the server applies the three fixed roles (ADR-015). The permission matrix is informative and, since October 24, 2026, read-only: it shows the permissions of each role, but it is not edited, because the role in the token decides the access. | 10 |
 | Services, prices, durations by vehicle type, and loyalty points | Management > Services | Complete. | 12.2 |
 | Promotions and coupons | Management > Promotions | Complete: percentage coupons saved in payment-service, unlocked with points and applied when the customer pays. | 12.8 |
 | Weekly hours, exceptions, and bays | Hours & Bays | Complete. | 11.2 and 11.3 |
@@ -244,7 +245,7 @@ The system defines three fixed roles: Administrator (code ADMIN), Operator (OPER
 | Reviews, approves, or rejects payments and records manual payments. | A booking admits a single approved payment; a payment in review cannot be duplicated. |
 | Sees the customer, vehicle, and booking information needed to operate. | Must treat it according to Law 1581 of 2012 and the security policy. |
 | Creates accounts with their user type and activates or deactivates them. | Accounts are deactivated, not deleted; the user type is not changed after the account is created; an administrator account is not deactivated and nobody deactivates their own. |
-| Consults the roles and checks the permissions of each one. | Cannot create or delete roles; the permission matrix does not yet change real access. |
+| Consults the roles and the permissions of each one. | Cannot create or delete roles or edit the permission matrix, which is read-only. |
 
 *Note.* All the routes under */admin* require the ADMIN role; a person with another role who tries to open them is returned to the home screen of their own role.
 
@@ -409,7 +410,7 @@ ORDER BY s.started_at DESC;
 
 ### 10.1 The Three Fixed Roles
 
-The server applies only the three fixed roles ADMIN, OPERATOR, and CLIENT (Table 7). The **Management > Roles** tab lists the three roles with their permissions and the number of users of each one. **Role permissions** lets the administrator pick one of the three roles (there is no free-text name) and check or uncheck its permissions from the catalog of *security.permission*; the changes are saved on the server in *security.role_permission* (*GET* and *PUT /api/v1/admin/roles-permissions*). **The matrix is informative**: real authorization still depends on the role of the token, so checking or unchecking a permission does not grant or remove access to any screen or endpoint (ADR-015). Since October 21, 2026 the permissions tab and dialog explain it on screen: the roles are fixed and the role decides the access. If a permission no longer exists, the system answers "One of the selected permissions no longer exists. Reload the page and try again."
+The server applies only the three fixed roles ADMIN, OPERATOR, and CLIENT (Table 7). The **Management > Roles** tab lists the three roles with their permissions and the number of users of each one. **The matrix is informative and read-only** (since October 24, 2026): it shows the permissions of each role stored in *security.role_permission* (*GET /api/v1/admin/roles-permissions*), but it no longer has the dialog to check or uncheck them. Real authorization depends on the role of the token (ADR-015), so changing the matrix would not grant or remove access; the tab explains it on screen.
 
 **Table 7**
 
@@ -470,7 +471,7 @@ The **Hours & Bays** screen (route */admin/schedule*) has two tabs: **Business h
 3. In **Exceptions and special days**, click **Add exception** to register a national holiday (closed all day) or special hours: choose the **Date**, the **Type**, the **Opening** and **Closing** times if applicable, and the **Reason / notes**, and click **Save exception**.
 4. Use the **History** button to see the latest changes of the schedule.
 
-A change applies to future availability; bookings already confirmed are not relocated automatically. Before registering a closure, check the bookings of that day in **Bookings** (filter by date) and contact the customers to reschedule or cancel them (section 12.3).
+A change applies to future availability; bookings already confirmed are not relocated automatically. Since October 24, 2026, if the new schedule or the exception would leave an active booking outside, the system does not save the change and shows how many bookings clash and their codes (*SCHEDULE_CONFLICTS_BOOKINGS*): first reschedule or cancel them in **Bookings** (section 12.3), contacting the customers, and then save the schedule.
 
 **Figure 6**
 
@@ -485,12 +486,12 @@ A bay is a physical washing spot, and the number of active bays defines the capa
 1. Open **Hours & Bays > Wash bays**.
 2. To create a bay, click **Add bay**, type the **Bay name**, choose the **Status**, and save.
 3. For a repair, edit the bay and change its status to **Under maintenance**; it stops receiving new bookings.
-4. Before putting a bay under maintenance or inactive, review the future bookings assigned to it and reschedule them.
+4. Before putting a bay under maintenance or inactive, review the future bookings assigned to it and reschedule them. Since October 24, 2026, if active bookings remain on that bay, the system does not save the change and shows the clashing bookings.
 5. When the repair is finished, return the status to **Active**.
 
 ### 11.4 Payment Methods and QR Codes
 
-**Settings > Payment methods** manages the payment accounts of the business: for each account, the method (Nequi, Daviplata, or bank transfer), the holder, the account number, the QR image, the instructions, and whether it is active. Customers see only the active accounts. The cash account (*Caja del establecimiento*) appears in the same list and has no QR code; since October 21, 2026, if it is deactivated, the Cash option disappears from the customer payment screen. A wrong QR code or account sends the business's money to a third party, so this information must be reviewed carefully.
+**Settings > Payment methods** manages the payment accounts of the business: for each account, the method (Nequi, Daviplata, or bank transfer), the holder, the account number, the QR image, the instructions, and whether it is active. Customers see only the active accounts. The cash account (*Caja del establecimiento*) appears in the same list and has no QR code; since October 21, 2026, if it is deactivated, the Cash option disappears from the customer payment screen; since October 24 the administrator still sees it in **Register manual payment** to collect at the counter. A wrong QR code or account sends the business's money to a third party, so this information must be reviewed carefully.
 
 1. Open **Settings > Payment methods**.
 2. Add an account or edit an existing one: method, holder, account number, QR image, and instructions.
@@ -518,7 +519,10 @@ The QR images and the receipts are stored inside the database as images (data UR
 | Access token validity | 1 hour; there is no refresh token | security-service (JWT_ACCESS_TOKEN_TTL). |
 | Closed session | The token of a closed session (sign-out or deactivated account) stops working within 30 seconds (since October 21, 2026) | security-service and API Gateway (*SESSION_CHECK_\**). |
 | Account lockout after failed attempts | 5 failed attempts within 15 minutes lock the account for 15 minutes; resetting the password unlocks it | security-service (*security.login_lockout*). |
-| Recovery code | 6 digits, valid for 15 minutes, single use, 5 failed attempts | security-service. |
+| Recovery code | 6 digits, valid for 15 minutes, single use. Since October 24, 2026, the 5th failed attempt voids the code and answers *TOO_MANY_ATTEMPTS*: another one must be requested | security-service. |
+| Current password | Since October 24, 2026, mistakes when typing the current password (changing the password or the email, deactivating the account) count toward the same sign-in lockout: at the 5th, the account is locked for 15 minutes | security-service. |
+| Request limit | Since October 24, 2026, 60 requests per minute per IP address on sign-in, sign-up, and recovery; beyond that, it answers *RATE_LIMITED* with the waiting time | API Gateway (*AUTH_RATE_LIMIT_\**). |
+| Consent | Since October 24, 2026 the server rejects a sign-up without the two data policy checkboxes (*CONSENT_REQUIRED*) | security-service. |
 | Password | 8 to 72 characters, one uppercase letter, one number, one special character, no spaces | security-service and web interface. |
 | Password storage | BCrypt with cost factor 12 | security-service. |
 | Token signature | HS256 with a shared secret of at least 32 bytes | JWT_SECRET in the .env file. |
@@ -528,7 +532,7 @@ The QR images and the receipts are stored inside the database as images (data UR
 
 ### 11.6 Operating Environment Variables
 
-The variables that change the behavior of the platform are read from the file *lavarapido-infra/.env* and require restarting the affected services. The most relevant for the IT administrator are *MESSAGING_ENABLED* (RabbitMQ events, also in payment-service), *MAIL_ENABLED* and *MAIL_\** (email), *PUSH_ENABLED* (push notifications), *REMINDER_LEADS* (reminders, by default 24 h and 1 h), *BOOKING_ZONE* (time zone of the business), *BOOKING_SLOT_MINUTES* and *BOOKING_MAX_DAYS_AHEAD* (booking grid and window), *INTERNAL_API_KEY* (internal calls between services; since *develop* of October 23, 2026 the operator also needs it to start and finish services), *ALLOWED_EMAIL_DOMAINS* (email domains accepted by sign-up, *gmail.com* by default), and *SPRING_PROFILES_ACTIVE* (profile of the Java services; with *dev*, the demonstration accounts whose password is in *DEMO_ADMIN_PASSWORD*, *DEMO_OPERATOR_PASSWORD*, or *DEMO_CLIENT_PASSWORD* are created). Those of October 21, 2026, *SESSION_CHECK_\** (gateway session check), *BOOKING_EXPIRY_\** (bookings that ended without being closed; *BOOKING_EXPIRY_GRACE_MINUTES* is used by booking-service and operations-service), and *FOLLOW_UP_\** (check of the **To close** list in operations-service, including *FOLLOW_UP_LOOK_BACK_DAYS*, 28 days), have defaults and the Compose file passes them to the containers since October 22, 2026, so they are changed from *.env*. Their values and the change procedure are described in the Installation Manual.
+The variables that change the behavior of the platform are read from the file *lavarapido-infra/.env* and require restarting the affected services. The most relevant for the IT administrator are *MESSAGING_ENABLED* (RabbitMQ events, also in payment-service), *MAIL_ENABLED* and *MAIL_\** (email), *PUSH_ENABLED* (push notifications), *REMINDER_LEADS* (reminders, by default 24 h and 1 h), *BOOKING_ZONE* (time zone of the business), *BOOKING_SLOT_MINUTES* and *BOOKING_MAX_DAYS_AHEAD* (booking grid and window), *INTERNAL_API_KEY* (internal calls between services; since *develop* of October 23, 2026 the operator also needs it to start and finish services), *ALLOWED_EMAIL_DOMAINS* (email domains accepted by sign-up, *gmail.com* by default; sign-in accepts any domain since October 24, 2026), and *SPRING_PROFILES_ACTIVE* (profile of the Java services; with *dev*, the demonstration accounts whose password is in *DEMO_ADMIN_PASSWORD*, *DEMO_OPERATOR_PASSWORD*, or *DEMO_CLIENT_PASSWORD* are created). Those of October 21, 2026, *SESSION_CHECK_\** (gateway session check), *BOOKING_EXPIRY_\** (bookings that ended without being closed; *BOOKING_EXPIRY_GRACE_MINUTES* is used by booking-service and operations-service), and *FOLLOW_UP_\** (check of the **To close** list in operations-service, including *FOLLOW_UP_LOOK_BACK_DAYS*, 28 days), have defaults and the Compose file passes them to the containers since October 22, 2026, so they are changed from *.env*. Since October 24, 2026 there are also *AUTH_RATE_LIMIT_\** and *TRUSTED_PROXIES* (the gateway's sign-in request limit and trusted networks), *ROUTE_CONNECT_TIMEOUT* and *ROUTE_READ_TIMEOUT* (5 and 60 seconds per route), and *START_LATE_LIMIT* (how long after the end time the operator can still start, 4 hours); they have a default value and the compose file does not pass them yet. customer-service receives *INTERNAL_API_KEY* and *BOOKING_SERVICE_URL* to check a vehicle's active bookings before removing it. Their values and the change procedure are described in the Installation Manual.
 
 ## 12. Management of Core Information
 
@@ -559,7 +563,7 @@ The catalog is organized in categories (washing, polishing, detailing, interior,
 1. Open **Management > Services**.
 2. Click **Add service**, or edit an existing service.
 3. Type the **Service Name**, the **Description**, and the **Category**.
-4. In **Price and duration by vehicle type**, define the price in Colombian pesos (COP) and the estimated duration for each vehicle type (car, sedan, SUV, pickup, truck, and motorcycle).
+4. In **Price and duration by vehicle type**, define the price in Colombian pesos (COP) and the estimated duration for each vehicle type (car, sedan, SUV, pickup, truck, and motorcycle). The price must be greater than 0: since October 24, 2026 the server rejects a price of 0 (*INVALID_PRICE*).
 5. In **Loyalty points**, type the points the customer earns when the payment for this service is approved (a whole number; 0 = no points). The services table shows them in the **Points** column.
 6. Click **Save Service**.
 7. To stop offering a service, deactivate it ("It will no longer be available to book"); existing bookings are not altered.
@@ -573,14 +577,14 @@ The **Bookings** screen (route */admin/reservations*) lists the bookings with **
 
 1. Use the search by client or plate, the date (**Today**), and the status and operator filters; **Clear** removes them.
 2. To create a booking on behalf of a customer, click **New Booking**, look up the vehicle by plate, choose the services, the date, and a free time, and confirm.
-3. Open a booking to see its detail. From there the administrator can reschedule it (another free date or time), change its status (confirm, start, complete, mark as **No-show**), or cancel it by choosing a **Cancellation reason**. Each change asks for confirmation.
+3. Open a booking to see its detail. From there the administrator can reschedule it (another free date or time, and also other services), change its status (confirm, start, complete, mark as **No-show**), or cancel it by choosing a **Cancellation reason**. Each change asks for confirmation. Since October 24, 2026: if the booking already has a payment, changing its services shows a warning that the payment amount will no longer match (the old payment cannot be approved, section 12.6); setting the booking **In progress**, **Completed**, or **No-show** cancels the customer's pending reminders, and **No-show** sends them a notice; and if someone else changed the booking while it was open, the system rejects the change and the screen must be refreshed.
 4. Click **Export** to download the list in Excel, PDF, or CSV.
 
 The life cycle rules are the same for everyone: a booking cannot fall outside the opening hours or occupy a bay that is already taken, and a booking that already started can no longer be canceled (Table 9).
 
 **Bookings that ended without being closed (since October 21, 2026).** The system only closes a booking on its own when there is no doubt about what happened; in the other cases the administrator decides:
 
-- A **Scheduled** booking that was never confirmed is cancelled on its own one hour after its end time, with the reason "Venció sin confirmarse" (expired without confirmation), which does not appear in the list of reasons for cancelling by hand.
+- Since October 24, 2026 every booking is created and rescheduled as **Confirmed**, so there is no longer a task that cancels expired **Scheduled** bookings (it was removed, B-07). An old booking still Scheduled becomes Confirmed if it is rescheduled.
 - A **Confirmed** booking that never had an operator becomes **No-show** on its own one hour after its end, because nobody could serve it.
 - A **Confirmed booking with an operator** that nobody started when its time ended, or an **In progress** booking that nobody finished one hour after its end, is never marked on its own: it goes to the **To close** card of the home screen. The operator receives the notice "¿Atendiste este servicio?" (did you serve this booking?) and every active administrator the notice "Servicio sin registrar" (service not recorded) (section 12.7).
 
@@ -589,7 +593,7 @@ This rule replaced the first version of the same day, which closed as No-show ev
 To close the pending bookings:
 
 1. Find the **To close** card on the web **Dashboard** or on the home screen of the mobile app. It only appears when there is a pending booking and shows those of the last 28 days (*FOLLOW_UP_LOOK_BACK_DAYS*), because the server can stay off for weeks.
-2. Check with the operator whether the vehicle was served. If it is still the same day, the operator can record the service with **Start** and **Finish** even if it is late; this keeps the real hours and the booking leaves the list.
+2. Check with the operator whether the vehicle was served. Up to 4 hours after the end time (*START_LATE_LIMIT*, since October 24, 2026), the operator can record the service with **Start** and **Finish** even if it is late; this keeps the real hours and the booking leaves the list. After that, their **Start** button is disabled and the administrator closes it.
 3. If the vehicle was served, click **Attended**. The booking becomes Completed without made-up hours: without a start time it does not count toward the operator's punctuality and without an end time it does not add worked hours, but it does count as a service done and as income. The customer does not receive the notice that the vehicle is ready for pickup (it would arrive hours late), but can still rate the service.
 4. If the customer did not come, click **No-show**. This option only applies to a booking that was never started, and the status is final.
 5. If a message says that the booking is no longer to close, another administrator or the operator closed it first; just refresh the screen.
@@ -604,7 +608,7 @@ To close the pending bookings:
 | CONFIRMED | With a slot and a bay. Bookings made by customers start here. | Assign or change the operator, reschedule, or cancel. |
 | IN_PROGRESS | The operator started the wash. | Supervise; it can no longer be canceled. |
 | COMPLETED | Service finished. | Verify or record the payment. |
-| CANCELLED | Voided by the customer or the business, or closed by the system because one hour passed after its end without being confirmed. | Check the reason. |
+| CANCELLED | Voided by the customer or the business (until October 23, 2026 the system also closed expired scheduled bookings this way). | Check the reason. |
 | NO_SHOW | The customer did not arrive (marked by the administrator), or the confirmed booking ended one hour ago without an operator (marked by the system). | Record it, review patterns and, if the customer had paid, decide on the refund. |
 
 *Note.* Database codes according to ADR-010; the interface translates them.
@@ -621,7 +625,7 @@ When a booking is confirmed, **the system assigns the operator automatically** (
 
 1. In the **Dashboard** (block **Bookings without an operator**) or in **Bookings**, click **Assign** on the booking.
 2. The window "Assign Operator to Booking [code]" shows the details of the appointment and the list of operators. The available operators appear first; the others show why they cannot take the booking: **Inactive**, **No shift at that time**, **Absent**, or **Busy at that time**.
-3. Select an available operator and, if desired, write instructions for the operator.
+3. Select an available operator and, if desired, write instructions for the operator. Since October 24, 2026 the operator sees those notes in the service detail, on the web and in the app; if the booking is reassigned without notes, the previous ones are kept.
 4. Click **Confirm Assignment**. The message "Operator assigned" appears and the operator receives a notification. If the booking already had another operator, that operator receives the notice that the service was reassigned.
 
 The assignments list shows the bay of each booking next to its operator, so the administrator can see which operator is working in which bay. Operators are not tied to a bay for a whole shift: the bay is chosen per booking (ADR-010 and ADR-015).
@@ -665,11 +669,12 @@ The system does not integrate a payment gateway (ADR-008). The customer pays out
 
 | Control | How the system applies it | What the administrator must do |
 |---|---|---|
-| Amount | The amount due is the booking total calculated by the server minus the coupon redeemed, if any; the customer declares the amount paid, and the review window compares both. | Compare the declared amount and the receipt with the amount due. |
-| Single approved payment | A booking does not admit more than one approved payment, and a second payment cannot be reported while one is in review. | Do not try to approve a second payment for the same booking. |
-| Transaction reference | The system rejects a reference already used in another payment (*TRANSACTION_REFERENCE_REUSED*). | Verify that the reference of the receipt matches the bank movement. |
+| Amount | The amount due is the booking total calculated by the server minus the coupon redeemed, if any; the customer declares the amount paid, and the review window compares both. Since October 24, 2026, if the booking changed after the customer reported the payment (other services or another total), approving answers *AMOUNT_CHANGED*. | Compare the declared amount and the receipt with the amount due; on *AMOUNT_CHANGED*, reject the payment so the customer reports it again with the current amount. |
+| Single approved payment | A booking does not admit more than one approved payment, and a second payment cannot be reported while one is in review; since October 24, 2026 the database also guarantees it against two simultaneous reports. | Do not try to approve a second payment for the same booking. |
+| Transaction reference | The system rejects a reference already used in another payment (*TRANSACTION_REFERENCE_REUSED*); since October 24, 2026 the database guarantees it among live payments. | Verify that the reference of the receipt matches the bank movement. |
 | Real verification | The system does not query the bank. | Confirm in the app or statement of the business that the money arrived; do not rely only on the image. |
 | History | Rejected payments are kept with their reason. | Do not delete rejected attempts. |
+| Cancelled booking | Since October 24, 2026, if a payment's booking was cancelled, the payment shows the "Booking cancelled" notice: **refund** it if approved or **reject** it if in review. | Return the money or reject the payment, as the notice says. |
 | Receipt size | The server rejects receipts larger than 2 MB (*RECEIPT_TOO_LARGE*); the web and the app reduce them before sending them. | If an image looks blurry, ask the customer for a screenshot of the receipt. |
 
 *Note.* Prepared by the authors from the payment service and ADR-008.
@@ -683,7 +688,7 @@ The system does not integrate a payment gateway (ADR-008). The customer pays out
 
 **Rejecting a payment.** If the money did not arrive, the receipt is illegible, or the amount does not match, click **Reject**, type the **Rejection reason** (maximum 200 characters), and confirm. The customer receives a notice and an email with the reason and can report the payment again.
 
-**Recording a cash or counter payment.** Click **Register manual payment**, choose the booking and the method, and confirm. The window shows the real amount due of the booking (with the coupon discount, if any), and the manual payment is approved immediately with that amount and credits the points. Use it only when the money was received.
+**Recording a cash or counter payment.** Click **Register manual payment**, choose the booking and the method, and confirm. The cash account appears even if it is deactivated for customers (since October 24, 2026). The window shows the real amount due of the booking (with the coupon discount, if any), and the manual payment is approved immediately with that amount and credits the points. Use it only when the money was received.
 
 **Refunding a payment.** Open an approved payment and click **Refund**. Confirm that the money was returned to the customer: the payment changes to Refunded, the points that the booking earned are reversed, and the customer receives a notice and an email. The refund cannot be undone.
 
@@ -710,7 +715,7 @@ Announcements are sent with *POST /api/v1/admin/notifications* (ADMIN role), whi
 **Promotions.** The **Management > Promotions** tab manages the discount coupons that customers unlock with their points (data saved in payment-service, *GET*, *POST*, *PUT*, *PATCH*, and *DELETE /api/v1/admin/promotions*):
 
 1. Click to create a promotion and type the **Name**, the **Description**, the **Coupon** code (for example, PREMIUM20), the icon, the benefits, and the **Start date** (if it is in the future, the promotion stays scheduled until that day).
-2. Type the **Discount on redemption (%)**, between 1 and 99, which is applied to the booking total when the customer redeems the coupon. There are no 100 % coupons: the payment requires an amount greater than zero, so the system always leaves at least 1 peso to pay, also with a fixed discount larger than the total (since *develop* of October 23, 2026, E-07).
+2. Type the **Discount on redemption (%)**, between 1 and 99 (if the promotion has a fixed discount in pesos, *FIXED*, the card shows it in pesos and editing it keeps the type, since October 24, 2026), which is applied to the booking total when the customer redeems the coupon. There are no 100 % coupons: the payment requires an amount greater than zero, so the system always leaves at least 1 peso to pay, also with a fixed discount larger than the total (since *develop* of October 23, 2026, E-07).
 3. Type the **Loyalty points required** to unlock the coupon (0 = available to everyone).
 4. Save. The card of the promotion shows the discount ("N% off") and the points needed ("unlocks at N points" or "available to everyone"). The status is calculated from the start date and can be paused or resumed from the card.
 
@@ -902,7 +907,8 @@ Since October 21, 2026 the public server backs up the database without intervent
 - Every backup, check, and restore is written to *~/lavarapido/backups/backup.log*: *tail -20* shows the latest and *grep FALLÓ* only the problems.
 - The database uses the SIMPLE recovery model: with full backups no transaction log backups are needed, and the log does not grow without limit.
 - The backups live on the same disk as the virtual machine: they protect against an error or a bad migration, not against losing the machine. To meet the 3-2-1 rule of Table 13, copy them to the IT administrator's computer with *scp* or take a disk snapshot in Azure.
-- **Continuous deployment (prepared on October 23, 2026, not yet merged or tested live).** When it is activated, *setup-server.sh* will add a second *@reboot* task to the same *crontab*, *deploy/boot-update.sh*, which, when the machine is turned on, pulls what entered *main* while it was off and deploys it with *update-server.sh*, which backs up first. Its result is written to *~/lavarapido/backups/deploy.log* and is checked with *crontab -l | grep boot-update*. If the prior backup fails, nothing is updated. The details are in the Deployment Document, section 4.3.4.
+- Since October 24, 2026 the *LavaRapido-pre-update-…* backups that each update makes are kept separately (the last 10), besides the 14 regular ones, and after a healthy update unused Docker images are deleted so the disk does not fill up.
+- **Continuous deployment (merged into *develop* on October 24, 2026; the secrets are missing).** Since that day *setup-server.sh* adds a second *@reboot* task to the same *crontab*, *deploy/boot-update.sh*, which, when the machine is turned on, pulls what entered *main* while it was off and deploys it with *update-server.sh*, which backs up first. While the server is on *develop* (until *v1.1.0*), that task does not update: the protection that prevents downgrading stops it without touching anything. Its result is written to *~/lavarapido/backups/deploy.log* and is checked with *crontab -l | grep boot-update*. If the prior backup fails, nothing is updated. The details are in the Deployment Document, section 4.3.4.
 
 ## 15. Data Restoration
 
@@ -950,7 +956,7 @@ docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd \
    ALTER DATABASE [LavaRapido] SET MULTI_USER;"
 ```
 
-On the public server, *bash ~/lavarapido/lavarapido-infra/deploy/restore-db.sh `<FILE>`.bak.gz* is used: it asks to type RESTAURAR, first backs up the current database, stops the seven services, restores, and starts them again (2 to 3 minutes of downtime). With *--as LavaRapido_prueba* it restores under another name, without touching the real database, to inspect a backup. The *WITH REPLACE* option overwrites the existing database: use it only when you are sure of the chosen backup. If the command fails halfway, the database may remain in a restoring state or in single-user mode; do not restart the container without reviewing the SQL Server log.
+On the public server, *bash ~/lavarapido/lavarapido-infra/deploy/restore-db.sh `<FILE>`.bak.gz* is used: it asks to type RESTAURAR, first backs up the current database, stops the seven services, restores, and starts them again (2 to 3 minutes of downtime). Since October 24, 2026 it requires a terminal, takes the same lock as the updates, shows the backup's date before confirming, runs *payment-migrate* at the end, and never leaves the services stopped. It is better to restore a recent backup: the safety backup it makes first applies the 14-file retention and could delete the chosen file if it is the oldest one (ACO-37). With *--as LavaRapido_prueba* it restores under another name, without touching the real database, to inspect a backup. The *WITH REPLACE* option overwrites the existing database: use it only when you are sure of the chosen backup. If the command fails halfway, the database may remain in a restoring state or in single-user mode; do not restart the container without reviewing the SQL Server log.
 
 ### 15.3 Post-Restoration Verification
 
@@ -965,6 +971,8 @@ Payments transferred to the business's account and not recorded because of the r
 ### 15.4 Rolling Back a Migration
 
 Liquibase changesets are forward-only. Undoing a migration therefore means restoring the previous backup and correcting the change with a new changeset; an already executed changeset must never be edited.
+
+**Going back to the previous version of the services (since October 24, 2026).** Before rebuilding, *update-server.sh* keeps the running version as *:prev*. If an update leaves something broken, the IT administrator logs into the server with *ssh -t* and runs *bash ~/lavarapido/lavarapido-infra/deploy/rollback.sh* (all services) or *rollback.sh web* (only some): it shows the date of the previous version, asks to type VOLVER, recreates the containers without building, waits up to 8 minutes for them to be healthy, and logs it in *backups/deploy.log*. It does not touch the database: if the bad version applied a migration, the *LavaRapido-pre-update-…* backup must also be restored (section 15.2). Then the change is reverted on GitHub. If a contract changed between the two versions (for example, the web's port), going back may leave that service down (ACO-37).
 
 **Figure 14**
 
@@ -1079,9 +1087,9 @@ The system processes personal data (ID number, names, phone, email, vehicles, an
 |---|---|
 | The token of a closed session still works for up to 30 seconds (or until it expires, if security-service does not answer). | Deactivate the account, which closes all its sessions, and, if serious, rotate the JWT secret. |
 | HS256 signature with a secret shared among services. | Protect the .env file and rotate the secret periodically. |
-| No request rate limit in the gateway. | Strong passwords; watch the Caddy and gateway logs for bursts of requests. |
-| Role permissions are editable but not enforced (ADR-015). | Do not use the matrix as access control; real access depends on the role. |
-| Without an Outbox, an event can be lost between the commit and its publication. | Review missing notifications and the dead-letter queues. |
+| The sign-in request limit lives in the gateway's memory: it resets with the gateway and counts per IP address. | Watch the gateway logs ("Demasiadas peticiones… desde X"): if X is an internal IP (172.x), all users share the limit and the team must be told. |
+| Informative permission matrix (ADR-015), read-only since October 24, 2026. | Do not use the matrix as access control; real access depends on the role. |
+| Without an Outbox, an event can be lost between the commit and its publication (since October 24, 2026 failed emails and push are retried up to 5 times and the operations queue has a dead-letter queue). | Review missing notifications and the dead-letter queues (*.dlq*). |
 | Audit trail not populated. | Use the traces of section 16 and request the audit triggers. |
 | Shared SQL Server instance for all the services. | Back up frequently and limit who accesses the instance. |
 | Manual payment verification. | Always confirm against the business's bank statement. |
@@ -1242,12 +1250,13 @@ The figures in this manual were taken on October 16, 2026, on the version of the
 
 | Topic | What is missing or contradictory | Section |
 |---|---|---|
-| Role permissions | Saved on the server but not enforced (ADR-015). | 10 |
+| Role permissions | The matrix is informative and read-only (ADR-015); enforcing it remains an improvement. | 10 |
 | Audit trail | audit.audit_log is not populated. | 16 |
 | Backup policy and RPO and RTO objectives | On the public server backups are automatic and checked every day (section 14.6); the RPO and RTO objectives and a copy outside the virtual machine still need approval. | 14 |
 | Retention of traces | No policy defined. | 16.3 |
 | One login per service | The services connect with the sa account. | 17.3 |
-| Request rate limit | Neither the gateway nor Caddy limits the requests per client. | 17.4 |
+| Request rate limit | Since October 24, 2026 the gateway limits sign-in, sign-up, and recovery (60 per minute per IP); the rest of the API has no limit. | 17.4 |
+| Payment queue | The web still requests the whole payment queue, with the images, every 45 seconds; with many payments it may be slow (ACO-33). | 12.6 |
 
 *Note.* Prepared by the authors from the verification of the source code and the technical backlog of the project.
 

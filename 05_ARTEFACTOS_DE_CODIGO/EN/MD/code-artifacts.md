@@ -15,28 +15,28 @@
 | Apprentices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano Quintero |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 23, 2026 |
+| Date | October 24, 2026 |
 
-The system's code lives in 10 GitHub repositories: the web application, the mobile application, and 8 backend repositories. Each one has a GitHub Actions workflow (`.github/workflows/ci.yml`) that builds it and runs its tests on every change (in `lavarapido-infra` it validates the deploy scripts, the Docker Compose files and the end-to-end test syntax); `lavarapido-infra` also has `deploy.yml`, a workflow started by hand to update the server (in `main` since October 23, 2026, not run yet because its secrets are missing); continuous deployment was prepared that day in branches not yet merged or tested live. On October 23, 2026 `v1.0.0` was tagged in 8 of the 10 repositories; payment-service and the mobile app have no release yet, and `develop` already has that day's fixes for `v1.1.0`. This document inventories the two clients and explains how to build and run them; the backend is described only as far as the clients need it. Source code is not reproduced.
+The system's code lives in 10 GitHub repositories: the web application, the mobile application, and 8 backend repositories. Each one has a GitHub Actions workflow (`.github/workflows/ci.yml`) that builds it and runs its tests on every change (in `lavarapido-infra` it validates the deploy scripts, the Docker Compose files and the end-to-end test syntax); `lavarapido-infra` also has `deploy.yml`, a workflow started by hand to update the server (in `main` since October 23, 2026, not run yet because its secrets are missing). On October 24, 2026 continuous deployment was merged into `develop`: the "Pedir despliegue" job in the `ci.yml` of 8 repositories and `cd.yml` in the mobile app, which publishes the over-the-air update when it reaches `main`; its secrets still have to be created. On October 23, 2026 `v1.0.0` was tagged in 8 of the 10 repositories and on the 24th in payment-service (PR #2 merged); the mobile app has no release yet (PR #1 open), and `develop` already has the fixes of October 23 and 24 (128 branches that day) for `v1.1.0`; it is what runs on the public server since October 24. The published web image runs nginx without `root` on port 8080. This document inventories the two clients and explains how to build and run them; the backend is described only as far as the clients need it. Source code is not reproduced.
 
 ## 1. Repository Inventory
 
 **Table 2**
 
-*System repositories (`develop` branch, as of October 23, 2026)*
+*System repositories (`develop` branch, as of October 24, 2026)*
 
 | Artifact | Repository | Technology | Commits | Last commit |
 | --- | --- | --- | --- | --- |
-| Web application | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 530 | 2026-10-23 |
-| Mobile application | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 248 | 2026-10-23 |
-| Infrastructure | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 96 | 2026-10-23 |
-| API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 28 | 2026-10-23 |
-| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 76 | 2026-10-23 |
-| customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 27 | 2026-10-23 |
-| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 72 | 2026-10-23 |
-| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 63 | 2026-10-23 |
-| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 57 | 2026-10-23 |
-| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 47 | 2026-10-23 |
+| Web application | [Front-end-proyecto-web](https://github.com/BrayanCABRERA123/Front-end-proyecto-web/tree/develop) | Angular 21.2.25, TypeScript 5.9 | 576 | 2026-10-24 |
+| Mobile application | [LavadoVehicular-Movil](https://github.com/merari0322/LavadoVehicular-Movil/tree/develop) | React Native 0.86.3, Expo ~57, TypeScript 6.0 | 296 | 2026-10-24 |
+| Infrastructure | [lavarapido-infra](https://github.com/BrayanCABRERA123/lavarapido-infra/tree/develop) | Docker Compose | 151 | 2026-10-24 |
+| API Gateway | [lavarapido-api-gateway](https://github.com/BrayanCABRERA123/lavarapido-api-gateway/tree/develop) | Spring Boot 4.0.8, Java 21 | 42 | 2026-10-24 |
+| security-service | [lavarapido-security-service](https://github.com/BrayanCABRERA123/lavarapido-security-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 100 | 2026-10-24 |
+| customer-service | [lavarapido-customer-service](https://github.com/camiloguilombo12/lavarapido-customer-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 41 | 2026-10-24 |
+| booking-service | [lavarapido-booking-service](https://github.com/camiloguilombo12/lavarapido-booking-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 102 | 2026-10-24 |
+| operations-service | [lavarapido-operation-service](https://github.com/BrayanCABRERA123/lavarapido-operation-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 93 | 2026-10-24 |
+| payment-service | [lavarapido-payment-service](https://github.com/merari0322/lavarapido-payment-service/tree/develop) | ASP.NET Core 8 | 85 | 2026-10-24 |
+| notification-service | [lavarapido-notification-service](https://github.com/BrayanCABRERA123/lavarapido-notification-service/tree/develop) | Spring Boot 4.0.8, Java 21 | 65 | 2026-10-24 |
 
 **Table 3**
 
@@ -194,7 +194,7 @@ docker compose --profile app up -d --build   # the whole backend in containers
 | Messaging | `MESSAGING_ENABLED`, `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD`; `AUTO_ASSIGN_ENABLED=false` (optional) turns off only the automatic assignment |
 | Push | `PUSH_ENABLED` (and `EXPO_ACCESS_TOKEN` in the compose file) |
 
-> *Note.* The variables of October 21, 2026 have defaults, are commented out in `.env.example`, and the compose file passes them to the containers since October 22, 2026: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL`, and `SESSION_CHECK_TIMEOUT` (gateway session check: on, 30 s, and 3 s); `BOOKING_EXPIRY_CHECK_ENABLED` and `BOOKING_EXPIRY_CHECK_INTERVAL` (cancellation of scheduled bookings that expired without confirmation, in booking-service: on and every 5 minutes); `BOOKING_EXPIRY_GRACE_MINUTES` (60-minute grace after the end of the booking, used by booking-service and operations-service); and `FOLLOW_UP_ENABLED`, `FOLLOW_UP_INTERVAL`, and `FOLLOW_UP_LOOK_BACK_DAYS` (follow-up of the bookings that ended and nobody closed, in operations-service: on, every 5 minutes, and looking back 28 days; it needs `INTERNAL_API_KEY`). They are changed in `.env`. Since October 23, 2026 there are also `ALLOWED_EMAIL_DOMAINS` (email domains, `gmail.com` by default) and `DEMO_ADMIN_PASSWORD`, `DEMO_OPERATOR_PASSWORD`, and `DEMO_CLIENT_PASSWORD` (demo accounts of the `dev` profile; empty, the account is not created).
+> *Note.* The variables of October 21, 2026 have defaults, are commented out in `.env.example`, and the compose file passes them to the containers since October 22, 2026: `SESSION_CHECK_ENABLED`, `SESSION_CHECK_CACHE_TTL`, and `SESSION_CHECK_TIMEOUT` (gateway session check: on, 30 s, and 3 s); `BOOKING_EXPIRY_CHECK_ENABLED` and `BOOKING_EXPIRY_CHECK_INTERVAL` (cancellation of scheduled bookings that expired without confirmation, in booking-service: on and every 5 minutes); `BOOKING_EXPIRY_GRACE_MINUTES` (60-minute grace after the end of the booking, used by booking-service and operations-service); and `FOLLOW_UP_ENABLED`, `FOLLOW_UP_INTERVAL`, and `FOLLOW_UP_LOOK_BACK_DAYS` (follow-up of the bookings that ended and nobody closed, in operations-service: on, every 5 minutes, and looking back 28 days; it needs `INTERNAL_API_KEY`). They are changed in `.env`. Since October 23, 2026 there are also `ALLOWED_EMAIL_DOMAINS` (email domains, `gmail.com` by default) and `DEMO_ADMIN_PASSWORD`, `DEMO_OPERATOR_PASSWORD`, and `DEMO_CLIENT_PASSWORD` (demo accounts of the `dev` profile; empty, the account is not created). Since October 24, 2026 customer-service receives `BOOKING_SERVICE_URL` (`http://booking-service:3003`) and `INTERNAL_API_KEY`; the gateway has `AUTH_RATE_LIMIT_*`, `TRUSTED_PROXIES`, and `ROUTE_CONNECT_TIMEOUT`/`ROUTE_READ_TIMEOUT`, and operations-service `START_LATE_LIMIT` (4 h), with default values and not yet in the compose file; and `BOOKING_EXPIRY_CHECK_*` no longer have any effect.
 
 To run a Java service from the console, use its Maven Wrapper (`./mvnw spring-boot:run` inside the service folder) with Java 21 (Spring, n.d.). payment-service runs with `dotnet run --project src/PaymentService.Api` and requires the .NET 8 SDK (Microsoft, n.d.). When starting with `--profile app`, the folders must be named after their repositories (`lavarapido-security-service`, `lavarapido-operation-service`), because that is how the compose file references them.
 
@@ -210,7 +210,7 @@ To run a Java service from the console, use its Maven Wrapper (`./mvnw spring-bo
 | RabbitMQ | Dashboard at `http://localhost:15672` |
 | Mailpit | Inbox at `http://localhost:8025` |
 
-With everything up, `lavarapido-infra/e2e` has three kinds of Node 22 scripts: the 19 end-to-end tests (`node --test "e2e/*.test.js"`: cross-service booking flow, full flow of the three roles, inspection report and access rules), the response time measurement (`node e2e/performance.js`) and the check of the web at 360 px wide (`node e2e/width-360.js`, after `npm install --prefix e2e`). They need `MESSAGING_ENABLED=true` and `INTERNAL_API_KEY` in the `.env`.
+With everything up, `lavarapido-infra/e2e` has three kinds of Node 22 scripts: the 19 end-to-end tests (`node --test "e2e/*.test.js"`: cross-service booking flow, full flow of the three roles, inspection report and access rules), the response time measurement (`node e2e/performance.js`) and the check of the web at 360 px wide (`node e2e/width-360.js`, after `npm install --prefix e2e`). They need `MESSAGING_ENABLED=true` and `INTERNAL_API_KEY` in the `.env`. Since October 24, 2026 `e2e/remote` also has a battery of 44 cases run against the public server through the API (`node e2e/remote/run.js` or the `e2e.yml` workflow, by hand), with test accounts in `E2E_*` variables; it has not been run against Azure yet.
 
 ## References
 

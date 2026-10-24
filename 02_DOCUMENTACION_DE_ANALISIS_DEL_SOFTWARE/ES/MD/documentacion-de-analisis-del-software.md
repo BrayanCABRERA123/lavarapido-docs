@@ -8,7 +8,7 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 2.5, 23 de octubre de 2026
+Versión 2.6, 24 de octubre de 2026
 
 ---
 
@@ -21,7 +21,7 @@ Este documento muestra cómo se comporta LavaRápido cuando alguien lo usa: qué
 3. **Diagramas de actividades** de los procesos de negocio.
 4. **Diagramas de estados** de las entidades que cambian de estado (reserva, pago, ejecución del servicio, promoción e informe de inspección).
 
-El 21 de octubre de 2026 se actualizaron, contra el código de ese día, el cierre de sesión que deja sin efecto el token (sección 2.8), el candado de la asignación de operarios (sección 2.4), el comprobante de máximo 2 MB y el efectivo que solo aparece si su cuenta está activa (secciones 2.5 y 3.4), y el tratamiento de las reservas que terminaron sin que nadie las cerrara (secciones 4.1 y 4.3): el sistema solo cambia el estado cuando no hay duda y lo demás pasa a la lista "Por cerrar" del administrador. El 20 de octubre de 2026 el contenido se revisó otra vez contra el código: el cliente solo cancela (la reprogramación la hace el administrador), se quitó el cambio de rol de las cuentas, se corrigieron las secuencias y los estados que no coincidían, y los casos de uso y diagramas se dibujaron de nuevo con líneas rectas y sin cruces. El 19 de octubre de 2026 se agregaron los casos de uso CU31 y CU32, la recuperación de la contraseña (sección 2.10) y el ciclo de vida de la cuenta (sección 4.6), y las capturas del inventario de pantallas se tomaron de nuevo con datos de demostración. El 17 de octubre de 2026 se agregaron el consentimiento de los documentos legales en el registro (sección 2.1) y el informe de inspección desde la aplicación móvil (sección 2.9). Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol. El 23 de octubre de 2026 (versión 2.5) se agregó que recuperar la contraseña revoca todas las sesiones (sección 2.10) y que, si security-service no responde, el gateway deja pasar la petición (*fail-open*); el resto del análisis sigue vigente contra *develop* de ese día.
+El 21 de octubre de 2026 se actualizaron, contra el código de ese día, el cierre de sesión que deja sin efecto el token (sección 2.8), el candado de la asignación de operarios (sección 2.4), el comprobante de máximo 2 MB y el efectivo que solo aparece si su cuenta está activa (secciones 2.5 y 3.4), y el tratamiento de las reservas que terminaron sin que nadie las cerrara (secciones 4.1 y 4.3): el sistema solo cambia el estado cuando no hay duda y lo demás pasa a la lista "Por cerrar" del administrador. El 20 de octubre de 2026 el contenido se revisó otra vez contra el código: el cliente solo cancela (la reprogramación la hace el administrador), se quitó el cambio de rol de las cuentas, se corrigieron las secuencias y los estados que no coincidían, y los casos de uso y diagramas se dibujaron de nuevo con líneas rectas y sin cruces. El 19 de octubre de 2026 se agregaron los casos de uso CU31 y CU32, la recuperación de la contraseña (sección 2.10) y el ciclo de vida de la cuenta (sección 4.6), y las capturas del inventario de pantallas se tomaron de nuevo con datos de demostración. El 17 de octubre de 2026 se agregaron el consentimiento de los documentos legales en el registro (sección 2.1) y el informe de inspección desde la aplicación móvil (sección 2.9). Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol. El 23 de octubre de 2026 (versión 2.5) se agregó que recuperar la contraseña revoca todas las sesiones (sección 2.10) y que, si security-service no responde, el gateway deja pasar la petición (*fail-open*); el resto del análisis sigue vigente contra *develop* de ese día. El 24 de octubre de 2026 (versión 2.6), contra *develop* de ese día, la matriz de permisos pasó a ser de solo lectura (secciones 2.7 y 3.6 e inventario de pantallas) y se quitó la cancelación automática de las reservas programadas vencidas, porque todas nacen confirmadas (sección 4.1).
 
 La especificación completa de cada requisito y caso de uso (actores, precondición, flujo normal, flujos alternos y postcondición) está en el *Informe de especificación de requisitos*, secciones 5 y 7.3; aquí se citan por su identificador (RF-XXX, CUXX).
 
@@ -499,14 +499,7 @@ sequenceDiagram
     W->>S: GET /api/v1/admin/roles-permissions
     S->>DB: SELECT catálogo de permisos + permisos de cada rol
     S-->>W: 200 {permisos[], roles: [{rol, permisos[]}]}, 3 roles fijos: ADMIN, OPERATOR, CLIENT
-    A->>W: Marca/desmarca permisos de un rol y guarda
-    W->>S: PUT /api/v1/admin/roles-permissions/{rol} {permissionIds[]}
-    alt todos los permissionIds existen en el catálogo
-        S->>DB: reemplaza exactamente esos permisos para el rol (transacción)
-        S-->>W: 200 permisos actualizados del rol
-    else algún id no existe en el catálogo
-        S-->>W: 400 UNKNOWN_PERMISSION (permiso inexistente, no se guarda nada)
-    end
+    W-->>A: Matriz de solo lectura (desde el 24 de octubre de 2026 la web ya no ofrece marcar ni guardar)
     Note over S: No se pueden crear ni borrar roles (ADR-010).<br/>Esta matriz es informativa: la autorización real sigue viniendo<br/>del claim roles del JWT, no de esta tabla (decisión abierta, sección 11.3 del SRS)
 ```
 
@@ -823,13 +816,7 @@ flowchart TD
     start0((Inicio)) --> start
     start([Admin abre Gestión → Roles]) --> load[Cargar los 3 roles fijos + catálogo de permisos]
     load --> view[Ver permisos actuales de cada rol: Administrador, Operario, Cliente]
-    view --> edit[Admin marca/desmarca permisos de un rol]
-    edit --> save[Guardar]
-    save --> valid{¿Todos los ids de<br/>permiso existen en el catálogo?}
-    valid -->|No| reject[Rechazar explícitamente el guardado]
-    reject --> edit
-    valid -->|Sí| replace[Reemplazar exactamente esos permisos para el rol]
-    replace --> stop([Permisos guardados; los roles no se crean ni se borran])
+    view --> stop([Solo consulta desde el 24 de octubre de 2026: los permisos no se editan y los roles no se crean ni se borran])
     stop --> stopx((Fin))
 ```
 
@@ -843,7 +830,7 @@ flowchart TD
 stateDiagram-v2
     [*] --> CONFIRMED : crear (se asigna bahía libre de inmediato, RF-006)
     SCHEDULED --> CONFIRMED : confirmar (necesita bahía)
-    SCHEDULED --> CANCELLED : cancelar o vencida
+    SCHEDULED --> CANCELLED : cancelar
     CONFIRMED --> CONFIRMED : reprogramar (admin, nueva hora/bahía, se conservan precios)
     CONFIRMED --> IN_PROGRESS : iniciar o Se atendió (admin)
     CONFIRMED --> NO_SHOW : no asistió, o terminó sin operario
@@ -854,7 +841,7 @@ stateDiagram-v2
     NO_SHOW --> [*]
 ```
 
-*Fuente:* `booking-service` (`Booking.moveTo`, `Booking.cancel`, `Booking.expire`, `BookingStatus`, `ExpiredBookingsJob`) y `operations-service` (`FollowUpJob`, `FollowUpPolicy`). *Reservas que terminaron y nadie cerró:* el sistema solo decide por su cuenta cuando no hay duda. Cada 5 minutos, `ExpiredBookingsJob` cancela la reserva que sigue `SCHEDULED` (nunca se confirmó) una hora después de su hora de fin, con el motivo del sistema `EXPIRED` ("Venció sin confirmarse"), que el administrador no puede elegir a mano, y publica `BookingCancelled`. También cada 5 minutos, `FollowUpJob` de operations pide a booking (`POST /internal/v1/bookings/{id}/no-show`) que deje en `NO_SHOW` la reserva `CONFIRMED` que nunca tuvo operario y terminó hace más de una hora; booking vuelve a comprobar que venció y, si no, responde 409 `BOOKING_NOT_EXPIRED`. La reserva `CONFIRMED` con operario que nadie inició (`NOT_STARTED`) y la `IN_PROGRESS` que nadie finalizó una hora después de su fin (`NOT_FINISHED`) **nunca** cambian de estado solas: pasan a la lista "Por cerrar" del administrador, quien las resuelve con "Se atendió" (la reserva pasa por `IN_PROGRESS` y queda `COMPLETED`, sin publicar `ServiceCompleted`) o con "No asistió" (solo si nunca se inició). Así se evita registrar como inasistencia un servicio que sí se hizo y que el operario olvidó marcar. En ningún caso hay reembolso automático: los pagos los revisa el administrador. Solo `SCHEDULED` y `CONFIRMED` se pueden reprogramar o cancelar (RF-007). El cliente solo cancela, antes de la hora de inicio y sin escribir motivo (la reserva guarda `CUSTOMER_REQUEST`); el administrador reprograma (CU29) y puede elegir el motivo de la cancelación. `SCHEDULED` existe en el modelo pero el flujo actual siempre crea la reserva directo en `CONFIRMED`.
+*Fuente:* `booking-service` (`Booking.moveTo`, `Booking.cancel`, `BookingStatus`) y `operations-service` (`FollowUpJob`, `FollowUpPolicy`). *Reservas que terminaron y nadie cerró:* el sistema solo decide por su cuenta cuando no hay duda. Hasta el 23 de octubre de 2026 `ExpiredBookingsJob` cancelaba las reservas que seguían `SCHEDULED`; se quitó el 24 de octubre (B-07) porque nunca actuaba: todas las reservas nacen y se reprograman `CONFIRMED`. Cada 5 minutos, `FollowUpJob` de operations pide a booking (`POST /internal/v1/bookings/{id}/no-show`) que deje en `NO_SHOW` la reserva `CONFIRMED` que nunca tuvo operario y terminó hace más de una hora; booking vuelve a comprobar que venció y, si no, responde 409 `BOOKING_NOT_EXPIRED`. La reserva `CONFIRMED` con operario que nadie inició (`NOT_STARTED`) y la `IN_PROGRESS` que nadie finalizó una hora después de su fin (`NOT_FINISHED`) **nunca** cambian de estado solas: pasan a la lista "Por cerrar" del administrador, quien las resuelve con "Se atendió" (la reserva pasa por `IN_PROGRESS` y queda `COMPLETED`, sin publicar `ServiceCompleted`) o con "No asistió" (solo si nunca se inició). Así se evita registrar como inasistencia un servicio que sí se hizo y que el operario olvidó marcar. En ningún caso hay reembolso automático: los pagos los revisa el administrador. Solo `SCHEDULED` y `CONFIRMED` se pueden reprogramar o cancelar (RF-007). El cliente solo cancela, antes de la hora de inicio y sin escribir motivo (la reserva guarda `CUSTOMER_REQUEST`); el administrador reprograma (CU29) y puede elegir el motivo de la cancelación. `SCHEDULED` existe en el modelo pero el flujo actual siempre crea la reserva directo en `CONFIRMED`.
 
 ### 4.2 Ciclo de vida del pago (RF-013b, RF-014, ADR-008)
 
@@ -960,7 +947,7 @@ Pantalla por pantalla y por rol, incluyendo los modales de crear/editar de cada 
 | Gestión → Usuarios | ![Usuarios](capturas/05_admin_usuarios.png) |
 | Modal: Crear usuario | ![Modal crear usuario](capturas/29_modal_crear_usuario.png) |
 | Gestión → Roles | ![Roles](capturas/06_admin_roles.png) |
-| Modal: Editar permisos del rol | ![Modal editar permisos](capturas/30_modal_editar_permisos.png) |
+| Modal: Editar permisos del rol (se quitó el 24 de octubre de 2026: la matriz es de solo lectura) | ![Modal editar permisos](capturas/30_modal_editar_permisos.png) |
 | Gestión → Servicios (catálogo) | ![Catálogo](capturas/07_admin_catalogo.png) |
 | Modal: Agregar servicio | ![Modal agregar servicio](capturas/31_modal_crear_servicio.png) |
 | Gestión → Promociones | ![Promociones](capturas/08_admin_promociones.png) |

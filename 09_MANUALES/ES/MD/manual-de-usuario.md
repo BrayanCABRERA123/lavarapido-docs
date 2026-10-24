@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-23 de octubre de 2026
+24 de octubre de 2026
 
-Tipo de manual: Manual de usuario (roles Cliente y Operario, en la web y en la aplicación móvil) · Versión 4.7
+Tipo de manual: Manual de usuario (roles Cliente y Operario, en la web y en la aplicación móvil) · Versión 4.8
 
 ## Control de Versiones
 
@@ -40,6 +40,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 4.5 | 2026-10-21 | Revisión contra el código del 21 de octubre de 2026: el comprobante se reduce a menos de 2 MB antes de enviarlo y el QR se amplía con **Ampliar QR** (sección 10.1.5); Efectivo solo aparece si el lavadero tiene activa esa cuenta; las reservas que nadie inicia se cierran solas una hora después de su hora de fin (Tabla 7, sección 10.2.3 y preguntas frecuentes); al cerrar sesión, las demás pestañas también salen (sección 12); la aplicación móvil pide instalar el APK nuevo cuando se publica (sección 6.2). Se corrigieron la fecha y la versión de la portada. | Equipo de desarrollo |
 | 4.6 | 2026-10-21 | Cambio de la regla de las reservas que terminan sin registrarse, revisada por el equipo la noche del 21 de octubre: solo la reserva confirmada que nunca tuvo operario pasa sola a No asistió; si tenía operario, el operario recibe el aviso "¿Atendiste este servicio?" y el administrador la cierra (Tabla 7, secciones 10.2.3 y 10.2.4 y preguntas frecuentes). La agenda y los servicios asignados ya no muestran reservas canceladas ni en No asistió. | Equipo de desarrollo |
 | 4.7 | 2026-10-23 | Revisión contra *develop* del 23 de octubre de 2026: capítulo nuevo de la aplicación móvil Android para los tres roles (sección 10.3), hecho a partir de las 31 pantallas de la app; el operario puede iniciar desde 15 minutos antes de la hora reservada y no hay límite posterior (secciones 10.2.2 y 13); el cupón aplicado se quita con la **X** y el sistema anula el canje, y solo se acepta un cupón por reserva (sección 10.1.5). | Equipo de desarrollo |
+| 4.8 | 2026-10-24 | Revisión contra *develop* del 24 de octubre de 2026, que corre en el servidor público desde ese día: las pantallas se actualizan solas, sin recargar (4.1 y 10.3.4); el inicio de sesión acepta cualquier dominio de correo y el registro sigue pidiendo @gmail.com (8.1, 8.2 y 10.3.2); el servidor exige el consentimiento, limita los intentos seguidos y anula el código de recuperación al 5.º error (8.1 a 8.3); el monto a pagar y el cupón vienen del servidor y se conservan al recargar (10.1.5); un vehículo con reservas activas no se retira (10.1.2); el operario ve las notas del administrador y puede iniciar hasta 4 horas después de la hora de fin (10.2.2, 10.2.3 y 13); avisos de pago de una reserva cancelada y permisos de solo lectura para el administrador en la app (10.3.6); mensajes de error nuevos (Tablas 11 y 12). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -98,6 +99,8 @@ El documento sigue la estructura de la guía para elaborar manuales de software 
 ### 4.1 Fuentes y Convenciones de Este Manual
 
 Las pantallas, rutas, botones y mensajes descritos corresponden a la rama *develop* de la aplicación web al 17 de octubre de 2026. En la interfaz el sistema aparece con su nombre comercial, **LavaRápido**. Los nombres de botones, menús y mensajes se escriben en **negrita** o entre comillas tal como aparecen cuando el idioma de la interfaz es el español; la interfaz también está disponible en inglés, francés y portugués. Una ruta como */client/vehicles* es la parte de la dirección web que sigue al dominio del sistema (por ejemplo, *http://localhost:4200/client/vehicles* en el entorno local).
+
+**Datos siempre al día (desde el 24 de octubre de 2026).** Ya no hace falta recargar la página para ver un cambio hecho por otra persona: la web actualiza la pantalla al entrar, al volver a la pestaña o a la ventana y cada vez que llega una notificación nueva, y las pantallas que esperan a otra persona (por ejemplo, **Pagar servicio** mientras el administrador revisa el pago) se actualizan cada 45 segundos mientras la pestaña está visible. La app móvil se actualiza al volver a la pantalla y al llegar una notificación push. Así, cuando el administrador aprueba un pago o asigna un operario, el cliente lo ve en menos de un minuto.
 
 ## 5. Objetivo
 
@@ -223,7 +226,7 @@ Toda persona debe tener una cuenta para usar las funciones del sistema. Los clie
 2. Hacer clic en **Registrarse** en la barra superior (o en **Comenzar ahora**).
 3. Escribir el **Número de Documento**: solo dígitos, entre 5 y 20.
 4. Escribir los **Nombres** (mínimo 3 caracteres) y los **Apellidos** (mínimo 2 caracteres).
-5. Escribir el **Correo Electrónico**, que debe terminar en @gmail.com. El campo no admite espacios.
+5. Escribir el **Correo Electrónico**, que debe terminar en @gmail.com (el registro solo acepta Gmail; el servidor también lo comprueba). El campo no admite espacios.
 6. Escribir el **Teléfono**: un número celular colombiano de 10 dígitos que empiece por 3. El campo solo acepta dígitos.
 7. Escribir la **Contraseña** y observar la lista de requisitos, que se marcan a medida que se cumplen: mínimo 8 caracteres, al menos una letra mayúscula, al menos un número y al menos un carácter especial. **Los cuatro requisitos son obligatorios**; no se admiten espacios.
 8. Repetir la contraseña en **Confirmar Contraseña**. El ícono del ojo muestra u oculta lo escrito.
@@ -232,7 +235,7 @@ Toda persona debe tener una cuenta para usar las funciones del sistema. Los clie
 
 **Resultado esperado:** El sistema muestra el mensaje "¡Registro exitoso!" y, al hacer clic en **Ir a iniciar sesión**, lleva a la persona a la pantalla de inicio de sesión. Si el lavadero tiene activado el correo, llega un mensaje de bienvenida.
 
-**Observaciones o restricciones:** No es posible registrar dos cuentas con el mismo correo ni con el mismo número de documento. En esos casos, el sistema muestra "Ya existe una cuenta con este correo" o "Ya existe una cuenta con este número de documento" y no crea la cuenta.
+**Observaciones o restricciones:** No es posible registrar dos cuentas con el mismo correo ni con el mismo número de documento. En esos casos, el sistema muestra "Ya existe una cuenta con este correo" o "Ya existe una cuenta con este número de documento" y no crea la cuenta. Desde el 24 de octubre de 2026 el servidor también exige las dos casillas de aceptación: sin ellas responde "Debes aceptar el tratamiento de datos personales (Ley 1581) para registrarte."
 
 **Figura 2**
 
@@ -264,13 +267,13 @@ Toda persona debe tener una cuenta para usar las funciones del sistema. Los clie
 
 1. Abrir el navegador e ingresar la dirección web del sistema.
 2. Hacer clic en **Iniciar Sesión**.
-3. Escribir el **Correo Electrónico** registrado (terminado en @gmail.com).
+3. Escribir el **Correo Electrónico** registrado. Desde el 24 de octubre de 2026 el inicio de sesión acepta un correo de cualquier dominio (solo se revisa que tenga formato de correo), para que las cuentas creadas antes con otro proveedor puedan entrar; el registro sigue pidiendo @gmail.com.
 4. Escribir la **Contraseña**.
 5. Hacer clic en **Iniciar Sesión**. Mientras se procesa la solicitud, el botón muestra "Ingresando...".
 
 **Resultado esperado:** El sistema abre la pantalla de inicio del rol de la persona: */client* para el cliente, */operator* para el operario o */admin* para el administrador. El tema y el idioma guardados en la cuenta se aplican automáticamente.
 
-**Observaciones o restricciones:** Si el correo o la contraseña son incorrectos, el sistema muestra "Correo o contraseña incorrectos" y no revela cuál de los dos falló. Después de cinco intentos fallidos en menos de 15 minutos, la cuenta queda bloqueada durante 15 minutos y el sistema muestra "Demasiados intentos fallidos. Tu cuenta quedó bloqueada 15 minutos; espera o usa "¿Olvidaste tu contraseña?" para entrar ya." Si la persona restablece la contraseña, puede entrar de inmediato. La sesión dura una hora; al vencerse, el sistema vuelve a la pantalla de inicio de sesión con el mensaje "Tu sesión expiró. Inicia sesión de nuevo." Una cuenta desactivada no puede ingresar y recibe el mensaje "Tu cuenta está desactivada. Contacta al administrador."
+**Observaciones o restricciones:** Si el correo o la contraseña son incorrectos, el sistema muestra "Correo o contraseña incorrectos" y no revela cuál de los dos falló. Después de cinco intentos fallidos en menos de 15 minutos, la cuenta queda bloqueada durante 15 minutos y el sistema muestra "Demasiados intentos fallidos. Tu cuenta quedó bloqueada 15 minutos; espera o usa "¿Olvidaste tu contraseña?" para entrar ya." Si la persona restablece la contraseña, puede entrar de inmediato. La sesión dura una hora; al vencerse, el sistema vuelve a la pantalla de inicio de sesión con el mensaje "Tu sesión expiró. Inicia sesión de nuevo." Una cuenta desactivada no puede ingresar y recibe el mensaje "Tu cuenta está desactivada. Contacta al administrador." Desde el 24 de octubre de 2026, si se hacen demasiados intentos seguidos desde el mismo equipo (más de 60 en un minuto entre inicio de sesión, registro y recuperación), el sistema responde "Hiciste demasiados intentos seguidos. Espera un momento y vuelve a intentarlo."
 
 **Figura 4**
 
@@ -301,7 +304,7 @@ Toda persona debe tener una cuenta para usar las funciones del sistema. Los clie
 
 **Resultado esperado:** La contraseña se cambia y el código usado no puede volver a usarse.
 
-**Observaciones o restricciones:** Por seguridad, el sistema muestra la misma pantalla esté o no registrado el correo, de modo que no revela qué cuentas existen. Cada código nuevo invalida el anterior ("Te enviamos un código nuevo. El anterior ya no sirve."). Después de cinco intentos incorrectos el código deja de funcionar y se debe solicitar uno nuevo. Un indicador de tres pasos en la parte superior muestra la etapa del proceso.
+**Observaciones o restricciones:** Por seguridad, el sistema muestra la misma pantalla esté o no registrado el correo, de modo que no revela qué cuentas existen. Cada código nuevo invalida el anterior ("Te enviamos un código nuevo. El anterior ya no sirve."). Después de cinco intentos incorrectos el código deja de funcionar y el sistema muestra "Demasiados intentos fallidos. Espera unos minutos o pide otro código para volver a intentarlo." (desde el 24 de octubre de 2026): hay que solicitar uno nuevo con **Reenviar** (en la app, **Pedir otro código**). Un indicador de tres pasos en la parte superior muestra la etapa del proceso.
 
 **Figura 5**
 
@@ -435,7 +438,7 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 4. En la ventana "Registrar nuevo vehículo", seleccionar el **Tipo de vehículo** (automóvil, sedán, camioneta SUV, pickup, camión o motocicleta) y escribir la **Marca**, el **Modelo**, la **Placa** y el **Color**.
 5. Hacer clic en **Guardar vehículo** y verificar que el vehículo aparezca en la lista con el mensaje "¡Vehículo registrado!".
 6. Para corregir los datos de un vehículo, usar la opción de editar de su tarjeta, cambiar los campos y hacer clic en **Guardar cambios**.
-7. Para retirar un vehículo, usar la opción de eliminar de su tarjeta y confirmar en la ventana "¿Eliminar vehículo?".
+7. Para retirar un vehículo, usar la opción de eliminar de su tarjeta y confirmar en la ventana "¿Eliminar vehículo?". Desde el 24 de octubre de 2026, si el vehículo tiene reservas activas o futuras, el sistema no lo retira y muestra "Este vehículo tiene reservas activas o futuras: cancélalas antes de retirarlo."
 
 **Resultado esperado:** El vehículo queda registrado y disponible para seleccionarlo al reservar un lavado.
 
@@ -573,7 +576,7 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 **Pasos para utilizarlo:**
 
 1. Abrir **Pagar servicio** y revisar el **Resumen de la reserva**: servicio, vehículo, **Subtotal**, **Descuento aplicado** y **TOTAL A PAGAR** (IVA del 19 % incluido).
-2. Si se tiene un cupón desbloqueado, escribirlo en **Código del cupón** y hacer clic en **Aplicar**. Aparece el mensaje "Cupón aplicado: [nombre]" y el descuento se resta del total a pagar. Para quitarlo antes de reportar el pago, hacer clic en la **X** junto al cupón: desde el 23 de octubre de 2026 el sistema anula el canje y el total vuelve a ser el de la reserva. Si se recarga la página después de aplicar el cupón, la pantalla todavía muestra el total completo y no ofrece la **X** (no conformidad BIZ-02, abierta); el monto que se cobra es siempre el que calcula el sistema.
+2. Si se tiene un cupón desbloqueado, escribirlo en **Código del cupón** y hacer clic en **Aplicar**. Aparece el mensaje "Cupón aplicado: [nombre]" y el descuento se resta del total a pagar. Para quitarlo antes de reportar el pago, hacer clic en la **X** junto al cupón: el sistema anula el canje y el total vuelve a ser el de la reserva. Desde el 24 de octubre de 2026 el **TOTAL A PAGAR** es el que calcula el servidor: si se recarga la página o se vuelve a entrar después de aplicar el cupón, la pantalla sigue mostrando el cupón, el descuento y la **X**. Si el sistema no logra consultar el total, muestra "—" y el aviso "No pudimos consultar el total a pagar. Revisa tu conexión y vuelve a entrar en unos segundos."; en ese caso no conviene pagar hasta que aparezca el monto.
 3. En **Selecciona tu método de pago**, elegir Nequi, Daviplata, Transferencia o Efectivo.
 4. Para un método digital: escanear el código QR con la aplicación bancaria o la billetera, o copiar el número que aparece en **Llave / Cuenta autorizada** con **Copiar número**, y transferir exactamente el **Monto a pagar**. Si el código es difícil de leer, **Ampliar QR** lo muestra más grande, con **Acercar** y **Alejar** (también con la rueda del mouse o con doble clic).
 5. En **Confirma tu pago**, arrastrar la imagen del comprobante o hacer clic para buscarla (JPG o PNG de hasta 10 MB). La página la reduce a menos de 2 MB antes de enviarla; mientras tanto muestra "Preparando el comprobante...".
@@ -587,12 +590,13 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 
 - El monto a pagar siempre lo calcula el sistema (total de la reserva menos el cupón aplicado, si lo hay); el cliente no puede cambiarlo. El administrador compara el monto pagado que declara el cliente con el comprobante y con el banco.
 - Solo se pueden pagar las reservas en estado Confirmada, En progreso o Completada.
-- Mientras un pago está en revisión no se puede reportar otro para la misma reserva; una reserva admite un solo pago aprobado.
+- Mientras un pago está en revisión no se puede reportar otro para la misma reserva ("Ya hay un pago en revisión para esta reserva."); una reserva admite un solo pago aprobado. Una referencia que ya se usó en otro pago se rechaza ("Esa referencia ya se usó en otro pago. Revisa el número de tu comprobante.").
+- Si la reserva cambia después de reportar el pago (por ejemplo, el administrador le cambia los servicios), el pago reportado ya no se puede aprobar con el monto viejo: el administrador lo rechaza y el cliente lo reporta de nuevo con el monto nuevo que muestra la pantalla.
 - Si el administrador rechaza el pago, el cliente puede reportarlo de nuevo con un comprobante correcto.
 - Si la imagen no se puede reducir a menos de 2 MB, aparece "No pudimos reducir la imagen a menos de 2 MB. Prueba con una captura de pantalla del comprobante."
 - Cuando el pago se aprueba, el cliente recibe el aviso de pago confirmado (bandeja y correo), los puntos de fidelización de la reserva ("Ganaste N puntos", solo en la bandeja) y, por cada cupón que esos puntos desbloquean, el aviso "¡Tienes un cupón canjeable!" con su código (bandeja y correo). Si el pago se rechaza o se reembolsa, el cliente recibe un aviso y un correo; un reembolso revierte los puntos ganados por esa reserva.
 - Cuando el pago queda aprobado, la pantalla **Pagar servicio** de esa reserva solo muestra el resumen: desaparecen el método de pago, el código QR, la carga del comprobante y el botón **Ya realicé el pago**, y el cupón usado (si lo hay) ya no se puede quitar.
-- Un cupón se acepta solo si está activo, está dentro de sus fechas y el cliente alcanzó los puntos que exige; solo se acepta un cupón por reserva (desde el 23 de octubre de 2026; antes se podían combinar cupones distintos). El sistema responde "Ese cupón no existe.", "Ese cupón no está vigente o todavía no acumulas los puntos necesarios." o "Ya canjeaste este cupón en esta reserva." Un canje exitoso envía un aviso y un correo de confirmación.
+- Un cupón se acepta solo si está activo, está dentro de sus fechas y el cliente alcanzó los puntos que exige; solo se acepta un cupón por reserva (desde el 23 de octubre de 2026; antes se podían combinar cupones distintos; si ya hay uno, el sistema responde "Esta reserva ya tiene un cupón. Quítalo si quieres usar otro."). Un cupón de porcentaje se recalcula si cambia el total de la reserva; uno de descuento fijo se muestra en pesos. El sistema responde "Ese cupón no existe.", "Ese cupón no está vigente o todavía no acumulas los puntos necesarios." o "Ya canjeaste este cupón en esta reserva." Un canje exitoso envía un aviso y un correo de confirmación.
 
 **Tabla 9**
 
@@ -795,7 +799,7 @@ El operario recibe la cuenta del administrador del negocio. El operario solo pue
 
 **Resultado esperado:** El estado del servicio cambia y el cliente puede seguir su avance.
 
-**Observaciones o restricciones:** Un servicio se puede iniciar desde 15 minutos antes de la hora reservada y no hay un límite posterior (un servicio que sí se hizo se puede registrar tarde), y solo puede haber un servicio en curso a la vez. Un servicio debe iniciarse antes de poder finalizarlo ("Primero debes iniciar el servicio."). Al finalizar, el sistema pregunta "¿Finalizar este servicio?" y lo pasa al historial.
+**Observaciones o restricciones:** Un servicio se puede iniciar desde 15 minutos antes de la hora reservada y hasta 4 horas después de su hora de fin (un servicio que sí se hizo se puede registrar tarde dentro de ese plazo; desde el 24 de octubre de 2026). Pasado ese plazo, el botón **Iniciar** queda deshabilitado con el aviso "Ya no se puede iniciar: pasaron más de 4 h de la hora de fin" y el servicio lo cierra el administrador. Solo puede haber un servicio en curso a la vez. Un servicio debe iniciarse antes de poder finalizarlo ("Primero debes iniciar el servicio."). Al finalizar, el sistema pregunta "¿Finalizar este servicio?" y lo pasa al historial.
 
 **Figura 26**
 
@@ -819,14 +823,14 @@ El operario recibe la cuenta del administrador del negocio. El operario solo pue
 2. Revisar las tarjetas: **Servicios Totales**, **Pendientes**, **En Progreso** y **Finalizados Hoy**.
 3. Usar **Filtrar por fecha**, **Filtrar por tipo de servicio** o el cuadro de búsqueda, y hacer clic en **Filtrar**.
 4. En la tabla, leer el **ID**, el **Tipo de servicio**, la fecha y hora, el **Vehículo**, el **Cliente** y el **Estado** de cada servicio.
-5. Hacer clic en un servicio para abrir **Información del servicio**: cliente, vehículo, tipo de servicio, hora programada y método de pago.
+5. Hacer clic en un servicio para abrir **Información del servicio**: cliente, vehículo, tipo de servicio, hora programada y método de pago. Desde el 24 de octubre de 2026, si el administrador escribió instrucciones al asignar o reasignar el servicio, aparecen en **Indicaciones del administrador** (en la web y en la app).
 6. Hacer clic en **Iniciar Servicio** al comenzar el lavado y confirmar con **Iniciar**.
 7. Al terminar el lavado, hacer clic en **Finalizar Servicio** y confirmar con **Finalizar**.
 8. Si es necesario comunicarse con el cliente, usar **Contactar al cliente** en **Opciones adicionales**.
 
 **Resultado esperado:** El estado cambia a En progreso y luego a Completado ("¡Servicio finalizado!"). El cliente recibe los avisos y puede calificar el servicio.
 
-**Observaciones o restricciones:** El servicio se puede iniciar desde 15 minutos antes de la hora reservada. El operario solo puede actualizar los servicios que tiene asignados. Cada servicio se debe registrar con **Iniciar** y **Finalizar**, aunque se haga tarde: si la hora del servicio ya pasó, todavía se puede iniciar y finalizar ese mismo día, y cuentan las horas reales. Si un servicio asignado no se inició cuando terminó su hora, o se inició y no se finalizó una hora después de su hora de fin, el operario recibe el aviso "¿Atendiste este servicio?" y el administrador ve la reserva en su lista de reservas por cerrar; si ya no es posible registrarlo, el operario le informa al administrador si atendió o no el vehículo, y el administrador lo cierra. La agenda y la lista de servicios asignados no muestran las reservas canceladas ni las que quedaron en No asistió.
+**Observaciones o restricciones:** El servicio se puede iniciar desde 15 minutos antes de la hora reservada. El operario solo puede actualizar los servicios que tiene asignados. Cada servicio se debe registrar con **Iniciar** y **Finalizar**, aunque se haga tarde: si la hora del servicio ya pasó, todavía se puede iniciar y finalizar hasta 4 horas después de su hora de fin, y cuentan las horas reales; después el sistema responde "Ya no se puede iniciar este servicio: pasaron más de 4 horas desde la hora de fin. Pide al administrador que lo cierre." Si un servicio asignado no se inició cuando terminó su hora, o se inició y no se finalizó una hora después de su hora de fin, el operario recibe el aviso "¿Atendiste este servicio?" y el administrador ve la reserva en su lista de reservas por cerrar; si ya no es posible registrarlo, el operario le informa al administrador si atendió o no el vehículo, y el administrador lo cierra. La agenda y la lista de servicios asignados no muestran las reservas canceladas ni las que quedaron en No asistió.
 
 **Tabla 10**
 
@@ -834,7 +838,7 @@ El operario recibe la cuenta del administrador del negocio. El operario solo pue
 
 | Estado | Significado | Acción disponible |
 |---|---|---|
-| Pendiente | El servicio fue asignado y todavía no ha comenzado. | Iniciar Servicio (desde 15 minutos antes de la hora reservada). |
+| Pendiente | El servicio fue asignado y todavía no ha comenzado. | Iniciar Servicio (desde 15 minutos antes de la hora reservada y hasta 4 horas después de su hora de fin). |
 | En progreso | El operario inició el lavado. | Finalizar Servicio. |
 | Completado | El lavado terminó y el cliente puede calificarlo. | Solo consulta. |
 
@@ -941,7 +945,7 @@ Las actualizaciones llegan de dos formas:
 
 #### 10.3.2 Ingreso, Registro y Cierre de Sesión
 
-La pantalla de ingreso pide el correo (terminado en @gmail.com) y la contraseña, con las mismas reglas de la sección 8: cinco intentos fallidos bloquean la cuenta 15 minutos. Desde ella se crea una cuenta de cliente (los mismos datos y la aceptación de los dos documentos legales de la sección 8.1) y se recupera la contraseña con el código de 6 dígitos que llega al correo (sección 8.3). La sesión se guarda cifrada en el teléfono y dura hasta que vence el token (una hora); entonces la app vuelve a pedir el ingreso. Para salir, abrir **Más** y tocar **Cerrar Sesión**, que pide confirmación; al cerrar, el teléfono deja de recibir las notificaciones de esa cuenta.
+La pantalla de ingreso pide el correo y la contraseña, con las mismas reglas de la sección 8: desde el 24 de octubre de 2026 acepta un correo de cualquier dominio (el registro sigue pidiendo @gmail.com) y cinco intentos fallidos bloquean la cuenta 15 minutos. Si el código de recuperación se escribe mal cinco veces, la app ofrece **Pedir otro código**. Desde ella se crea una cuenta de cliente (los mismos datos y la aceptación de los dos documentos legales de la sección 8.1) y se recupera la contraseña con el código de 6 dígitos que llega al correo (sección 8.3). La sesión se guarda cifrada en el teléfono y dura hasta que vence el token (una hora); entonces la app vuelve a pedir el ingreso. Para salir, abrir **Más** y tocar **Cerrar Sesión**, que pide confirmación; al cerrar, el teléfono deja de recibir las notificaciones de esa cuenta.
 
 #### 10.3.3 Navegación
 
@@ -955,14 +959,14 @@ Cada rol ve solo sus pantallas. Abajo hay una barra con tres opciones principale
 
 - **Inicio:** saludo, tarjetas de **Mis reservas activas**, **Mis vehículos**, **Lavados realizados** y **Notificaciones**, el bloque **Tu próximo servicio** (estado, operario y avance), los **Accesos rápidos** (**Agendar lavado**, **Pagar servicio**, **Mis vehículos** y **Notificaciones**) y **Tus beneficios y promociones**, con el progreso de fidelidad y los cupones desbloqueados (sección 10.1.1).
 - **Reservar:** cuatro pasos en una sola pantalla: **Elige tu vehículo**, **Tipo de servicio** (con la duración estimada y los puntos que suma), **Fecha y hora** (los días cerrados y las horas ocupadas no se ofrecen) y **Operario (opcional)**, con **Sin preferencia** por defecto. **Reservar Ahora** muestra **¡Reserva creada!** con el resumen y el botón **Ir a pagar** (sección 10.1.3).
-- **Pagar servicio:** se elige la cuenta del lavadero (o **Pago en efectivo**, si el lavadero la tiene activa), se amplía el QR con **Ampliar QR**, se aplica un cupón (y se quita con la **X**), se adjunta el comprobante, que la app reduce a menos de 2 MB, y se escribe la referencia de la transacción. El **Monto a pagar** lo calcula el sistema. Al enviar aparece **¡Pago enviado!** y el pago queda en revisión; desde esta pantalla también se cancela la reserva (sección 10.1.5).
+- **Pagar servicio:** se elige la cuenta del lavadero (o **Pago en efectivo**, si el lavadero la tiene activa), se amplía el QR con **Ampliar QR**, se aplica un cupón (y se quita con la **X**), se adjunta el comprobante, que la app reduce a menos de 2 MB, y se escribe la referencia de la transacción. El **Monto a pagar** lo calcula el servidor y, desde el 24 de octubre de 2026, el cupón aplicado se sigue viendo al salir y volver a la pantalla. Al enviar aparece **¡Pago enviado!** y el pago queda en revisión; cuando el administrador lo aprueba, la pantalla se actualiza sola con la notificación push. Desde esta pantalla también se cancela la reserva (sección 10.1.5).
 - **Historial:** filtros **Todos**, **Activas**, **Completadas** y **Canceladas**, búsqueda por servicio, vehículo o código, y el detalle de cada reserva con **Pagar ahora**, **Cancelar reserva** y **Calificar Servicio** (sección 10.1.6).
 - **Mis vehículos**, **Avisos**, **Perfil** y **Configuración** funcionan como en las secciones 10.1.2, 10.1.7, 10.1.8 y 10.1.9.
 
 #### 10.3.5 Uso por el Operario
 
 - **Inicio:** "Tienes N servicios pendientes para hoy", el botón **Ver servicios asignados** y los indicadores de reservas asignadas, en progreso, notificaciones y calificación (sección 10.2.1).
-- **Agenda:** vistas **Día**, **Semana** y **Realizados**, con el **Próximo servicio** y los botones **Iniciar** y **Finalizar**. Antes de tiempo la app indica "Podrás iniciarlo desde las HH:MM (15 minutos antes de la reserva)" (secciones 10.2.2 y 10.2.3).
+- **Agenda:** vistas **Día**, **Semana** y **Realizados**, con el **Próximo servicio** y los botones **Iniciar** y **Finalizar**. Antes de tiempo la app indica "Podrás iniciarlo desde las HH:MM (15 minutos antes de la reserva)" y, desde el 24 de octubre de 2026, más de 4 horas después de la hora de fin el botón **Iniciar** queda deshabilitado con "ya no se puede iniciar" (secciones 10.2.2 y 10.2.3). El detalle del servicio muestra las notas del administrador.
 - **Asignados:** totales de servicios pendientes, en progreso y finalizados hoy, con filtros por fecha, tipo de servicio y búsqueda (sección 10.2.3).
 - **Historial**, **Calificaciones** (promedio, total recibido y nivel de satisfacción de los últimos 12 meses, con el detalle de cada calificación), **Avisos**, **Perfil** y **Configuración** funcionan como en las secciones 10.2.4 a 10.2.7. Si llega el aviso "¿Atendiste este servicio?", se sigue la sección 10.2.4.
 
@@ -972,16 +976,17 @@ Las reglas son las del Manual de Administrador; la app reúne sus funciones así
 
 - **Inicio** (**Panel de control general**): reservas de hoy, servicios en progreso, pagos por revisar, ingresos del día y bahías activas, los ingresos de los últimos 7 días, el estado de los operarios y las tarjetas **Pagos pendientes de revisión** (con **Revisar**), **Reservas sin operario** (con la asignación) y **Por cerrar**, donde se confirma si la reserva se atendió o el cliente no asistió.
 - **Reservas** (**Gestión de Reservas**): **Nueva Reserva**, **Asignar operario**, el detalle de cada reserva con su informe de inspección del vehículo y **Exportar**, que genera un archivo CSV.
-- **Pagos** (**Gestión y Verificación de Pagos**): **Revisar** cada comprobante para aprobarlo o rechazarlo, **Registrar pago manual** cuando el cliente pagó en caja, reembolsar un pago aprobado y **Exportar conciliación**.
+- **Pagos** (**Gestión y Verificación de Pagos**): **Revisar** cada comprobante para aprobarlo o rechazarlo (la cola se carga por páginas y la imagen del comprobante se pide al abrirlo), **Registrar pago manual** cuando el cliente pagó en caja (la cuenta de efectivo aparece aunque esté desactivada para los clientes), reembolsar un pago aprobado y **Exportar conciliación**. Desde el 24 de octubre de 2026, si la reserva de un pago se canceló, el pago muestra un aviso para **reembolsarlo** (si estaba aprobado) o **rechazarlo** (si estaba en revisión); en la web el aviso dice "Reserva cancelada: reembolsar" o "Reserva cancelada: rechazar".
 - **Operarios**: lista, detalle con habilidades, estado del día y calendario; las cuentas nuevas de operario se crean en **Gestión**.
-- **Gestión**: pestañas **Usuarios**, **Roles** (los 3 roles son fijos), **Servicios** y **Promociones**.
+- **Gestión**: pestañas **Usuarios**, **Roles** (los 3 roles son fijos; desde el 24 de octubre de 2026 la matriz de permisos es de solo consulta, en la web y en la app: "Esta tabla muestra los permisos de referencia de cada rol y es solo de consulta."), **Servicios** y **Promociones**.
 - **Horarios y bahías**: horario semanal, excepciones y bahías. **Reportes**: servicios realizados, servicios más vendidos, gráficas y **Exportar reporte** con vista previa.
 
 #### 10.3.7 Notificaciones Push y Diferencias con la Web
 
 - Al ingresar, la app pide permiso para enviar notificaciones. Si se acepta, el teléfono recibe por push los mismos avisos de la bandeja (recordatorios 24 horas y 1 hora antes, operario asignado, servicio iniciado y terminado, pagos, puntos y cupones, entre otros) y tocar uno abre la pantalla relacionada. Android los agrupa en los canales **Recordatorios**, **Promociones y puntos**, **Confirmaciones**, **Cancelaciones**, **Mensajes del servicio** y **Sistema**, que se pueden silenciar desde los ajustes del teléfono.
 - Los datos son los mismos de la web: una reserva hecha en la app aparece en la web y al revés.
-- Limitaciones conocidas al 23 de octubre de 2026, registradas en el documento de Acciones Correctivas: si se vuelve a abrir la pantalla de pago después de aplicar un cupón, la app muestra el total completo y no deja quitarlo (BIZ-02); algunos errores del servidor aparecen como un mensaje general en lugar del motivo exacto, y en el formulario de reserva del administrador hay estados que el servidor rechaza, porque no se permite ese cambio de estado.
+- Desde el 24 de octubre de 2026 la app muestra el motivo exacto de los errores del servidor (en los cuatro idiomas), el formulario de reserva del administrador solo ofrece los cambios de estado permitidos y el cupón se conserva al volver a la pantalla de pago.
+- Limitación conocida al 24 de octubre de 2026, registrada en el documento de Acciones Correctivas (ACO-39): si la sesión vence mientras la app está en segundo plano, el teléfono puede seguir recibiendo las notificaciones de esa cuenta hasta que se vuelva a iniciar sesión o se cierre la sesión desde **Más**.
 
 ## 11. Mensajes y Validaciones
 
@@ -994,7 +999,7 @@ El sistema valida la información mientras la persona escribe. Cuando un dato no
 | Mensaje del sistema | Significado | Acción del usuario |
 |---|---|---|
 | El correo es obligatorio | El campo de correo está vacío. | Escribir el correo. |
-| Debe ingresar un correo válido @gmail.com | El correo no tiene un formato válido o no termina en @gmail.com. | Corregir el correo. |
+| Debe ingresar un correo válido | En el inicio de sesión o la recuperación, el correo no tiene formato de correo (desde el 24 de octubre de 2026 se acepta cualquier dominio). | Corregir el correo. |
 | Solo se permiten correos @gmail.com | En el registro se escribió un correo de otro proveedor. | Usar una cuenta de Gmail. |
 | El documento es obligatorio / Debe tener entre 5 y 20 dígitos | El número de documento está vacío o tiene una longitud no válida. | Escribir el documento solo con dígitos. |
 | El nombre es obligatorio / Debe tener mínimo 3 caracteres | Los nombres están vacíos o son demasiado cortos. | Escribir los nombres. |
@@ -1005,6 +1010,9 @@ El sistema valida la información mientras la persona escribe. Cuando un dato no
 | Las contraseñas no coinciden | La confirmación es diferente de la contraseña. | Escribir la misma contraseña en ambos campos. |
 | La contraseña no cumple los requisitos de seguridad | Falta uno de los cuatro requisitos. | Seguir la lista de requisitos. |
 | Debes aceptar los Términos y la Política de Datos para continuar | No se aceptó uno de los dos documentos legales. | Leer y aceptar ambos documentos. |
+| Debes aceptar el tratamiento de datos personales (Ley 1581) para registrarte. | El servidor recibió el registro sin las dos aceptaciones (desde el 24 de octubre de 2026). | Marcar las dos casillas y registrarse de nuevo. |
+| Hiciste demasiados intentos seguidos. Espera un momento y vuelve a intentarlo. | Se hicieron más de 60 intentos en un minuto desde el mismo equipo (desde el 24 de octubre de 2026). | Esperar un minuto e intentar de nuevo. |
+| Demasiados intentos fallidos. Espera unos minutos o pide otro código para volver a intentarlo. | Se escribió mal cinco veces el código de recuperación o la contraseña actual (desde el 24 de octubre de 2026). | Pedir otro código; si fue la contraseña actual, esperar 15 minutos. |
 | Ya existe una cuenta con este correo | El correo ya está registrado. | Iniciar sesión o recuperar la contraseña. |
 | Ya existe una cuenta con este número de documento | El número de documento ya está registrado. | Verificar los datos o contactar al lavadero. |
 | Correo o contraseña incorrectos | Las credenciales no coinciden con ninguna cuenta. | Revisar los datos e intentar de nuevo, o recuperar la contraseña. |
@@ -1031,6 +1039,7 @@ El sistema valida la información mientras la persona escribe. Cuando un dato no
 | Esa hora ya pasó. Elige una hora más tarde. | La hora elegida ya pasó. | Elegir una hora más tarde. |
 | Demasiados intentos fallidos. Tu cuenta quedó bloqueada 15 minutos... | Se escribió mal la contraseña cinco veces en menos de 15 minutos. | Esperar 15 minutos o usar ¿Olvidaste tu contraseña?. |
 | Ese vehículo ya tiene una reserva a esa hora. | El vehículo ya está reservado en ese turno. | Elegir otra hora. |
+| Este vehículo tiene reservas activas o futuras: cancélalas antes de retirarlo. | Se intentó retirar un vehículo con reservas pendientes (desde el 24 de octubre de 2026). | Cancelar o esperar a que terminen esas reservas. |
 | La fecha no es válida para reservar. | La fecha ya pasó o está fuera de la ventana de reservas. | Elegir una fecha válida. |
 | Esta reserva ya no se puede cambiar. | La reserva ya empezó o se cerró. | Contactar al lavadero. |
 | Archivo no válido | El comprobante no es una imagen JPG o PNG de hasta 10 MB. | Adjuntar una imagen válida. |
@@ -1039,8 +1048,14 @@ El sistema valida la información mientras la persona escribe. Cuando un dato no
 | Ese cupón no existe. | El código del cupón es incorrecto. | Revisar el código que aparece en el aviso del cupón. |
 | Ese cupón no está vigente o todavía no acumulas los puntos necesarios. | El cupón está pausado, fuera de sus fechas o bloqueado. | Revisar los puntos en el panel. |
 | Ya canjeaste este cupón en esta reserva. | El cupón ya se usó en esa reserva. | Pagar sin el cupón o usar otro. |
+| Esta reserva ya tiene un cupón. Quítalo si quieres usar otro. | Solo se acepta un cupón por reserva. | Quitar el cupón con la **X** antes de aplicar otro. |
+| No pudimos consultar el total a pagar. Revisa tu conexión y vuelve a entrar en unos segundos. | El sistema no logró calcular el monto (desde el 24 de octubre de 2026 el total viene del servidor). | Esperar y volver a abrir la pantalla; no pagar mientras el total aparezca como "—". |
+| Ya hay un pago en revisión para esta reserva. / Esa referencia ya se usó en otro pago. Revisa el número de tu comprobante. | El pago ya se reportó o la referencia ya existe en otro pago. | Esperar la revisión o corregir la referencia. |
 | Solo puedes calificar un servicio finalizado. / Este servicio ya fue calificado. | La calificación no está permitida. | Esperar a que el servicio termine; una reserva se califica una sola vez. |
 | Primero debes iniciar el servicio. / Este servicio ya fue iniciado. | El operario intentó una acción fuera de orden. | Iniciar el servicio antes de finalizarlo. |
+| Ya no se puede iniciar este servicio: pasaron más de 4 horas desde la hora de fin. Pide al administrador que lo cierre. | El operario intentó iniciar un servicio fuera de plazo (desde el 24 de octubre de 2026). | Avisar al administrador si el vehículo se atendió. |
+| Los datos chocan con un registro existente o alguien los cambió mientras los editabas. Vuelve a abrirlos e intenta de nuevo. | Otra persona cambió lo mismo al mismo tiempo. | Volver a abrir la pantalla y repetir el cambio. |
+| El servicio de reservas no responde. / La base de datos no responde en este momento. | Una parte del sistema está detenida por un momento. | Intentar de nuevo en unos minutos. |
 | No hay conexión con el servidor. Intenta de nuevo en un momento. | No hay conexión con el sistema. | Revisar la conexión a internet e intentar de nuevo. |
 
 *Nota.* Textos tomados del archivo de traducción al español de la aplicación web.
@@ -1130,11 +1145,11 @@ La opción **Desactivar mi cuenta** desactiva la cuenta, no la borra: no podrá 
 
 ##### Soy operario y no puedo iniciar un servicio. ¿Por qué?
 
-Un servicio se puede iniciar desde 15 minutos antes de la hora reservada (antes, el sistema responde que todavía es muy temprano), solo si está asignado a usted y solo cuando no tiene otro servicio en curso. Si el servicio es suyo y el problema continúa, informe al administrador.
+Un servicio se puede iniciar desde 15 minutos antes de la hora reservada (antes, el sistema responde que todavía es muy temprano) y hasta 4 horas después de su hora de fin (después responde que ya no se puede iniciar), solo si está asignado a usted y solo cuando no tiene otro servicio en curso. Si el servicio es suyo y el problema continúa, informe al administrador.
 
 ##### Atendí un vehículo y olvidé marcar Iniciar. ¿Qué hago?
 
-Si todavía es el mismo día, abra el servicio y márquelo con **Iniciar** y luego con **Finalizar**; el sistema lo acepta aunque sea tarde. Si ya no puede hacerlo, informe al administrador que el vehículo sí se atendió, para que cierre la reserva como atendida y no como No asistió.
+Si no han pasado más de 4 horas desde la hora de fin, abra el servicio y márquelo con **Iniciar** y luego con **Finalizar**; el sistema lo acepta aunque sea tarde. Si ya no puede hacerlo, informe al administrador que el vehículo sí se atendió, para que cierre la reserva como atendida y no como No asistió.
 
 ## 14. Glosario
 

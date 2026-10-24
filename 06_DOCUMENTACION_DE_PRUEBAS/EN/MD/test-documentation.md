@@ -15,9 +15,9 @@
 | Apprentices | Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano Quintero |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 23, 2026 |
+| Date | October 24, 2026 |
 
-This document gathers the test plan, the inventory of automated tests in the repositories, their actual results when run on October 19, 2026 (including the end-to-end, performance, and responsive design tests against the complete system) and again on October 21, and the 42 functional test cases, run on October 19, traced to the SRS v7.9 requirements (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`, the current SRS; *SRS_V4.docx* is the previous version of October 8). On October 23, 2026 the inventory (Table 2), the results of the latest *develop* CI (section 3.3, Table 5d), and the traceability matrix were updated; the matrix now marks as partial the requirements that the review of that day found incomplete. On October 20, 2026, the inventory, case CP-42 and the traceability matrix were adjusted because the role change of an account was reverted in the code that day, and the wording of CP-10 because the customer cancels without writing a reason. On October 21, 2026, two runs of the automated tests and of the 19 end-to-end tests were recorded: the early-morning run (689 tests, all passed) and the evening run (707, all passed), which is the latest. They include the changes of that day: the token of a closed session stops working, operator assignment uses a lock, the receipt has a 2 MB maximum, and, for bookings that ended and nobody closed, the system only cancels a scheduled booking that expired without confirmation and sets to "No-show" a confirmed one that never had an operator; one that had an operator goes to the administrator's "To close" list. Its structure follows the ISO/IEC/IEEE 29119-3 standard for test documentation (International Organization for Standardization [ISO], 2021). No result in this document is assumed.
+This document gathers the test plan, the inventory of automated tests in the repositories, their actual results when run on October 19, 2026 (including the end-to-end, performance, and responsive design tests against the complete system) and again on October 21, and the 42 functional test cases, run on October 19, traced to the SRS v8.0 requirements (`lavarapido-docs/01_INFORME_DE_ESPECIFICACION_DE_REQUISITOS`, the current SRS; *SRS_V4.docx* is the previous version of October 8). On October 24, 2026, after merging 128 fix branches into *develop* and deploying them to the public server, the inventory (Table 4), the results of the latest CI (section 3.3, Table 5d), the traceability matrix (eight requirements move to Implemented), and the gaps (Table 8) were updated again. On October 23, 2026 the inventory (Table 2), the results of the latest *develop* CI (section 3.3, Table 5d), and the traceability matrix were updated; the matrix now marks as partial the requirements that the review of that day found incomplete. On October 20, 2026, the inventory, case CP-42 and the traceability matrix were adjusted because the role change of an account was reverted in the code that day, and the wording of CP-10 because the customer cancels without writing a reason. On October 21, 2026, two runs of the automated tests and of the 19 end-to-end tests were recorded: the early-morning run (689 tests, all passed) and the evening run (707, all passed), which is the latest. They include the changes of that day: the token of a closed session stops working, operator assignment uses a lock, the receipt has a 2 MB maximum, and, for bookings that ended and nobody closed, the system only cancels a scheduled booking that expired without confirmation and sets to "No-show" a confirmed one that never had an operator; one that had an operator goes to the administrator's "To close" list. Its structure follows the ISO/IEC/IEEE 29119-3 standard for test documentation (International Organization for Standardization [ISO], 2021). No result in this document is assumed.
 
 ## 1. Test Plan
 
@@ -68,7 +68,7 @@ The web application, the mobile application, and the seven backend services on t
 
 ## 2. Automated Test Inventory
 
-As of October 23, 2026 (*develop* branch), the repositories have 735 test methods: 576 in the backend, 146 in the web, and 13 in the mobile app (on October 21 there were 602: 540 in the backend and 62 in the web). Since that day the mobile app has its first tests with *jest-expo*; it is also checked with the TypeScript build and the screen walk-through (section 3.2).
+As of October 24, 2026 (*develop* branch), the repositories have 1,036 test methods: 759 in the backend, 204 in the web (212 cases when run, because some repeat with several data sets), and 73 in the mobile app (on October 23 there were 735: 576, 146, and 13; on October 21, 602). The mobile app has tests with *jest-expo* since October 23; it is also checked with the TypeScript build and the screen walk-through (section 3.2).
 
 **Table 4**
 
@@ -76,17 +76,17 @@ As of October 23, 2026 (*develop* branch), the repositories have 735 test method
 
 | Artifact | Files | Methods | What they cover |
 | --- | --- | --- | --- |
-| api-gateway | 2 | 15 | Routing of each `/api/v1/**` prefix to its service, and that `/internal/**` is not exposed by the gateway (`GatewayRoutesTest`); session check: the token of a closed session does not get through, the answer is kept per token, logout drops it, if security-service fails the request goes on, and public routes are not checked (`SessionCheckFilterTest`) |
-| security-service | 18 | 152 | Registration, sign-in with lockout after failed attempts, password recovery, profile and address, user administration (including the rule that an administrator account cannot be deactivated), roles and permissions, preferences, value objects, password policy, JWT issuing, open and closed sessions (the token of a closed session answers 401), and HTTP security by role (`ApiSecurityWebTest`) |
-| customer-service | 6 | 50 | Customer account, license plates, vehicle CRUD, `security.user_registered` listener and web API |
-| booking-service | 9 | 60 | Booking life cycle, cancellation of scheduled bookings that expired without confirmation, "No-show" only for an expired confirmed booking that operations requests through the internal route, availability and the reason a time is not available, bays (`ServiceBayTest`), catalog, business data (`EstablishmentTest`), preferred operator in the event and web API |
-| operations-service | 14 | 71 | Manual and automatic assignment (with the assignment lock), a single rule for bookings without an operator, bookings that ended and nobody closed and the "To close" list (`FollowUpPolicyTest`, `FollowUpServiceTest`), free operators, start window, execution, rating, absences, operator metrics, team summary, operator profile, inspection report and web API |
-| notification-service | 13 | 109 | Notification use cases, message factory per event, notices in the account's language, reminders, alerts for bookings without an operator, unregistered service notice, `null` fields in the event (`DomainEventEnvelopeTest`), new version notice, device tokens and admin controller |
-| payment-service (.NET) | 9 | 119 | Payment and receipt (2 MB maximum), reused reference, history with filters, promotions, loyalty points, payment policy, command and query services, and 7 persistence tests against SQL Server |
-| Web (Angular) | 59 | 146 | Behavior of the guard per role and of the interceptor on a 401, and the sign-up, payment, and dashboard ViewModels (since October 23, 2026); creation of components, guards and services (`should create` smoke tests), API error messages, payment account selection, session across tabs, bookings without an operator and filters, "To close" list, accounts and fixed roles, reports, and loyalty bar |
-| Mobile | 3 | 13 | Since October 23, 2026, with *jest-expo*: email and password validators (`authValidators.test.ts`), management utilities with the email domain and the 1 to 99 % discount (`managementUtils.test.ts`), and services (`services.test.ts`) |
+| api-gateway | 6 | 38 | Routing of each `/api/v1/**` prefix to its service, and that `/internal/**` is not exposed by the gateway (`GatewayRoutesTest`); session check with any scheme (*bearer*, *Bearer*, *BEARER*, *Basic*), the answer is kept per token and logout drops it in all its variants (`SessionCheckFilterTest`); a limit of 60 requests per minute on `/auth` with the real IP (`AuthRateLimitFilterTest`, `ClientIpResolverTest`, `GatewayAuthRateLimitTest`) and route timeouts (`GatewayRouteTimeoutTest`) |
+| security-service | 19 | 168 | Registration with mandatory consent (`CONSENT_REQUIRED`), sign-in with lockout after failed attempts, a cap on the attempts for the recovery code and the current password (`TOO_MANY_ATTEMPTS`), passwords of up to 72 bytes, the client IP behind the proxy (`ClientIpBehindGatewayTest`), password recovery, profile and address, user administration (including the rule that an administrator account cannot be deactivated), roles and permissions, preferences, value objects, password policy, JWT issuing, open and closed sessions (the token of a closed session answers 401), and HTTP security by role (`ApiSecurityWebTest`) |
+| customer-service | 8 | 61 | Customer account, license plates (strict when creating and tolerated when reading stored ones), vehicle CRUD, vehicle with active bookings (`VEHICLE_HAS_ACTIVE_BOOKINGS`), customer-only routes, `security.user_registered` listener and web API |
+| booking-service | 14 | 95 | Customer rescheduling without changing services (`BOOKING_SERVICES_LOCKED`), price greater than 0, optimistic locking, frozen rate per vehicle type, schedule changes that clash with bookings (`ScheduleServiceTest`), forwarded customer errors, active bookings count per vehicle, booking life cycle, cancellation of scheduled bookings that expired without confirmation, "No-show" only for an expired confirmed booking that operations requests through the internal route, availability and the reason a time is not available, bays (`ServiceBayTest`), catalog, business data (`EstablishmentTest`), preferred operator in the event and web API |
+| operations-service | 20 | 109 | Starting and finishing without leaving the operator blocked if booking fails (OPS-01), row locks, start window up to 4 hours after the end (`SERVICE_TOO_LATE`), notes for the operator, listener retries and dead-letter queue, sharing the inspection without a broker (503), database errors, manual and automatic assignment (with the assignment lock), a single rule for bookings without an operator, bookings that ended and nobody closed and the "To close" list (`FollowUpPolicyTest`, `FollowUpServiceTest`), free operators, start window, execution, rating, absences, operator metrics, team summary, operator profile, inspection report and web API |
+| notification-service | 18 | 127 | Pending deliveries with retries (`pending_delivery`), reminders cancelled by IN_PROGRESS, COMPLETED, or NO_SHOW, released-operator notice, administrator lookup with retries, bindings and dead-letter queue, notification use cases, message factory per event, notices in the account's language, reminders, alerts for bookings without an operator, unregistered service notice, `null` fields in the event (`DomainEventEnvelopeTest`), new version notice, device tokens and admin controller |
+| payment-service (.NET) | 14 | 161 | The customer's amount and coupon (`GET /loyalty/redemptions/{bookingId}`), `AMOUNT_CHANGED` when approving, a percentage coupon with the current total, a single open payment and a unique reference, the administrator's paged queue, cancelled-booking notice, inactive cash for the administrator, API tests by role (`PaymentService.Api.UnitTests`), payment and receipt (2 MB maximum), reused reference, history with filters, promotions, loyalty points, payment policy, command and query services, and 11 persistence tests against SQL Server |
+| Web (Angular) | 66 | 204 | Real guard and interceptor with `app.routes` (role × area, expired token, 401 and 403), payment with the server's amount and the coupon that survives a reload, automatic refresh (`LiveRefresh`), the 4 languages with the same keys and translated error codes, field errors, the operator's notes and start window, `BOOKING_NO_SHOW`, the sign-up, payment, and dashboard ViewModels; creation of components, guards and services (`should create` smoke tests), API error messages, payment account selection, session across tabs, bookings without an operator and filters, "To close" list, accounts and fixed roles, reports, and loyalty bar |
+| Mobile | 25 | 73 | With *jest-expo*: validators (`authValidators.test.ts`), the customer's payment with the server's amount (`useClientPayment.test.tsx`), refresh on return and on each push (`useRefreshOnFocus.test.tsx`), error codes (`apiError.test.ts`), the operator contract (`opsContract.test.ts`), the paged payment queue (`paymentQueue.test.tsx`), fixed discount (`promotionDiscount.test.ts`), production URL (`config.test.ts`), recovery with "Request another code" (`useForgotPasswordFlow.test.tsx`), session and push unregistration (`AuthServiceContext.test.tsx`), accessibility of icon buttons, and pagination |
 
-> *Note.* Support files (`Fakes.java`, `InMemory*.java`, `InMemoryPorts.cs`, `DatabaseFixture.cs`) are not counted as tests. The 7 payment persistence tests skip themselves when the `PAYMENT_INTEGRATION_DB` variable is not set (`DatabaseFixture.cs:16-21`).
+> *Note.* Support files (`Fakes.java`, `InMemory*.java`, `InMemoryPorts.cs`, `DatabaseFixture.cs`) are not counted as tests. The 11 payment persistence tests skip themselves when the `PAYMENT_INTEGRATION_DB` variable is not set (`DatabaseFixture.cs:16-21`).
 
 Backend tests are domain and application tests with in-memory doubles, plus controller tests with MockMvc. Many web tests only check that each component is created; `api-error.spec.ts`, `payment.spec.ts` and, since October 21, 2026, `auth.spec.ts`, `reservations-store.spec.ts`, `reservations.spec.ts`, `management.spec.ts`, `reports.spec.ts`, and `dashboard.spec.ts` test real rules.
 
@@ -213,30 +213,31 @@ For responsive design (NFR-008), Playwright (headless Edge) went through the scr
 
 *Note.* Taking or picking photos with the phone camera and gallery cannot be automated in this test; it remains to be tested on an Android device.
 
-### 3.3 Latest CI of October 23, 2026
+### 3.3 Latest CI of October 24, 2026
 
-On October 23, 2026 *v1.0.0* was tagged in 8 repositories (757 tests at that moment), and that same day the fixes from the audit of October 22 entered *develop*. Table 5d takes the latest GitHub Actions CI of *develop* in each repository, all green. The end-to-end tests and the 42 functional cases were not run that day.
+On October 23, 2026 *v1.0.0* was tagged in 8 repositories (757 tests), and on October 24 the 128 fix branches of the 10 repositories were merged into *develop*. Before pushing each repository, its branches were merged onto *develop* in a separate copy, the full suite was run, and it was checked that what was pushed was identical to what was tested. Table 5d takes the latest GitHub Actions CI of *develop* in each repository on October 24, all green; that same day this code was deployed to the public server. The 19 local end-to-end tests and the 42 functional cases were not run that day; the new remote battery (44 cases, *e2e.yml*) has only been tested against a simulator.
 
 **Table 5d**
 
-*Results of the latest develop CI per artifact (October 23, 2026, night)*
+*Results of the latest develop CI per artifact (October 24, 2026)*
 
-| Artifact | Command in the CI | Run | Passed | Failed | Skipped | Compared with the evening of October 21 (707) |
+| Artifact | Command in the CI | Run | Passed | Failed | Skipped | Compared with October 23 (838) |
 | --- | --- | --- | --- | --- | --- | --- |
-| Web (Angular) | `ng test` | 146 | 146 | 0 | 0 | +84: guard, interceptor, and ViewModels (59 files) |
-| api-gateway | `./mvnw verify` | 39 | 39 | 0 | 0 | −1: the operator route is no longer published (E-01) |
-| security-service | `./mvnw verify` | 171 | 171 | 0 | 0 | +16: sessions when changing or recovering the password and sign-in lock (October 22), email domains (A-01), removed role (E-02), and demo accounts through variables (E-05) |
-| customer-service | `./mvnw verify` | 71 | 71 | 0 | 0 | +2: plates longer than 6 characters (E-16) |
-| booking-service | `./mvnw verify` | 60 | 60 | 0 | 0 | +10: operator routes with the internal key (E-01), status change event (A-11), cancellation reason (A-20), and points per line (A-09) |
-| operations-service | `./mvnw verify` | 72 | 72 | 0 | 0 | +5: 28 days of "To close" (A-03), internal key (E-01), notes (B-01), and active account (A-13, E-12) |
-| notification-service | `./mvnw verify` | 115 | 115 | 0 | 0 | +1: status change notice (A-11) |
-| payment-service: domain | `dotnet test` | 119 | 119 | 0 | 0 | +4: 1 to 99 % discount (E-07) and one coupon per booking (E-09) |
-| payment-service: application | (same command) | 32 | 32 | 0 | 0 | +4: cancelling the redemption (E-08) |
-| payment-service: integration | (same command, without `PAYMENT_INTEGRATION_DB`) | 0 | 0 | 0 | 7 | Skipped in the CI; on October 21 they were run against the isolated database |
-| Mobile app | `npm test -- --ci` | 13 | 13 | 0 | 0 | +13: first automated tests (F-01) |
-| **Total** | | **838** | **838** | **0** | **7** | **+131** |
+| Web (Angular) | `ng test` | 212 | 212 | 0 | 0 | +66: server amount, automatic refresh, translations of the 4 languages, field errors, real guard and interceptor, read-only permissions, operator (66 files) |
+| api-gateway | `./mvnw verify` | 62 | 62 | 0 | 0 | +23: session with any scheme (SEC-01), `/auth` limit and real IP (SEC-04, SEC-11), and timeouts (SEC-16) |
+| security-service | `./mvnw verify` | 200 | 200 | 0 | 0 | +29: consent (SEC-07), attempt caps (SEC-05, SEC-12), 72 bytes (SEC-11), IP behind the proxy, 403 tests by role (F-04, SEC-09) |
+| customer-service | `./mvnw verify` | 82 | 82 | 0 | 0 | +11: vehicle with active bookings (BIZ-08), customer-only routes (BIZ-12), stored plates (E-16), and Merari's tests (F-05) |
+| booking-service | `./mvnw verify` | 95 | 95 | 0 | 0 | +35: BIZ-01, BIZ-04, BIZ-06, BIZ-08, BIZ-09, BIZ-10, BIZ-12, BIZ-13, `reasonCode`, and F-05 |
+| operations-service | `./mvnw verify` | 110 | 110 | 0 | 0 | +38: OPS-01, OPS-03, OPS-04, OPS-08, OPS-11, OPS-12, A-12, A-13, B-01, E-12, and F-05 |
+| notification-service | `./mvnw verify` | 133 | 133 | 0 | 0 | +18: pending deliveries (OPS-05), reminders (A-11), administrators with retries (OPS-06), released operator (E-12) |
+| payment-service: domain | `dotnet test` | 134 | 134 | 0 | 0 | +15: `AMOUNT_CHANGED`, percentage coupon, cancelled-booking notice |
+| payment-service: application | (same command) | 52 | 52 | 0 | 0 | +20: customer redemption (BIZ-02), paged queue (E-10), inactive cash (C-04), discount type (D-01) |
+| payment-service: API | (same command) | 34 | 34 | 0 | 0 | +34: new project with the tests by role (F-04) and the required identifiers (BIZ-13) |
+| payment-service: infrastructure | (same command, without `PAYMENT_INTEGRATION_DB`) | 5 | 5 | 0 | 11 | +5 without a database; the 11 persistence tests are skipped in the CI |
+| Mobile app | `npm test -- --ci` | 73 | 73 | 0 | 0 | +60: payment, refresh, errors, operator, paged queue, fixed discount (25 suites) |
+| **Total** | | **1,192** | **1,192** | **0** | **11** | **+354** |
 
-> *Note.* Source: log of the GitHub Actions runs of October 23, 2026 (*gh run view --log*): Maven `Tests run:` lines, *dotnet test* `Passed!`, the Vitest summary, and the Jest summary. Without the mobile app, the total is 825. The reasons for each difference are inferred from that day's commits.
+> *Note.* Source: log of the *develop* GitHub Actions runs of October 24, 2026 (*gh run view --log*): Maven `Tests run:` lines, *dotnet test* `Passed!`, the Vitest summary, and the Jest summary. Without the mobile app, the total is 1,119. The reasons for each difference are inferred from the branches merged that day. The October 23 table (838 tests) remains in the document's history.
 
 ## 4. Functional Test Cases
 
@@ -303,23 +304,23 @@ Cases CP-01 to CP-33 were defined on SRS v4 and first run on October 9, 2026; ca
 
 ## 5. Traceability Matrix
 
-Of the 41 requirements in SRS v7.9 (11 of them partial as of October 23, 2026, with the reason in the SRS), 38 have a functional case and 39 a related automated test; RF-032 and RF-034 only have a functional case, and RF-017, RF-023, and RF-025 only an automated test.
+Of the 41 requirements in SRS v8.0 (3 of them partial as of October 24, 2026: RF-005, RF-015, and RF-023, with the reason in the SRS; on October 23 there were 11), 38 have a functional case and 39 a related automated test; RF-032 and RF-034 only have a functional case, and RF-017, RF-023, and RF-025 only an automated test.
 
 **Table 7**
 
 *RF → status → endpoint / screen → test case*
 
-| RF | Status (SRS v7.9) | Endpoint (prefix `/api/v1`) | Web screen | Functional case | Related automated test |
+| RF | Status (SRS v8.0) | Endpoint (prefix `/api/v1`) | Web screen | Functional case | Related automated test |
 | --- | --- | --- | --- | --- | --- |
-| RF-001 | Partial | `POST /auth/register` | `/auth/register` | CP-01, CP-02 | `AccountRegistrationServiceTest`, `UserRegisteredListenerTest` |
+| RF-001 | Implemented | `POST /auth/register` | `/auth/register` | CP-01, CP-02 | `AccountRegistrationServiceTest`, `UserRegisteredListenerTest` |
 | RF-002 | Implemented | `POST /auth/login` | `/auth` | CP-03, CP-04 | `AuthenticationServiceTest`, `JwtTokenIssuerTest`, `ApiSecurityWebTest` |
 | RF-003 | Implemented | `POST /auth/password/forgot`, `/verify`, `/reset` | `/auth/forgot-password` | CP-05, CP-06 | `PasswordRecoveryServiceTest`, `PasswordResetTokenTest` |
 | RF-004 | Implemented | `PUT /users/me/password` | `/client/profile` | CP-07 | `UserProfileAndAdministrationTest`, `PasswordPolicyTest` |
 | RF-004b | Implemented | `POST /auth/login` (423 `ACCOUNT_LOCKED`) | `/auth` | CP-34 | `AuthenticationServiceTest` (lockout and window), `PasswordRecoveryServiceTest` (a reset lifts it), `ApiSecurityWebTest` (423) |
-| RF-027 | Partial | `GET/PATCH /users/me`, `GET/PUT /users/me/address`, `PUT /users/me/email`, `POST /auth/logout`, `POST /users/me/deactivate`, `GET /auth/session` (gateway) | `/client/profile` | CP-25 | `UserProfileAndAdministrationTest`, `PersonAddressServiceTest`, `AuthenticationServiceTest`, `ApiSecurityWebTest` and `SessionCheckFilterTest` (token of a closed session), `auth.spec.ts` (tabs) |
-| RF-028 | Partial | `GET/POST /admin/users`, `PATCH /admin/users/{id}/status` | `/admin/management`, `/admin/operators` | CP-26, CP-42 | `UserProfileAndAdministrationTest`, `ApiSecurityWebTest` |
+| RF-027 | Implemented | `GET/PATCH /users/me`, `GET/PUT /users/me/address`, `PUT /users/me/email`, `POST /auth/logout`, `POST /users/me/deactivate`, `GET /auth/session` (gateway) | `/client/profile` | CP-25 | `UserProfileAndAdministrationTest`, `PersonAddressServiceTest`, `AuthenticationServiceTest`, `ApiSecurityWebTest` and `SessionCheckFilterTest` (token of a closed session), `auth.spec.ts` (tabs) |
+| RF-028 | Implemented | `GET/POST /admin/users`, `PATCH /admin/users/{id}/status` | `/admin/management`, `/admin/operators` | CP-26, CP-42 | `UserProfileAndAdministrationTest`, `ApiSecurityWebTest` |
 | RF-029 | Implemented | `GET /admin/roles-permissions`, `PUT /admin/roles-permissions/{role}` | `/admin/management` | CP-27 | `RolePermissionAdministrationServiceTest`, `management.spec.ts` (fixed roles) |
-| RF-030 | Partial | `/vehicles`, `GET /vehicle-types`, `GET /admin/vehicles` | `/client/vehicles` | CP-28 | `CustomerVehicleServiceTest`, `LicensePlateTest`, `CustomerApiWebTest` |
+| RF-030 | Implemented | `/vehicles`, `GET /vehicle-types`, `GET /admin/vehicles` | `/client/vehicles` | CP-28 | `CustomerVehicleServiceTest`, `LicensePlateTest`, `CustomerApiWebTest` |
 | RF-031 | Implemented | `GET /catalog/services`, `/admin/catalog/services` | `/admin/management` | CP-29 | `CatalogServiceTest` |
 | RF-021 | Implemented | `PUT /admin/schedule/business-hours`, `POST /admin/schedule/exceptions` | `/admin/schedule` | CP-22 | `AvailabilityPolicyTest` |
 | RF-032 | Implemented | `/admin/bays` | `/admin/schedule` | CP-30 | — |
@@ -342,15 +343,15 @@ Of the 41 requirements in SRS v7.9 (11 of them partial as of October 23, 2026, w
 | RF-013b | Implemented | `POST /payments` | `/client/payment` | CP-17 | `PaymentTests` (receipt of at most 2 MB), `PaymentCommandServiceTests` |
 | RF-014 | Implemented | `POST /admin/payments/{id}/approve`, `/reject` | `/admin/payments` | CP-18 | `PaymentTests`, `PaymentCommandServiceTests` |
 | RF-015 | Partial | `GET /payments/me?from=&to=&service=` | `/client/history` | CP-37 | `PaymentQueryServiceTests` (order and filters) |
-| RF-016 | Partial | `POST /payments` | `/client/payment` | CP-19 | `PaymentPolicyTests`, `PaymentCommandServiceTests` (reused reference) |
+| RF-016 | Implemented | `POST /payments` | `/client/payment` | CP-19 | `PaymentPolicyTests`, `PaymentCommandServiceTests` (reused reference) |
 | RF-035 | Implemented | `POST /admin/payments/{id}/refund` | `/admin/payments` | CP-33 | `PaymentTests`, `PaymentCommandServiceTests` |
 | RF-017 | Implemented | `GET /admin/bookings/day-summary`, `GET /operators/my-bookings` and dashboard stores | `/client`, `/operator`, `/admin` | — | `BookingServiceTest` (day summary), web smoke tests (`dashboard.spec.ts`) |
-| RF-018 | Partial | `/notifications/*` + RabbitMQ events | `/*/notifications` | CP-20 | `NotificationUseCasesTest`, `NotificationFactoryTest`, `BookingReminderServiceTest`, `LocalizedNotificationsTest`, `UnassignedBookingAlertTest`, `StaffNotificationsTest` |
+| RF-018 | Implemented | `/notifications/*` + RabbitMQ events | `/*/notifications` | CP-20 | `NotificationUseCasesTest`, `NotificationFactoryTest`, `BookingReminderServiceTest`, `LocalizedNotificationsTest`, `UnassignedBookingAlertTest`, `StaffNotificationsTest` |
 | RF-019 | Implemented | `PUT /users/me/preferences` | `/*/configuration` | Covered by CP-21 | `UserPreferenceServiceTest` |
 | RF-020 | Implemented | `PUT /users/me/preferences` | `/*/configuration` | CP-21 | `UserPreferenceServiceTest`, `UserPreferenceTest` |
 | RF-023 | Partial | `GET /admin/operators/{id}/metrics`, `GET /admin/operators/summary`, payment and booking stores | `/admin/reports`, `/admin/operators/:id` | — | `OperatorMetricsCalculatorTest`, `TeamSummaryCalculatorTest`, `reports.spec.ts` (only completed bookings count) |
-| RF-024 | Partial | `/admin/promotions` | `/admin/management` | CP-23 | `PromotionTests` |
-| RF-025 | Partial | `POST /loyalty/redeem` | `/client/payment` | — | `CustomerPromotionServiceTests` |
+| RF-024 | Implemented | `/admin/promotions` | `/admin/management` | CP-23 | `PromotionTests` |
+| RF-025 | Implemented | `POST /loyalty/redeem` | `/client/payment` | — | `CustomerPromotionServiceTests` |
 | RF-026 | Implemented | `GET /loyalty/balance` | `/client` | CP-24 | `LoyaltyTransactionTests` |
 
 > *Note.* The automated test column points to the file whose name and methods match the requirement; code coverage was not measured. `booking-flow.test.js` is in `lavarapido-infra/e2e` and needs the system running.
@@ -363,13 +364,15 @@ Of the 41 requirements in SRS v7.9 (11 of them partial as of October 23, 2026, w
 
 | # | Gap | Recommendation |
 | --- | --- | --- |
-| 1 | The mobile app has no automated tests | Add Jest with `jest-expo`, at least for validators (`shared/validators`) and services (`core/services`) |
-| 2 | Many of the 62 web tests only check that the component is created; the 19 added on October 21, 2026 already test real rules (session across tabs, bookings without an operator, "To close", fixed roles, and reports) | Test more real rules: `authGuard` by role, `authInterceptor` on 401, booking form |
-| 3 | The 7 payment persistence tests need a migrated database and skip without it; on October 19 and 21 they were run against `LavaRapidoPaymentIT` and passed | Document in the README how to create the test database and set `PAYMENT_INTEGRATION_DB`, and run them in GitHub Actions with a SQL Server service |
+| 1 | The mobile app had no automated tests | Closed: 73 tests in 25 suites with *jest-expo* in the CI as of October 24, 2026; coverage is not measured yet |
+| 2 | Many of the web tests only checked that the component is created | As of October 24, 2026 there are 212 tests in 66 files, with the real guard and interceptor, the coupon payment, the refresh, and the translations, and coverage in the CI; the booking form is still missing |
+| 3 | The 11 payment persistence tests (7 until October 23) need a migrated database and skip without it; the first 7 were run on October 19 and 21 against `LavaRapidoPaymentIT` and passed; those for the indexes of migration 023 have not been run | Document in the README how to create the test database and set `PAYMENT_INTEGRATION_DB`, and run them in GitHub Actions with a SQL Server service |
 | 4 | For RF-023 (reports) the operator metrics, the team summary and, since October 21, 2026, that only completed bookings count (`reports.spec.ts`) are tested; the PDF/Excel export has no test | Add a functional case for reports and the PDF/Excel export |
 | 5 | RF-032 (bays) and RF-034 (payment accounts) have no dedicated automated tests: `ScheduleService` and `PaymentAccountService` have no test class | Add unit tests for those two services |
 | 6 | The requirements implemented after October 9 (RF-004b, RF-008, RF-010, RF-015, RF-022, RF-036, RF-037, and RF-038) had no functional case of their own | Closed on October 19, 2026, with cases CP-34 to CP-41 |
 | 7 | The changes of October 21, 2026 (the token of a closed session stops working, bookings that ended and nobody closed with the "To close" list, the receipt over 2 MB, and the cash option that only appears with its account active) have no functional case of their own; automated tests cover them, except the cash option, the 19 end-to-end tests were run with the session check on, and "To close" was checked live on the web and in the mobile app | Add those functional cases and run them against the complete system; add a `PaymentAccountService` test for the cash account |
+| 8 | The changes of October 24, 2026 (server amount and `AMOUNT_CHANGED`, `BOOKING_SERVICES_LOCKED`, `VEHICLE_HAS_ACTIVE_BOOKINGS`, consent, `/auth` limit, `TOO_MANY_ATTEMPTS`, 4-hour window to start, operator notes) have no functional case of their own; the automated tests and the remote battery of `lavarapido-infra/e2e/remote` (44 cases) cover them, but the battery has not been run against the public server yet | Create the three test accounts and the `E2E_*` secrets, run *e2e.yml* without flags and then with `allow_writes`, and add the corresponding functional cases |
+| 9 | Migrations 044, 045, and 113 (booking), 047 and 116 (notification), and 022 and 023 (payment) were only tested when applied on the public server on October 24, 2026 | Integration tests against SQL Server in the CI (RNF-003) |
 
 **Table 9**
 
