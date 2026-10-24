@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 21, 2026
+October 23, 2026
 
-Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.5
+Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.6
 
 ## Version Control
 
@@ -35,6 +35,7 @@ Table 1 records the change history of this document. Each time the implementatio
 | 2.3 | 2026-10-20 | Review against the code of October 20, 2026: criterion E2 with the tests of October 19 (655 automated and 19 end-to-end) and RabbitMQ queues corrected (the operations-service queue has no dead-letter queue) and communication plan (the panel does not send general announcements). | Development team |
 | 2.4 | 2026-10-21 | Review against the code and the server of October 21, 2026: criterion E2 with the tests of that day (689 automated and 19 end-to-end), automatic pre-implementation backup on the public server (phase 3, monitoring, and rollback), smoke test H10 (the token of a closed session stops working), new variables with defaults, app updates without a new APK, and risk R-I11. | Development team |
 | 2.5 | 2026-10-21 | Review against the code of the evening of October 21, 2026: criterion E2 with the final run of that day (707 automated tests and 19 end-to-end), operations-service *FOLLOW_UP_\** variables, smoke test H11 (the administrator's "To close" list), and updated configuration rule. Confirmed bookings with an operator that nobody registered are no longer closed as "No-show" on their own: the administrator resolves them. | Development team |
+| 2.6 | 2026-10-23 | Review against *develop* of October 23, 2026 and version *v1.0.0*: cloning that works (payment-service from *develop* until its first release), rollback without the nonexistent *v0.9.0* tag and without *update-server.sh*, pre-update backup without *COMPRESSION* (SQL Server Express does not support it), criterion E2 with the tests of October 23 (825 automated and 13 of the mobile app; the 19 end-to-end tests run only locally), criterion E4 with the payment and mobile exception, Compose variables (ACO-14 closed), *INTERNAL_API_KEY* required for the operator, demo accounts through variables, warning about ports on the local network, and continuous deployment prepared and not tested (risk R-I04). Includes the content of Merari Urbano's *fix/A-05*, *fix/A-08*, *fix/B-02*, and *fix/E-20* branches. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -121,7 +122,7 @@ To establish an orderly, verifiable, and reversible procedure for putting a rele
 
 ### 6.1 What This Procedure Covers
 
-- The implementation of a tagged release of the backend (six services and gateway), the database, the messaging, and the web application on a machine with Docker in the local network or on the public server (an Azure virtual machine with Docker, Caddy, and HTTPS that the team turns on when it is needed).
+- The implementation of a tagged release of the backend (six services and gateway), the database, the messaging, and the web application on a machine with Docker in the local network or on the public server (an Azure virtual machine with Docker, Caddy, and HTTPS that the team turns on when it is needed). **Warning:** the development *docker-compose.yml* publishes on the machine ports 1433 (SQL Server with the *sa* account), 5672 and 15672 (RabbitMQ), 1025 and 8025 (Mailpit), and 3001 to 3006 (each service without going through the gateway); on the local network any computer can reach them. For real use the public server with *docker-compose.prod.yml* is recommended, since it publishes none of them; if the local network is used, block those ports in the machine's firewall and leave only 8080 and 4200 open.
 - The initial implementation (first go-live at the car wash or on the evaluation machine) and later implementations of new releases.
 - The load of the master data of the business (opening hours, bays, services, prices, points, payment accounts, operators, and promotions).
 - The smoke tests, the acceptance tests, the training, the go-live, the post-implementation support, and the rollback.
@@ -199,7 +200,7 @@ A full parallel implementation (operating on paper and in the system at the same
 
 ## 9. Target Environment and Components
 
-The target environment is a machine or server with Docker (Windows 10 or 11 with WSL 2, Ubuntu 22.04 or later, or macOS) that runs all the components of Table 4 with *docker compose --profile app*. The hardware and software requirements and the ports are those of sections 6 and 7 of the Installation Manual (minimum 4 cores, 8 GB of RAM with 5 GB for Docker, and 20 GB of free disk; recommended 16 GB of RAM and SSD). On the public server *docker-compose.prod.yml* is added: the web is served compiled from a container with nginx, Caddy publishes only ports 80 and 443 with HTTPS, and no internal service is exposed.
+The target environment is a machine or server with Docker (Windows 10 or 11 with WSL 2, Ubuntu 22.04 or later, or macOS) that runs all the components of Table 4 with *docker compose --profile app*. The hardware and software requirements and the ports are those of sections 6 and 7 of the Installation Manual (minimum 4 cores, 8 GB of RAM with 5 GB for Docker, and 20 GB of free disk; recommended 16 GB of RAM and SSD). On the public server *docker-compose.prod.yml* is added: the web is served compiled from a container with nginx, Caddy publishes only ports 80 and 443 with HTTPS, and no internal service is exposed. Without that file (local network), 1433, RabbitMQ, Mailpit, and 3001 to 3006 stay published: see the warning in the scope section.
 
 **Table 4**
 
@@ -235,9 +236,9 @@ The implementation **does not start** until all the criteria of Table 5 are met.
 | No. | Criterion | Evidence |
 |---|---|---|
 | E1 | The code of the release is merged into *develop* (or *main*) of the eleven repositories, with no uncommitted work. | Clean *git status* and *git log* with the last commit of each repository. |
-| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, and the end-to-end suite of *lavarapido-infra/e2e* against the containers. | Summaries without failures (final run of October 21, 2026: 707 automated tests and 19 end-to-end tests). |
+| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, *npx jest* in the mobile app, and the end-to-end suite of *lavarapido-infra/e2e* against the containers, which is run locally because the CI only checks its syntax. | Summaries without failures. Latest *develop* CI (October 23, 2026, night): 825 automated tests in the web, the gateway, and the six services (7 payment integration tests skipped without SQL Server) and 13 in the mobile app; the end-to-end suite (19 tests) last ran on October 21, 2026. |
 | E3 | The web application builds in production mode (*npx ng build*). | Folder *dist/* generated without errors. |
-| E4 | The release is tagged in each repository (for example, *v1.0.0*) (section 13). | *git tag* in each repository. |
+| E4 | The release is tagged in each repository (for example, *v1.0.0*) (section 13). As of October 23, 2026, *v1.0.0* exists in 8 repositories; payment-service and the mobile app have no tag yet and are implemented from *develop* until their first release (exception recorded in the corrective actions document). | *git tag* in each repository. |
 | E5 | The installation, administrator, and user manuals correspond to the release (version 4.0 or later). | Version control of the manuals. |
 | E6 | Open incidents of severity P0 and P1 are resolved; P2 and P3 incidents are recorded with their action in the corrective, preventive, and improvement actions document. | Updated action register. |
 | E7 | The target environment meets the hardware, software, and port requirements. | Checklist of Annex A. |
@@ -269,7 +270,7 @@ Each phase states its person responsible, its estimated duration, the steps, and
 
 1. Install and check Git, Docker with Compose v2, JDK 21, the .NET 8 SDK, and Node.js 22 LTS (Installation Manual, section 7.1). On Windows, confirm that Docker uses the Linux engine with WSL 2.
 2. Check that ports 1433, 5672, 15672, 1025, 8025, 3001 to 3006, 8080, and 4200 are free. If a native Windows SQL Server uses port 1433, stop the *MSSQLSERVER* service.
-3. Clone the repositories **side by side and with their original names**, at the release tag. The operations repository is called *lavarapido-operation-service* (singular), and *docker-compose.yml* builds it with that name: cloning it with another name makes the build fail.
+3. Clone the repositories **side by side and with their original names**, at the release tag. As of October 23, 2026, tag *v1.0.0* exists in 8 repositories; **payment-service does not have it yet** (its *main* is the skeleton of September 30) and is cloned from *develop*, as in the block below, until it has its first release. The fixes of October 23 are in *develop* and will ship with *v1.1.0*: to test them earlier, replace *-b v1.0.0* with *-b develop*. The operations repository is called *lavarapido-operation-service* (singular), and *docker-compose.yml* builds it with that name: cloning it with another name makes the build fail.
 
 ```bash
 mkdir Backend && cd Backend
@@ -279,7 +280,7 @@ for repo in lavarapido-infra lavarapido-security-service lavarapido-api-gateway 
 done
 git clone -b v1.0.0 https://github.com/camiloguilombo12/lavarapido-customer-service.git
 git clone -b v1.0.0 https://github.com/camiloguilombo12/lavarapido-booking-service.git
-git clone -b v1.0.0 https://github.com/merari0322/lavarapido-payment-service.git
+git clone -b develop https://github.com/merari0322/lavarapido-payment-service.git   # no tag yet
 cd .. && mkdir Frontend && cd Frontend
 git clone -b v1.0.0 https://github.com/BrayanCABRERA123/Front-end-proyecto-web.git
 ```
@@ -302,8 +303,9 @@ git check-ignore -v .env      # must show the .gitignore rule
 |---|---|---|
 | DB_PASSWORD | New strong password (8 or more characters with uppercase, lowercase, number, and symbol). | SQL Server rejects weak ones; never reuse the development password. |
 | JWT_SECRET | Random value of at least 32 bytes (*openssl rand -base64 48*). | Signs the tokens; the same for all services. |
-| INTERNAL_API_KEY | Random value (*node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"*). | Without it, booking and payment notices and reminders are not sent by email. |
-| SPRING_PROFILES_ACTIVE | *prod* (any value other than *dev*). | With *dev* (the default value of the Compose file), demonstration accounts are created and Swagger is published. |
+| INTERNAL_API_KEY | Random value (*node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"*). | Without it, booking and payment notices and reminders are not sent by email, there is no automatic assignment and, since *develop* of October 23, 2026 (E-01), the operator cannot start or finish services. |
+| SPRING_PROFILES_ACTIVE | *prod* (any value other than *dev*). | With *dev* (the default value of the Compose file), Swagger is published and the demonstration accounts whose password is in *DEMO_ADMIN_PASSWORD*, *DEMO_OPERATOR_PASSWORD*, or *DEMO_CLIENT_PASSWORD* are created (empty: that account is not created). |
+| ALLOWED_EMAIL_DOMAINS | *gmail.com* (default) or the business's list of domains, comma separated. | Since *develop* of October 23, 2026 (A-01), security-service only accepts those domains when registering, creating users, and changing the email (400 *EMAIL_DOMAIN_NOT_ALLOWED*). |
 | MESSAGING_ENABLED | *true* | With *false* (the default value), no notifications, point notices, or event-driven profiles are generated. |
 | RABBITMQ_USERNAME, RABBITMQ_PASSWORD | New user and password (not *guest*). | The RabbitMQ console must not keep default credentials. |
 | MAIL_ENABLED, MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM, MAIL_DOCKER_HOST | *true*, *smtp.gmail.com*, *587*, business account, app password, and *smtp.gmail.com* for Docker. | Mailpit only catches emails; real operation uses a real SMTP server. |
@@ -311,7 +313,7 @@ git check-ignore -v .env      # must show the .gitignore rule
 | ADMIN_EMAIL, ADMIN_PASSWORD | Email and password of the first administrator (only the first time). | security-service creates the account at startup if there is still no administrator. |
 | PUSH_ENABLED | *true* when the installed mobile application is the APK built with EAS. | Expo Go does not receive remote push notifications. |
 | BOOKING_ZONE | *America/Bogota* | Time zone of the car wash; the system stores UTC. |
-| SESSION_CHECK_\*, BOOKING_EXPIRY_\*, FOLLOW_UP_\* | Not set. | They have defaults (gateway session check on with 30 s and 3 s; cancellation of scheduled bookings that expired without confirmation every 5 minutes, with a 60-minute grace after the end; operations-service follow-up every 5 minutes for bookings that ended and nobody closed, which uses the same grace and *INTERNAL_API_KEY*) and the Compose file does not pass them to the containers. |
+| SESSION_CHECK_\*, BOOKING_EXPIRY_\*, FOLLOW_UP_\* | Optional (commented out in *.env.example* and *.env.production.example*). | They have defaults (gateway session check on with 30 s and 3 s; cancellation of scheduled bookings that expired without confirmation every 5 minutes, with a 60-minute grace after the end; operations-service follow-up every 5 minutes for bookings that ended and nobody closed in the last 28 days, *FOLLOW_UP_LOOK_BACK_DAYS*, which uses the same grace and *INTERNAL_API_KEY*). There are nine and *docker-compose.yml* passes them to the containers. |
 
 *Note.* Prepared by the authors from *.env.example* and *docker-compose.yml*. Secret values are written only in the *.env* file; never in a message, a shared document, or a repository.
 
@@ -343,12 +345,14 @@ On the public server this phase is automatic: *deploy/update-server.sh* first ru
 1. Generate a full backup with a checksum and verify it (Administrator Manual, section 14.3):
 
 ```bash
-docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
-  "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/pre_v1.0.0.bak' WITH INIT, CHECKSUM, COMPRESSION"
-docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
-  "RESTORE VERIFYONLY FROM DISK = N'/var/opt/mssql/data/pre_v1.0.0.bak' WITH CHECKSUM"
-docker cp lavarapido-sqlserver:/var/opt/mssql/data/pre_v1.0.0.bak ./backups/
+docker compose exec -e SQLCMDPASSWORD="$DB_PASSWORD" sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -b -Q \
+  "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/pre_v1.1.0.bak' WITH INIT, CHECKSUM"
+docker compose exec -e SQLCMDPASSWORD="$DB_PASSWORD" sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -b -Q \
+  "RESTORE VERIFYONLY FROM DISK = N'/var/opt/mssql/data/pre_v1.1.0.bak' WITH CHECKSUM"
+docker cp lavarapido-sqlserver:/var/opt/mssql/data/pre_v1.1.0.bak ./backups/
 ```
+
+The command does not use *COMPRESSION*: SQL Server Express, the edition on the public server, does not support it and the backup would fail; *backup-db.sh* compresses afterwards with *gzip*. The password is given to *sqlcmd* in the *SQLCMDPASSWORD* variable and not with *-P*, as *backup-db.sh* does. On the public server this command is not written: use *bash ~/lavarapido/lavarapido-infra/deploy/backup-db.sh* and, to prove that the backup works, *deploy/verify-backup.sh*.
 
 2. Keep an encrypted copy of the current *.env* file, separate from the data backup.
 3. Write down the tag of the release in operation: it is the release to return to if a rollback is needed (section 12).
@@ -567,7 +571,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
 ```
 
 3. Restore the pre-implementation backup of phase 3 (Administrator Manual, section 15.2). On the public server, *bash deploy/restore-db.sh \<backup.bak.gz\>* is used: it asks to type *RESTAURAR*, first backs up the current database, stops the services, restores, and starts them again. Liquibase changesets only move forward, so **a migration is not undone with another one**: the database is restored to its state before the release.
-4. In each repository, return to the previous tag (*git checkout v0.9.0*), rebuild, and start: *docker compose --profile app up -d --build*.
+4. In each affected repository, return to the previous version written down in phase 3: its tag (the first one that exists is *v1.0.0*; there are no earlier tagged versions) or, if it has none, its commit (*git checkout \<tag or commit\>*); then rebuild and start: *docker compose --profile app up -d --build*. On the public server it is not done this way, because *update-server.sh* pulls the tip of the branch again: revert the change on GitHub (*git revert* in a branch with its PR) and deploy again or, in an emergency, go back to the image kept as *:prev* (Deployment Document, section 3.4).
 5. Restore the previous *.env* file if the release had added variables.
 6. Repeat the smoke tests of section 11.9.
 7. Communicate the restoration, stating the date and time of the last recovered data; payments received after the backup are reconciled with the bank statement.
@@ -577,11 +581,11 @@ docker compose stop api-gateway security-service customer-service booking-servic
 
 ## 13. Release Configuration Management
 
-- **Tagging.** Each implemented release is tagged in the eleven repositories with the same name (semantic versioning: *vMAJOR.MINOR.PATCH*, for example, *v1.0.0*). Tags make it possible to rebuild exactly what was implemented and to roll back.
-- **Branches.** Releases are implemented from *develop* or *main* (conventions of *00-governance/git-conventions.md*); never from a *feature/\** branch.
-- **Images.** The Compose file builds *lavarapido/\<service\>:local* images. To keep the previous release, each image can be tagged with the current release before rebuilding (*docker tag lavarapido/booking-service:local lavarapido/booking-service:v0.9.0*).
+- **Tagging.** Each implemented release is tagged in the code repositories with the same name (semantic versioning: *vMAJOR.MINOR.PATCH*, for example, *v1.0.0*). Tags make it possible to rebuild exactly what was implemented and to roll back. Status as of October 23, 2026: *v1.0.0* in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra); payment-service and the mobile app are missing, and *develop* already has that day's fixes for *v1.1.0*.
+- **Branches.** Releases are implemented from *main*, which has the tagged version; payment-service, while it has no release, from *develop*; never from a *feature/\** branch. The public server keeps deploying *develop* until continuous deployment is activated, which deploys *main* (Deployment Document, section 4.3.4).
+- **Images.** The Compose file builds *lavarapido/\<service\>:local* images. To keep the previous release, each image is tagged before rebuilding (*docker tag lavarapido/booking-service:local lavarapido/booking-service:prev*, or with the name of the current version, *:v1.0.0*); to go back, do the reverse and *docker compose up -d --no-build \<service\>*. The server scripts do not do this on their own yet.
 - **Database.** The schema is versioned with Liquibase; each service keeps its history in *DATABASECHANGELOG_\<SERVICE\>* (payments in *DATABASECHANGELOG_PAYMENT*). An executed changeset is never edited.
-- **Configuration.** *.env.example* is versioned; *.env* is not. Every new variable is added to *.env.example* with a comment and to the *environment* block of the service in *docker-compose.yml*. Those of October 21, 2026 (*SESSION_CHECK_\**, *BOOKING_EXPIRY_\**, and *FOLLOW_UP_\**) do not follow this rule yet (action ACO-14).
+- **Configuration.** *.env.example* is versioned; *.env* is not. Every new variable is added to *.env.example* with a comment and to the *environment* block of the service in *docker-compose.yml*. Those of October 21, 2026 (*SESSION_CHECK_\**, *BOOKING_EXPIRY_\**, and *FOLLOW_UP_\**, nine variables) already follow this rule (action ACO-14, closed on October 23, 2026), as do *ALLOWED_EMAIL_DOMAINS* and *DEMO_\*_PASSWORD* of October 23.
 - **Documentation.** The version control of each manual records the software release it corresponds to.
 
 ## 14. Implementation Risks
@@ -595,7 +599,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
 | R-I01 | The operations repository is cloned as *lavarapido-operations-service* and the Compose build fails. | Medium | High | Clone with the original name *lavarapido-operation-service* (phase 1). |
 | R-I02 | *MESSAGING_ENABLED=false* or an empty *INTERNAL_API_KEY* remain, and notifications and emails do not arrive. | Medium | Medium | Values of Table 6 and tests H2, H7, and H8. |
 | R-I03 | The release is implemented with the *dev* profile, leaving demonstration accounts and Swagger exposed. | Medium | High | *SPRING_PROFILES_ACTIVE=prod*; Annex A. |
-| R-I04 | The public server is off when it is needed (it is turned on on demand). | Medium | Medium | Tell the DevOps owner in advance and run *deploy/update-server.sh* after the last push. |
+| R-I04 | The public server is off when it is needed (it is turned on on demand). | Medium | Medium | Tell the DevOps owner in advance and run *deploy/update-server.sh* after the last push. With continuous deployment (prepared on October 23, 2026, not yet merged or tested), what enters *main* while the machine is off is deployed on its own when it is turned on (*deploy/boot-update.sh*); for the presentation the machine is turned on beforehand and *main* is frozen. |
 | R-I05 | There is no request rate limit in the gateway or in Caddy (TD-022); account lockout only protects each account separately. | Medium | Medium | Long and unique passwords for the administrators; review the Caddy logs. |
 | R-I06 | A wrongly loaded QR code or payment account sends the money to a third party. | Low | High | Step 9 of Table 7. |
 | R-I07 | Data loss caused by *docker compose down -v* or a damaged volume. | Low | High | Pre-implementation backup (phase 3) and daily backup, both verified; on the public server they are automatic (Deployment Document, section 3.2). |

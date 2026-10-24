@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-21 de octubre de 2026
+23 de octubre de 2026
 
-Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.5
+Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.6
 
 ## Control de Versiones
 
@@ -35,6 +35,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 2.3 | 2026-10-20 | Revisión contra el código del 20 de octubre de 2026: criterio E2 con las pruebas del 19 de octubre (655 automatizadas y 19 de punta a punta) y colas de RabbitMQ corregidas (la cola de operations-service no tiene cola de mensajes muertos) y plan de comunicación (el panel no envía avisos generales). | Equipo de desarrollo |
 | 2.4 | 2026-10-21 | Revisión contra el código y el servidor del 21 de octubre de 2026: criterio E2 con las pruebas de ese día (689 automatizadas y 19 de punta a punta), respaldo previo automático en el servidor público (fase 3, monitoreo y reversión), prueba de humo H10 (el token de una sesión cerrada deja de servir), variables nuevas con valor por defecto, actualizaciones de la app sin APK nuevo y riesgo R-I11. | Equipo de desarrollo |
 | 2.5 | 2026-10-21 | Revisión contra el código de la noche del 21 de octubre de 2026: criterio E2 con la ejecución final de ese día (707 pruebas automatizadas y 19 de punta a punta), variables *FOLLOW_UP_\** de operations-service, prueba de humo H11 (lista "Por cerrar" del administrador) y regla de configuración actualizada. Las reservas confirmadas con operario que nadie registró ya no se cierran solas como "No asistió": las resuelve el administrador. | Equipo de desarrollo |
+| 2.6 | 2026-10-23 | Revisión contra *develop* del 23 de octubre de 2026 y la versión *v1.0.0*: clonado que funciona (payment-service desde *develop* hasta su primera versión), reversión sin la etiqueta inexistente *v0.9.0* y sin *update-server.sh*, respaldo previo sin *COMPRESSION* (SQL Server Express no la admite), criterio E2 con las pruebas del 23 de octubre (825 automatizadas y 13 de la app móvil; las 19 de punta a punta, solo en local), criterio E4 con la excepción de payment y móvil, variables del compose (ACO-14 cerrada), *INTERNAL_API_KEY* obligatoria para el operario, cuentas demo por variables, aviso de puertos en la red local y despliegue continuo preparado y sin probar (riesgo R-I04). Incluye el contenido de las ramas *fix/A-05*, *fix/A-08*, *fix/B-02* y *fix/E-20* de Merari Urbano. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -121,7 +122,7 @@ Establecer un procedimiento ordenado, verificable y reversible para poner en ope
 
 ### 6.1 Qué Cubre Este Procedimiento
 
-- La implementación de una versión etiquetada del backend (seis servicios y gateway), la base de datos, la mensajería y la aplicación web en un equipo con Docker de la red local o en el servidor público (una máquina virtual de Azure con Docker, Caddy y HTTPS que el equipo enciende cuando la necesita).
+- La implementación de una versión etiquetada del backend (seis servicios y gateway), la base de datos, la mensajería y la aplicación web en un equipo con Docker de la red local o en el servidor público (una máquina virtual de Azure con Docker, Caddy y HTTPS que el equipo enciende cuando la necesita). **Aviso:** el *docker-compose.yml* de desarrollo publica en el equipo los puertos 1433 (SQL Server con la cuenta *sa*), 5672 y 15672 (RabbitMQ), 1025 y 8025 (Mailpit) y 3001 a 3006 (cada servicio sin pasar por el gateway); en la red local cualquier equipo los alcanza. Para un uso real se recomienda el servidor público con *docker-compose.prod.yml*, que no publica ninguno; si se usa la red local, bloquear esos puertos en el firewall del equipo y dejar abiertos solo 8080 y 4200.
 - La implementación inicial (primera puesta en marcha en el lavadero o en el equipo de evaluación) y las implementaciones posteriores de nuevas versiones.
 - La carga de los datos maestros del negocio (horario, bahías, servicios, precios, puntos, cuentas de pago, operarios y promociones).
 - Las pruebas de humo, las pruebas de aceptación, la capacitación, la puesta en marcha, el soporte posterior y la reversión.
@@ -199,7 +200,7 @@ Se descarta la implementación paralela completa (operar a la vez en papel y en 
 
 ## 9. Entorno de Destino y Componentes
 
-El entorno de destino es un equipo o servidor con Docker (Windows 10 u 11 con WSL 2, Ubuntu 22.04 o posterior, o macOS) que ejecuta todos los componentes de la Tabla 4 con *docker compose --profile app*. Los requisitos de hardware y software y los puertos son los de las secciones 6 y 7 del Manual de Instalación (mínimo 4 núcleos, 8 GB de RAM con 5 GB para Docker y 20 GB de disco libre; recomendado 16 GB de RAM y SSD). En el servidor público se agrega *docker-compose.prod.yml*: la web se sirve compilada desde un contenedor con nginx, Caddy publica solo los puertos 80 y 443 con HTTPS y ningún servicio interno queda expuesto.
+El entorno de destino es un equipo o servidor con Docker (Windows 10 u 11 con WSL 2, Ubuntu 22.04 o posterior, o macOS) que ejecuta todos los componentes de la Tabla 4 con *docker compose --profile app*. Los requisitos de hardware y software y los puertos son los de las secciones 6 y 7 del Manual de Instalación (mínimo 4 núcleos, 8 GB de RAM con 5 GB para Docker y 20 GB de disco libre; recomendado 16 GB de RAM y SSD). En el servidor público se agrega *docker-compose.prod.yml*: la web se sirve compilada desde un contenedor con nginx, Caddy publica solo los puertos 80 y 443 con HTTPS y ningún servicio interno queda expuesto. Sin ese archivo (red local) quedan publicados 1433, RabbitMQ, Mailpit y 3001 a 3006: ver el aviso de la sección de alcance.
 
 **Tabla 4**
 
@@ -235,9 +236,9 @@ La implementación **no comienza** hasta que se cumplan todos los criterios de l
 | N.° | Criterio | Evidencia |
 |---|---|---|
 | E1 | El código de la versión está integrado en *develop* (o en *main*) de los once repositorios, sin trabajo sin confirmar. | *git status* limpio y *git log* con el último commit de cada repositorio. |
-| E2 | Las pruebas automáticas pasan: *./mvnw -B verify* en los servicios Java y en el gateway, *dotnet test* en payment-service, *ng test* en la web y la suite de punta a punta de *lavarapido-infra/e2e* contra los contenedores. | Resúmenes sin fallos (ejecución final del 21 de octubre de 2026: 707 pruebas automatizadas y 19 de punta a punta). |
+| E2 | Las pruebas automáticas pasan: *./mvnw -B verify* en los servicios Java y en el gateway, *dotnet test* en payment-service, *ng test* en la web, *npx jest* en la app móvil y la suite de punta a punta de *lavarapido-infra/e2e* contra los contenedores, que se corre en local porque el CI solo revisa su sintaxis. | Resúmenes sin fallos. Último CI de *develop* (23 de octubre de 2026, noche): 825 pruebas automatizadas en la web, el gateway y los seis servicios (7 de integración de payment omitidas sin SQL Server) y 13 de la app móvil; la suite de punta a punta (19 pruebas) se ejecutó por última vez el 21 de octubre de 2026. |
 | E3 | La aplicación web compila en modo producción (*npx ng build*). | Carpeta *dist/* generada sin errores. |
-| E4 | La versión está etiquetada en cada repositorio (por ejemplo, *v1.0.0*) (sección 13). | *git tag* en cada repositorio. |
+| E4 | La versión está etiquetada en cada repositorio (por ejemplo, *v1.0.0*) (sección 13). Al 23 de octubre de 2026 *v1.0.0* existe en 8 repositorios; payment-service y la app móvil todavía no tienen etiqueta y se implementan desde *develop* hasta su primera versión (excepción registrada en el documento de acciones correctivas). | *git tag* en cada repositorio. |
 | E5 | Los manuales de instalación, administrador y usuario corresponden a la versión (versión 4.0 o posterior). | Control de versiones de los manuales. |
 | E6 | Las incidencias abiertas de severidad P0 y P1 están resueltas; las P2 y P3 están registradas con su acción en el documento de acciones correctivas, preventivas y de mejoramiento. | Registro de acciones actualizado. |
 | E7 | El entorno de destino cumple los requisitos de hardware, software y puertos. | Lista de verificación del Anexo A. |
@@ -269,7 +270,7 @@ Cada fase indica su responsable, su duración estimada, los pasos y la evidencia
 
 1. Instalar y verificar Git, Docker con Compose v2, JDK 21, .NET 8 SDK y Node.js 22 LTS (Manual de Instalación, sección 7.1). En Windows, confirmar que Docker usa el motor Linux con WSL 2.
 2. Comprobar que los puertos 1433, 5672, 15672, 1025, 8025, 3001 a 3006, 8080 y 4200 estén libres. Si hay un SQL Server nativo de Windows en el 1433, detener el servicio *MSSQLSERVER*.
-3. Clonar los repositorios **uno al lado del otro y con su nombre original**, en la etiqueta de la versión. El repositorio de operaciones se llama *lavarapido-operation-service* (en singular) y *docker-compose.yml* lo construye con ese nombre: clonarlo con otro nombre hace fallar la construcción.
+3. Clonar los repositorios **uno al lado del otro y con su nombre original**, en la etiqueta de la versión. Al 23 de octubre de 2026 la etiqueta *v1.0.0* existe en 8 repositorios; **payment-service todavía no la tiene** (su *main* es el esqueleto del 30 de septiembre) y se clona desde *develop*, como en el bloque de abajo, hasta que tenga su primera versión. Los arreglos del 23 de octubre están en *develop* y llegarán con *v1.1.0*: para probarlos antes, reemplazar *-b v1.0.0* por *-b develop*. El repositorio de operaciones se llama *lavarapido-operation-service* (en singular) y *docker-compose.yml* lo construye con ese nombre: clonarlo con otro nombre hace fallar la construcción.
 
 ```bash
 mkdir Backend && cd Backend
@@ -279,7 +280,7 @@ for repo in lavarapido-infra lavarapido-security-service lavarapido-api-gateway 
 done
 git clone -b v1.0.0 https://github.com/camiloguilombo12/lavarapido-customer-service.git
 git clone -b v1.0.0 https://github.com/camiloguilombo12/lavarapido-booking-service.git
-git clone -b v1.0.0 https://github.com/merari0322/lavarapido-payment-service.git
+git clone -b develop https://github.com/merari0322/lavarapido-payment-service.git   # sin etiqueta todavía
 cd .. && mkdir Frontend && cd Frontend
 git clone -b v1.0.0 https://github.com/BrayanCABRERA123/Front-end-proyecto-web.git
 ```
@@ -302,8 +303,9 @@ git check-ignore -v .env      # debe mostrar la regla de .gitignore
 |---|---|---|
 | DB_PASSWORD | Contraseña fuerte nueva (8 o más caracteres con mayúscula, minúscula, número y símbolo). | SQL Server rechaza las débiles; nunca reutilizar la de desarrollo. |
 | JWT_SECRET | Valor aleatorio de al menos 32 bytes (*openssl rand -base64 48*). | Firma de los tokens; el mismo para todos los servicios. |
-| INTERNAL_API_KEY | Valor aleatorio (*node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"*). | Sin ella no se envían por correo los avisos de reserva, de pago ni los recordatorios. |
-| SPRING_PROFILES_ACTIVE | *prod* (cualquier valor distinto de *dev*). | Con *dev* (valor por defecto del archivo de Compose) se crean cuentas de demostración y se publica Swagger. |
+| INTERNAL_API_KEY | Valor aleatorio (*node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"*). | Sin ella no se envían por correo los avisos de reserva, de pago ni los recordatorios, no hay asignación automática y, desde *develop* del 23 de octubre de 2026 (E-01), el operario no puede iniciar ni terminar servicios. |
+| SPRING_PROFILES_ACTIVE | *prod* (cualquier valor distinto de *dev*). | Con *dev* (valor por defecto del archivo de Compose) se publica Swagger y se crean las cuentas de demostración cuya contraseña esté en *DEMO_ADMIN_PASSWORD*, *DEMO_OPERATOR_PASSWORD* o *DEMO_CLIENT_PASSWORD* (vacía: esa cuenta no se crea). |
+| ALLOWED_EMAIL_DOMAINS | *gmail.com* (por defecto) o la lista de dominios del negocio, separados por comas. | Desde *develop* del 23 de octubre de 2026 (A-01), security-service solo acepta esos dominios al registrar, crear usuarios y cambiar el correo (400 *EMAIL_DOMAIN_NOT_ALLOWED*). |
 | MESSAGING_ENABLED | *true* | Con *false* (valor por defecto) no se generan notificaciones, ni puntos notificados, ni perfiles por evento. |
 | RABBITMQ_USERNAME, RABBITMQ_PASSWORD | Usuario y contraseña nuevos (no *guest*). | El panel de RabbitMQ no debe quedar con credenciales por defecto. |
 | MAIL_ENABLED, MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM, MAIL_DOCKER_HOST | *true*, *smtp.gmail.com*, *587*, cuenta del negocio, contraseña de aplicación y *smtp.gmail.com* para Docker. | Mailpit solo atrapa correos; en operación real se usa un SMTP real. |
@@ -311,7 +313,7 @@ git check-ignore -v .env      # debe mostrar la regla de .gitignore
 | ADMIN_EMAIL, ADMIN_PASSWORD | Correo y contraseña del primer administrador (solo la primera vez). | security-service crea la cuenta al arrancar si todavía no hay ningún administrador. |
 | PUSH_ENABLED | *true* cuando la aplicación móvil instalada es el APK compilado con EAS. | Expo Go no recibe notificaciones push remotas. |
 | BOOKING_ZONE | *America/Bogota* | Zona horaria del lavadero; el sistema guarda UTC. |
-| SESSION_CHECK_\*, BOOKING_EXPIRY_\*, FOLLOW_UP_\* | No se definen. | Tienen valor por defecto (chequeo de sesión del gateway activo con 30 s y 3 s; cancelación de las reservas programadas que vencieron sin confirmarse cada 5 minutos, con 60 minutos de margen después del fin; seguimiento de operations-service cada 5 minutos para las reservas que terminaron y nadie cerró, que usa el mismo margen y *INTERNAL_API_KEY*) y el archivo de Compose no las pasa a los contenedores. |
+| SESSION_CHECK_\*, BOOKING_EXPIRY_\*, FOLLOW_UP_\* | Opcionales (comentadas en *.env.example* y *.env.production.example*). | Tienen valor por defecto (chequeo de sesión del gateway activo con 30 s y 3 s; cancelación de las reservas programadas que vencieron sin confirmarse cada 5 minutos, con 60 minutos de margen después del fin; seguimiento de operations-service cada 5 minutos para las reservas que terminaron y nadie cerró en los últimos 28 días, *FOLLOW_UP_LOOK_BACK_DAYS*, que usa el mismo margen y *INTERNAL_API_KEY*). Son nueve y *docker-compose.yml* las pasa a los contenedores. |
 
 *Nota.* Elaborado por los autores a partir de *.env.example* y *docker-compose.yml*. Los valores secretos se escriben solo en el archivo *.env*; nunca en un mensaje, un documento compartido o un repositorio.
 
@@ -343,12 +345,14 @@ En el servidor público esta fase es automática: *deploy/update-server.sh* corr
 1. Generar un respaldo completo con suma de comprobación y verificarlo (Manual de Administrador, sección 14.3):
 
 ```bash
-docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
-  "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/pre_v1.0.0.bak' WITH INIT, CHECKSUM, COMPRESSION"
-docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$DB_PASSWORD" -C -Q \
-  "RESTORE VERIFYONLY FROM DISK = N'/var/opt/mssql/data/pre_v1.0.0.bak' WITH CHECKSUM"
-docker cp lavarapido-sqlserver:/var/opt/mssql/data/pre_v1.0.0.bak ./backups/
+docker compose exec -e SQLCMDPASSWORD="$DB_PASSWORD" sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -b -Q \
+  "BACKUP DATABASE [LavaRapido] TO DISK = N'/var/opt/mssql/data/pre_v1.1.0.bak' WITH INIT, CHECKSUM"
+docker compose exec -e SQLCMDPASSWORD="$DB_PASSWORD" sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -b -Q \
+  "RESTORE VERIFYONLY FROM DISK = N'/var/opt/mssql/data/pre_v1.1.0.bak' WITH CHECKSUM"
+docker cp lavarapido-sqlserver:/var/opt/mssql/data/pre_v1.1.0.bak ./backups/
 ```
+
+El comando no usa *COMPRESSION*: SQL Server Express, la edición del servidor público, no la admite y el respaldo fallaría; *backup-db.sh* comprime después con *gzip*. La contraseña se le entrega a *sqlcmd* en la variable *SQLCMDPASSWORD* y no con *-P*, como hace *backup-db.sh*. En el servidor público no se escribe este comando: se usa *bash ~/lavarapido/lavarapido-infra/deploy/backup-db.sh* y, para probar que el respaldo sirve, *deploy/verify-backup.sh*.
 
 2. Guardar una copia cifrada del archivo *.env* vigente, separada del respaldo de datos.
 3. Anotar la etiqueta de la versión que está en operación: es la versión a la que se vuelve si hay que revertir (sección 12).
@@ -567,7 +571,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
 ```
 
 3. Restaurar el respaldo previo de la fase 3 (Manual de Administrador, sección 15.2). En el servidor público se usa *bash deploy/restore-db.sh \<respaldo.bak.gz\>*: pide escribir *RESTAURAR*, guarda antes un respaldo de cómo estaba la base, detiene los servicios, restaura y los vuelve a levantar. Los changesets de Liquibase solo avanzan, por lo que **no se deshace una migración con otra**: se restaura la base de datos al estado anterior a la versión.
-4. En cada repositorio, volver a la etiqueta anterior (*git checkout v0.9.0*), reconstruir y levantar: *docker compose --profile app up -d --build*.
+4. En cada repositorio afectado, volver a la versión anterior anotada en la fase 3: su etiqueta (la primera que existe es *v1.0.0*; no hay versiones anteriores etiquetadas) o, si no tiene, su commit (*git checkout \<etiqueta o commit\>*); luego reconstruir y levantar: *docker compose --profile app up -d --build*. En el servidor público no se hace así, porque *update-server.sh* vuelve a bajar la punta de la rama: se revierte el cambio en GitHub (*git revert* en una rama con su PR) y se despliega de nuevo o, de urgencia, se vuelve a la imagen guardada como *:prev* (Documento de Despliegue, sección 3.4).
 5. Restaurar el archivo *.env* anterior si la versión había agregado variables.
 6. Repetir las pruebas de humo de la sección 11.9.
 7. Comunicar el restablecimiento indicando la fecha y la hora de los últimos datos recuperados; los pagos recibidos después del respaldo se concilian con el extracto bancario.
@@ -577,11 +581,11 @@ docker compose stop api-gateway security-service customer-service booking-servic
 
 ## 13. Gestión de la Configuración de la Versión
 
-- **Etiquetado.** Cada versión implementada se etiqueta en los once repositorios con el mismo nombre (versionado semántico: *vMAYOR.MENOR.PARCHE*, por ejemplo, *v1.0.0*). Las etiquetas permiten reconstruir exactamente lo implementado y revertir.
-- **Ramas.** Se implementa desde *develop* o *main* (convenciones de *00-governance/git-conventions.md*); nunca desde una rama *feature/\**.
-- **Imágenes.** El archivo de Compose construye imágenes *lavarapido/\<servicio\>:local*. Para conservar la versión anterior, antes de reconstruir se puede etiquetar cada imagen con la versión vigente (*docker tag lavarapido/booking-service:local lavarapido/booking-service:v0.9.0*).
+- **Etiquetado.** Cada versión implementada se etiqueta en los repositorios de código con el mismo nombre (versionado semántico: *vMAYOR.MENOR.PARCHE*, por ejemplo, *v1.0.0*). Las etiquetas permiten reconstruir exactamente lo implementado y revertir. Estado al 23 de octubre de 2026: *v1.0.0* en 8 repositorios (web, api-gateway, security, customer, booking, operations, notification e infra); faltan payment-service y la app móvil, y *develop* ya tiene los arreglos de ese día para *v1.1.0*.
+- **Ramas.** Se implementa desde *main*, que tiene la versión etiquetada; payment-service, mientras no tenga versión, desde *develop*; nunca desde una rama *feature/\**. El servidor público sigue desplegando *develop* hasta que se active el despliegue continuo, que despliega *main* (Documento de Despliegue, sección 4.3.4).
+- **Imágenes.** El archivo de Compose construye imágenes *lavarapido/\<servicio\>:local*. Para conservar la versión anterior, antes de reconstruir se etiqueta cada imagen (*docker tag lavarapido/booking-service:local lavarapido/booking-service:prev*, o con el nombre de la versión vigente, *:v1.0.0*); para volver se hace la operación inversa y *docker compose up -d --no-build \<servicio\>*. Los scripts del servidor todavía no lo hacen solos.
 - **Base de datos.** El esquema se versiona con Liquibase; cada servicio guarda su historial en *DATABASECHANGELOG_\<SERVICIO\>* (pagos en *DATABASECHANGELOG_PAYMENT*). Un changeset ejecutado nunca se edita.
-- **Configuración.** *.env.example* se versiona; *.env* no. Toda variable nueva se agrega a *.env.example* con un comentario y al bloque *environment* del servicio en *docker-compose.yml*. Las del 21 de octubre de 2026 (*SESSION_CHECK_\**, *BOOKING_EXPIRY_\** y *FOLLOW_UP_\**) todavía no cumplen esta regla (acción ACO-14).
+- **Configuración.** *.env.example* se versiona; *.env* no. Toda variable nueva se agrega a *.env.example* con un comentario y al bloque *environment* del servicio en *docker-compose.yml*. Las del 21 de octubre de 2026 (*SESSION_CHECK_\**, *BOOKING_EXPIRY_\** y *FOLLOW_UP_\**, nueve variables) ya cumplen esta regla (acción ACO-14, cerrada el 23 de octubre de 2026), igual que *ALLOWED_EMAIL_DOMAINS* y *DEMO_\*_PASSWORD* del 23 de octubre.
 - **Documentación.** El control de versiones de cada manual registra la versión del software a la que corresponde.
 
 ## 14. Riesgos de la Implementación
@@ -595,7 +599,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
 | R-I01 | El repositorio de operaciones se clona como *lavarapido-operations-service* y la construcción de Compose falla. | Media | Alto | Clonar con el nombre original *lavarapido-operation-service* (fase 1). |
 | R-I02 | Quedan *MESSAGING_ENABLED=false* o *INTERNAL_API_KEY* vacía y no llegan notificaciones ni correos. | Media | Medio | Valores de la Tabla 6 y pruebas H2, H7 y H8. |
 | R-I03 | Se implementa con el perfil *dev* y quedan cuentas de demostración y Swagger expuestos. | Media | Alto | *SPRING_PROFILES_ACTIVE=prod*; Anexo A. |
-| R-I04 | El servidor público está apagado cuando se necesita (se enciende bajo demanda). | Media | Medio | Avisar con anticipación al responsable de DevOps y ejecutar *deploy/update-server.sh* después del último push. |
+| R-I04 | El servidor público está apagado cuando se necesita (se enciende bajo demanda). | Media | Medio | Avisar con anticipación al responsable de DevOps y ejecutar *deploy/update-server.sh* después del último push. Con el despliegue continuo (preparado el 23 de octubre de 2026, todavía sin fusionar ni probar), lo que entra a *main* con la máquina apagada se despliega solo al encenderla (*deploy/boot-update.sh*); para la exposición la máquina se enciende antes y se congela *main*. |
 | R-I05 | No hay límite de solicitudes en el gateway ni en Caddy (TD-022); el bloqueo de cuentas solo protege cada cuenta por separado. | Media | Medio | Contraseñas largas y únicas para los administradores; revisar los registros de Caddy. |
 | R-I06 | Un código QR o una cuenta de pago mal cargada envía el dinero a un tercero. | Baja | Alto | Paso 9 de la Tabla 7. |
 | R-I07 | Pérdida de datos por *docker compose down -v* o por un volumen dañado. | Baja | Alto | Respaldo previo (fase 3) y respaldo diario, ambos verificados; en el servidor público son automáticos (Documento de Despliegue, sección 3.2). |
