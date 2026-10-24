@@ -4,6 +4,23 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-10-23 — Versión v1.0.0, arreglos del 23 de octubre, despliegue continuo y no conformidades reales
+
+**Contenido** (español e inglés). Revisión contra `develop` del 23 de octubre de 2026, la versión `v1.0.0` y la revisión del sistema de ese día. Incluye y traduce al inglés el contenido de las ramas `fix/*` que Merari Urbano subió ese día a este repositorio (A-01, A-03 a A-08, A-15, B-02, C-01, D-01, E-02, E-07 y E-20), corregido donde el código ya había cambiado (por ejemplo, el botón "Desplegar en Azure" ya existe en `main` y `v1.0.0` ya existe en 8 repositorios); esas ramas quedan sustituidas por `docs/update-october-23`.
+
+- Versiones y ramas: `v1.0.0` el 23 de octubre en 8 repositorios (web, api-gateway, security, customer, booking, operations, notification e infra); payment-service y la app móvil sin versión; `develop` otra vez adelante con los arreglos del día, que saldrán en `v1.1.0` (07 Despliegue 1.7, 09 Instalación 4.6, 09 Técnico 4.7, 11 Evidencias, README).
+- Despliegue: el servidor se actualizó por última vez el 22 de octubre (semilla 112 y migraciones 040 y 041); el despliegue continuo quedó preparado en ramas locales de `lavarapido-infra` y de cinco repositorios, **sin fusionar ni probar en vivo** (07 Despliegue §4.3.4, Procedimiento, Manual de Administrador §14.6, Manual Técnico §15.4, Diseño, Evidencias, README).
+- Comandos que funcionan: clonado de payment-service desde `develop`, reversión sin la etiqueta inexistente `v0.9.0` ni `update-server.sh`, respaldo sin `WITH COMPRESSION` (SQL Server Express no la admite) remitiendo a `backup-db.sh` y `verify-backup.sh`, tarea de `cron` que no depende de `DB_PASSWORD` ni pasa la contraseña con `-P`, perfil `preview` de EAS y script SQL global que no existe (07 Procedimiento 2.6, 09 Administrador 4.7, 09 Instalación 4.6).
+- 08 Acciones 2.7: ACO-14 cerrada (AC-55); arreglos del 23 de octubre cerrados con su commit (AC-56 a AC-71) y documentación (AC-72); ACO-15 a ACO-32 abiertas (entre ellas SEC-01, BIZ-01, BIZ-02, OPS-01, CD-01 y las salvedades de los arreglos del día); Tabla 10 recalculada (72 de 92; dos P1 abiertas, así que el criterio E6 no se cumple); mejoras AM-17 y AM-18; Anexo D con los 25 hallazgos del instructor y su estado.
+- 01 SRS 7.9: 11 RF y 9 RNF parciales, con su motivo (Tabla 57 y tablas de requisitos); RF-001 con `ALLOWED_EMAIL_DOMAINS`; RF-004 y CU04 con la revocación de sesiones; el 01 es el SRS vigente y `SRS_V4.docx` es la versión anterior V4 del 8 de octubre.
+- 06 Pruebas y conteos: último CI de `develop` del 23 de octubre con 838 pruebas (web 146, gateway 39, security 171, customer 71, booking 60, operations 72, notification 115, payment 151 con 7 omitidas, y 13 de la app móvil); inventario de 735 métodos; matriz de trazabilidad con los parciales (06, 01 Tabla 58, 08 Tabla 10, 09 Técnico §16.5, artículos).
+- 09 Usuario 4.7: capítulo nuevo de la app móvil Android para los tres roles (sección 10.3), hecho con las 31 pantallas de la app; regla del operario (desde 15 minutos antes, sin límite posterior) y quitar el cupón.
+- 09 Técnico 4.7 y 04 Diseño 1.6: patrón MVVM de la web (36 ViewModels), capas y actualizaciones (APK obligatorio y EAS Update) de la app móvil, "una base `LavaRapido` con un esquema por servicio" en lugar de "base de datos por servicio", candado del login y chequeo de sesión con *fail-open* y SEC-01.
+- "Por cerrar" de 28 días (`FOLLOW_UP_LOOK_BACK_DAYS`), cierre de sesiones al cambiar o recuperar la contraseña y candado del login, y las variables que ya pasa el compose (`FOLLOW_UP_LOOK_BACK_DAYS`, `ALLOWED_EMAIL_DOMAINS`, `DEMO_*_PASSWORD`, `INTERNAL_API_KEY` obligatoria para el operario, `ADMIN_DOCUMENT` y `ADMIN_PHONE`) en los manuales, el procedimiento, el despliegue y el diseño.
+- 11 Evidencias: tabla de repositorios con su versión, `main` y `develop`; nota de seguridad corregida (quedan secretos antiguos, sin copiarlos); marcadores "[Completar]" llenados o con su responsable; lista de verificación con su estado.
+- Otros: ancla rota del Manual de Administrador (10.3), nota que explica la numeración que empieza en 4 (procedimiento, 08 y los cuatro manuales), Node.js 22 en 05 Artefactos, 02 Análisis 2.5 (recuperación que revoca sesiones y *fail-open*), artículos con `v1.0.0`, Tablas 4 y 5 al día y versiones citadas, e índice de este README.
+- **PDF y Word: pendientes de regenerar** con el generador APA 7 del equipo para 01, 02, 04, 05, 06, 07 (procedimiento y despliegue), 08, 09 (los cuatro manuales), 10 (los tres artículos) y 11 (solo PDF). Los de 03 Propuesta técnica siguen en la 1.3 aunque el Markdown está en la 1.4. Esta entrada solo cambia los Markdown.
+
 ## 2026-10-21 — Código del 21 de octubre, servidor con respaldos y pruebas del día
 
 **Contenido** (español e inglés)
@@ -16,7 +33,8 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 - 08 Acciones 2.6: AC-45 ajustada; correctivas AC-53 (riesgo de registrar como "No asistió" un servicio que sí se hizo, encontrado en la revisión del equipo y corregido con la lista "Por cerrar") y AC-54 (campo `null` que mandaba el evento a la cola de errores) cerradas; preventiva AP-19 y lección L-16; ACO-14 con las variables `FOLLOW_UP_*`; indicadores con las 707 pruebas.
 - Correcciones encontradas en la revisión: rutas que faltaban en la tabla del gateway y numeración de los changelogs (manual técnico), fecha y versión de la portada de los manuales de usuario y de administrador, 24 tipos de notificación y líneas de código citadas (diseño), y referencias de los artículos con las versiones vigentes de los documentos.
 - 11 Evidencias: estado del servidor y pruebas del 21 de octubre (707 automatizadas en la ejecución final).
-- PDF y Word: pendientes de regenerar con el generador del equipo; esta entrada solo cambia los Markdown.
+- Versiones de la noche del 21 de octubre: 01 SRS 7.8, 07 Procedimiento 2.5 y Despliegue 1.6, 08 Acciones 2.6 y manuales técnico, de usuario y de administrador 4.6 y de instalación 4.5 (el índice del README quedó una versión atrás y se corrigió el 23 de octubre).
+- PDF y Word: el equipo los regeneró con su generador después de esta entrada, salvo los de 03 Propuesta técnica, que quedaron en la 1.3.
 
 ## 2026-10-20 — Revisión completa contra el código y diagramas sin cruces
 
