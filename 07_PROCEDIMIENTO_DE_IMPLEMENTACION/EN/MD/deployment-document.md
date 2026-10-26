@@ -40,7 +40,7 @@
 | Actual duration | ~2 h 30 min (provisioning, image builds, HTTPS setup and testing) |
 | User downtime | Not applicable: first deployment (no users in production yet) |
 | Window for future updates | Outside the car wash's business hours (before 07:00 or after 18:00) |
-| Latest update | 2026-10-24 at 17:12 UTC: notification-service only, with migration 048, which fixes reading `pending_delivery` (1.3.10). Before that, the same day around 15:10: the complete `develop` of the 10 repositories (fixes of October 23 and 24, 1.3.8 and 1.3.9), in two runs over SSH; 11 healthy containers, migrations 044, 045, and seed 113 (booking), 047 and seed 116 (notification), and 022 and 023 (payment) applied, and 0 errors in the logs. The previous update (2026-10-22) is in 1.3.7 |
+| Latest update | 2026-10-26 around 12:02 (Colombia time): booking-service, payment-service, and the web from `develop`, with payment at booking, booking migration 049 and seed 117 (1.3.11); services healthy and 0 errors. Before that, on 2026-10-24 at 17:12 UTC: notification-service only, with migration 048, which fixes reading `pending_delivery` (1.3.10). Before that, the same day around 15:10: the complete `develop` of the 10 repositories (fixes of October 23 and 24, 1.3.8 and 1.3.9), in two runs over SSH; 11 healthy containers, migrations 044, 045, and seed 113 (booking), 047 and seed 116 (notification), and 022 and 023 (payment) applied, and 0 errors in the logs. The previous update (2026-10-22) is in 1.3.7 |
 
 #### 1.1.3 Target environment (VPS / Staging / Production)
 
@@ -79,6 +79,7 @@
 | 1.8 | 2026-10-24 | Development team | Deployment of 2026-10-24 with `develop` (1.1.1, 1.1.2, and 1.3.9): two runs, health wait, `:prev` images, `rollback.sh`, and the protection that prevents downgrading; the web on port 8080 (2.2.3); new variables `AUTH_RATE_LIMIT_*`, `TRUSTED_PROXIES`, `ROUTE_*_TIMEOUT`, `START_LATE_LIMIT`, and `INTERNAL_API_KEY` and `BOOKING_SERVICE_URL` in customer-service (3.3.2); rollback with `rollback.sh` and restore with `payment-migrate` (3.2.4 and 3.4); continuous deployment merged into `develop`, without secrets (4.3.4); mobile OTA with `cd.yml`; CI of 2026-10-24 (4.3.3) |
 | 1.7 | 2026-10-23 | Development team | Version `v1.0.0` in 8 repositories and what is pending for payment and mobile (1.1.1); deployment of 2026-10-22 (1.3.7); fixes of 2026-10-23 in `develop` for `v1.1.0` (1.3.8); the variables the compose file already passes, `FOLLOW_UP_LOOK_BACK_DAYS` and `ALLOWED_EMAIL_DOMAINS` (3.3.2); a rollback that works (3.4); `setup-server.sh` from `main` (4.3.1); continuous deployment prepared and not yet tested live (4.3.4); QA and DBA owners (1.1.4). Includes the content of Merari Urbano's `fix/A-06`, `fix/A-07`, and `fix/A-08` branches |
 | 1.9 | 2026-10-24 | Development team | notification-service update of 2026-10-24 at 17:12 UTC with migration 048 and its result (1.3.10); latest update (1.1.2) |
+| 1.10 | 2026-10-26 | Development team | Deployment of payment at booking on 2026-10-26 around 12:02 (Colombia time): booking-service, payment-service, and the web, with their checks (1.3.11); new booking-service variables and `INTERNAL_API_KEY` required in payment-service (3.3.2); latest update (1.1.2) |
 
 ### 1.3 Change Summary (Release Notes)
 
@@ -228,6 +229,29 @@ While testing production after the 15:10 deployment (1.3.9), notification-servic
 - **Fix:** migration `048-notification-pending-delivery-nvarchar.sql` (commit `612417a`, merged into `develop` as `3f99df4`): `channel` NVARCHAR(10) NOT NULL and `language` NVARCHAR(5) NULL, with `uq_pending_delivery_channel` and `ck_pending_delivery_channel` re-created; `MARK_RAN` precondition and rollback. It was first tested in `tempdb` with the data kept, and the notification suite passed.
 - **Deployment:** notification-service only, on 2026-10-24 at 17:12 UTC.
 - **Result:** migration 048 applied; the 2 stuck deliveries went out at 17:13:50 (push) and 17:13:52 (email), and there have been no errors since. It is recorded as AC-87 in the Corrective Actions document.
+
+#### 1.3.11 Payment at booking: deployment of 2026-10-26 (around 12:02, Colombia time)
+
+So that nobody blocks the schedule with bookings they do not intend to pay for (a question from the preparation of the final presentation and a recommendation of the instructor), the customer chooses how they will pay when booking: with cash they can have at most 1 active booking (409 `CASH_BOOKING_LIMIT`), and a booking with digital payment without a receipt is cancelled automatically after 30 minutes, or at the start time if that comes first, with the reason `PAYMENT_TIMEOUT` (AC-88 and AC-89 in the Corrective Actions document). What was deployed:
+
+- **booking-service** (`develop` `db156cb`): `paymentMode` in `POST /api/v1/bookings` (400 `INVALID_PAYMENT_MODE`); `paymentMode`, `paymentDeadline`, and `paymentReported` in the booking views; migration `049-booking-payment-mode-deadline.sql` (`payment_mode` NVARCHAR(10), `payment_deadline`, `payment_reported_at`, and the filtered index `ix_booking_payment_pending`; `MARK_RAN` precondition and rollback) and seed `117-seed-payment-timeout-cancellation-reason.sql` (reason `PAYMENT_TIMEOUT`); queue `booking.payment-events` (with its `.dlq`) bound to `carwash.events` with `payment.reported` and `payment.confirmed`; the `PaymentDeadlineJob` task, which asks payment-service before cancelling. Global numbering after the change: structure max. 049 (next 050), seeds max. 117 (next 118); payment stays at 023.
+- **payment-service** (`develop` `d94cde5`): `payment.reported` event when a payment with a receipt is reported, and the internal path `GET /internal/v1/payments/bookings/{bookingId}/reported`, which requires `X-Internal-Key` (401 without a key or with a wrong one). Until now payment did not validate any internal key.
+- **Web** (`develop` `7f8aca5`): step 4 "How will you pay?", deadline and cash label in the history, payment screen according to the mode, payment method in the administrator's detail, and the Terms and Conditions of 2026-10-26.
+- **lavarapido-infra** (`develop` `0f949e5`): the booking variables and payment's internal key in the compose file (3.3.2).
+- **Mobile app** (`develop` `acf4e6d`): the same change, by OTA; it has not reached phones yet, because the OTA goes out when merged into `main` (*v1.1.0*) and the `EXPO_TOKEN` is missing.
+
+**How it was deployed.** With `BRANCH=develop` and the server update script (`update-server.sh`, section 4.3.3), booking-service, payment-service, and the web were deployed, and migration 049 and seed 117 were applied when booking-service started. `docker-compose.prod.yml` now requires `INTERNAL_API_KEY` for payment-service; since it was already in `.env.production` for the other services, payment started healthy.
+
+**Checks:**
+
+- All services were `healthy` and there were 0 errors in the logs.
+- The new columns of `booking.booking` are NVARCHAR and the `PAYMENT_TIMEOUT` reason exists.
+- The `booking.payment-events` queue has a consumer.
+- Payment's internal path answers 401 without a key and 200 `reported:true` with a key for a booking with an approved payment.
+- 0 failures when publishing events.
+- The team made a cash booking (#12) and a digital payment booking (#13, with its deadline at 13:06).
+
+The live tests run earlier locally, with the two simulated failures, are in the Test document, section 3.4.
 
 ---
 
@@ -505,6 +529,17 @@ Variables of 2026-10-24, all with a default value in the service; the compose fi
 | `START_LATE_LIMIT` | operations-service | `PT4H` | How long after the end time the operator can still start (409 `SERVICE_TOO_LATE`) |
 
 In addition, since 2026-10-24 **customer-service** receives `BOOKING_SERVICE_URL` (fixed in the compose file: `http://booking-service:3003`, the service root, without `/api/v1`) and `INTERNAL_API_KEY` (the same as the others; in production it is mandatory and, without it, the compose file does not start), to ask booking-service whether a vehicle has active bookings before removing it. Optional: `BOOKING_SERVICE_TIMEOUT` (3 s). In booking-service, `BOOKING_EXPIRY_CHECK_ENABLED` and `BOOKING_EXPIRY_CHECK_INTERVAL` no longer exist (the task was removed, B-07); the compose file still passes them with no effect (ACO-40). `ADMIN_DOCUMENT` and `ADMIN_PHONE` complete the ID number and mobile phone of the first administrator, next to `ADMIN_EMAIL` and `ADMIN_PASSWORD`. The `DEMO_*_PASSWORD` variables are not used in production: they only exist in the `dev` profile.
+
+Variables of 2026-10-26 (payment at booking). The four booking-service variables have defaults, are commented out in `.env.example`, and the compose file already passes them to the container, so they can be changed in `.env.production`:
+
+| Variable | Service | Default value | Purpose |
+|---|---|---|---|
+| `BOOKING_CASH_ACTIVE_LIMIT` | booking-service | `1` | Maximum active cash bookings per customer (409 `CASH_BOOKING_LIMIT`) |
+| `BOOKING_PAYMENT_WINDOW` | booking-service | `30m` | Deadline to upload the receipt of a booking with digital payment (or the start time, if that comes first) |
+| `BOOKING_PAYMENT_EXPIRY_ENABLED` | booking-service | `true` | Turns on `PaymentDeadlineJob`, which cancels overdue digital bookings with `PAYMENT_TIMEOUT` |
+| `BOOKING_PAYMENT_EXPIRY_INTERVAL` | booking-service | `60s` | How often that task runs |
+| `PAYMENT_SERVICE_URL` | booking-service | `http://payment-service:3005` (fixed in the compose file) | Root of payment-service for the internal query before cancelling |
+| `INTERNAL_API_KEY` | booking-service and payment-service | No default | The same as the other services. Since 2026-10-26 **payment-service also needs it**: `docker-compose.prod.yml` requires it (the compose file does not start without it) and, without it, payment's internal path stays closed and booking cancels no booking for lack of payment |
 
 #### 3.3.3 Memory and runtime limits (JVM -Xmx, ASPNETCORE_ENVIRONMENT)
 

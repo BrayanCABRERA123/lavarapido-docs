@@ -40,7 +40,7 @@
 | Duración real | ~2 h 30 min (aprovisionamiento, compilación de imágenes, configuración de HTTPS y pruebas) |
 | Interrupción a usuarios | No aplica: primer despliegue (no había usuarios en producción) |
 | Ventana para próximas actualizaciones | Fuera de horario de atención del lavadero (antes de las 07:00 o después de las 18:00) |
-| Última actualización | 24-10-2026 a las 17:12 UTC: solo notification-service, con la migración 048, que corrige la lectura de `pending_delivery` (1.3.10). Antes, ese mismo día hacia las 15:10: `develop` completo de los 10 repositorios (arreglos del 23-10 y del 24-10, 1.3.8 y 1.3.9), en dos corridas por SSH; 11 contenedores sanos, migraciones 044, 045 y semilla 113 (booking), 047 y semilla 116 (notification) y 022 y 023 (payment) aplicadas, y 0 errores en los registros. La actualización anterior (22-10-2026) está en 1.3.7 |
+| Última actualización | 26-10-2026 hacia las 12:02 (hora de Colombia): booking-service, payment-service y la web desde `develop`, con el pago al reservar, la migración 049 y la semilla 117 de booking (1.3.11); servicios sanos y 0 errores. Antes, el 24-10-2026 a las 17:12 UTC: solo notification-service, con la migración 048, que corrige la lectura de `pending_delivery` (1.3.10). Antes, ese mismo día hacia las 15:10: `develop` completo de los 10 repositorios (arreglos del 23-10 y del 24-10, 1.3.8 y 1.3.9), en dos corridas por SSH; 11 contenedores sanos, migraciones 044, 045 y semilla 113 (booking), 047 y semilla 116 (notification) y 022 y 023 (payment) aplicadas, y 0 errores en los registros. La actualización anterior (22-10-2026) está en 1.3.7 |
 
 #### 1.1.3 Entorno de destino (VPS / Staging / Producción)
 
@@ -79,6 +79,7 @@
 | 1.8 | 2026-10-24 | Equipo de desarrollo | Despliegue del 24-10-2026 con `develop` (1.1.1, 1.1.2 y 1.3.9): dos corridas, espera de salud, imágenes `:prev`, `rollback.sh` y la protección que impide bajar de versión; la web en el puerto 8080 (2.2.3); variables nuevas `AUTH_RATE_LIMIT_*`, `TRUSTED_PROXIES`, `ROUTE_*_TIMEOUT`, `START_LATE_LIMIT`, e `INTERNAL_API_KEY` y `BOOKING_SERVICE_URL` en customer-service (3.3.2); reversión con `rollback.sh` y restauración con `payment-migrate` (3.2.4 y 3.4); despliegue continuo fusionado en `develop`, sin secretos (4.3.4); OTA del móvil con `cd.yml`; CI del 24-10-2026 (4.3.3) |
 | 1.7 | 2026-10-23 | Equipo de desarrollo | Versión `v1.0.0` en 8 repositorios y pendientes de payment y móvil (1.1.1); despliegue del 22-10-2026 (1.3.7); arreglos del 23-10-2026 en `develop` para `v1.1.0` (1.3.8); las variables que el compose ya pasa, `FOLLOW_UP_LOOK_BACK_DAYS` y `ALLOWED_EMAIL_DOMAINS` (3.3.2); reversión que funciona (3.4); `setup-server.sh` desde `main` (4.3.1); despliegue continuo preparado y todavía sin probar en vivo (4.3.4); responsables de QA y DBA (1.1.4). Incluye el contenido de las ramas `fix/A-06`, `fix/A-07` y `fix/A-08` de Merari Urbano |
 | 1.9 | 2026-10-24 | Equipo de desarrollo | Actualización de notification-service del 24-10-2026 a las 17:12 UTC con la migración 048 y su resultado (1.3.10); última actualización (1.1.2) |
+| 1.10 | 2026-10-26 | Equipo de desarrollo | Despliegue del pago al reservar del 26-10-2026 hacia las 12:02 (hora de Colombia): booking-service, payment-service y la web, con sus verificaciones (1.3.11); variables nuevas de booking-service y `INTERNAL_API_KEY` obligatoria en payment-service (3.3.2); última actualización (1.1.2) |
 
 ### 1.3 Resumen de Cambios (Release Notes)
 
@@ -228,6 +229,29 @@ Al probar producción después del despliegue de las 15:10 (1.3.9) se vio que no
 - **Corrección:** migración `048-notification-pending-delivery-nvarchar.sql` (commit `612417a`, merge a `develop` `3f99df4`): `channel` NVARCHAR(10) NOT NULL y `language` NVARCHAR(5) NULL, con `uq_pending_delivery_channel` y `ck_pending_delivery_channel` recreados; precondición `MARK_RAN` y rollback. Antes se probó en `tempdb` con los datos conservados, y la suite de notification pasó.
 - **Despliegue:** solo notification-service, el 24-10-2026 a las 17:12 UTC.
 - **Resultado:** migración 048 aplicada; las 2 entregas atascadas salieron a las 17:13:50 (push) y a las 17:13:52 (correo), y desde entonces no hay errores. Queda registrada como AC-87 en el documento de Acciones Correctivas.
+
+#### 1.3.11 Pago al reservar: despliegue del 26-10-2026 (hacia las 12:02, hora de Colombia)
+
+Para que nadie bloquee la agenda con reservas que no piensa pagar (pregunta de la preparación de la sustentación y recomendación del instructor), al reservar el cliente elige cómo va a pagar: en efectivo puede tener como máximo 1 reserva activa (409 `CASH_BOOKING_LIMIT`) y una reserva con pago digital sin comprobante se cancela sola a los 30 minutos, o a la hora de inicio si es más pronto, con el motivo `PAYMENT_TIMEOUT` (AC-88 y AC-89 del documento de Acciones Correctivas). Lo que se desplegó:
+
+- **booking-service** (`develop` `db156cb`): `paymentMode` en `POST /api/v1/bookings` (400 `INVALID_PAYMENT_MODE`); `paymentMode`, `paymentDeadline` y `paymentReported` en las vistas de reserva; migración `049-booking-payment-mode-deadline.sql` (`payment_mode` NVARCHAR(10), `payment_deadline`, `payment_reported_at` y el índice filtrado `ix_booking_payment_pending`; precondición `MARK_RAN` y rollback) y semilla `117-seed-payment-timeout-cancellation-reason.sql` (motivo `PAYMENT_TIMEOUT`); cola `booking.payment-events` (con su `.dlq`) unida a `carwash.events` con `payment.reported` y `payment.confirmed`; tarea `PaymentDeadlineJob`, que antes de cancelar le pregunta a payment-service. Numeración global después del cambio: estructura máx. 049 (siguiente 050), semillas máx. 117 (siguiente 118); payment sigue en 023.
+- **payment-service** (`develop` `d94cde5`): evento `payment.reported` al reportar un pago con comprobante y ruta interna `GET /internal/v1/payments/bookings/{bookingId}/reported`, que exige `X-Internal-Key` (401 sin llave o con una errada). Hasta ahora payment no validaba ninguna llave interna.
+- **Web** (`develop` `7f8aca5`): paso 4 "¿Cómo vas a pagar?", plazo y etiqueta de efectivo en el historial, pantalla de pago según el modo, forma de pago en el detalle del administrador y Términos y Condiciones del 26-10-2026.
+- **lavarapido-infra** (`develop` `0f949e5`): las variables de booking y la llave interna de payment en el compose (3.3.2).
+- **App móvil** (`develop` `acf4e6d`): el mismo cambio, por OTA; todavía no llega a los celulares, porque la OTA sale al fusionar a `main` (*v1.1.0*) y falta el `EXPO_TOKEN`.
+
+**Cómo se desplegó.** Con `BRANCH=develop` y el script de actualización del servidor (`update-server.sh`, sección 4.3.3) se desplegaron booking-service, payment-service y la web, y al arrancar booking-service se aplicaron la migración 049 y la semilla 117. `docker-compose.prod.yml` exige ahora `INTERNAL_API_KEY` para payment-service; como ya estaba en `.env.production` para los demás servicios, payment arrancó sano.
+
+**Verificaciones:**
+
+- Todos los servicios quedaron `healthy` y hubo 0 errores en los registros.
+- Las columnas nuevas de `booking.booking` quedaron en NVARCHAR y existe el motivo `PAYMENT_TIMEOUT`.
+- La cola `booking.payment-events` tiene consumidor.
+- La ruta interna de payment responde 401 sin llave y 200 `reported:true` con llave para una reserva con pago aprobado.
+- 0 fallas al publicar eventos.
+- El equipo hizo una reserva en efectivo (#12) y una con pago digital (#13, con plazo a las 13:06).
+
+Las pruebas en vivo hechas antes en local, con las dos fallas simuladas, están en el documento de Pruebas, sección 3.4.
 
 ---
 
@@ -505,6 +529,17 @@ Variables del 24-10-2026, todas con valor por defecto en el servicio; el compose
 | `START_LATE_LIMIT` | operations-service | `PT4H` | Hasta cuánto después de la hora de fin el operario puede iniciar (409 `SERVICE_TOO_LATE`) |
 
 Además, **customer-service** recibe desde el 24-10-2026 `BOOKING_SERVICE_URL` (fija en el compose: `http://booking-service:3003`, la raíz del servicio, sin `/api/v1`) e `INTERNAL_API_KEY` (la misma de los demás; en producción es obligatoria y, sin ella, el compose no arranca), para preguntar a booking-service si un vehículo tiene reservas activas antes de retirarlo. Opcional: `BOOKING_SERVICE_TIMEOUT` (3 s). En booking-service ya no existen `BOOKING_EXPIRY_CHECK_ENABLED` ni `BOOKING_EXPIRY_CHECK_INTERVAL` (la tarea se quitó, B-07); el compose todavía las pasa sin efecto (ACO-40). `ADMIN_DOCUMENT` y `ADMIN_PHONE` completan la cédula y el celular del primer administrador junto a `ADMIN_EMAIL` y `ADMIN_PASSWORD`. Las variables `DEMO_*_PASSWORD` no se usan en producción: solo existen en el perfil `dev`.
+
+Variables del 26-10-2026 (pago al reservar). Las cuatro de booking-service tienen valor por defecto, están comentadas en `.env.example` y el compose ya las pasa al contenedor, así que se pueden cambiar en `.env.production`:
+
+| Variable | Servicio | Valor por defecto | Para qué |
+|---|---|---|---|
+| `BOOKING_CASH_ACTIVE_LIMIT` | booking-service | `1` | Máximo de reservas activas en efectivo por cliente (409 `CASH_BOOKING_LIMIT`) |
+| `BOOKING_PAYMENT_WINDOW` | booking-service | `30m` | Plazo para subir el comprobante de una reserva con pago digital (o la hora de inicio, si es más pronto) |
+| `BOOKING_PAYMENT_EXPIRY_ENABLED` | booking-service | `true` | Activa `PaymentDeadlineJob`, que cancela con `PAYMENT_TIMEOUT` las reservas digitales vencidas |
+| `BOOKING_PAYMENT_EXPIRY_INTERVAL` | booking-service | `60s` | Cada cuánto corre esa tarea |
+| `PAYMENT_SERVICE_URL` | booking-service | `http://payment-service:3005` (fija en el compose) | Raíz de payment-service para la consulta interna antes de cancelar |
+| `INTERNAL_API_KEY` | booking-service y payment-service | Sin valor por defecto | La misma de los demás. Desde el 26-10-2026 **payment-service también la necesita**: `docker-compose.prod.yml` la exige (el compose no arranca sin ella) y, sin ella, la ruta interna de payment queda cerrada y booking no cancela ninguna reserva por falta de pago |
 
 #### 3.3.3 Límites de memoria y runtime (JVM -Xmx, ASPNETCORE_ENVIRONMENT)
 
