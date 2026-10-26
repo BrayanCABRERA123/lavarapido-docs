@@ -1444,16 +1444,16 @@ De los 41 requisitos funcionales, 38 están implementados y 3 parcialmente (RF-0
 
 | Componente | Comando | Pruebas | Fecha del conteo |
 |---|---|---|---|
-| Aplicación web (Angular) | `npx ng test --watch=false` | 212 (66 archivos) | 24 de octubre de 2026 |
-| api-gateway | `./mvnw verify` | 62 | 24 de octubre de 2026 |
-| security-service | `./mvnw verify` | 200 | 24 de octubre de 2026 |
-| customer-service | `./mvnw verify` | 82 | 24 de octubre de 2026 |
-| booking-service | `./mvnw verify` | 95 | 24 de octubre de 2026 |
-| operations-service | `./mvnw verify` | 110 | 24 de octubre de 2026 |
-| notification-service | `./mvnw verify` | 133 | 24 de octubre de 2026 |
-| payment-service | `dotnet test` | 225 | 24 de octubre de 2026 |
-| App móvil (React Native) | `npm test -- --ci` | 73 (25 suites) | 24 de octubre de 2026 |
-| **Total** | | **1 192** | |
+| Aplicación web (Angular) | `npx ng test --watch=false` | 239 | 26 de octubre de 2026 |
+| api-gateway | `./mvnw verify` | 62 | 26 de octubre de 2026 |
+| security-service | `./mvnw verify` | 200 | 26 de octubre de 2026 |
+| customer-service | `./mvnw verify` | 82 | 26 de octubre de 2026 |
+| booking-service | `./mvnw verify` | 133 | 26 de octubre de 2026 |
+| operations-service | `./mvnw verify` | 110 | 26 de octubre de 2026 |
+| notification-service | `./mvnw verify` | 133 | 26 de octubre de 2026 |
+| payment-service | `dotnet test` | 252 (+12 omitidas sin la base aislada) | 26 de octubre de 2026 |
+| App móvil (React Native) | `npm test -- --ci` | 100 | 26 de octubre de 2026 |
+| **Total** | | **1 311** | |
 
 *Nota.* Todas las pruebas pasaron en el CI de GitHub Actions del 24 de octubre de 2026. payment-service tiene además 11 de persistencia que necesitan SQL Server y se omiten en el CI (siete se corrieron contra una base aislada el 21 de octubre). El 23 de octubre de 2026 el total era 838; en la versión *v1.0.0*, 757, y el 21 de octubre, 707. `lavarapido-infra` tiene además una batería remota de 44 casos (*e2e/remote*, flujo *e2e.yml*) que se corre a mano contra el servidor público y que hasta ahora solo se probó contra un simulador (ACO-26). Además, `lavarapido-infra/e2e` tiene 19 pruebas de punta a punta que se ejecutan con el sistema levantado y que pasaron el 21 de octubre de 2026 con el chequeo de sesión del gateway activo: el flujo de reserva con elección de operario y asignación automática, el flujo completo de los tres roles (reserva, pago, aprobación con puntos, servicio y calificación), el informe de inspección con fotos y enlace público, y las reglas de acceso por rol. Los 42 casos funcionales de la Documentación de Pruebas se ejecutaron completos por última vez el 19 de octubre de 2026. La carpeta incluye también la medición de RNF-001 y la revisión de las pantallas web a 360 px (RNF-008). En la revisión manual del 9 de octubre se corrigieron una ruta que faltaba en el API Gateway (`/api/v1/loyalty/**`) y un estilo que desalineaba las insignias de las promociones.
 

@@ -217,6 +217,28 @@ Para el diseño adaptable (RNF-008) se recorrieron con Playwright (Edge sin vent
 
 El 23 de octubre de 2026 se etiquetó *v1.0.0* en 8 repositorios (757 pruebas) y el 24 de octubre se fusionaron a *develop* las 128 ramas de correcciones de los 10 repositorios. Antes de subir cada repositorio, sus ramas se fusionaron sobre *develop* en una copia aparte, se corrió la suite completa y se comprobó que lo subido fuera idéntico a lo probado. La Tabla 5d toma el último CI de GitHub Actions de *develop* de cada repositorio del 24 de octubre, todos en verde; ese mismo día ese código se desplegó en el servidor público. No se ejecutaron ese día las 19 pruebas de punta a punta locales ni los 42 casos funcionales; la batería remota nueva (44 casos, *e2e.yml*) solo se probó contra un simulador.
 
+**Tabla 5e**
+
+*Resultados de la ejecución completa sobre develop por artefacto (26 de octubre de 2026)*
+
+| Artefacto | Comando | Ejecutadas | Aprobadas | Fallidas | Omitidas | Frente al 24 de octubre (1 192) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Web (Angular) | `ng test` | 239 | 239 | 0 | 0 | +27 |
+| api-gateway | `./mvnw test` | 62 | 62 | 0 | 0 | Sin cambios |
+| security-service | `./mvnw test` | 200 | 200 | 0 | 0 | Sin cambios |
+| customer-service | `./mvnw test` | 82 | 82 | 0 | 0 | Sin cambios |
+| booking-service | `./mvnw test` | 133 | 133 | 0 | 0 | +38 (pago al reservar, bloqueo optimista y plazo de pago) |
+| operations-service | `./mvnw test` | 110 | 110 | 0 | 0 | Sin cambios |
+| notification-service | `./mvnw test` | 133 | 133 | 0 | 0 | Sin cambios |
+| payment-service: dominio | `dotnet test` | 142 | 142 | 0 | 0 | +8 |
+| payment-service: aplicación | (mismo comando) | 61 | 61 | 0 | 0 | +9 |
+| payment-service: API | (mismo comando) | 44 | 44 | 0 | 0 | +10 |
+| payment-service: infraestructura | (mismo comando, sin `PAYMENT_INTEGRATION_DB`) | 5 | 5 | 0 | 12 | +1 omitida (12 de persistencia sin la base aislada) |
+| App móvil | `npm test -- --ci` | 100 | 100 | 0 | 0 | +27 |
+| **Total** | | **1 311** | **1 311** | **0** | **12** | **+119** |
+
+> *Nota.* Ejecución completa del equipo el 26 de octubre de 2026 sobre la rama *develop* de los 10 repositorios, después del pago al reservar. Sin la app móvil, el total es 1 211; sin el proyecto de infraestructura de payment, 1 306 (la misma cifra de las acciones correctivas). Las 12 pruebas omitidas necesitan la base aislada de payment-service.
+
 **Tabla 5d**
 
 *Resultados del último CI de develop por artefacto (24 de octubre de 2026)*
