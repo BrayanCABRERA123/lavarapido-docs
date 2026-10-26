@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 24, 2026
+October 26, 2026
 
-Manual Type: User Manual (Customer and Operator Roles, on the web and in the mobile application) · Version 4.8
+Manual Type: User Manual (Customer and Operator Roles, on the web and in the mobile application) · Version 4.9
 
 ## Version Control
 
@@ -41,6 +41,7 @@ Table 1 records the change history of this document. Each time the development t
 | 4.6 | 2026-10-21 | Change of the rule for bookings that end without being recorded, reviewed by the team on the night of October 21: only a confirmed booking that never had an operator becomes No show on its own; if it had an operator, the operator receives the notice "¿Atendiste este servicio?" (did you serve this booking?) and the administrator closes it (Table 7, sections 10.2.3 and 10.2.4, and frequently asked questions). The schedule and the assigned services no longer show cancelled or No show bookings. | Development team |
 | 4.7 | 2026-10-23 | Review against *develop* of October 23, 2026: new chapter on the Android mobile application for the three roles (section 10.3), written from the app's 31 screens; the operator can start from 15 minutes before the booked time and there is no later limit (sections 10.2.2 and 13); the applied coupon is removed with the **X** and the system cancels the redemption, and only one coupon is accepted per booking (section 10.1.5). | Development team |
 | 4.8 | 2026-10-24 | Review against *develop* of October 24, 2026, which runs on the public server since that day: the screens refresh on their own, without reloading (4.1 and 10.3.4); sign-in accepts any email domain and sign-up still requires @gmail.com (8.1, 8.2, and 10.3.2); the server requires the consent, limits repeated attempts, and voids the recovery code at the 5th mistake (8.1 to 8.3); the amount to pay and the coupon come from the server and are kept after reloading (10.1.5); a vehicle with active bookings is not removed (10.1.2); the operator sees the administrator's notes and can start up to 4 hours after the end time (10.2.2, 10.2.3, and 13); payment notices for a cancelled booking and read-only permissions for the administrator in the app (10.3.6); new error messages (Tables 11 and 12). | Development team |
+| 4.9 | 2026-10-26 | Payment at booking, reviewed against *develop* of October 26, 2026 and deployed to the public server that day: "How will you pay?" step when booking, 30-minute deadline to upload the digital payment receipt, and at most one active cash booking (10.1.3); booking cancelled for lack of payment (10.1.4); payment screen according to the chosen method and cash label (10.1.5 and 10.3.4); new messages (Table 12) and a frequently asked question about the payment deadline (13). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -460,7 +461,7 @@ Each module is documented with the same format: name, description, role that can
 
 **Module name:** Book a wash.
 
-**Description:** Allows scheduling a washing slot by choosing the vehicle, the type of service, the date, and the time. The system only offers times that are really free.
+**Description:** Allows scheduling a washing slot by choosing the vehicle, the type of service, the date, the time, and the payment method. The system only offers times that are really free.
 
 **Role that can use it:** Customer.
 
@@ -473,10 +474,16 @@ Each module is documented with the same format: name, description, role that can
 3. **Step 2 (Service type):** select Basic, Premium, or Complete. Each card shows what it includes, the duration, the price for the type of vehicle chosen, and the loyalty points it adds ("Earns N points").
 4. **Step 3 (Date and time):** choose the date (the calendar does not allow past days) and then one of the free times shown in **Select a time**. The times are offered every 30 minutes, within the opening hours, outside the break, and only when a washing bay is free for the whole duration of the service.
 5. Optionally, choose in **Operator (optional)** one of the operators who are free at that time. If it is left as "No preference: we assign a free one", the system assigns one automatically.
-6. Review **Your booking summary**: vehicle, plate, service, estimated duration, date, time, location, total, and **Points you earn**.
-7. Click **Book Now**.
+6. **Step 4 (How will you pay?):** choose one of the two options (since October 26, 2026):
+   - **Digital payment now:** Nequi, Daviplata, or bank transfer. The QR code is scanned and the receipt is uploaded **within the next 30 minutes** (or before the service time, if that comes first).
+   - **Cash at the car wash:** paid on arrival, and the administrator records the payment, without a receipt. It only appears if the business has the cash account active, and the customer can have **at most one active cash booking**.
+7. Review **Your booking summary**: vehicle, plate, service, estimated duration, date, time, location, total, and **Points you earn**.
+8. Click **Book Now**.
 
-**Expected result:** The booking is created immediately with the status Confirmed and a washing bay. The system shows "Booking created!" with the booking code, and the **Go to payment** button opens the payment screen for that booking.
+**Expected result:** The booking is created immediately with the status Confirmed and a washing bay, and the customer receives the confirmation in their notifications and by email. What follows depends on the payment method:
+
+- **Digital payment:** the system opens the payment screen of that booking directly, with the notice "You have a deadline to pay: Upload the receipt before HH:mm or the booking will be released." If the receipt is not uploaded in time, the booking is cancelled automatically with the reason "The payment receipt was not uploaded in time" and the slot is freed for other customers.
+- **Cash:** "Booking created!" appears with the summary and the message "Your wash is scheduled. You pay in cash at the car wash."; the **View my bookings** button opens the history. There is nothing to pay online.
 
 **Notes or restrictions:**
 
@@ -487,6 +494,9 @@ Each module is documented with the same format: name, description, role that can
 - If the chosen time cannot be booked for another reason, the system explains which one: "The car wash is closed that day. Choose another date.", "At that time the service does not fit in the opening hours. Choose another time.", or "That time has already passed. Choose a later time."
 - A vehicle cannot have two bookings at the same time ("That vehicle already has a booking at that time.").
 - The service is provided at the business: the customer must bring the vehicle on the booked date and time.
+- If the customer already has an active cash booking (Scheduled, Confirmed, or In progress), they cannot make another one in cash: the system shows "You already have an active booking paid in cash. Pay it or cancel it, or choose digital payment." Cash becomes available again when that booking ends, is cancelled, or is marked No-show (it is not enough for the administrator to record the payment).
+- While the booking with digital payment is waiting for the receipt, the History and the detail show the badge "Pay before HH:mm". Once the receipt is sent, the booking no longer expires, even if the administrator has not reviewed it yet.
+- The payment method does not change if the administrator reschedules the booking. Bookings made before October 26, 2026 have no payment method and no deadline.
 
 **Figure 14**
 
@@ -537,7 +547,7 @@ Each module is documented with the same format: name, description, role that can
 | Confirmed | The booking has a slot and a washing bay. Bookings made by the customer are created with this status. | Yes, before the start time. |
 | In progress | The operator started the wash. | No. |
 | Completed | The service is finished; from this status it can be rated. | No. |
-| Cancelled | The booking was voided by the customer or by the business, or the system closed it because one hour passed after its end without being confirmed. | Not applicable. |
+| Cancelled | The booking was voided by the customer or by the business, or the system closed it because one hour passed after its end without being confirmed or, since October 26, 2026, because the digital payment receipt was not uploaded in time ("The payment receipt was not uploaded in time"). | Not applicable. |
 | No show | The customer did not arrive at the booked slot and the business recorded it. If the confirmed booking never had an operator, the system marks it this way one hour after its end time. | Not applicable. |
 
 *Note.* The names are those displayed by the interface in English (codes SCHEDULED, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, and NO_SHOW in the database).
@@ -551,6 +561,8 @@ Each module is documented with the same format: name, description, role that can
 #### 10.1.5 Pay for a Service
 
 Payment is made by transfer to the business's account (scanning its QR code or using its account data) or in cash at the business. The system **does not request or store credit or debit card data** and does not connect to banks: an administrator verifies each digital payment manually (Table 8).
+
+Since October 26, 2026 the payment method is chosen when booking (section 10.1.3), and the **Pay service** screen follows it: on a booking with **digital payment**, cash is not offered and the deadline is shown ("Upload the receipt before HH:mm or the booking will be released."); on a **cash** booking, the Cash method appears preselected with the notice "You pay in cash at the car wash: The administrator records the payment when you arrive; you don't need to upload a receipt.", and in the History that booking shows "You pay in cash at the car wash" instead of **Pay now**.
 
 **Table 8**
 
@@ -582,7 +594,7 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 5. In **Confirm your payment**, drag the image of the receipt or click to browse for it (JPG or PNG of up to 10 MB). The page reduces it below 2 MB before sending it; meanwhile it shows "Preparing the receipt...".
 6. Type the **Transaction reference** printed on the receipt (8 to 12 letters or numbers issued by the bank) and check the **Amount paid** (greater than 0), which must match the amount transferred.
 7. Click **I've made the payment**. While data is missing, the button stays disabled and the list "To confirm the payment you still need to:" shows what is pending (receipt, reference, or amount).
-8. For cash: select **Cash** and click **Confirm booking**; the payment is made at the business when the vehicle is picked up.
+8. For cash: on a booking made with cash, the **Cash** method is already selected; the payment is made at the business and recorded by the administrator, without a receipt.
 
 **Expected result:** The system shows "Payment sent!" and the payment remains in review ("Payment under review") until an administrator approves or rejects it. The customer receives a notification and an email with the result.
 
@@ -593,6 +605,7 @@ Payment is made by transfer to the business's account (scanning its QR code or u
 - While a payment is in review, another one cannot be reported for the same booking ("There is already a payment under review for this booking."); a booking admits a single approved payment. A reference already used in another payment is rejected ("That reference was already used in another payment. Check your receipt number.").
 - If the booking changes after the payment is reported (for example, the administrator changes its services), the reported payment can no longer be approved with the old amount: the administrator rejects it and the customer reports it again with the new amount shown on screen.
 - If the administrator rejects the payment, the customer can report it again with a correct receipt.
+- A booking with digital payment has a deadline to upload the receipt: 30 minutes from when it was made, or the service time if that comes first. If it passes, the booking is cancelled automatically and can no longer be paid ("This booking can no longer be paid (it is cancelled, paid or under review)."): the customer has to book again.
 - If the image cannot be reduced below 2 MB, the message "We could not reduce the image below 2 MB. Try a screenshot of the receipt." appears.
 - When the payment is approved, the customer receives the notice "Payment confirmed" (inbox and email), the loyalty points of the booking ("You earned N points", inbox only), and, for each coupon those points unlock, the notice "You have a redeemable coupon!" with its code (inbox and email). If the payment is rejected or refunded, the customer receives a notice and an email; a refund reverses the points earned by that booking.
 - Once the payment is approved, the **Pay service** screen of that booking only shows the summary: the payment method, the QR code, the receipt upload, and the **I've made the payment** button disappear, and the coupon used (if any) can no longer be removed.
@@ -958,7 +971,7 @@ Each role sees only its screens. At the bottom there is a bar with three main op
 #### 10.3.4 Use by the Customer
 
 - **Home:** greeting, cards for active bookings, vehicles, washes done, and notifications, the next service block (status, operator, and progress), the quick access buttons (book a wash, pay service, my vehicles, and notifications), and the benefits and promotions block, with the loyalty progress and the unlocked coupons (section 10.1.1).
-- **Book:** four steps on one screen: choose the vehicle, the type of service (with the estimated duration and the points it adds), the date and time (closed days and taken times are not offered), and the operator (optional), with no preference by default. **Book Now** shows the booking summary and the **Go to payment** button (section 10.1.3).
+- **Book:** steps on one screen: choose the vehicle, the type of service (with the estimated duration and the points it adds), the date and time (closed days and taken times are not offered), the operator (optional), with no preference by default, and, since October 26, 2026, **How will you pay?** (digital payment now or cash at the car wash, with the same rules as the web). With digital payment, **Book Now** goes to pay with the deadline; with cash, it shows the summary and that payment is made at the car wash (section 10.1.3). The change reaches the app through an over-the-air (OTA) update when version *v1.1.0* is published.
 - **Pay service:** choose the business's account (or cash, if the business has it active), enlarge the QR, apply a coupon (and remove it with the **X**), attach the receipt, which the app reduces to less than 2 MB, and type the transaction reference. The amount to pay is calculated by the server and, since October 24, 2026, the applied coupon is still shown after leaving and returning to the screen. After sending, the payment is under review; when the administrator approves it, the screen refreshes on its own with the push notification. The booking can also be cancelled from this screen (section 10.1.5).
 - **History:** filters for all, active, completed, and cancelled bookings, search by service, vehicle, or code, and the detail of each booking with pay now, cancel booking, and rate service (section 10.1.6).
 - **My vehicles**, **Alerts**, **Profile**, and **Settings** work as in sections 10.1.2, 10.1.7, 10.1.8, and 10.1.9.
@@ -1042,6 +1055,12 @@ The system validates the information while the person types. When a piece of dat
 | This vehicle has active or upcoming bookings: cancel them before removing it. | An attempt was made to remove a vehicle with pending bookings (since October 24, 2026). | Cancel those bookings or wait for them to finish. |
 | That date cannot be booked. | The date is in the past or beyond the booking window. | Choose a valid date. |
 | This booking can no longer be changed. | The booking already started or was closed. | Contact the business. |
+| Choose how you will pay: digital payment or cash at the car wash. | A booking was attempted without choosing the payment method (since October 26, 2026). | Choose an option in **How will you pay?**. |
+| You already have an active booking paid in cash. Pay it or cancel it, or choose digital payment. | The customer already has an active cash booking (at most one). | Choose digital payment, or wait for that booking to end or cancel it. |
+| Upload the receipt before HH:mm or the booking will be released. / Pay before HH:mm | The booking with digital payment has a deadline to upload the receipt (30 minutes or the service time). | Pay and upload the receipt before that time. |
+| You pay in cash at the car wash | The booking is paid in cash on arrival; no receipt is needed. | Bring the money on the day of the service. |
+| The payment receipt was not uploaded in time | Reason with which the system cancelled a booking with digital payment whose deadline passed. | Book again. |
+| This booking can no longer be paid (it is cancelled, paid or under review). | Payment was attempted for a cancelled booking or one that already has a payment. | Check the status in the History. |
 | Invalid file | The receipt is not a JPG or PNG image of up to 10 MB. | Attach a valid image. |
 | Only a completed service can be rated. / This service was already rated. | The rating is not allowed. | Wait until the service is completed; a booking is rated only once. |
 | You must start the service first. / This service was already started. | The operator tried an action out of order. | Start the service before finishing it. |
@@ -1118,6 +1137,10 @@ In Pay service, choose the method. With Nequi, Daviplata, or Transfer, scan the 
 ##### Does the system store my card data?
 
 No. The system does not request or store card data.
+
+##### Why was my booking cancelled on its own?
+
+If you chose **Digital payment now** when booking, you had 30 minutes (or until the service time, if that came first) to upload the receipt. If you did not upload it in time, the system cancelled the booking with the reason "The payment receipt was not uploaded in time" and freed the slot. You can book again and pay within the deadline, or choose **Cash at the car wash** if you have no other active cash booking.
 
 ##### Why does my payment appear as "In review"?
 
