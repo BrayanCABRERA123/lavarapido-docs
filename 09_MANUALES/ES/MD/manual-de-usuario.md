@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-24 de octubre de 2026
+26 de octubre de 2026
 
-Tipo de manual: Manual de usuario (roles Cliente y Operario, en la web y en la aplicación móvil) · Versión 4.8
+Tipo de manual: Manual de usuario (roles Cliente y Operario, en la web y en la aplicación móvil) · Versión 4.9
 
 ## Control de Versiones
 
@@ -41,6 +41,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 4.6 | 2026-10-21 | Cambio de la regla de las reservas que terminan sin registrarse, revisada por el equipo la noche del 21 de octubre: solo la reserva confirmada que nunca tuvo operario pasa sola a No asistió; si tenía operario, el operario recibe el aviso "¿Atendiste este servicio?" y el administrador la cierra (Tabla 7, secciones 10.2.3 y 10.2.4 y preguntas frecuentes). La agenda y los servicios asignados ya no muestran reservas canceladas ni en No asistió. | Equipo de desarrollo |
 | 4.7 | 2026-10-23 | Revisión contra *develop* del 23 de octubre de 2026: capítulo nuevo de la aplicación móvil Android para los tres roles (sección 10.3), hecho a partir de las 31 pantallas de la app; el operario puede iniciar desde 15 minutos antes de la hora reservada y no hay límite posterior (secciones 10.2.2 y 13); el cupón aplicado se quita con la **X** y el sistema anula el canje, y solo se acepta un cupón por reserva (sección 10.1.5). | Equipo de desarrollo |
 | 4.8 | 2026-10-24 | Revisión contra *develop* del 24 de octubre de 2026, que corre en el servidor público desde ese día: las pantallas se actualizan solas, sin recargar (4.1 y 10.3.4); el inicio de sesión acepta cualquier dominio de correo y el registro sigue pidiendo @gmail.com (8.1, 8.2 y 10.3.2); el servidor exige el consentimiento, limita los intentos seguidos y anula el código de recuperación al 5.º error (8.1 a 8.3); el monto a pagar y el cupón vienen del servidor y se conservan al recargar (10.1.5); un vehículo con reservas activas no se retira (10.1.2); el operario ve las notas del administrador y puede iniciar hasta 4 horas después de la hora de fin (10.2.2, 10.2.3 y 13); avisos de pago de una reserva cancelada y permisos de solo lectura para el administrador en la app (10.3.6); mensajes de error nuevos (Tablas 11 y 12). | Equipo de desarrollo |
+| 4.9 | 2026-10-26 | Pago al reservar, revisado contra *develop* del 26 de octubre de 2026 y desplegado en el servidor público ese día: paso "¿Cómo vas a pagar?" al reservar, plazo de 30 minutos para subir el comprobante del pago digital y máximo una reserva activa en efectivo (10.1.3); reserva cancelada por falta de pago (10.1.4); pantalla de pago según la forma elegida y etiqueta de efectivo (10.1.5 y 10.3.4); mensajes nuevos (Tabla 12) y pregunta frecuente sobre el plazo de pago (13). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -460,7 +461,7 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 
 **Nombre del módulo:** Reservar lavado.
 
-**Descripción:** Permite programar un turno de lavado eligiendo el vehículo, el tipo de servicio, la fecha y la hora. El sistema solo ofrece horas que están realmente libres.
+**Descripción:** Permite programar un turno de lavado eligiendo el vehículo, el tipo de servicio, la fecha, la hora y la forma de pago. El sistema solo ofrece horas que están realmente libres.
 
 **Rol que puede usarlo:** Cliente.
 
@@ -473,10 +474,16 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 3. **Paso 2 (Tipo de servicio):** seleccionar Básico, Premium o Completo. Cada tarjeta muestra qué incluye, la duración, el precio para el tipo de vehículo elegido y los puntos de fidelización que suma ("Suma N puntos").
 4. **Paso 3 (Fecha y hora):** elegir la fecha (el calendario no deja escoger días pasados) y luego una de las horas libres que aparecen en **Selecciona una hora**. Las horas se ofrecen cada 30 minutos, dentro del horario de atención, fuera del descanso y solo cuando hay una bahía de lavado libre durante toda la duración del servicio.
 5. Si se desea, elegir en **Operario (opcional)** uno de los operarios libres a esa hora. Si se deja en "Sin preferencia: te asignamos uno libre", el sistema asigna uno automáticamente.
-6. Revisar el **Resumen de tu reserva**: vehículo, placa, servicio, duración estimada, fecha, hora, ubicación, total y **Puntos que ganas**.
-7. Hacer clic en **Reservar Ahora**.
+6. **Paso 4 (¿Cómo vas a pagar?):** elegir una de las dos opciones (desde el 26 de octubre de 2026):
+   - **Pago digital ahora:** Nequi, Daviplata o transferencia. Se escanea el QR y se sube el comprobante **dentro de los 30 minutos siguientes** (o antes de la hora del servicio, si es más pronto).
+   - **Efectivo en el lavadero:** se paga al llegar y el administrador registra el pago, sin comprobante. Solo aparece si el lavadero tiene activa la cuenta de efectivo, y el cliente puede tener **como máximo una reserva activa en efectivo**.
+7. Revisar el **Resumen de tu reserva**: vehículo, placa, servicio, duración estimada, fecha, hora, ubicación, total y **Puntos que ganas**.
+8. Hacer clic en **Reservar Ahora**.
 
-**Resultado esperado:** La reserva se crea de inmediato con el estado Confirmada y una bahía de lavado. El sistema muestra "¡Reserva creada!" con el código de la reserva, y el botón **Ir a pagar** abre la pantalla de pago de esa reserva. El cliente recibe la confirmación en sus notificaciones y por correo.
+**Resultado esperado:** La reserva se crea de inmediato con el estado Confirmada y una bahía de lavado, y el cliente recibe la confirmación en sus notificaciones y por correo. Lo que sigue depende de la forma de pago:
+
+- **Pago digital:** el sistema abre directamente la pantalla de pago de esa reserva con el aviso "Tienes un plazo para pagar: Sube el comprobante antes de las HH:mm o la reserva se libera." Si el comprobante no se sube a tiempo, la reserva se cancela sola con el motivo "No se subió el comprobante de pago a tiempo" y el horario queda libre para otros clientes.
+- **Efectivo:** aparece "¡Reserva creada!" con el resumen y el mensaje "Tu lavado quedó programado. Pagas en efectivo en el lavadero."; el botón **Ver mis reservas** abre el historial. No hay nada que pagar en línea.
 
 **Observaciones o restricciones:**
 
@@ -487,6 +494,9 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 - Si la hora elegida no se puede reservar por otro motivo, el sistema explica cuál: "El lavadero no abre ese día. Elige otra fecha.", "A esa hora el servicio no cabe en el horario de atención. Elige otra hora." o "Esa hora ya pasó. Elige una hora más tarde."
 - Un vehículo no puede tener dos reservas a la misma hora ("Ese vehículo ya tiene una reserva a esa hora.").
 - El servicio se presta en el lavadero: el cliente debe llevar el vehículo en la fecha y la hora reservadas.
+- Si el cliente ya tiene una reserva activa en efectivo (Programada, Confirmada o En progreso), no puede hacer otra en efectivo: el sistema muestra "Ya tienes una reserva activa con pago en efectivo. Págala o cancélala, o elige pago digital." El efectivo vuelve a estar disponible cuando esa reserva termina, se cancela o queda como No asistió (no basta con que el administrador registre el pago).
+- Mientras la reserva con pago digital está esperando el comprobante, el Historial y el detalle muestran la insignia "Paga antes de las HH:mm". Una vez enviado el comprobante, la reserva ya no vence, aunque el administrador todavía no lo haya revisado.
+- La forma de pago no cambia si el administrador reprograma la reserva. Las reservas hechas antes del 26 de octubre de 2026 no tienen forma de pago ni plazo.
 
 **Figura 14**
 
@@ -537,7 +547,7 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 | Confirmada | La reserva tiene turno y bahía de lavado. Las reservas que hace el cliente se crean con este estado. | Sí, antes de la hora de inicio. |
 | En progreso | El operario inició el lavado. | No. |
 | Completada | El servicio terminó; desde este estado se puede calificar. | No. |
-| Cancelada | La reserva fue anulada por el cliente o por el lavadero, o el sistema la cerró porque pasó una hora de su fin sin confirmarse. | No aplica. |
+| Cancelada | La reserva fue anulada por el cliente o por el lavadero, o el sistema la cerró porque pasó una hora de su fin sin confirmarse o, desde el 26 de octubre de 2026, porque no se subió el comprobante del pago digital a tiempo ("No se subió el comprobante de pago a tiempo"). | No aplica. |
 | No asistió | El cliente no llegó al turno reservado y el lavadero lo registró así. Si la reserva confirmada nunca tuvo operario, el sistema la marca así una hora después de su hora de fin. | No aplica. |
 
 *Nota.* Códigos SCHEDULED, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED y NO_SHOW en la base de datos; la interfaz los traduce.
@@ -551,6 +561,8 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 #### 10.1.5 Pagar un Servicio
 
 El pago se hace por transferencia a la cuenta del lavadero (escaneando su código QR o usando los datos de su cuenta) o en efectivo en el local. El sistema **no solicita ni guarda datos de tarjetas de crédito o débito** y no se conecta con los bancos: un administrador verifica manualmente cada pago digital (Tabla 8).
+
+Desde el 26 de octubre de 2026 la forma de pago se elige al reservar (sección 10.1.3), y la pantalla **Pagar servicio** la respeta: en una reserva con **pago digital** no se ofrece el efectivo y se muestra el plazo ("Sube el comprobante antes de las HH:mm o la reserva se libera."); en una reserva **en efectivo** el método Efectivo aparece preseleccionado con el aviso "Pagas en efectivo en el lavadero: El administrador registra el pago cuando llegues; no necesitas subir comprobante.", y en el Historial esa reserva muestra "Pagas en efectivo en el lavadero" en lugar de **Pagar ahora**.
 
 **Tabla 8**
 
@@ -582,7 +594,7 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 5. En **Confirma tu pago**, arrastrar la imagen del comprobante o hacer clic para buscarla (JPG o PNG de hasta 10 MB). La página la reduce a menos de 2 MB antes de enviarla; mientras tanto muestra "Preparando el comprobante...".
 6. Escribir la **Referencia de la transacción** impresa en el comprobante (de 8 a 12 letras o números emitidos por el banco) y revisar el **Monto pagado** (mayor que 0), que debe coincidir con lo transferido.
 7. Hacer clic en **Ya realicé el pago**. Mientras falten datos, el botón permanece deshabilitado y la lista "Para confirmar el pago te falta:" indica lo pendiente (comprobante, referencia o monto).
-8. Para efectivo: seleccionar **Efectivo** y hacer clic en **Confirmar reserva**; el pago se hace en el lavadero al recoger el vehículo.
+8. Para efectivo: en una reserva hecha en efectivo el método **Efectivo** ya viene seleccionado; el pago se hace en el lavadero y lo registra el administrador, sin comprobante.
 
 **Resultado esperado:** El sistema muestra "¡Pago enviado!" y el pago queda en revisión ("Pago en verificación") hasta que un administrador lo apruebe o lo rechace. El cliente recibe una notificación y un correo con el resultado.
 
@@ -593,6 +605,7 @@ El pago se hace por transferencia a la cuenta del lavadero (escaneando su códig
 - Mientras un pago está en revisión no se puede reportar otro para la misma reserva ("Ya hay un pago en revisión para esta reserva."); una reserva admite un solo pago aprobado. Una referencia que ya se usó en otro pago se rechaza ("Esa referencia ya se usó en otro pago. Revisa el número de tu comprobante.").
 - Si la reserva cambia después de reportar el pago (por ejemplo, el administrador le cambia los servicios), el pago reportado ya no se puede aprobar con el monto viejo: el administrador lo rechaza y el cliente lo reporta de nuevo con el monto nuevo que muestra la pantalla.
 - Si el administrador rechaza el pago, el cliente puede reportarlo de nuevo con un comprobante correcto.
+- Una reserva con pago digital tiene plazo para subir el comprobante: 30 minutos desde que se hizo, o la hora del servicio si es más pronto. Si se vence, la reserva se cancela sola y ya no se puede pagar ("Esta reserva ya no se puede pagar (está cancelada, pagada o en revisión)."): hay que reservar de nuevo.
 - Si la imagen no se puede reducir a menos de 2 MB, aparece "No pudimos reducir la imagen a menos de 2 MB. Prueba con una captura de pantalla del comprobante."
 - Cuando el pago se aprueba, el cliente recibe el aviso de pago confirmado (bandeja y correo), los puntos de fidelización de la reserva ("Ganaste N puntos", solo en la bandeja) y, por cada cupón que esos puntos desbloquean, el aviso "¡Tienes un cupón canjeable!" con su código (bandeja y correo). Si el pago se rechaza o se reembolsa, el cliente recibe un aviso y un correo; un reembolso revierte los puntos ganados por esa reserva.
 - Cuando el pago queda aprobado, la pantalla **Pagar servicio** de esa reserva solo muestra el resumen: desaparecen el método de pago, el código QR, la carga del comprobante y el botón **Ya realicé el pago**, y el cupón usado (si lo hay) ya no se puede quitar.
@@ -958,7 +971,7 @@ Cada rol ve solo sus pantallas. Abajo hay una barra con tres opciones principale
 #### 10.3.4 Uso por el Cliente
 
 - **Inicio:** saludo, tarjetas de **Mis reservas activas**, **Mis vehículos**, **Lavados realizados** y **Notificaciones**, el bloque **Tu próximo servicio** (estado, operario y avance), los **Accesos rápidos** (**Agendar lavado**, **Pagar servicio**, **Mis vehículos** y **Notificaciones**) y **Tus beneficios y promociones**, con el progreso de fidelidad y los cupones desbloqueados (sección 10.1.1).
-- **Reservar:** cuatro pasos en una sola pantalla: **Elige tu vehículo**, **Tipo de servicio** (con la duración estimada y los puntos que suma), **Fecha y hora** (los días cerrados y las horas ocupadas no se ofrecen) y **Operario (opcional)**, con **Sin preferencia** por defecto. **Reservar Ahora** muestra **¡Reserva creada!** con el resumen y el botón **Ir a pagar** (sección 10.1.3).
+- **Reservar:** pasos en una sola pantalla: **Elige tu vehículo**, **Tipo de servicio** (con la duración estimada y los puntos que suma), **Fecha y hora** (los días cerrados y las horas ocupadas no se ofrecen), **Operario (opcional)**, con **Sin preferencia** por defecto, y, desde el 26 de octubre de 2026, **¿Cómo vas a pagar?** (pago digital ahora o efectivo en el lavadero, con las mismas reglas de la web). Con pago digital, **Reservar Ahora** lleva a pagar con el plazo; con efectivo, muestra el resumen y que se paga en el lavadero (sección 10.1.3). El cambio llega a la app por actualización por internet (OTA) cuando se publique la versión *v1.1.0*.
 - **Pagar servicio:** se elige la cuenta del lavadero (o **Pago en efectivo**, si el lavadero la tiene activa), se amplía el QR con **Ampliar QR**, se aplica un cupón (y se quita con la **X**), se adjunta el comprobante, que la app reduce a menos de 2 MB, y se escribe la referencia de la transacción. El **Monto a pagar** lo calcula el servidor y, desde el 24 de octubre de 2026, el cupón aplicado se sigue viendo al salir y volver a la pantalla. Al enviar aparece **¡Pago enviado!** y el pago queda en revisión; cuando el administrador lo aprueba, la pantalla se actualiza sola con la notificación push. Desde esta pantalla también se cancela la reserva (sección 10.1.5).
 - **Historial:** filtros **Todos**, **Activas**, **Completadas** y **Canceladas**, búsqueda por servicio, vehículo o código, y el detalle de cada reserva con **Pagar ahora**, **Cancelar reserva** y **Calificar Servicio** (sección 10.1.6).
 - **Mis vehículos**, **Avisos**, **Perfil** y **Configuración** funcionan como en las secciones 10.1.2, 10.1.7, 10.1.8 y 10.1.9.
@@ -1042,6 +1055,12 @@ El sistema valida la información mientras la persona escribe. Cuando un dato no
 | Este vehículo tiene reservas activas o futuras: cancélalas antes de retirarlo. | Se intentó retirar un vehículo con reservas pendientes (desde el 24 de octubre de 2026). | Cancelar o esperar a que terminen esas reservas. |
 | La fecha no es válida para reservar. | La fecha ya pasó o está fuera de la ventana de reservas. | Elegir una fecha válida. |
 | Esta reserva ya no se puede cambiar. | La reserva ya empezó o se cerró. | Contactar al lavadero. |
+| Elige cómo vas a pagar: pago digital o efectivo en el lavadero. | Se intentó reservar sin elegir la forma de pago (desde el 26 de octubre de 2026). | Elegir una opción en **¿Cómo vas a pagar?**. |
+| Ya tienes una reserva activa con pago en efectivo. Págala o cancélala, o elige pago digital. | El cliente ya tiene una reserva activa en efectivo (máximo una). | Elegir pago digital, o esperar a que esa reserva termine o cancelarla. |
+| Sube el comprobante antes de las HH:mm o la reserva se libera. / Paga antes de las HH:mm | La reserva con pago digital tiene un plazo para subir el comprobante (30 minutos o la hora del servicio). | Pagar y subir el comprobante antes de esa hora. |
+| Pagas en efectivo en el lavadero | La reserva se paga en efectivo al llegar; no hay que subir comprobante. | Llevar el dinero el día del servicio. |
+| No se subió el comprobante de pago a tiempo | Motivo con el que el sistema canceló una reserva con pago digital cuyo plazo venció. | Reservar de nuevo. |
+| Esta reserva ya no se puede pagar (está cancelada, pagada o en revisión). | Se intentó pagar una reserva cancelada o que ya tiene un pago. | Revisar el estado en el Historial. |
 | Archivo no válido | El comprobante no es una imagen JPG o PNG de hasta 10 MB. | Adjuntar una imagen válida. |
 | No pudimos reducir la imagen a menos de 2 MB. Prueba con una captura de pantalla del comprobante. | La foto del comprobante es demasiado pesada aun después de reducirla. | Adjuntar una captura de pantalla del comprobante. |
 | Para confirmar el pago te falta: ... | Faltan datos del pago (comprobante, referencia o monto). | Completar los elementos listados bajo el botón. |
@@ -1118,6 +1137,10 @@ En Pagar servicio, elija el método. Con Nequi, Daviplata o Transferencia, escan
 ##### ¿El sistema guarda los datos de mi tarjeta?
 
 No. El sistema no solicita ni guarda datos de tarjetas.
+
+##### ¿Por qué se canceló sola mi reserva?
+
+Si al reservar eligió **Pago digital ahora**, tenía 30 minutos (o hasta la hora del servicio, si era más pronto) para subir el comprobante. Si no lo subió a tiempo, el sistema canceló la reserva con el motivo "No se subió el comprobante de pago a tiempo" y liberó el horario. Puede reservar de nuevo y pagar dentro del plazo, o elegir **Efectivo en el lavadero** si no tiene otra reserva activa en efectivo.
 
 ##### ¿Por qué mi pago aparece "En revisión"?
 

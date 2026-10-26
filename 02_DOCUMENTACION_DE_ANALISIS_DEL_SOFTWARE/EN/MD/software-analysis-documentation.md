@@ -8,7 +8,7 @@ Software Analysis and Development Technologist program (ADSO), group (ficha) 314
 
 Instructor: Karol Daniela Correa
 
-Version 2.6, October 24, 2026
+Version 2.7, October 26, 2026
 
 ---
 
@@ -21,7 +21,7 @@ This document shows how LavaRápido behaves when someone uses it: what happens, 
 3. **Activity diagrams** of the business processes.
 4. **State diagrams** of the entities that change status (booking, payment, service execution, promotion and inspection report).
 
-On October 21, 2026, the following were updated against the code of that day: the sign-out that voids the token (section 2.8), the lock on operator assignment (section 2.4), the receipt of at most 2 MB and the cash option that only appears while its account is active (sections 2.5 and 3.4), and the handling of bookings that ended without anyone closing them (sections 4.1 and 4.3): the system only changes the status when there is no doubt, and the rest goes to the administrator's "To close" list. On October 20, 2026, the content was checked again against the code: the client only cancels (the administrator reschedules), the role change of accounts was removed, the sequences and states that did not match were corrected, and the use case and other diagrams were redrawn with straight lines and no crossings. On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end. On October 23, 2026 (version 2.5) it was added that recovering the password revokes all sessions (section 2.10) and that, if security-service does not answer, the gateway lets the request through (*fail-open*); the rest of the analysis still holds against *develop* of that day. On October 24, 2026 (version 2.6), against *develop* of that day, the permission matrix became read-only (sections 2.7 and 3.6 and the screen inventory) and the automatic cancellation of expired scheduled bookings was removed, because every booking is created confirmed (section 4.1).
+On October 21, 2026, the following were updated against the code of that day: the sign-out that voids the token (section 2.8), the lock on operator assignment (section 2.4), the receipt of at most 2 MB and the cash option that only appears while its account is active (sections 2.5 and 3.4), and the handling of bookings that ended without anyone closing them (sections 4.1 and 4.3): the system only changes the status when there is no doubt, and the rest goes to the administrator's "To close" list. On October 20, 2026, the content was checked again against the code: the client only cancels (the administrator reschedules), the role change of accounts was removed, the sequences and states that did not match were corrected, and the use case and other diagrams were redrawn with straight lines and no crossings. On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end. On October 23, 2026 (version 2.5) it was added that recovering the password revokes all sessions (section 2.10) and that, if security-service does not answer, the gateway lets the request through (*fail-open*); the rest of the analysis still holds against *develop* of that day. On October 24, 2026 (version 2.6), against *develop* of that day, the permission matrix became read-only (sections 2.7 and 3.6 and the screen inventory) and the automatic cancellation of expired scheduled bookings was removed, because every booking is created confirmed (section 4.1). On October 26, 2026 (version 2.7), against *develop* of that day, payment at booking was added: the customer chooses how they will pay when booking, with at most one active cash booking (sections 2.2 and 3.2); payment-service announces with `payment.reported` when the customer uploads the receipt (section 2.5), and a booking with digital payment that reaches its deadline without a receipt is cancelled automatically with the reason `PAYMENT_TIMEOUT`, after asking payment-service (sections 2.11 and 4.1).
 
 The full specification of each requirement and use case (actors, precondition, main flow, alternative flows and postcondition) is in the *Software Requirements Specification*, sections 5 and 7.3; here they are cited by their identifier (RF-XXX, CUXX).
 
@@ -253,14 +253,21 @@ sequenceDiagram
     C->>W: Chooses a time
     W->>OP: GET /api/v1/operators/available?date=…&time=…&minutes=…
     OP-->>W: free operators (first name and rating)
-    C->>W: Chooses an operator (optional) and confirms
-    W->>B: POST /api/v1/bookings {…, preferredOperatorId}
+    C->>W: Chooses an operator (optional)
+    C->>W: How will you pay? Digital payment now or cash at the car wash, and confirms
+    W->>B: POST /api/v1/bookings {…, preferredOperatorId, paymentMode}
+    alt no paymentMode or an invalid value (customer only)
+        B-->>W: 400 INVALID_PAYMENT_MODE
+    end
     B->>CU: GET /api/v1/vehicles/{id} (customer JWT)
     CU-->>B: vehicle + type (ownership is validated, INV-BOOK-002)
     B->>DB: sp_getapplock (schedule lock)
-    alt free bay and the vehicle has no other booking at that time
-        B->>DB: INSERT CONFIRMED booking + bay + lines with frozen prices
-        B-->>W: 201 booking (code RES-000042)
+    alt CASH and the customer already has 1 active cash booking made by themselves
+        B-->>W: 409 CASH_BOOKING_LIMIT
+    else free bay and the vehicle has no other booking at that time
+        B->>DB: INSERT CONFIRMED booking + bay + lines with frozen prices<br/>+ payment_mode and, if DIGITAL, payment_deadline = min(now + 30 min, start)
+        B-->>W: 201 booking (code RES-000042, paymentMode, paymentDeadline)
+        W-->>C: DIGITAL: goes to pay ("Upload the receipt before HH:mm")<br/>CASH: "You pay in cash at the car wash"
         B-)MQ: BookingConfirmed (booking.confirmed, with preferredOperatorId), after commit
         MQ-)OP: BookingConfirmed: automatic assignment (section 2.4)
         MQ-)N: BookingConfirmed
@@ -274,7 +281,7 @@ sequenceDiagram
     end
 ```
 
-*Source:* `booking-service` (`BookingService.create`, `Booking.confirmNew`, `AvailabilityPolicy`), `operations-service` (`AvailableOperatorsController`), contracts in `07-api/contracts/openapi/`.
+*Source:* `booking-service` (`BookingService.create`, `Booking.confirmNew`, `AvailabilityPolicy`, `PaymentPolicy`), `operations-service` (`AvailableOperatorsController`), contracts in `07-api/contracts/openapi/`. The cash limit (`BOOKING_CASH_ACTIVE_LIMIT`, 1) is counted with the schedule locked and only with the active bookings (Scheduled, Confirmed, or In progress) made by the customer themselves (`booked_by`). The administrator does not have to send `paymentMode`, and their bookings have no deadline or limit.
 
 ### 2.3 Reminders and alert for bookings without an operator (ADR-011)
 
@@ -403,6 +410,7 @@ sequenceDiagram
     alt booking can be paid, has no open or approved payment and the reference was not used on another booking
         P->>DB: PENDING payment (amount = booking total minus<br/>the coupons applied) + receipt → IN_REVIEW
         P-->>W: 201 payment IN_REVIEW
+        P-)B: PaymentReported (payment.reported) through RabbitMQ: booking sets payment_reported_at and the booking no longer expires (section 2.11)
     else not payable / already reported / already approved / reference reused
         P-->>W: 409 BOOKING_NOT_PAYABLE | PAYMENT_ALREADY_REPORTED | PAYMENT_ALREADY_APPROVED | TRANSACTION_REFERENCE_REUSED
     else receipt larger than 2 MB
@@ -628,6 +636,39 @@ sequenceDiagram
 
 *Source:* `security-service` (`PasswordRecoveryService`, `PasswordResetToken`, `PasswordRecoveryPolicy` with `code-ttl: 15m` and `max-failed-attempts: 5`, `SecureRandomResetCodeGenerator`, `EmailResetCodeNotifier`). The *forgot* answer does not reveal whether the email exists.
 
+### 2.11 Expiry of the digital payment (RF-005, RF-033, RN-BOOK-03)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant MQ as RabbitMQ (carwash.events)
+    participant B as booking-service
+    participant J as PaymentDeadlineJob (booking, every 60 s)
+    participant P as payment-service (.NET)
+    participant DB as SQL Server (booking)
+    participant N as notification-service
+
+    MQ-)B: payment.reported or payment.confirmed (queue booking.payment-events)
+    B->>DB: payment_reported_at = now (idempotent)
+    J->>DB: DIGITAL bookings without a report whose payment_deadline has passed (ix_booking_payment_pending)
+    loop each overdue booking, in its own transaction
+        J->>P: GET /internal/v1/payments/bookings/{id}/reported (X-Internal-Key, 3 s)
+        alt reported = true (the event had been lost)
+            P-->>J: 200 {"bookingId":…, "reported":true}
+            J->>DB: payment_reported_at = now (PAYMENT_REPORTED, not cancelled)
+        else reported = false
+            P-->>J: 200 {"bookingId":…, "reported":false}
+            J->>DB: CANCELLED with the reason PAYMENT_TIMEOUT, the bay is freed (CANCELLED)
+            B-)MQ: BookingCancelled (booking.cancelled, reasonCode PAYMENT_TIMEOUT)
+            MQ-)N: BookingCancelled: notice to the customer
+        else payment-service does not answer or returns an error
+            J->>J: not cancelled this round (PAYMENT_SERVICE_UNAVAILABLE), retried in the next one
+        end
+    end
+```
+
+*Source:* `booking-service` (`PaymentEventsListener`, `RabbitConsumerConfig`, `PaymentDeadlineJob`, `BookingService.cancelForPaymentTimeout`, `PaymentServiceDirectory`, `PaymentTimeoutOutcome`) and `payment-service` (`InternalPaymentsController`, `InternalApiKeyAuthenticationHandler`). Since there is no Outbox, a `payment.reported` event can be lost; that is why the job asks payment-service before cancelling (AC-89). For payment, `reported` is true if the booking has an `IN_REVIEW` or `APPROVED` payment. The job is turned off with `BOOKING_PAYMENT_EXPIRY_ENABLED=false`, and the interval is `BOOKING_PAYMENT_EXPIRY_INTERVAL` (60 s).
+
 ---
 
 ## 3. Activity Diagrams
@@ -702,16 +743,25 @@ flowchart TD
     price --> date[Choose date and time]
     date --> op{"Does the customer want to choose the operator?<br/>(list of those free at that time)"}
     op -->|Yes| pickop[Choose a free operator]
-    op -->|No| check[Check opening hours, exceptions and bays]
-    pickop --> check
+    op -->|No| pay{"How will you pay?"}
+    pickop --> pay
+    pay -->|Digital payment| check[Check opening hours, exceptions and bays]
+    pay -->|Cash| cashlim{Does the customer already have<br/>an active cash booking?}
+    cashlim -->|Yes| cashno["Reject (CASH_BOOKING_LIMIT): pay it or cancel it, or choose digital payment"]
+    cashno --> pay
+    cashlim -->|No| check
     check --> avail{Is there a free bay<br/>in that slot?}
     avail -->|No| alt[Offer up to 5 alternative times on the same day]
     alt --> date
     avail -->|Yes| confirm[Confirm booking: assign bay, freeze prices]
     confirm --> notif["Send confirmation, schedule 24h/1h reminders<br/>and assign an operator (section 3.3)"]
     notif --> conf([Booking Confirmed])
+    conf --> due{"Digital payment: was the receipt uploaded<br/>before the deadline (30 min or the start time)?"}
+    due -->|No, and payment-service does not have the payment| timeout[Cancel with PAYMENT_TIMEOUT and free the bay]
+    timeout --> stop4([End])
+    due -->|Yes, or pays in cash| manage
 
-    conf --> manage{Any change<br/>before the start?}
+    manage{Any change<br/>before the start?}
     manage -->|The customer cancels| state{Is the booking Scheduled<br/>or Confirmed?}
     state -->|No - in progress/finished| block[Block the action with an explanatory message]
     block --> stop2([End])
@@ -835,13 +885,14 @@ stateDiagram-v2
     CONFIRMED --> IN_PROGRESS : start or Attended (admin)
     CONFIRMED --> NO_SHOW : no show, or ended without operator
     CONFIRMED --> CANCELLED : cancel (customer before the start, or admin)
+    CONFIRMED --> CANCELLED : the digital payment deadline passes without a receipt (system, PAYMENT_TIMEOUT)
     IN_PROGRESS --> COMPLETED : finish or Attended (admin)
     COMPLETED --> [*]
     CANCELLED --> [*]
     NO_SHOW --> [*]
 ```
 
-*Source:* `booking-service` (`Booking.moveTo`, `Booking.cancel`, `BookingStatus`) and `operations-service` (`FollowUpJob`, `FollowUpPolicy`). *Bookings that ended and nobody closed:* the system only decides on its own when there is no doubt. Until October 23, 2026 `ExpiredBookingsJob` cancelled bookings still `SCHEDULED`; it was removed on October 24 (B-07) because it never acted: every booking is created and rescheduled as `CONFIRMED`. Every 5 minutes, the operations `FollowUpJob` asks booking (`POST /internal/v1/bookings/{id}/no-show`) to set to `NO_SHOW` a `CONFIRMED` booking that never had an operator and ended more than an hour ago; booking checks again that it expired and, if not, answers 409 `BOOKING_NOT_EXPIRED`. A `CONFIRMED` booking with an operator that nobody started (`NOT_STARTED`) and an `IN_PROGRESS` one that nobody finished one hour after its end (`NOT_FINISHED`) **never** change status on their own: they go to the administrator's "To close" list, and the administrator resolves them with "Attended" (the booking goes through `IN_PROGRESS` and ends `COMPLETED`, without publishing `ServiceCompleted`) or with "No-show" (only if it was never started). This avoids recording as a no-show a service that was actually done and that the operator forgot to mark. There is never an automatic refund: payments are reviewed by the administrator. Only `SCHEDULED` and `CONFIRMED` can be rescheduled or cancelled (RF-007). The customer only cancels, before the start time and without writing a reason (the booking stores `CUSTOMER_REQUEST`); the administrator reschedules (CU29) and may choose the cancellation reason. `SCHEDULED` exists in the model, but the current flow always creates the booking directly as `CONFIRMED`.
+*Source:* `booking-service` (`Booking.moveTo`, `Booking.cancel`, `BookingStatus`) and `operations-service` (`FollowUpJob`, `FollowUpPolicy`). *Bookings that ended and nobody closed:* the system only decides on its own when there is no doubt. Until October 23, 2026 `ExpiredBookingsJob` cancelled bookings still `SCHEDULED`; it was removed on October 24 (B-07) because it never acted: every booking is created and rescheduled as `CONFIRMED`. Every 5 minutes, the operations `FollowUpJob` asks booking (`POST /internal/v1/bookings/{id}/no-show`) to set to `NO_SHOW` a `CONFIRMED` booking that never had an operator and ended more than an hour ago; booking checks again that it expired and, if not, answers 409 `BOOKING_NOT_EXPIRED`. A `CONFIRMED` booking with an operator that nobody started (`NOT_STARTED`) and an `IN_PROGRESS` one that nobody finished one hour after its end (`NOT_FINISHED`) **never** change status on their own: they go to the administrator's "To close" list, and the administrator resolves them with "Attended" (the booking goes through `IN_PROGRESS` and ends `COMPLETED`, without publishing `ServiceCompleted`) or with "No-show" (only if it was never started). This avoids recording as a no-show a service that was actually done and that the operator forgot to mark. There is never an automatic refund: payments are reviewed by the administrator. Only `SCHEDULED` and `CONFIRMED` can be rescheduled or cancelled (RF-007). The customer only cancels, before the start time and without writing a reason (the booking stores `CUSTOMER_REQUEST`); the administrator reschedules (CU29) and may choose the cancellation reason. `SCHEDULED` exists in the model, but the current flow always creates the booking directly as `CONFIRMED`. Since October 26, 2026, `PaymentDeadlineJob` cancels with the reason `PAYMENT_TIMEOUT` a booking with digital payment that reached its deadline without a receipt, only if payment-service confirms it does not have the payment (section 2.11); rescheduling changes neither the payment mode nor the deadline.
 
 ### 4.2 Payment life cycle (RF-013b, RF-014, ADR-008)
 
@@ -1007,5 +1058,6 @@ Screen by screen and by role, including the create and edit modals of each modul
 | §2.7 Roles and permissions | RF-029 |
 | §2.8 Sign-in with lockout | RF-002, RF-003, RF-004b |
 | §2.9 Inspection report | RF-036, RF-018 |
+| §2.11 Expiry of the digital payment | RF-005, RF-033 |
 | §3.1 to §3.6 Activities | The whole authentication, booking, operations, payment and promotion module |
 | §4.1 to §4.5 States | RF-006, RF-007, RF-012b, RF-013b, RF-014, RF-024, RF-036 |

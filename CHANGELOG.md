@@ -4,6 +4,20 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-10-26 — Pago al reservar: modo de pago, efectivo con límite y vencimiento del pago digital
+
+**Contenido** (español e inglés). Mitigación de reservas masivas, a partir de la pregunta de la preparación de la sustentación (¿qué impide que un bot o una persona bloquee la agenda?) y de la recomendación del instructor. Verificado contra `develop` del 26 de octubre de 2026: booking `db156cb`, payment `d94cde5`, web `7f8aca5`, móvil `acf4e6d` e infra `0f949e5`. Desplegado en Azure ese día hacia las 12:02 (hora de Colombia): booking-service, payment-service y la web.
+
+- 01 SRS 8.1: RF-005 con `paymentMode` (400 `INVALID_PAYMENT_MODE`), el límite de efectivo (409 `CASH_BOOKING_LIMIT`) y el plazo del pago digital (`PAYMENT_TIMEOUT`); RF-013 y RF-033; reglas RN-BOOK-02 a RN-BOOK-04; RNF-004 con la mitigación de reservas masivas y RNF-009 con el paso de la forma de pago.
+- 02 Análisis 2.7: secuencias 2.2 y 2.5 con el modo de pago y `payment.reported`; secuencia nueva 2.11 (vencimiento del pago digital, con la consulta a payment antes de cancelar); actividad 3.2 y estados 4.1.
+- 04 Diseño 1.9: llamada interna booking → payment (Tabla 6); `payment.reported` y `payment.confirmed` consumidos por booking en `booking.payment-events` (Tabla 7); `PaymentDeadlineJob`; columnas de la migración 049 y motivo de la semilla 117 en el diccionario; adaptadores y puertos nuevos; transición por pago vencido.
+- 06 Pruebas: sección 3.4 con la prueba en vivo del 26 de octubre en local (Tabla 5e, con las dos fallas simuladas) y en producción; conteos nuevos (Tabla 5f: booking 133, payment 247 sin las de integración, web 239 y móvil 100); defecto 13 y brechas 9 y 10.
+- 07 Despliegue 1.10: subsección 1.3.11 con el despliegue del 26 de octubre y sus verificaciones; variables nuevas de booking e `INTERNAL_API_KEY` obligatoria en payment (3.3.2). 07 Procedimiento 2.8: Tabla 6 con las mismas variables.
+- 08 Acciones 3.0: AC-88 (preventiva y de mejora: mitigación de reservas masivas) y AC-89 (el evento perdido canceló una reserva pagada; ahora booking le pregunta a payment antes de cancelar) cerradas; ACO-41 abierta (tolerancia por retraso en el efectivo); Tabla 10: 89 de 106 (84 %), sin P0 ni P1; lección L-20; Anexo C.
+- 09 Usuario 4.9 (paso "¿Cómo vas a pagar?", plazo de 30 minutos, límite de efectivo, mensajes y pregunta frecuente), Administrador 4.9 (forma de pago en el detalle, efectivo registrado por el administrador, `PAYMENT_TIMEOUT`), Técnico 4.9 (ruta interna, cola, eventos, reglas, códigos y numeración: estructura 049 → siguiente 050, semillas 117 → siguiente 118) e Instalación 4.8 (variables, changelogs y `RABBITMQ_HOST=127.0.0.1` para payment fuera de Docker en Windows).
+- La app móvil tiene el cambio en `develop`, pero todavía no llega a los celulares: sale por OTA al fusionar a `main` (*v1.1.0*).
+- **PDF y Word: pendientes de regenerar** para 01, 02, 04, 06, 07 (procedimiento y despliegue), 08 y 09 (los cuatro manuales). Esta entrada solo cambia los Markdown.
+
 ## 2026-10-24 (tarde) — Migración 048 de notification-service
 
 **Contenido** (español e inglés). Corrección encontrada al probar producción después del despliegue de las 15:10: notification-service no podía leer `notification.pending_delivery` (migración 047), porque `channel` y `language` eran VARCHAR y Hibernate (`use_nationalized_character_data: true`) las lee como NCHAR, y no envió push ni correos hasta la migración 048 (NVARCHAR; commit `612417a`, merge `3f99df4`), desplegada sola el 24 de octubre a las 17:12 UTC; las 2 entregas atascadas salieron a las 17:13.

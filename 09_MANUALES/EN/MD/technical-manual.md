@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 24, 2026
+October 26, 2026
 
-Manual Type: Technical Manual (Developers and Software Architects) · Version 4.8
+Manual Type: Technical Manual (Developers and Software Architects) · Version 4.9
 
 ## Version Control
 
@@ -41,6 +41,7 @@ Table 1 records the change history of this document. Each modification must add 
 | 4.6 | 2026-10-21 | Change of the rule for bookings that end without being closed, reviewed by the team on the night of October 21: *ExpiredBookingsJob* only cancels the scheduled ones; operations-service (*FollowUpJob*, *FollowUpPolicy*, and *FollowUpService*) moves to NO_SHOW only a confirmed booking without an operator, through the internal route */internal/v1/bookings/{id}/no-show*, and leaves the others in the administrator's "To close" list (12.3, 12.4, 12.8, and Figure 3); new endpoints, ServiceNotStarted and ServiceNotFinished events, notification types, and changelogs 040 and 041 (11.5, 12.6, 13.3, and 13.4); single count of bookings without an operator in the mobile app too and other app changes (12.7); tests of the night of October 21 (707 automated and 19 end-to-end, 16.5); *FOLLOW_UP_\** variables (16.2); troubleshooting and discrepancies (Tables 26 and 29). | Development team |
 | 4.7 | 2026-10-23 | Review against *develop* of October 23, 2026 and version *v1.0.0*: MVVM pattern of the web (10.4); layers, ViewModels, and updates of the mobile app (mandatory APK and EAS Update) (10.5); the operator starts from 15 minutes before and with no later limit (operations-service rules table); **To close** looks back 28 days; the server calculates the payment amount; the variables of October 21 already go through the Compose file (ACO-14 closed); the end-to-end tests run only locally; version control with *v1.0.0* and continuous deployment prepared and not tested (15.1 and 15.4); tests of October 23 (825, and 13 in the mobile app) (16.5). Includes the content of Merari Urbano's *fix/A-03*, *fix/A-05*, *fix/A-08*, *fix/A-15*, and *fix/C-01* branches, checked against the code. | Development team |
 | 4.8 | 2026-10-24 | Review against *develop* of October 24, 2026 (128 branches merged), which runs on the public server since that day: the gateway checks the session with any scheme, limits */api/v1/auth/\**, and sets per-route timeouts (components and 14.1); window to start up to 4 hours after the end (operations-service rules); *booking.status_changed* and *execution.operator_unassigned* events, operations dead-letter queue, and notification pending deliveries, without *booking.created* (Table 22); OWASP A07 applied; CI and continuous deployment merged into *develop*, the October 24 deployment with *:prev*, *rollback.sh*, and the protection against downgrading (15.4); tests of October 24, 1,192 (16.5). | Development team |
+| 4.9 | 2026-10-26 | Payment at booking, reviewed against *develop* of October 26, 2026 and deployed to the public server that day: booking-service queries payment-service through an internal path before cancelling (9.4.1 and 13.3) and consumes *payment.reported* and *payment.confirmed* in the *booking.payment-events* queue (13.4); booking and payment rules (12.3 and 12.5); *paymentMode* when creating the booking and codes *INVALID_PAYMENT_MODE* and *CASH_BOOKING_LIMIT* (13.3); migration numbering with 049 and seed 117 (11.5 and 16.4); new variables (16.2). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -384,6 +385,7 @@ REST is used when the caller needs an answer to continue (ADR-004). The calls be
 | payment-service | booking-service GET /bookings/{id}, /bookings/me, /admin/bookings/{id} | Total, status, owner, and loyalty points of the booking; the browser never sends the amount. |
 | notification-service | security-service GET /internal/v1/users/{id}/contact (header X-Internal-Key) | Current email, first name, active status, and notification switches of the user (ADR-011 sections 8 and 12). |
 | notification-service | security-service GET /internal/v1/users/admins (header X-Internal-Key) | Active administrators who receive the staff notices (ADR-011 section 10). |
+| booking-service | payment-service GET /internal/v1/payments/bookings/{bookingId}/reported (header X-Internal-Key, 3 s; *PAYMENT_SERVICE_URL*) | Since October 26, 2026: before cancelling for lack of payment, find out whether the booking already has a payment in review or approved (*PaymentStatusDirectory*, *PaymentServiceDirectory*). |
 | api-gateway | security-service GET /api/v1/auth/session (the same token) | Confirm that the session of the token is still open before passing the request on (since October 21, 2026; section 9.2). |
 
 *Note.* If the target does not answer, the caller responds 503 with a stable code (CUSTOMER_SERVICE_UNAVAILABLE or BOOKING_SERVICE_UNAVAILABLE). Default timeouts: 3 s (5 s in payment-service).
@@ -834,7 +836,7 @@ The dictionary lists, for each table, its columns, types, nullability, and const
 
 ### 11.5 Migrations and Initial Data
 
-Each service owns the Liquibase changelog of its schemas and applies it at startup; *ddl-auto: validate* then checks that the JPA entities match the tables. Each service records its history in its own tables `DATABASECHANGELOG_<SERVICE>` and `DATABASECHANGELOGLOCK_<SERVICE>`. The payment-service is the exception: its changelogs live in *db/changelog* and are run by the *payment-migrate* container (ADR-013). Every changeset has a precondition *onFail:MARK_RAN*, so a database created with the global script *lavarapido-6-services-sqlserver.sql* converges with one created by the services. The numbering is shared (001 to 013 initial schemas, 014 onward later changes, 101 to 112 seeds), except in payment-service, which uses its own numbering 001 to 020 (TD-019). The global high-water mark is 041 (040 of operations-service and 041 of notification-service, from October 21, 2026); the next shared changeset is 042. The latest seed is booking-service 112 (*EXPIRED* cancellation reason, October 21, 2026). The list of changelogs of each service is in the Installation Manual, section 11.2.
+Each service owns the Liquibase changelog of its schemas and applies it at startup; *ddl-auto: validate* then checks that the JPA entities match the tables. Each service records its history in its own tables `DATABASECHANGELOG_<SERVICE>` and `DATABASECHANGELOGLOCK_<SERVICE>`. The payment-service is the exception: its changelogs live in *db/changelog* and are run by the *payment-migrate* container (ADR-013). Every changeset has a precondition *onFail:MARK_RAN*, so a database created with the global script *lavarapido-6-services-sqlserver.sql* converges with one created by the services. The numbering is shared (001 to 013 initial schemas, 014 onward later changes, 101 onward seeds), except in payment-service, which uses its own numbering (TD-019; it is at 023). As of October 26, 2026, the global high-water mark is 049 (booking-service *049-booking-payment-mode-deadline.sql*: *payment_mode*, *payment_deadline*, *payment_reported_at*, and the filtered index *ix_booking_payment_pending*); the next shared changeset is 050. The latest seed is booking-service 117 (*PAYMENT_TIMEOUT* cancellation reason); the next one is 118. The list of changelogs of each service is in the Installation Manual, section 11.2.
 
 ## 12. Technical Modules
 
@@ -866,6 +868,8 @@ Each service owns the Liquibase changelog of its schemas and applies it at start
 
 **Rules:** availability is calculated on a 30-minute grid inside the opening hours, outside the break, not in the past, up to 60 days ahead, and with at least one active bay free for the whole duration; a booking is created directly as CONFIRMED with a bay; if the slot is taken, nothing is saved and up to five alternative times of the same day are returned (409 SLOT_UNAVAILABLE, which also carries the reason: CLOSED_DAY, OUTSIDE_HOURS, TIME_PASSED, or NO_FREE_BAY, calculated by *AvailabilityPolicy.whyUnavailable*); the request may carry *preferredOperatorId*, which travels in BookingConfirmed so that operations-service respects it if that operator is free; customers can reschedule or cancel only before the start; the administrator moves bookings through IN_PROGRESS, COMPLETED, NO_SHOW, or CANCELLED; each catalog service has its *loyalty_points*, each booking line copies them when the booking is built, and *Booking.totalLoyaltyPoints()* exposes the total in *BookingResponse.totalLoyaltyPoints*; changes of schedule, exceptions, and bays are recorded in *schedule_history*. The business data of the establishment (identity, tax information, and channels) are read and saved with *GET* and *PUT /api/v1/admin/establishment*; the */internal/v1/bookings* routes serve operations-service with the internal key; creating, rescheduling, closing expired bookings, and marking a booking without an operator as NO_SHOW take the schedule lock (*sp_getapplock* on *booking-schedule*). **Expired bookings (since October 21, 2026):** every 5 minutes *ExpiredBookingsJob* calls *BookingService.closeExpired*, which cancels only the bookings still SCHEDULED one hour after their end time (*BOOKING_EXPIRY_GRACE_MINUTES*), with the system reason *EXPIRED* (seed 112), which does not appear in the list of reasons. A CONFIRMED booking is never closed from booking-service, because it may have been served without being recorded: operations-service decides (section 12.4). For one that never had an operator, operations-service calls the internal route *POST /internal/v1/bookings/{id}/no-show* (*BookingService.markUnattended*), which checks again that the booking is CONFIRMED and already expired (409 BOOKING_NOT_EXPIRED otherwise) and moves it to NO_SHOW. Nothing is refunded automatically. The job is turned off with *BOOKING_EXPIRY_CHECK_ENABLED=false* and its interval is *BOOKING_EXPIRY_CHECK_INTERVAL*. **Events:** publishes BookingConfirmed (created or rescheduled) and BookingCancelled (also when an expired booking is cancelled; the move to NO_SHOW publishes no event).
 
+**Payment at booking (since October 26, 2026):** the customer must send *paymentMode* (*DIGITAL* or *CASH*) when creating the booking (400 *INVALID_PAYMENT_MODE*); the administrator does not have to, and their bookings have no deadline or limit. *PaymentPolicy* applies two rules: at most *BOOKING_CASH_ACTIVE_LIMIT* (1) active (SCHEDULED, CONFIRMED, or IN_PROGRESS) cash bookings made by the customer themselves (*booked_by*), counted with the schedule locked (*lockSchedule*; 409 *CASH_BOOKING_LIMIT*), and, for *DIGITAL*, *paymentDeadline* = min(creation + *BOOKING_PAYMENT_WINDOW* (30 min), start). *PaymentEventsListener* consumes *payment.reported* and *payment.confirmed* and sets *payment_reported_at* (*Booking.markPaymentReported*, idempotent). *PaymentDeadlineJob* runs every *BOOKING_PAYMENT_EXPIRY_INTERVAL* (60 s; turned off with *BOOKING_PAYMENT_EXPIRY_ENABLED=false*) and, before cancelling an overdue booking (*Booking.paymentOverdue*), asks payment-service: with *reported=true* it marks it and does not cancel it; with *false* it cancels it with *PAYMENT_TIMEOUT* and publishes *BookingCancelled*; if payment does not answer, it leaves it for the next round (*PaymentTimeoutOutcome*: CANCELLED, PAYMENT_REPORTED, or NOT_OVERDUE). Rescheduling does not change the mode or the deadline, and earlier bookings have *payment_mode* NULL and none of these rules.
+
 ### 12.4 operations-service
 
 **Function:** operators, weekly shifts, absences, operator profile and skills, manual and automatic assignment, execution, ratings, and inspection reports (ADR-014).
@@ -877,6 +881,8 @@ Each service owns the Liquibase changelog of its schemas and applies it at start
 **Function:** payment accounts with QR, payments with receipt, review, refunds, and manual payments (ADR-008 and ADR-013).
 
 **Rules:** only bookings CONFIRMED, IN_PROGRESS, or COMPLETED can be paid, and *PaymentPolicy.CanReportPayment* also requires that there is no approved payment and none pending or in review (exposed as *payable* in *GET /api/v1/payments/me/bookings*); the amount due is the total returned by booking-service minus the redeemed coupon (*AmountDueCalculator*); the payment amount is calculated by the server (*AmountDueCalculator*, in *PaymentCommandService* when reporting and when recording an in-person payment), not by the screen; what the customer says they paid is stored separately in the receipt (*reported_amount*) so that the administrator can compare it, and the payment goes directly to IN_REVIEW; a reused transaction reference is rejected; the receipt weighs 2 MB at most (400 RECEIPT_TOO_LARGE; the web and the app compress it before sending it); *GET /api/v1/payment-accounts* returns the active accounts, including the cash account while it is active; rejection requires a reason of up to 200 characters; a manual payment is approved immediately; the state machine is PENDING → IN_REVIEW → APPROVED or REJECTED, and APPROVED → REFUNDED. **Loyalty and promotions (ADR-015):** an approval credits the points of the booking as EARNED (idempotent per customer and booking); a refund reverses them (REVERSED); the balance is the *balance_after* of the last movement; a coupon is a percentage discount unlocked when the balance reaches *required_points*, and redeeming it does not consume points. **Events:** publishes PaymentConfirmed, PaymentRejected, PaymentRefunded, PromotionRedeemed, and LoyaltyPointsEarned after the commit, only with *MESSAGING_ENABLED=true*. **Correlation and health:** *CorrelationIdMiddleware* takes or creates the *X-Correlation-Id* and forwards it to booking-service; */health* and */actuator/health* check SQL Server with a 3-second limit.
+
+**Payment at booking (since October 26, 2026):** when the customer reports a payment with a receipt (*POST /api/v1/payments*, *Payment.ReportWithReceipt*), also when reporting it again after a rejection, payment-service publishes *PaymentReported* (*payment.reported*; payload *paymentId*, *bookingId*, *customerUserId*, *amount*). The internal path *GET /internal/v1/payments/bookings/{bookingId}/reported* answers *{"bookingId":123,"reported":true}*, with *reported* true if there is an IN_REVIEW or APPROVED payment; it is protected by *InternalApiKeyAuthenticationHandler* (*X-Internal-Key* = *INTERNAL_API_KEY*; 401 without a key or with a wrong one, and a user's JWT does not work). Until that day payment-service did not validate any internal key. Reporting or approving the payment of a cancelled booking still answers 409 *BOOKING_NOT_PAYABLE* (*BookingPaymentGuard.EnsureBookingIsPayable*).
 
 ### 12.6 notification-service
 
@@ -1023,6 +1029,7 @@ security-service issues a JWT signed with HS256 (secret JWT_SECRET of at least 3
 | GET | /internal/v1/bookings?from=&to=, /internal/v1/bookings/{id} | Internal key | Bookings for the automatic assignment of operations-service. |
 | POST | /internal/v1/bookings/{id}/no-show | Internal key | Moves to NO_SHOW a confirmed booking that ended without an operator; only operations-service calls it (409 BOOKING_NOT_EXPIRED if it has not expired yet). |
 | POST | /internal/v1/notifications/app-update | Internal key | Push notice of a new version of the mobile application. |
+| GET | /internal/v1/payments/bookings/{bookingId}/reported | Internal key | Since October 26, 2026, payment-service: whether the booking has an IN_REVIEW or APPROVED payment (*{"bookingId":123,"reported":true}*); only booking-service calls it before cancelling for lack of payment. |
 | GET | /actuator/health | Public | Health of each service and of the gateway. |
 
 *Note.* Prepared by the authors from the controllers of the services and the service documentation.
@@ -1041,7 +1048,8 @@ Content-Type: application/json
   "serviceIds": [1],
   "date": "2026-10-12",
   "time": "10:30",
-  "notes": "Check the upholstery"
+  "notes": "Check the upholstery",
+  "paymentMode": "DIGITAL"
 }
 ```
 
@@ -1060,6 +1068,8 @@ Content-Type: application/json
 | The service is not offered for the vehicle type | SERVICE_NOT_AVAILABLE_FOR_VEHICLE. |
 | Invalid date (past or beyond 60 days) | INVALID_DATE. |
 | Invalid shape of the request | 400 VALIDATION_ERROR. |
+| The customer did not send *paymentMode* or it is neither *DIGITAL* nor *CASH* (since October 26, 2026) | 400 INVALID_PAYMENT_MODE. |
+| The customer already has *BOOKING_CASH_ACTIVE_LIMIT* active cash bookings | 409 CASH_BOOKING_LIMIT. |
 
 *Note.* Codes taken from the translation file of the web application and the documentation of booking-service.
 
@@ -1094,12 +1104,14 @@ The messaging uses a single topic exchange, *carwash.events*. The routing key fo
 | ServiceCompleted | execution.service_completed | operations-service | notification-service | Published |
 | InspectionShared | execution.inspection_shared | operations-service | notification-service | Published (with the token of the public link) |
 | ServiceNotStarted, ServiceNotFinished | execution.service_not_started, execution.service_not_finished | operations-service | notification-service | Published once per booking (since October 21, 2026) |
-| PaymentConfirmed, PaymentRejected, PaymentRefunded | payment.confirmed, payment.rejected, payment.refunded | payment-service | notification-service | Published |
+| PaymentReported | payment.reported | payment-service | booking-service | Published since October 26, 2026, when a payment with a receipt is reported |
+| PaymentConfirmed | payment.confirmed | payment-service | notification-service; booking-service since October 26, 2026 | Published |
+| PaymentRejected, PaymentRefunded | payment.rejected, payment.refunded | payment-service | notification-service | Published |
 | PromotionRedeemed | payment.promotion_redeemed | payment-service | notification-service | Published |
 | LoyaltyPointsEarned | payment.loyalty_points_earned | payment-service | notification-service | Published (with unlockedPromotions) |
 | BookingCreated | booking.created | — | — | Not published; since October 24, 2026 notification-service no longer listens to it (H-12) |
 
-*Note.* Delivery is at least once; acknowledgment after processing; three retries and then the dead-letter queue (*.dlq*); publication after the commit, without Outbox. Since October 24, 2026 operations-service consumes from *operations-service.booking-confirmed* with its *.dlq* (the old *operations-service.events* queue is drained and deleted on startup) and publishes with broker confirmation; notification-service stores in the *pending_delivery* table, in the same transaction, the email and push it sends after the commit, and retries them (1, 2, 4… minutes, at most 1 hour, up to 5 attempts). Each event that generates a notification carries the user identifier of the recipient (*customerUserId* or *operatorUserId*), so notification-service does not query other services (ADR-011).
+*Note.* Delivery is at least once; acknowledgment after processing; three retries and then the dead-letter queue (*.dlq*); publication after the commit, without Outbox. Since October 24, 2026 operations-service consumes from *operations-service.booking-confirmed* with its *.dlq* (the old *operations-service.events* queue is drained and deleted on startup) and publishes with broker confirmation; notification-service stores in the *pending_delivery* table, in the same transaction, the email and push it sends after the commit, and retries them (1, 2, 4… minutes, at most 1 hour, up to 5 attempts). Each event that generates a notification carries the user identifier of the recipient (*customerUserId* or *operatorUserId*), so notification-service does not query other services (ADR-011). Since October 26, 2026 booking-service consumes from *booking.payment-events* (keys *payment.reported* and *payment.confirmed*), with its dead-letter queue *booking.payment-events.dlq* through the *carwash.events.dlx* exchange. Since there is no Outbox, a *payment.reported* can be lost; that is why *PaymentDeadlineJob* confirms with payment-service before cancelling (AC-89).
 
 ### 13.5 Health and Verification
 
@@ -1234,7 +1246,7 @@ The local environment and its startup order are described in the Installation Ma
 
 ### 16.2 Configuration
 
-The configuration variables are described in the Installation Manual, section 10. Any new variable must be added to *.env.example* with a comment and, if the service runs in Docker, to its *environment* block of *docker-compose.yml*. Those of October 21, 2026 (*SESSION_CHECK_\** in the gateway, *BOOKING_EXPIRY_\** in booking-service, with *BOOKING_EXPIRY_GRACE_MINUTES* shared with operations-service, and *FOLLOW_UP_ENABLED*, *FOLLOW_UP_INTERVAL*, and *FOLLOW_UP_LOOK_BACK_DAYS* in operations-service; nine in total) are already in those files (action ACO-14, closed). Those of October 23, 2026 (*ALLOWED_EMAIL_DOMAINS* and *DEMO_\*_PASSWORD* in security-service) are too. *ADMIN_DOCUMENT* and *ADMIN_PHONE* complete the data of the first administrator in production.
+The configuration variables are described in the Installation Manual, section 10. Any new variable must be added to *.env.example* with a comment and, if the service runs in Docker, to its *environment* block of *docker-compose.yml*. Those of October 21, 2026 (*SESSION_CHECK_\** in the gateway, *BOOKING_EXPIRY_\** in booking-service, with *BOOKING_EXPIRY_GRACE_MINUTES* shared with operations-service, and *FOLLOW_UP_ENABLED*, *FOLLOW_UP_INTERVAL*, and *FOLLOW_UP_LOOK_BACK_DAYS* in operations-service; nine in total) are already in those files (action ACO-14, closed). Those of October 23, 2026 (*ALLOWED_EMAIL_DOMAINS* and *DEMO_\*_PASSWORD* in security-service) are too. *ADMIN_DOCUMENT* and *ADMIN_PHONE* complete the data of the first administrator in production. Those of October 26, 2026 (booking-service's *BOOKING_CASH_ACTIVE_LIMIT*, *BOOKING_PAYMENT_WINDOW*, *BOOKING_PAYMENT_EXPIRY_ENABLED*, *BOOKING_PAYMENT_EXPIRY_INTERVAL*, and *PAYMENT_SERVICE_URL*, and *INTERNAL_API_KEY*, which payment-service now also needs and *docker-compose.prod.yml* requires) are in *.env.example* and in the compose file.
 
 ### 16.3 Updates and Dependencies
 
@@ -1247,7 +1259,7 @@ The configuration variables are described in the Installation Manual, section 10
 - A new domain table must create its *tr_touch_* trigger in the same changeset.
 - Every new query must include *deleted_at IS NULL*.
 - Seeds use fixed identifiers; never reseed without *IDENTITY_INSERT* (CANCELLED = 5, APPROVED = 3).
-- The next changeset of the global numbering is 042.
+- The next changeset of the global numbering is 050, and the next seed is 118 (as of October 26, 2026); payment-service is at its 023.
 - Back up the database before deploying a service that adds changesets.
 
 ### 16.5 Testing
