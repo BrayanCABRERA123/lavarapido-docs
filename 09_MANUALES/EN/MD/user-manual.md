@@ -14,7 +14,7 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 26, 2026
+October 27, 2026
 
 Manual Type: User Manual (Customer and Operator Roles, on the web and in the mobile application) · Version 4.13
 

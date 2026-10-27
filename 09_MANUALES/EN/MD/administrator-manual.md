@@ -14,7 +14,7 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 26, 2026
+October 27, 2026
 
 Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.12
 
