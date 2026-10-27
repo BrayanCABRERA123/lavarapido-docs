@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 26, 2026
 
-Document Type: Register of Corrective, Preventive, and Improvement Actions (Development Team and Instructor) · Version 3.1
+Document Type: Register of Corrective, Preventive, and Improvement Actions (Development Team and Instructor) · Version 3.2
 
 ## Version Control
 
@@ -41,6 +41,7 @@ Table 1 records the change history of this document. The action register (sectio
 | 2.9 | 2026-10-24 | AC-87 closed: after the October 24 deployment, notification-service could not read *pending_delivery* (VARCHAR columns of migration 047) and sent no push notifications or emails; migration 048 turned them into NVARCHAR and was deployed that day at 17:12 UTC. Table 10 was recalculated (87 of 103) and lesson L-19 on integration tests against SQL Server (RNF-003) was added. | Development team |
 | 3.0 | 2026-10-26 | Payment at booking. AC-88 was closed, a preventive and improvement action born from the question of the final presentation and the instructor's recommendation: mitigation of mass bookings with the payment mode at booking, cash with a limit, and the expiry of the digital payment. AC-89 was closed: in the live test an event was lost and the job cancelled a paid booking, and now booking asks payment before cancelling. ACO-41 was opened (tolerance for lateness with cash). Table 10 (89 of 106) and the test count were recalculated, and lesson L-20 and the new actions in Annex C were added. | Development team |
 | 3.1 | 2026-10-26 | Versions *v1.1.0* and *v1.1.1*. ACO-19 was closed as AC-90: continuous deployment ran on its own for the first time on the night of October 26 and the mobile OTA was published after checking the native fingerprint. ACO-24 was left with only the protection of *develop*. Table 10 (90 of 106), AM-17, H-15, and Annex C were updated. | Development team |
+| 3.2 | 2026-10-27 | Test count of October 27, 2026 (booking 137, customer-service 83: 1,311) and payment persistence tests in the CI (Table 10). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -424,7 +425,7 @@ Preventive actions address the causes of risks that have not yet materialized or
 | On-time closure | Actions closed within the time of their severity / closed actions × 100 | ≥ 90% | To be measured from version 1.0 |
 | Recurrence | Closed corrective actions whose problem reappears / closed corrective actions × 100 | 0% | 0% |
 | Escaped defects | Defects found in acceptance or operation / total defects of the period × 100 | Downward trend | To be measured from the first implementation |
-| Automated tests | Tests run and passed in every repository | Increasing | On October 26, 2026 booking (133), payment-service (247, without the integration tests), the web (239), and the mobile app (100) changed; with the other artifacts of the latest CI of October 24, 1,306 without payment's infrastructure project (on October 24 it was 1,187 with the same criterion and 1,192 with it). In addition, the live test of payment at booking of October 26 (11 tests, 2 of them simulated failures), 19 end-to-end tests on October 21, and 42 functional cases on October 19 |
+| Automated tests | Tests run and passed in every repository | Increasing | On October 26, 2026 booking (133), payment-service (247, without the integration tests), the web (239), and the mobile app (100) changed; with the other artifacts of the latest CI of October 24, 1,306 without payment's infrastructure project (on October 24 it was 1,187 with the same criterion and 1,192 with it); on October 27, 2026 booking went up to 137 and customer-service to 83, for 1,311 with the same criterion, and payment's 11 persistence tests started running in the CI against SQL Server. In addition, the live test of payment at booking of October 26 (11 tests, 2 of them simulated failures), 19 end-to-end tests on October 21, and 42 functional cases on October 19 |
 
 *Note.* Prepared by the authors. The test count corresponds to the latest *develop* CI of each repository on October 24, 2026 (on October 23 there were 838; in *v1.0.0*, 757; on October 21, 707); version 1.0 counted annotations (about 400). On October 26, 2026 the counts of booking, payment, the web, and the mobile app were added (Test document, Table 5f). The recorded corrective actions count AC-01 to AC-90 (AC-88 is preventive and improvement, but has an AC number) and the 16 open ACOs.
 

@@ -276,7 +276,7 @@ On October 26, 2026 the team tested payment at booking live (payment mode at boo
 | Web (Angular) | 239 | 212 | Payment method step, deadline badge and cash label in the history, payment screen according to the mode, error codes, and Terms and Conditions |
 | Mobile app | 100 | 73 | Payment method step (`useReservePaymentStep`), badge, cash label, payment screen according to the mode, and texts (Jest) |
 
-> *Note.* Prepared by the authors from the *develop* suites of each repository on October 26, 2026. With the counts of Table 5d for the other artifacts, the total is 1,306 without the tests of payment's infrastructure project (on October 24 it was 1,187 with the same criterion). The mobile app got the change with the *v1.1.1* OTA on October 26, 2026. On October 27, 2026 booking-service went up to 137 tests (alternatives that respect the vehicle's other bookings, at most 10 services, and 400 for an invalid business hours week) and customer-service to 83 (owners of many vehicles in one query), and the end-to-end tests send the payment method.
+> *Note.* Prepared by the authors from the *develop* suites of each repository on October 26, 2026. With the counts of Table 5d for the other artifacts, the total is 1,306 without the tests of payment's infrastructure project (on October 24 it was 1,187 with the same criterion). The mobile app got the change with the *v1.1.1* OTA on October 26, 2026. On October 27, 2026 booking-service went up to 137 tests (alternatives that respect the vehicle's other bookings, at most 10 services, and 400 for an invalid business hours week) and customer-service to 83 (owners of many vehicles in one query), for 1,311 with the same criterion,, and the end-to-end tests send the payment method.
 
 ## 4. Functional Test Cases
 

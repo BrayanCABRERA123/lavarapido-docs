@@ -4,6 +4,14 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-10-27 (tarde) — PDF y Word de todas las evidencias regenerados
+
+**Contenido** (español e inglés).
+
+- 08 Acciones 3.2 y 06 Pruebas: conteo del 27 de octubre (booking 137, customer-service 83: 1 311 con el mismo criterio) y pruebas de persistencia de payment en el CI.
+- **PDF y Word de 01 a 09 y PDF de 11 regenerados** desde el Markdown actual (el artículo, 10, no cambió). Ya no quedan PDF ni Word desactualizados.
+- Formato: el mismo generador APA de los manuales, con cuatro ajustes: los diagramas Mermaid se convierten en imagen; las capturas dentro de tablas (01 y 02) se muestran como imagen; la tabla de la portada de 11 se conserva; y ninguna imagen se parte entre páginas (las muy altas se reducen para que el título, la imagen y la nota queden en la misma página). 03 se regeneró solo por este último ajuste.
+
 ## 2026-10-27 — Cambios de booking, customer, payment e infra de la madrugada
 
 **Contenido** (español e inglés). Verificado contra `develop` del 27 de octubre de 2026 (booking `c648730`, customer `c9ac51c`, payment `6cb806f`, infra `f9a44d0`) y en el entorno local con booking y customer reconstruidos.
