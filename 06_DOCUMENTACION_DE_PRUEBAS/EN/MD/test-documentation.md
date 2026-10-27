@@ -233,7 +233,7 @@ On October 23, 2026 *v1.0.0* was tagged in 8 repositories (757 tests), and on Oc
 | payment-service: domain | `dotnet test` | 134 | 134 | 0 | 0 | +15: `AMOUNT_CHANGED`, percentage coupon, cancelled-booking notice |
 | payment-service: application | (same command) | 52 | 52 | 0 | 0 | +20: customer redemption (BIZ-02), paged queue (E-10), inactive cash (C-04), discount type (D-01) |
 | payment-service: API | (same command) | 34 | 34 | 0 | 0 | +34: new project with the tests by role (F-04) and the required identifiers (BIZ-13) |
-| payment-service: infrastructure | (same command, without `PAYMENT_INTEGRATION_DB`) | 5 | 5 | 0 | 11 | +5 without a database; the 11 persistence tests are skipped in the CI |
+| payment-service: infrastructure | (same command, without `PAYMENT_INTEGRATION_DB`) | 5 | 5 | 0 | 11 | +5 without a database; the 11 persistence tests used to be skipped in the CI (since October 27, 2026 they run in the "Pruebas de integración" job, against SQL Server with the Liquibase migrations) |
 | Mobile app | `npm test -- --ci` | 73 | 73 | 0 | 0 | +60: payment, refresh, errors, operator, paged queue, fixed discount (25 suites) |
 | **Total** | | **1,192** | **1,192** | **0** | **11** | **+354** |
 
@@ -276,7 +276,7 @@ On October 26, 2026 the team tested payment at booking live (payment mode at boo
 | Web (Angular) | 239 | 212 | Payment method step, deadline badge and cash label in the history, payment screen according to the mode, error codes, and Terms and Conditions |
 | Mobile app | 100 | 73 | Payment method step (`useReservePaymentStep`), badge, cash label, payment screen according to the mode, and texts (Jest) |
 
-> *Note.* Prepared by the authors from the *develop* suites of each repository on October 26, 2026. With the counts of Table 5d for the other artifacts, the total is 1,306 without the tests of payment's infrastructure project (on October 24 it was 1,187 with the same criterion). The mobile app does not have the change on phones yet: it goes out by OTA when merged into *main* (*v1.1.0*).
+> *Note.* Prepared by the authors from the *develop* suites of each repository on October 26, 2026. With the counts of Table 5d for the other artifacts, the total is 1,306 without the tests of payment's infrastructure project (on October 24 it was 1,187 with the same criterion). The mobile app got the change with the *v1.1.1* OTA on October 26, 2026. On October 27, 2026 booking-service went up to 137 tests (alternatives that respect the vehicle's other bookings, at most 10 services, and 400 for an invalid business hours week) and customer-service to 83 (owners of many vehicles in one query), and the end-to-end tests send the payment method.
 
 ## 4. Functional Test Cases
 
