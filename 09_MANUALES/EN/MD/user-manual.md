@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 26, 2026
 
-Manual Type: User Manual (Customer and Operator Roles, on the web and in the mobile application) · Version 4.12
+Manual Type: User Manual (Customer and Operator Roles, on the web and in the mobile application) · Version 4.13
 
 ## Version Control
 
@@ -45,6 +45,7 @@ Table 1 records the change history of this document. Each time the development t
 | 4.10 | 2026-10-26 | The Customer User Manual and the Operator User Manual (version 1.0) are created, with the content of this manual separated by role as the SENA guide recommends; this manual is kept as a joint reference for both roles. Corrections: the operator also has the notification switches and **Deactivate my account** (10.2.7), and mobile app *v1.1.0* is already published (10.3.4). | Development team |
 | 4.11 | 2026-10-26 | Mobile application 1.1.1: APK *versionCode* 6 and over-the-air update published on October 26, 2026 (10.3 and 10.3.4). | Development team |
 | 4.12 | 2026-10-27 | The alternative times of "That time was just taken" respect the other bookings of the same vehicle (10.1.3 and 13). | Development team |
+| 4.13 | 2026-10-27 | Section 10.3 points to the mobile application screenshots of the role manuals. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -944,7 +945,7 @@ The operator views and edits the personal data, changes the password, and can de
 
 ### 10.3 Android Mobile Application
 
-The LavaRapidoVehicular application (version 1.1.1, APK *versionCode* 6 published on October 26, 2026, package *com.vehiclecarwash.app*) offers the three roles the same functions as the web, with the same rules and the same data: what is done in one is seen in the other. This section explains how to install it and how its use differs; the rules of each module are those of sections 10.1 and 10.2, and the administrator's are those of the Administrator Manual. It was written from the 31 screens in the app's code of October 23, 2026 (3 for sign-in, 8 for the customer, 8 for the operator, and 12 for the administrator) and has no screenshots yet.
+The LavaRapidoVehicular application (version 1.1.1, APK *versionCode* 6 published on October 26, 2026, package *com.vehiclecarwash.app*) offers the three roles the same functions as the web, with the same rules and the same data: what is done in one is seen in the other. This section explains how to install it and how its use differs; the rules of each module are those of sections 10.1 and 10.2, and the administrator's are those of the Administrator Manual. It was written from the 31 screens in the app's code of October 23, 2026 (3 for sign-in, 8 for the customer, 8 for the operator, and 12 for the administrator); its screenshots are in the Customer User Manual (Figures 26 to 32) and in the Operator User Manual (Figures 15 to 18).
 
 #### 10.3.1 Installation and Updates
 

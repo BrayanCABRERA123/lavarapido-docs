@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 26 de octubre de 2026
 
-Tipo de manual: Manual de usuario (roles Cliente y Operario, en la web y en la aplicación móvil) · Versión 4.12
+Tipo de manual: Manual de usuario (roles Cliente y Operario, en la web y en la aplicación móvil) · Versión 4.13
 
 ## Control de Versiones
 
@@ -45,6 +45,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 4.10 | 2026-10-26 | Se crean el Manual de Usuario del Cliente y el Manual de Usuario del Operario (versión 1.0), con el contenido de este manual separado por rol según la guía del SENA; este manual se conserva como referencia conjunta de los dos roles. Correcciones: el operario también tiene los interruptores de notificación y **Desactivar mi cuenta** (10.2.7), y la app móvil *v1.1.0* ya se publicó (10.3.4). | Equipo de desarrollo |
 | 4.11 | 2026-10-26 | Aplicación móvil 1.1.1: APK *versionCode* 6 y actualización por internet publicados el 26 de octubre de 2026 (10.3 y 10.3.4). | Equipo de desarrollo |
 | 4.12 | 2026-10-27 | Las horas alternativas de "Esa hora ya se ocupó" respetan las otras reservas del mismo vehículo (10.1.3 y 13). | Equipo de desarrollo |
+| 4.13 | 2026-10-27 | La sección 10.3 remite a las capturas de la aplicación móvil de los manuales por rol. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -944,7 +945,7 @@ El operario consulta y edita sus datos personales, cambia la contraseña y puede
 
 ### 10.3 Aplicación Móvil Android
 
-La aplicación LavaRapidoVehicular (versión 1.1.1, APK *versionCode* 6 publicado el 26 de octubre de 2026, paquete *com.vehiclecarwash.app*) ofrece a los tres roles las mismas funciones que la web, con las mismas reglas y los mismos datos: lo que se hace en una se ve en la otra. Esta sección explica cómo instalarla y en qué cambia su uso; las reglas de cada módulo son las de las secciones 10.1 y 10.2, y las del administrador, las del Manual de Administrador. Se escribió a partir de las 31 pantallas del código de la app del 23 de octubre de 2026 (3 de ingreso, 8 del cliente, 8 del operario y 12 del administrador) y todavía no tiene capturas.
+La aplicación LavaRapidoVehicular (versión 1.1.1, APK *versionCode* 6 publicado el 26 de octubre de 2026, paquete *com.vehiclecarwash.app*) ofrece a los tres roles las mismas funciones que la web, con las mismas reglas y los mismos datos: lo que se hace en una se ve en la otra. Esta sección explica cómo instalarla y en qué cambia su uso; las reglas de cada módulo son las de las secciones 10.1 y 10.2, y las del administrador, las del Manual de Administrador. Se escribió a partir de las 31 pantallas del código de la app del 23 de octubre de 2026 (3 de ingreso, 8 del cliente, 8 del operario y 12 del administrador); sus capturas están en el Manual de Usuario del Cliente (Figuras 26 a 32) y en el Manual de Usuario del Operario (Figuras 15 a 18).
 
 #### 10.3.1 Instalación y Actualizaciones
 
