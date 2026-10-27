@@ -1261,7 +1261,7 @@ The main business flow goes through the system's services in the following order
 6. From 15 minutes before the time, the operator starts the service and finishes it when done (CU11); the booking moves to In progress and then to Completed, and the pending reminders are cancelled. For services of 180 minutes or more, the administrator records the inspection report and shares it with the customer (CU30).
 7. The customer rates the service (CU15).
 
-If a booking ends without being recorded, the system only closes it when there is no doubt (CU32): one hour after its end time, a Scheduled booking that was never confirmed is cancelled and a Confirmed booking that never had an operator becomes No-show. If it had an operator, it goes to "To close" and the administrator closes it with "Attended" or "No-show" (CU29).
+If a booking ends without being recorded, the system only closes it when there is no doubt (CU32): one hour after its end time, a Confirmed booking that never had an operator becomes No-show. If it had an operator, it goes to "To close" and the administrator closes it with "Attended" or "No-show" (CU29).
 
 The rule that defines whether payment must be approved before the service starts is still open (section 11.3); today steps 5 and 6 are independent.
 
