@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 26, 2026
 
-Manual Type: User Manual for the Customer Role (web application and Android mobile application) · Version 1.2
+Manual Type: User Manual for the Customer Role (web application and Android mobile application) · Version 1.3
 
 ## Version Control
 
@@ -31,6 +31,7 @@ Table 1 records the change history of this document. Every time the development 
 | 1.0 | 2026-10-26 | Creation of the manual exclusive to the Customer role, separated from the User Manual (version 4.9) so that each audience has its own document, as the SENA manuals guide recommends. Reviewed against *develop* of October 26, 2026: payment at booking (section 10.3), payment screen according to the method chosen (10.5), new section on the vehicle inspection report that the business shares by link (10.8), terms and conditions updated with the clause on the inspection report and its photographs (8.1), and the mobile application (10.11). New screenshots of the booking with the "How will you pay?" step, the cash confirmation, the digital (with deadline) and cash payment screens, and the history with the payment badges. | Development team |
 | 1.1 | 2026-10-26 | Data Policy with the inspection photographs (8.1); mobile application 1.1.1 with APK *versionCode* 6 and the over-the-air update published (10.11). | Development team |
 | 1.2 | 2026-10-27 | The alternative times of "That time was just taken" no longer include those that overlap another booking of the same vehicle (10.3 and 13), with the new Figure 16. | Development team |
+| 1.3 | 2026-10-27 | Mobile application screenshots (Figures 26 to 32) in section 10.11; logging out becomes Figure 33. | Development team |
 
 *Note.* Dates are written in ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -129,7 +130,7 @@ To explain step by step how the customer must register, log in, navigate, and us
 
 ### 6.3 About the Screenshots
 
-The figures in this manual are real screenshots of the system running with test accounts and data, ordered according to the flow of use. The booking, payment, and history screens (Figures 13 to 15 and 18 to 21) were taken again on October 26, 2026 to show payment at booking and Figure 16 on October 27; the others are from October 19, 2026 and have not changed since then. Their source is explained in Annex A.
+The figures in this manual are real screenshots of the system running with test accounts and data, ordered according to the flow of use. The booking, payment, and history screens (Figures 13 to 15 and 18 to 21) were taken again on October 26, 2026 to show payment at booking and Figure 16 on October 27; the others are from October 19, 2026 and have not changed since then. Figures 26 to 32 are from the mobile application. Their source is explained in Annex A.
 
 ## 7. Requirements to Use the System
 
@@ -783,6 +784,52 @@ The **LavaRapidoVehicular** application (version 1.1.1, APK *versionCode* 6, pub
 - **History:** filters for all, active, completed, and cancelled bookings, search by service, vehicle, or code, and the detail of each booking with **Pay now**, **Cancel booking**, and **Rate Service** (section 10.6).
 - **My vehicles**, **Alerts**, **Profile**, and **Settings** work as in sections 10.2, 10.7, 10.9, and 10.10.
 
+**Figure 26**
+
+*Mobile App Sign-In*
+
+![Mobile App Sign-In](capturas/customer-26-mobile-app-sign-in.jpg)
+
+**Figure 27**
+
+*Customer Home in the Mobile App*
+
+![Customer Home in the Mobile App](capturas/customer-27-mobile-app-home.jpg)
+
+**Figure 28**
+
+*Booking in the Mobile App: Vehicle and Service*
+
+![Booking in the Mobile App: Vehicle and Service](capturas/customer-28-mobile-app-book-vehicle-and-service.jpg)
+
+**Figure 29**
+
+*Booking in the Mobile App: Payment Option and Summary*
+
+![Booking in the Mobile App: Payment Option and Summary](capturas/customer-29-mobile-app-book-time-and-payment-option.jpg)
+
+*Note.* Screen scrolled to step 4, with **Digital payment now** chosen.
+
+**Figure 30**
+
+*Payment With the Deadline in the Mobile App*
+
+![Payment With the Deadline in the Mobile App](capturas/customer-30-mobile-app-pay-service-with-deadline.jpg)
+
+*Note.* It opens on its own after **Book Now** with digital payment; in the app the screen is titled **Payment Gateway**.
+
+**Figure 31**
+
+*History in the Mobile App*
+
+![History in the Mobile App](capturas/customer-31-mobile-app-history.jpg)
+
+**Figure 32**
+
+*Customer More Menu in the Mobile App*
+
+![Customer More Menu in the Mobile App](capturas/customer-32-mobile-app-more-menu.jpg)
+
 **Push notifications.** When signing in, the app asks for permission to send notifications. If it is granted, the phone receives by push the same notices as the inbox (reminders 24 hours and 1 hour before, operator assigned, service started and finished, payments, points, and coupons, among others), and tapping one opens the related screen. Android groups them in the channels **Reminders**, **Promotions and points**, **Confirmations**, **Cancellations**, **Service messages**, and **System**, which can be muted from the phone's settings. The app shows the exact reason of the server errors in the four languages.
 
 **Logging out in the app.** Open **More** and tap **Log Out**, which asks for confirmation; after signing out, the phone stops receiving that account's notifications. Known limitation, recorded in the Corrective Actions document (ACO-39): if the session expires while the app is in the background, the phone may keep receiving that account's notifications until signing in again or logging out from **More**.
@@ -875,7 +922,7 @@ Logging out when finished prevents another person from using the account, especi
 
 When signing out, the other tabs of the same browser also go back to the login screen, and if another account signs in on one tab, the others reload with that account. The closed session does not work on the server either, even if someone had copied its access. In the mobile app, the session is closed from **More** (section 10.11).
 
-**Figure 26**
+**Figure 33**
 
 *Log Out Confirmation*
 
@@ -1005,7 +1052,7 @@ Vehicle Washing Development Team. (2026c). *LavadoVehicular-Movil* (version 1.1.
 
 ### Annex A. Source of the Screenshots
 
-The figures in this manual are real screenshots of the whole system running in Docker with the web at *http://localhost:4200*, on the *develop* branch, with the interface in English. Figures 13 to 15 and 18 to 21 were taken on October 26, 2026 to show payment at booking, with a test customer account and a test QR code, and Figure 16 on October 27, 2026, with test bookings that filled the bays at that time; the others, on October 19, 2026, and correspond to screens that have not changed since then. Test accounts, vehicles, bookings, and payments created only for the screenshots were used, so no real emails, ID numbers, phone numbers, plates, or bank accounts appear. If a screen changes in a future version, the corresponding screenshot must be taken again with the same file name in the *capturas* folder.
+The figures in this manual are real screenshots of the whole system running in Docker with the web at *http://localhost:4200*, on the *develop* branch, with the interface in English. Figures 13 to 15 and 18 to 21 were taken on October 26, 2026 to show payment at booking, with a test customer account and a test QR code, and Figure 16 on October 27, 2026, with test bookings that filled the bays at that time; the others, on October 19, 2026, and correspond to screens that have not changed since then. Test accounts, vehicles, bookings, and payments created only for the screenshots were used, so no real emails, ID numbers, phone numbers, plates, or bank accounts appear. The mobile app screenshots were taken on October 27, 2026 with the app's code (*develop*, version 1.1.1) running in Expo's web mode, with the screen size and density of a phone (393 × 852 points, density 2.5), against the same local system and with the same test accounts. The screens are the app's; the only difference from the phone is that the status bar and the operating system permissions do not appear. If a screen changes in a future version, the corresponding screenshot must be taken again with the same file name in the *capturas* folder.
 
 ### Annex B. Delivery Checklist
 

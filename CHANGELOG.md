@@ -4,6 +4,14 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-10-27 (noche) — Capturas de la aplicación móvil
+
+- 09 Usuario del cliente 1.3: Figuras 26 a 32 de la app (ingreso, inicio, reservar con la forma de pago, pago con plazo, historial y menú Más); el cierre de sesión pasa a ser la Figura 33.
+- 09 Usuario del operario 1.2: Figuras 15 a 18 de la app (inicio, agenda en vista Semana, servicios asignados y menú Más); el cierre de sesión pasa a ser la Figura 19.
+- 09 Usuario 4.13: la sección 10.3 ya no dice que la app no tiene capturas y remite a los manuales por rol.
+- Las capturas (11 por idioma) se tomaron el 27 de octubre con el código de la app (*develop*, 1.1.1) en el modo web de Expo, con tamaño y densidad de celular (393 × 852, densidad 2,5), contra el sistema local con cuentas de prueba; el Anexo A de cada manual lo explica.
+- 11 Enlaces: conteo de capturas. PDF y Word de los manuales regenerados.
+
 ## 2026-10-27 (noche) — Generador de PDF y Word en el repositorio
 
 - `_generador/`: el generador con el que se regeneraron todas las evidencias el 27 de octubre (`generar.py`, `generador_apa.py`, `apa.css` y las plantillas de estilos del Word), con sus instrucciones en `LEEME.md`. Lee las rutas del índice del README, convierte los diagramas Mermaid en imagen, muestra las imágenes dentro de tablas, conserva la tabla de la portada y no parte ninguna figura entre páginas.
