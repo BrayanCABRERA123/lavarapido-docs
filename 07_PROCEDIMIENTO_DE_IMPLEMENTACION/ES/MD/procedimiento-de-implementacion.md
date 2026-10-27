@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 26 de octubre de 2026
 
-Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.8
+Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.9
 
 ## Control de Versiones
 
@@ -38,6 +38,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 2.6 | 2026-10-23 | Revisión contra *develop* del 23 de octubre de 2026 y la versión *v1.0.0*: clonado que funciona (payment-service desde *develop* hasta su primera versión), reversión sin la etiqueta inexistente *v0.9.0* y sin *update-server.sh*, respaldo previo sin *COMPRESSION* (SQL Server Express no la admite), criterio E2 con las pruebas del 23 de octubre (825 automatizadas y 13 de la app móvil; las 19 de punta a punta, solo en local), criterio E4 con la excepción de payment y móvil, variables del compose (ACO-14 cerrada), *INTERNAL_API_KEY* obligatoria para el operario, cuentas demo por variables, aviso de puertos en la red local y despliegue continuo preparado y sin probar (riesgo R-I04). Incluye el contenido de las ramas *fix/A-05*, *fix/A-08*, *fix/B-02* y *fix/E-20* de Merari Urbano. | Equipo de desarrollo |
 | 2.7 | 2026-10-24 | Revisión contra *develop* del 24 de octubre de 2026, que corre en el servidor público desde ese día: criterio E2 con las pruebas del 24 de octubre (1 119 automatizadas y 73 de la app móvil, 1 192 en total), criterio E6 cumplido (ninguna P0 ni P1 abierta), clonado con *BRANCH=develop* hasta *v1.1.0*, reversión con *rollback.sh* y las imágenes *:prev* que guarda *update-server.sh*, restauración con *payment-migrate*, la protección que impide bajar de versión, variables nuevas (*AUTH_RATE_LIMIT_**, *TRUSTED_PROXIES*, *ROUTE_*_TIMEOUT*, *START_LATE_LIMIT*, e *INTERNAL_API_KEY* y *BOOKING_SERVICE_URL* en customer-service) y despliegue continuo fusionado en *develop*, a falta de los secretos (R-I04). | Equipo de desarrollo |
 | 2.8 | 2026-10-26 | Pago al reservar, desplegado en el servidor público el 26 de octubre de 2026: *INTERNAL_API_KEY* ahora también la exige payment-service, y variables nuevas de booking-service (*BOOKING_CASH_ACTIVE_LIMIT*, *BOOKING_PAYMENT_\**, *PAYMENT_SERVICE_URL*) en la Tabla 6. | Equipo de desarrollo |
+| 2.9 | 2026-10-26 | R-I04: el despliegue continuo está activo desde el 26 de octubre de 2026 (AC-90). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -606,7 +607,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
 | R-I01 | El repositorio de operaciones se clona como *lavarapido-operations-service* y la construcción de Compose falla. | Media | Alto | Clonar con el nombre original *lavarapido-operation-service* (fase 1). |
 | R-I02 | Quedan *MESSAGING_ENABLED=false* o *INTERNAL_API_KEY* vacía y no llegan notificaciones ni correos. | Media | Medio | Valores de la Tabla 6 y pruebas H2, H7 y H8. |
 | R-I03 | Se implementa con el perfil *dev* y quedan cuentas de demostración y Swagger expuestos. | Media | Alto | *SPRING_PROFILES_ACTIVE=prod*; Anexo A. |
-| R-I04 | El servidor público está apagado cuando se necesita (se enciende bajo demanda). | Media | Medio | Avisar con anticipación al responsable de DevOps y ejecutar *deploy/update-server.sh* después del último push. Con el despliegue continuo (fusionado en *develop* el 24 de octubre de 2026; falta crear los secretos y liberar *v1.1.0*), lo que entra a *main* con la máquina apagada se despliega solo al encenderla (*deploy/boot-update.sh*, instalado en el servidor ese día); para la exposición la máquina se enciende antes y se congela *main*. |
+| R-I04 | El servidor público está apagado cuando se necesita (se enciende bajo demanda). | Media | Medio | Avisar con anticipación al responsable de DevOps y ejecutar *deploy/update-server.sh* después del último push. Con el despliegue continuo (activo desde el 26 de octubre de 2026, AC-90), lo que entra a *main* con la máquina apagada se despliega solo al encenderla (*deploy/boot-update.sh*, instalado en el servidor ese día); para la exposición la máquina se enciende antes y se congela *main*. |
 | R-I05 | No hay límite de solicitudes en el gateway ni en Caddy (TD-022); el bloqueo de cuentas solo protege cada cuenta por separado. | Media | Medio | Contraseñas largas y únicas para los administradores; revisar los registros de Caddy. |
 | R-I06 | Un código QR o una cuenta de pago mal cargada envía el dinero a un tercero. | Baja | Alto | Paso 9 de la Tabla 7. |
 | R-I07 | Pérdida de datos por *docker compose down -v* o por un volumen dañado. | Baja | Alto | Respaldo previo (fase 3) y respaldo diario, ambos verificados; en el servidor público son automáticos (Documento de Despliegue, sección 3.2). |

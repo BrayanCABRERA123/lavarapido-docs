@@ -4,6 +4,17 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-10-26 (cierre) — Despliegue continuo activo, APK 1.1.1, términos y Política de Datos, SonarCloud
+
+**Contenido** (español e inglés). Verificado en GitHub Actions (`lavarapido-infra`, `deploy.yml`; `LavadoVehicular-Movil`, `cd.yml`), en `/app/version.json` del servidor público y en los archivos de traducción de la web.
+
+- 07 Despliegue 1.11: subsección 1.3.12 (versiones `v1.1.0` y `v1.1.1`; payment-service desde `main`; primera corrida automática del despliegue continuo a las 22:19, hora de Colombia, y pedidos hasta las 22:48, todos en verde; publicación de `v1.1.0` del móvil fallida por falta de `EXPO_TOKEN` y APK `versionCode` 6 con la OTA publicada tras comparar la huella nativa; arreglos de SonarCloud); 4.3.4 "activo desde el 26-10-2026". 07 Procedimiento 2.9 (R-I04).
+- 08 Acciones 3.1: ACO-19 cerrada como AC-90; ACO-24 queda solo con la protección de `develop`; Tabla 10: 90 de 106 (85 %), 16 abiertas; AM-17 implementada; H-15 corregido; Anexo C.
+- 09 Técnico 4.11 (despliegue continuo comprobado y SonarCloud), Administrador 4.11, Usuario 4.11, Usuario del cliente 1.1 (Política de Datos con las fotografías de la inspección: apartados 4, 5 y 12; app 1.1.1, `versionCode` 6) y Usuario del operario 1.1 (app 1.1.1).
+- 01 SRS 8.2 (RNF-002), 04 Diseño 1.10 y 05 Artefactos: despliegue continuo activo y servidor en `main`.
+- 11 Enlaces: fila "Despliegue continuo".
+- **PDF y Word regenerados** de los seis manuales. Siguen pendientes los de 01, 02, 04, 05, 06, 07 y 08 y el PDF de 11, que el equipo genera con otra variante del generador.
+
 ## 2026-10-26 (noche) — Manuales de usuario por rol (cliente y operario) y versiones v1.1.0 y v1.1.1
 
 **Contenido** (español e inglés). Verificado contra `develop` del 26 de octubre de 2026 (web `dcfd2e2`, móvil `b921582`, infra `14cc594`) y las etiquetas `v1.1.0` (10 repositorios) y `v1.1.1` (web, móvil, payment-service e infra) de ese día.

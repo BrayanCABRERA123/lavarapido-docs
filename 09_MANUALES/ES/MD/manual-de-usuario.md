@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 26 de octubre de 2026
 
-Tipo de manual: Manual de usuario (roles Cliente y Operario, en la web y en la aplicación móvil) · Versión 4.10
+Tipo de manual: Manual de usuario (roles Cliente y Operario, en la web y en la aplicación móvil) · Versión 4.11
 
 ## Control de Versiones
 
@@ -43,6 +43,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 4.8 | 2026-10-24 | Revisión contra *develop* del 24 de octubre de 2026, que corre en el servidor público desde ese día: las pantallas se actualizan solas, sin recargar (4.1 y 10.3.4); el inicio de sesión acepta cualquier dominio de correo y el registro sigue pidiendo @gmail.com (8.1, 8.2 y 10.3.2); el servidor exige el consentimiento, limita los intentos seguidos y anula el código de recuperación al 5.º error (8.1 a 8.3); el monto a pagar y el cupón vienen del servidor y se conservan al recargar (10.1.5); un vehículo con reservas activas no se retira (10.1.2); el operario ve las notas del administrador y puede iniciar hasta 4 horas después de la hora de fin (10.2.2, 10.2.3 y 13); avisos de pago de una reserva cancelada y permisos de solo lectura para el administrador en la app (10.3.6); mensajes de error nuevos (Tablas 11 y 12). | Equipo de desarrollo |
 | 4.9 | 2026-10-26 | Pago al reservar, revisado contra *develop* del 26 de octubre de 2026 y desplegado en el servidor público ese día: paso "¿Cómo vas a pagar?" al reservar, plazo de 30 minutos para subir el comprobante del pago digital y máximo una reserva activa en efectivo (10.1.3); reserva cancelada por falta de pago (10.1.4); pantalla de pago según la forma elegida y etiqueta de efectivo (10.1.5 y 10.3.4); mensajes nuevos (Tabla 12) y pregunta frecuente sobre el plazo de pago (13). | Equipo de desarrollo |
 | 4.10 | 2026-10-26 | Se crean el Manual de Usuario del Cliente y el Manual de Usuario del Operario (versión 1.0), con el contenido de este manual separado por rol según la guía del SENA; este manual se conserva como referencia conjunta de los dos roles. Correcciones: el operario también tiene los interruptores de notificación y **Desactivar mi cuenta** (10.2.7), y la app móvil *v1.1.0* ya se publicó (10.3.4). | Equipo de desarrollo |
+| 4.11 | 2026-10-26 | Aplicación móvil 1.1.1: APK *versionCode* 6 y actualización por internet publicados el 26 de octubre de 2026 (10.3 y 10.3.4). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -942,7 +943,7 @@ El operario consulta y edita sus datos personales, cambia la contraseña y puede
 
 ### 10.3 Aplicación Móvil Android
 
-La aplicación LavaRapidoVehicular (versión 1.1.0, paquete *com.vehiclecarwash.app*) ofrece a los tres roles las mismas funciones que la web, con las mismas reglas y los mismos datos: lo que se hace en una se ve en la otra. Esta sección explica cómo instalarla y en qué cambia su uso; las reglas de cada módulo son las de las secciones 10.1 y 10.2, y las del administrador, las del Manual de Administrador. Se escribió a partir de las 31 pantallas del código de la app del 23 de octubre de 2026 (3 de ingreso, 8 del cliente, 8 del operario y 12 del administrador) y todavía no tiene capturas.
+La aplicación LavaRapidoVehicular (versión 1.1.1, APK *versionCode* 6 publicado el 26 de octubre de 2026, paquete *com.vehiclecarwash.app*) ofrece a los tres roles las mismas funciones que la web, con las mismas reglas y los mismos datos: lo que se hace en una se ve en la otra. Esta sección explica cómo instalarla y en qué cambia su uso; las reglas de cada módulo son las de las secciones 10.1 y 10.2, y las del administrador, las del Manual de Administrador. Se escribió a partir de las 31 pantallas del código de la app del 23 de octubre de 2026 (3 de ingreso, 8 del cliente, 8 del operario y 12 del administrador) y todavía no tiene capturas.
 
 #### 10.3.1 Instalación y Actualizaciones
 
@@ -972,7 +973,7 @@ Cada rol ve solo sus pantallas. Abajo hay una barra con tres opciones principale
 #### 10.3.4 Uso por el Cliente
 
 - **Inicio:** saludo, tarjetas de **Mis reservas activas**, **Mis vehículos**, **Lavados realizados** y **Notificaciones**, el bloque **Tu próximo servicio** (estado, operario y avance), los **Accesos rápidos** (**Agendar lavado**, **Pagar servicio**, **Mis vehículos** y **Notificaciones**) y **Tus beneficios y promociones**, con el progreso de fidelidad y los cupones desbloqueados (sección 10.1.1).
-- **Reservar:** pasos en una sola pantalla: **Elige tu vehículo**, **Tipo de servicio** (con la duración estimada y los puntos que suma), **Fecha y hora** (los días cerrados y las horas ocupadas no se ofrecen), **Operario (opcional)**, con **Sin preferencia** por defecto, y, desde el 26 de octubre de 2026, **¿Cómo vas a pagar?** (pago digital ahora o efectivo en el lavadero, con las mismas reglas de la web). Con pago digital, **Reservar Ahora** lleva a pagar con el plazo; con efectivo, muestra el resumen y que se paga en el lavadero (sección 10.1.3). El cambio está en la versión *v1.1.0* de la app, publicada el 26 de octubre de 2026.
+- **Reservar:** pasos en una sola pantalla: **Elige tu vehículo**, **Tipo de servicio** (con la duración estimada y los puntos que suma), **Fecha y hora** (los días cerrados y las horas ocupadas no se ofrecen), **Operario (opcional)**, con **Sin preferencia** por defecto, y, desde el 26 de octubre de 2026, **¿Cómo vas a pagar?** (pago digital ahora o efectivo en el lavadero, con las mismas reglas de la web). Con pago digital, **Reservar Ahora** lleva a pagar con el plazo; con efectivo, muestra el resumen y que se paga en el lavadero (sección 10.1.3). El cambio está en la app desde *v1.1.0*; el 26 de octubre de 2026 se publicó el APK *versionCode* 6 (1.1.1) y la actualización por internet.
 - **Pagar servicio:** se elige la cuenta del lavadero (o **Pago en efectivo**, si el lavadero la tiene activa), se amplía el QR con **Ampliar QR**, se aplica un cupón (y se quita con la **X**), se adjunta el comprobante, que la app reduce a menos de 2 MB, y se escribe la referencia de la transacción. El **Monto a pagar** lo calcula el servidor y, desde el 24 de octubre de 2026, el cupón aplicado se sigue viendo al salir y volver a la pantalla. Al enviar aparece **¡Pago enviado!** y el pago queda en revisión; cuando el administrador lo aprueba, la pantalla se actualiza sola con la notificación push. Desde esta pantalla también se cancela la reserva (sección 10.1.5).
 - **Historial:** filtros **Todos**, **Activas**, **Completadas** y **Canceladas**, búsqueda por servicio, vehículo o código, y el detalle de cada reserva con **Pagar ahora**, **Cancelar reserva** y **Calificar Servicio** (sección 10.1.6).
 - **Mis vehículos**, **Avisos**, **Perfil** y **Configuración** funcionan como en las secciones 10.1.2, 10.1.7, 10.1.8 y 10.1.9.

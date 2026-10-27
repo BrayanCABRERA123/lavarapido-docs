@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 26, 2026
 
-Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.10
+Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.11
 
 ## Version Control
 
@@ -42,6 +42,7 @@ Table 1 records the change history of this document. Each time an administrative
 | 4.8 | 2026-10-24 | Review against *develop* of October 24, 2026, which runs on the public server since that day: the permission matrix is read-only (6.3, 7.3, 10.1, and 17.5); the screens refresh on their own (4.1); request limit on sign-in and attempt cap on the recovery code (11.5 and 17.5); new variables (11.6); schedule or bay changes that clash with bookings (11.2 and 11.3); inactive cash in the counter payment (11.4 and 12.6); price greater than 0 (12.2); warning when changing the services of a booking with a payment, status changes that cancel the reminders, and a 4-hour window for the operator to record (12.3); notes visible to the operator (12.4); changed amount (*AMOUNT_CHANGED*), cancelled-booking notice, and unique reference (12.6); fixed discount in pesos (12.8); *:prev* images, *rollback.sh*, backup retention, and merged continuous deployment (14.6, 15.2, and 15.4); Annex B up to date. | Development team |
 | 4.9 | 2026-10-26 | Payment at booking, reviewed against *develop* of October 26, 2026 and deployed to the public server that day: the payment method appears in the booking detail, digital bookings without a receipt are cancelled automatically with the reason *PAYMENT_TIMEOUT*, and the customer has at most one active cash booking (12.3); cash is recorded by the administrator, without a receipt (12.6); new variables (11.6). | Development team |
 | 4.10 | 2026-10-26 | The server boot task is explained with *v1.1.0* already published on October 26, 2026 (14.6). | Development team |
+| 4.11 | 2026-10-26 | Continuous deployment is active since October 26, 2026 (14.6). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -916,7 +917,7 @@ Since October 21, 2026 the public server backs up the database without intervent
 - The database uses the SIMPLE recovery model: with full backups no transaction log backups are needed, and the log does not grow without limit.
 - The backups live on the same disk as the virtual machine: they protect against an error or a bad migration, not against losing the machine. To meet the 3-2-1 rule of Table 13, copy them to the IT administrator's computer with *scp* or take a disk snapshot in Azure.
 - Since October 24, 2026 the *LavaRapido-pre-update-…* backups that each update makes are kept separately (the last 10), besides the 14 regular ones, and after a healthy update unused Docker images are deleted so the disk does not fill up.
-- **Continuous deployment (merged into *develop* on October 24, 2026; the secrets are missing).** Since that day *setup-server.sh* adds a second *@reboot* task to the same *crontab*, *deploy/boot-update.sh*, which, when the machine is turned on, pulls what entered *main* while it was off and deploys it with *update-server.sh*, which backs up first. If the server is on *develop* (as it was until *v1.1.0*, published on October 26, 2026), that task does not update: the protection that prevents downgrading stops it without touching anything. Its result is written to *~/lavarapido/backups/deploy.log* and is checked with *crontab -l | grep boot-update*. If the prior backup fails, nothing is updated. The details are in the Deployment Document, section 4.3.4.
+- **Continuous deployment (active since October 26, 2026).** Every approved merge into *main* deploys on its own (Deployment Document, sections 1.3.12 and 4.3.4). Since that day *setup-server.sh* adds a second *@reboot* task to the same *crontab*, *deploy/boot-update.sh*, which, when the machine is turned on, pulls what entered *main* while it was off and deploys it with *update-server.sh*, which backs up first. If the server is on *develop* (as it was until *v1.1.0*, published on October 26, 2026), that task does not update: the protection that prevents downgrading stops it without touching anything. Its result is written to *~/lavarapido/backups/deploy.log* and is checked with *crontab -l | grep boot-update*. If the prior backup fails, nothing is updated. The details are in the Deployment Document, section 4.3.4.
 
 ## 15. Data Restoration
 

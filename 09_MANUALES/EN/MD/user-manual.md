@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 26, 2026
 
-Manual Type: User Manual (Customer and Operator Roles, on the web and in the mobile application) · Version 4.10
+Manual Type: User Manual (Customer and Operator Roles, on the web and in the mobile application) · Version 4.11
 
 ## Version Control
 
@@ -43,6 +43,7 @@ Table 1 records the change history of this document. Each time the development t
 | 4.8 | 2026-10-24 | Review against *develop* of October 24, 2026, which runs on the public server since that day: the screens refresh on their own, without reloading (4.1 and 10.3.4); sign-in accepts any email domain and sign-up still requires @gmail.com (8.1, 8.2, and 10.3.2); the server requires the consent, limits repeated attempts, and voids the recovery code at the 5th mistake (8.1 to 8.3); the amount to pay and the coupon come from the server and are kept after reloading (10.1.5); a vehicle with active bookings is not removed (10.1.2); the operator sees the administrator's notes and can start up to 4 hours after the end time (10.2.2, 10.2.3, and 13); payment notices for a cancelled booking and read-only permissions for the administrator in the app (10.3.6); new error messages (Tables 11 and 12). | Development team |
 | 4.9 | 2026-10-26 | Payment at booking, reviewed against *develop* of October 26, 2026 and deployed to the public server that day: "How will you pay?" step when booking, 30-minute deadline to upload the digital payment receipt, and at most one active cash booking (10.1.3); booking cancelled for lack of payment (10.1.4); payment screen according to the chosen method and cash label (10.1.5 and 10.3.4); new messages (Table 12) and a frequently asked question about the payment deadline (13). | Development team |
 | 4.10 | 2026-10-26 | The Customer User Manual and the Operator User Manual (version 1.0) are created, with the content of this manual separated by role as the SENA guide recommends; this manual is kept as a joint reference for both roles. Corrections: the operator also has the notification switches and **Deactivate my account** (10.2.7), and mobile app *v1.1.0* is already published (10.3.4). | Development team |
+| 4.11 | 2026-10-26 | Mobile application 1.1.1: APK *versionCode* 6 and over-the-air update published on October 26, 2026 (10.3 and 10.3.4). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -942,7 +943,7 @@ The operator views and edits the personal data, changes the password, and can de
 
 ### 10.3 Android Mobile Application
 
-The LavaRapidoVehicular application (version 1.1.0, package *com.vehiclecarwash.app*) offers the three roles the same functions as the web, with the same rules and the same data: what is done in one is seen in the other. This section explains how to install it and how its use differs; the rules of each module are those of sections 10.1 and 10.2, and the administrator's are those of the Administrator Manual. It was written from the 31 screens in the app's code of October 23, 2026 (3 for sign-in, 8 for the customer, 8 for the operator, and 12 for the administrator) and has no screenshots yet.
+The LavaRapidoVehicular application (version 1.1.1, APK *versionCode* 6 published on October 26, 2026, package *com.vehiclecarwash.app*) offers the three roles the same functions as the web, with the same rules and the same data: what is done in one is seen in the other. This section explains how to install it and how its use differs; the rules of each module are those of sections 10.1 and 10.2, and the administrator's are those of the Administrator Manual. It was written from the 31 screens in the app's code of October 23, 2026 (3 for sign-in, 8 for the customer, 8 for the operator, and 12 for the administrator) and has no screenshots yet.
 
 #### 10.3.1 Installation and Updates
 
@@ -972,7 +973,7 @@ Each role sees only its screens. At the bottom there is a bar with three main op
 #### 10.3.4 Use by the Customer
 
 - **Home:** greeting, cards for active bookings, vehicles, washes done, and notifications, the next service block (status, operator, and progress), the quick access buttons (book a wash, pay service, my vehicles, and notifications), and the benefits and promotions block, with the loyalty progress and the unlocked coupons (section 10.1.1).
-- **Book:** steps on one screen: choose the vehicle, the type of service (with the estimated duration and the points it adds), the date and time (closed days and taken times are not offered), the operator (optional), with no preference by default, and, since October 26, 2026, **How will you pay?** (digital payment now or cash at the car wash, with the same rules as the web). With digital payment, **Book Now** goes to pay with the deadline; with cash, it shows the summary and that payment is made at the car wash (section 10.1.3). The change is in version *v1.1.0* of the app, published on October 26, 2026.
+- **Book:** steps on one screen: choose the vehicle, the type of service (with the estimated duration and the points it adds), the date and time (closed days and taken times are not offered), the operator (optional), with no preference by default, and, since October 26, 2026, **How will you pay?** (digital payment now or cash at the car wash, with the same rules as the web). With digital payment, **Book Now** goes to pay with the deadline; with cash, it shows the summary and that payment is made at the car wash (section 10.1.3). The change is in the app since *v1.1.0*; on October 26, 2026 APK *versionCode* 6 (1.1.1) and the over-the-air update were published.
 - **Pay service:** choose the business's account (or cash, if the business has it active), enlarge the QR, apply a coupon (and remove it with the **X**), attach the receipt, which the app reduces to less than 2 MB, and type the transaction reference. The amount to pay is calculated by the server and, since October 24, 2026, the applied coupon is still shown after leaving and returning to the screen. After sending, the payment is under review; when the administrator approves it, the screen refreshes on its own with the push notification. The booking can also be cancelled from this screen (section 10.1.5).
 - **History:** filters for all, active, completed, and cancelled bookings, search by service, vehicle, or code, and the detail of each booking with pay now, cancel booking, and rate service (section 10.1.6).
 - **My vehicles**, **Alerts**, **Profile**, and **Settings** work as in sections 10.1.2, 10.1.7, 10.1.8, and 10.1.9.

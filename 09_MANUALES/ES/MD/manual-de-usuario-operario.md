@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 26 de octubre de 2026
 
-Tipo de manual: Manual de usuario del rol Operario (aplicación web y aplicación móvil Android) · Versión 1.0
+Tipo de manual: Manual de usuario del rol Operario (aplicación web y aplicación móvil Android) · Versión 1.1
 
 ## Control de Versiones
 
@@ -28,7 +28,8 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 
 | Versión | Fecha | Descripción del cambio | Responsable |
 |---|---|---|---|
-| 1.0 | 2026-10-26 | Creación del manual exclusivo del rol Operario, separado del Manual de Usuario (versión 4.9) para que cada público tenga su propio documento, según la guía de manuales del SENA. Revisado contra *develop* del 26 de octubre de 2026. Se agregaron: perfil y responsabilidades del operario (sección 7.2), primer ingreso con la contraseña temporal (8.1), forma de pago de la reserva visible en la información del servicio (10.3), interruptores de notificación y opción **Desactivar mi cuenta** del operario, que existen en la web y no estaban documentados (10.7 y 10.8), y aplicación móvil en la versión 1.1.0 (10.9). Capturas nuevas del perfil y de la configuración del operario. | Equipo de desarrollo |
+| 1.0 | 2026-10-26 | Creación del manual exclusivo del rol Operario, separado del Manual de Usuario (versión 4.9) para que cada público tenga su propio documento, según la guía de manuales del SENA. Revisado contra *develop* del 26 de octubre de 2026. Se agregaron: perfil y responsabilidades del operario (sección 7.2), primer ingreso con la contraseña temporal (8.1), forma de pago de la reserva visible en la información del servicio (10.3), interruptores de notificación y opción **Desactivar mi cuenta** del operario, que existen en la web y no estaban documentados (10.7 y 10.8), y aplicación móvil (10.9). Capturas nuevas del perfil y de la configuración del operario. | Equipo de desarrollo |
+| 1.1 | 2026-10-26 | Aplicación móvil 1.1.1 con el APK *versionCode* 6 y la actualización por internet publicada (10.9). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -548,7 +549,7 @@ Cada módulo se documenta con el formato de la guía de manuales: nombre, descri
 
 ### 10.9 Aplicación Móvil Android
 
-La aplicación **LavaRapidoVehicular** (versión 1.1.0, publicada el 26 de octubre de 2026) ofrece al operario las mismas funciones que la web, con las mismas reglas y los mismos datos: un servicio iniciado en la app aparece iniciado en la web y al revés. Es la forma más práctica de trabajar en la zona de lavado.
+La aplicación **LavaRapidoVehicular** (versión 1.1.1, APK *versionCode* 6, publicada el 26 de octubre de 2026) ofrece al operario las mismas funciones que la web, con las mismas reglas y los mismos datos: un servicio iniciado en la app aparece iniciado en la web y al revés. Es la forma más práctica de trabajar en la zona de lavado.
 
 **Instalación y actualizaciones.** La app no está en Google Play. En la pantalla de bienvenida de la web se toca el botón de descarga o se escanea el código QR (archivo */app/LavaRapidoVehicular.apk*), se abre el archivo y se toca **Instalar**; la primera vez Android pide permitir que el navegador instale aplicaciones. Si el lavadero publica un APK nuevo, la app muestra **Actualiza la app para continuar** con el botón **Descargar**, y los cambios de pantallas llegan solos con **Actualización lista** y **Reiniciar ahora**.
 

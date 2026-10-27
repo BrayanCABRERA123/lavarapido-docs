@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 26 de octubre de 2026
 
-Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.10
+Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.11
 
 ## Control de Versiones
 
@@ -42,6 +42,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.8 | 2026-10-24 | Revisión contra *develop* del 24 de octubre de 2026, que corre en el servidor público desde ese día: la matriz de permisos es de solo lectura (6.3, 7.3, 10.1 y 17.5); las pantallas se actualizan solas (4.1); límite de solicitudes en el inicio de sesión y tope de intentos del código de recuperación (11.5 y 17.5); variables nuevas (11.6); cambios de horario o de bahías que chocan con reservas (11.2 y 11.3); efectivo inactivo en el pago en caja (11.4 y 12.6); precio mayor que 0 (12.2); aviso al cambiar los servicios de una reserva con pago, cambios de estado que cancelan los recordatorios y ventana de 4 horas para que el operario registre (12.3); notas visibles para el operario (12.4); monto que cambió (*AMOUNT_CHANGED*), aviso de reserva cancelada y referencia única (12.6); descuento fijo en pesos (12.8); imágenes *:prev*, *rollback.sh*, retención de respaldos y despliegue continuo fusionado (14.6, 15.2 y 15.4); Anexo B al día. | Equipo de desarrollo |
 | 4.9 | 2026-10-26 | Pago al reservar, revisado contra *develop* del 26 de octubre de 2026 y desplegado en el servidor público ese día: la forma de pago aparece en el detalle de la reserva, las reservas digitales sin comprobante se cancelan solas con el motivo *PAYMENT_TIMEOUT* y el cliente tiene como máximo una reserva activa en efectivo (12.3); el efectivo lo registra el administrador, sin comprobante (12.6); variables nuevas (11.6). | Equipo de desarrollo |
 | 4.10 | 2026-10-26 | La tarea de arranque del servidor se explica con *v1.1.0* ya publicada el 26 de octubre de 2026 (14.6). | Equipo de desarrollo |
+| 4.11 | 2026-10-26 | El despliegue continuo está activo desde el 26 de octubre de 2026 (14.6). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -916,7 +917,7 @@ Desde el 21 de octubre de 2026 el servidor público respalda la base sin interve
 - La base usa el modelo de recuperación SIMPLE: con respaldos completos no hacen falta respaldos del registro de transacciones, y el registro no crece sin límite.
 - Los respaldos viven en el mismo disco de la máquina virtual: protegen de un error o de una migración mala, no de perder la máquina. Para cumplir la regla 3-2-1 de la Tabla 13, copiarlos al computador del administrador de TI con *scp* o tomar una instantánea del disco en Azure.
 - Desde el 24 de octubre de 2026 los respaldos *LavaRapido-pre-update-…* que hace cada actualización se guardan aparte (los últimos 10), además de los 14 normales, y tras una actualización sana se borran las imágenes de Docker sin uso, para que el disco no se llene.
-- **Despliegue continuo (fusionado en *develop* el 24 de octubre de 2026; falta crear los secretos).** Desde ese día *setup-server.sh* agrega al mismo *crontab* una segunda tarea *@reboot*, *deploy/boot-update.sh*, que al encender la máquina baja lo que entró a *main* mientras estaba apagada y lo despliega con *update-server.sh*, que respalda antes. Si el servidor está en *develop* (como estuvo hasta *v1.1.0*, publicada el 26 de octubre de 2026), esa tarea no actualiza: la protección que impide bajar de versión la detiene sin tocar nada. Su resultado queda en *~/lavarapido/backups/deploy.log* y se revisa con *crontab -l | grep boot-update*. Si el respaldo previo falla, no se actualiza. El detalle está en el Documento de Despliegue, sección 4.3.4.
+- **Despliegue continuo (activo desde el 26 de octubre de 2026).** Cada fusión aprobada a *main* despliega sola (Documento de Despliegue, secciones 1.3.12 y 4.3.4). Desde ese día *setup-server.sh* agrega al mismo *crontab* una segunda tarea *@reboot*, *deploy/boot-update.sh*, que al encender la máquina baja lo que entró a *main* mientras estaba apagada y lo despliega con *update-server.sh*, que respalda antes. Si el servidor está en *develop* (como estuvo hasta *v1.1.0*, publicada el 26 de octubre de 2026), esa tarea no actualiza: la protección que impide bajar de versión la detiene sin tocar nada. Su resultado queda en *~/lavarapido/backups/deploy.log* y se revisa con *crontab -l | grep boot-update*. Si el respaldo previo falla, no se actualiza. El detalle está en el Documento de Despliegue, sección 4.3.4.
 
 ## 15. Restauración de Datos
 

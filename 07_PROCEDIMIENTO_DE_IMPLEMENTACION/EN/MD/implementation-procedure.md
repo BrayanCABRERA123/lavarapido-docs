@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 26, 2026
 
-Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.8
+Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.9
 
 ## Version Control
 
@@ -38,6 +38,7 @@ Table 1 records the change history of this document. Each time the implementatio
 | 2.6 | 2026-10-23 | Review against *develop* of October 23, 2026 and version *v1.0.0*: cloning that works (payment-service from *develop* until its first release), rollback without the nonexistent *v0.9.0* tag and without *update-server.sh*, pre-update backup without *COMPRESSION* (SQL Server Express does not support it), criterion E2 with the tests of October 23 (825 automated and 13 of the mobile app; the 19 end-to-end tests run only locally), criterion E4 with the payment and mobile exception, Compose variables (ACO-14 closed), *INTERNAL_API_KEY* required for the operator, demo accounts through variables, warning about ports on the local network, and continuous deployment prepared and not tested (risk R-I04). Includes the content of Merari Urbano's *fix/A-05*, *fix/A-08*, *fix/B-02*, and *fix/E-20* branches. | Development team |
 | 2.7 | 2026-10-24 | Review against *develop* of October 24, 2026, which runs on the public server since that day: criterion E2 with the tests of October 24 (1,119 automated and 73 in the mobile app, 1,192 in total), criterion E6 met (no P0 or P1 open), cloning with *BRANCH=develop* until *v1.1.0*, rollback with *rollback.sh* and the *:prev* images that *update-server.sh* keeps, restore with *payment-migrate*, the protection that prevents downgrading, new variables (*AUTH_RATE_LIMIT_\**, *TRUSTED_PROXIES*, *ROUTE_\*_TIMEOUT*, *START_LATE_LIMIT*, and *INTERNAL_API_KEY* and *BOOKING_SERVICE_URL* in customer-service), and continuous deployment merged into *develop*, with the secrets still missing (R-I04). | Development team |
 | 2.8 | 2026-10-26 | Payment at booking, deployed to the public server on October 26, 2026: *INTERNAL_API_KEY* is now also required by payment-service, and new booking-service variables (*BOOKING_CASH_ACTIVE_LIMIT*, *BOOKING_PAYMENT_\**, *PAYMENT_SERVICE_URL*) in Table 6. | Development team |
+| 2.9 | 2026-10-26 | R-I04: continuous deployment is active since October 26, 2026 (AC-90). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -606,7 +607,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
 | R-I01 | The operations repository is cloned as *lavarapido-operations-service* and the Compose build fails. | Medium | High | Clone with the original name *lavarapido-operation-service* (phase 1). |
 | R-I02 | *MESSAGING_ENABLED=false* or an empty *INTERNAL_API_KEY* remain, and notifications and emails do not arrive. | Medium | Medium | Values of Table 6 and tests H2, H7, and H8. |
 | R-I03 | The release is implemented with the *dev* profile, leaving demonstration accounts and Swagger exposed. | Medium | High | *SPRING_PROFILES_ACTIVE=prod*; Annex A. |
-| R-I04 | The public server is off when it is needed (it is turned on on demand). | Medium | Medium | Tell the DevOps owner in advance and run *deploy/update-server.sh* after the last push. With continuous deployment (merged into *develop* on October 24, 2026; the secrets and the *v1.1.0* release are missing), what enters *main* while the machine is off is deployed on its own when it is turned on (*deploy/boot-update.sh*, installed on the server that day); for the presentation the machine is turned on beforehand and *main* is frozen. |
+| R-I04 | The public server is off when it is needed (it is turned on on demand). | Medium | Medium | Tell the DevOps owner in advance and run *deploy/update-server.sh* after the last push. With continuous deployment (active since October 26, 2026, AC-90), what enters *main* while the machine is off is deployed on its own when it is turned on (*deploy/boot-update.sh*, installed on the server that day); for the presentation the machine is turned on beforehand and *main* is frozen. |
 | R-I05 | There is no request rate limit in the gateway or in Caddy (TD-022); account lockout only protects each account separately. | Medium | Medium | Long and unique passwords for the administrators; review the Caddy logs. |
 | R-I06 | A wrongly loaded QR code or payment account sends the money to a third party. | Low | High | Step 9 of Table 7. |
 | R-I07 | Data loss caused by *docker compose down -v* or a damaged volume. | Low | High | Pre-implementation backup (phase 3) and daily backup, both verified; on the public server they are automatic (Deployment Document, section 3.2). |
