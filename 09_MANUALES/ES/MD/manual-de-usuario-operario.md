@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-26 de octubre de 2026
+27 de octubre de 2026
 
-Tipo de manual: Manual de usuario del rol Operario (aplicación web y aplicación móvil Android) · Versión 1.2
+Tipo de manual: Manual de usuario del rol Operario (aplicación web y aplicación móvil Android) · Versión 1.3
 
 ## Control de Versiones
 
@@ -31,6 +31,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 1.0 | 2026-10-26 | Creación del manual exclusivo del rol Operario, separado del Manual de Usuario (versión 4.9) para que cada público tenga su propio documento, según la guía de manuales del SENA. Revisado contra *develop* del 26 de octubre de 2026. Se agregaron: perfil y responsabilidades del operario (sección 7.2), primer ingreso con la contraseña temporal (8.1), forma de pago de la reserva visible en la información del servicio (10.3), interruptores de notificación y opción **Desactivar mi cuenta** del operario, que existen en la web y no estaban documentados (10.7 y 10.8), y aplicación móvil (10.9). Capturas nuevas del perfil y de la configuración del operario. | Equipo de desarrollo |
 | 1.1 | 2026-10-26 | Aplicación móvil 1.1.1 con el APK *versionCode* 6 y la actualización por internet publicada (10.9). | Equipo de desarrollo |
 | 1.2 | 2026-10-27 | Capturas de la aplicación móvil (Figuras 15 a 18) en la sección 10.9; el cierre de sesión pasa a ser la Figura 19. | Equipo de desarrollo |
+| 1.3 | 2026-10-27 | Referencia de la aplicación móvil con la versión *v1.1.2* del repositorio, del 27 de octubre de 2026 (Referencias). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -714,7 +715,7 @@ Equipo de Desarrollo Vehicle Washing. (2026a). *Vehicle washing management syste
 
 Equipo de Desarrollo Vehicle Washing. (2026b). *Front-end-proyecto-web* (rama develop) [Software]. GitHub. https://github.com/BrayanCABRERA123/Front-end-proyecto-web
 
-Equipo de Desarrollo Vehicle Washing. (2026c). *LavadoVehicular-Movil* (versión 1.1.0) [Software]. GitHub. https://github.com/merari0322/LavadoVehicular-Movil
+Equipo de Desarrollo Vehicle Washing. (2026c). *LavadoVehicular-Movil* (versión 1.1.2) [Software]. GitHub. https://github.com/merari0322/LavadoVehicular-Movil
 
 Servicio Nacional de Aprendizaje. (2026). *Guía para elaborar manuales de software: Manual de usuario, manual técnico, manual de instalación y manual de administrador* [Material de formación no publicado]. Programa Tecnólogo en Análisis y Desarrollo de Software.
 
