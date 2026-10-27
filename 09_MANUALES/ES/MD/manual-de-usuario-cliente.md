@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-26 de octubre de 2026
+27 de octubre de 2026
 
-Tipo de manual: Manual de usuario del rol Cliente (aplicación web y aplicación móvil Android) · Versión 1.3
+Tipo de manual: Manual de usuario del rol Cliente (aplicación web y aplicación móvil Android) · Versión 1.4
 
 ## Control de Versiones
 
@@ -32,6 +32,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 1.1 | 2026-10-26 | Política de Datos con las fotografías de la inspección (8.1); aplicación móvil 1.1.1 con el APK *versionCode* 6 y la actualización por internet publicada (10.11). | Equipo de desarrollo |
 | 1.2 | 2026-10-27 | Las horas alternativas de "Esa hora ya se ocupó" ya no incluyen las que se cruzan con otra reserva del mismo vehículo (10.3 y 13), con la Figura 16 nueva. | Equipo de desarrollo |
 | 1.3 | 2026-10-27 | Capturas de la aplicación móvil (Figuras 26 a 32) en la sección 10.11; el cierre de sesión pasa a ser la Figura 33. | Equipo de desarrollo |
+| 1.4 | 2026-10-27 | Términos y Condiciones: el apartado 6 con el plazo de 30 minutos del pago digital y el límite de una reserva activa en efectivo (8.1); actualización por internet de la app del 27 de octubre (*v1.1.2*) (10.11 y referencias). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -217,7 +218,7 @@ Para reservar se necesita una cuenta de cliente. El cliente la crea él mismo co
 
 - No es posible registrar dos cuentas con el mismo correo ni con el mismo número de documento: el sistema muestra "Ya existe una cuenta con este correo" o "Ya existe una cuenta con este número de documento" y no crea la cuenta.
 - El servidor exige las dos casillas de aceptación: sin ellas responde "Debes aceptar el tratamiento de datos personales (Ley 1581) para registrarte."
-- Los **Términos y Condiciones** tienen 15 apartados. Desde el 26 de octubre de 2026 están redactados en tercera persona ("el Cliente") e incluyen el apartado 8, **Informe de inspección y fotografías del vehículo**: en los servicios de tres horas o más, el lavadero puede registrar el estado del vehículo antes y después del servicio, por fases, con hasta cinco fotografías por hallazgo, y compartir ese informe con el cliente (sección 10.8). La **Política de Tratamiento de Datos Personales** incluye esas fotografías entre los datos que se recolectan (apartado 4), entre las finalidades (registrar el estado del vehículo y atender reclamaciones por daños, apartado 5) y en la conservación (se guardan el tiempo necesario para atender reclamaciones sobre el servicio, apartado 12).
+- Los **Términos y Condiciones** tienen 15 apartados. Desde el 26 de octubre de 2026 están redactados en tercera persona ("el Cliente"). El apartado 6, **Reservas, cancelaciones y prestación del servicio**, dice que con pago digital el comprobante debe cargarse dentro de los 30 minutos siguientes a la reserva (o antes de la hora del servicio, si es más pronto), porque si no la reserva se cancela sola y el horario se libera, y que con pago en efectivo el cliente puede tener como máximo una reserva activa. Los términos incluyen además el apartado 8, **Informe de inspección y fotografías del vehículo**: en los servicios de tres horas o más, el lavadero puede registrar el estado del vehículo antes y después del servicio, por fases, con hasta cinco fotografías por hallazgo, y compartir ese informe con el cliente (sección 10.8). La **Política de Tratamiento de Datos Personales** incluye esas fotografías entre los datos que se recolectan (apartado 4), entre las finalidades (registrar el estado del vehículo y atender reclamaciones por daños, apartado 5) y en la conservación (se guardan el tiempo necesario para atender reclamaciones sobre el servicio, apartado 12).
 
 **Figura 2**
 
@@ -764,7 +765,7 @@ La forma de pago se elige al reservar (sección 10.3), y la pantalla **Pagar ser
 
 ### 10.11 Aplicación Móvil Android
 
-La aplicación **LavaRapidoVehicular** (versión 1.1.1, APK *versionCode* 6, publicada el 26 de octubre de 2026) ofrece al cliente las mismas funciones que la web, con las mismas reglas y los mismos datos: una reserva hecha en la app aparece en la web y al revés. Esta sección explica cómo instalarla y en qué cambia su uso; las reglas de cada módulo son las de las secciones 10.1 a 10.10.
+La aplicación **LavaRapidoVehicular** (versión 1.1.1, APK *versionCode* 6, publicada el 26 de octubre de 2026; el 27 de octubre recibió por internet la nota del paso de reservar corregida, *v1.1.2* del repositorio, sin APK nuevo) ofrece al cliente las mismas funciones que la web, con las mismas reglas y los mismos datos: una reserva hecha en la app aparece en la web y al revés. Esta sección explica cómo instalarla y en qué cambia su uso; las reglas de cada módulo son las de las secciones 10.1 a 10.10.
 
 **Instalación.** La app no está en Google Play: se instala desde la web del lavadero en un teléfono Android con conexión a internet.
 
@@ -1044,7 +1045,7 @@ Equipo de Desarrollo Vehicle Washing. (2026a). *Vehicle washing management syste
 
 Equipo de Desarrollo Vehicle Washing. (2026b). *Front-end-proyecto-web* (rama develop) [Software]. GitHub. https://github.com/BrayanCABRERA123/Front-end-proyecto-web
 
-Equipo de Desarrollo Vehicle Washing. (2026c). *LavadoVehicular-Movil* (versión 1.1.0) [Software]. GitHub. https://github.com/merari0322/LavadoVehicular-Movil
+Equipo de Desarrollo Vehicle Washing. (2026c). *LavadoVehicular-Movil* (versión 1.1.2) [Software]. GitHub. https://github.com/merari0322/LavadoVehicular-Movil
 
 Servicio Nacional de Aprendizaje. (2026). *Guía para elaborar manuales de software: Manual de usuario, manual técnico, manual de instalación y manual de administrador* [Material de formación no publicado]. Programa Tecnólogo en Análisis y Desarrollo de Software.
 
