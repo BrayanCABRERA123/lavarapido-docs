@@ -25,9 +25,9 @@
 |---|---|
 | Sistema | LavaRápido Vehicular — gestión de reservas, pagos y operación de un lavadero |
 | Componentes | 6 microservicios backend, API Gateway, aplicación web, aplicación móvil Android |
-| Versión (Release Tag) | `v1.0.0`, creada el 23-10-2026 en 8 repositorios (web, api-gateway, security, customer, booking, operations, notification e infra), donde `main` quedó igual a `develop` en ese momento. payment-service tiene `v1.0.0` desde el 24-10-2026: ese día se fusionó su PR #2 `develop` → `main` y la etiqueta quedó sobre ese `main` (`2deac9e`), que incluye todo su `develop`. **Pendiente:** la app móvil (PR #1 «Release v1.1.0» abierto; su `main` es del 06-07-2026). Después de la etiqueta, `develop` volvió a avanzar con los arreglos del 23-10-2026 (1.3.8) y las 128 ramas del 24-10-2026 (1.3.9), que saldrán en `v1.1.0`. El PR #2 de payment se fusionó el 24-10-2026, con el CI y SonarCloud en verde |
-| Rama desplegada | `develop` del 24-10-2026 en los 9 repositorios del servidor, desplegado ese día (1.3.9). Hasta liberar `v1.1.0` cada actualización se lanza con `BRANCH=develop`: con `main`, la protección de `setup-server.sh` se detiene sin tocar nada, porque `main` no contiene lo desplegado. Con `v1.1.0` el servidor pasa a `main`, salvo payment-service mientras siga en `DEVELOP_ONLY` |
-| Versión de la app móvil | **1.1.0** (versionCode **5**), APK publicado el 19-10-2026 + actualizaciones por internet (EAS Update) |
+| Versión (Release Tag) | Al 27-10-2026: `v1.1.0` en api-gateway, security, operations y notification; `v1.1.1` en customer y booking, y `v1.1.2` en la web, payment-service, infra y la app móvil (esta última solo con un texto corregido, que llegó a los celulares por internet). Todas están en `main`, protegida en los 10 repositorios (PR con una aprobación de otro integrante y el CI en verde). Antes: `v1.0.0` (23-10-2026 en 8 repositorios y 24-10-2026 en payment-service), `v1.1.0` en los 10 y `v1.1.1` en la web, la app móvil, payment-service e infra el 26-10-2026 (1.3.12), y `v1.1.1` en customer y booking y `v1.1.2` en la web, payment-service e infra el 27-10-2026 (1.3.13) |
+| Rama desplegada | `main` en los 9 repositorios del servidor desde el 26-10-2026, payment-service incluido (desde `v1.1.1` de infra ya no está en `DEVELOP_ONLY`). El despliegue continuo actualiza el servidor con cada fusión aprobada a `main` (4.3.4); las últimas corridas, del 27-10-2026, están en 1.3.13 |
+| Versión de la app móvil | **1.1.1** (versionCode **6**), APK publicado el 26-10-2026 a las 22:39 + actualizaciones por internet (EAS Update); la última, la de `v1.1.2` del 27-10-2026 a las 14:30 (1.3.13) |
 | Repositorios | `lavarapido-infra`, `lavarapido-api-gateway`, `lavarapido-security-service`, `lavarapido-customer-service`, `lavarapido-booking-service`, `lavarapido-operation-service`, `lavarapido-notification-service`, `lavarapido-payment-service`, `Front-end-proyecto-web`, `LavadoVehicular-Movil` |
 | Dirección pública | https://lavarapidovehicular.northcentralus.cloudapp.azure.com |
 
@@ -40,7 +40,7 @@
 | Duración real | ~2 h 30 min (aprovisionamiento, compilación de imágenes, configuración de HTTPS y pruebas) |
 | Interrupción a usuarios | No aplica: primer despliegue (no había usuarios en producción) |
 | Ventana para próximas actualizaciones | Fuera de horario de atención del lavadero (antes de las 07:00 o después de las 18:00) |
-| Última actualización | 26-10-2026 hacia las 12:02 (hora de Colombia): booking-service, payment-service y la web desde `develop`, con el pago al reservar, la migración 049 y la semilla 117 de booking (1.3.11); servicios sanos y 0 errores. Antes, el 24-10-2026 a las 17:12 UTC: solo notification-service, con la migración 048, que corrige la lectura de `pending_delivery` (1.3.10). Antes, ese mismo día hacia las 15:10: `develop` completo de los 10 repositorios (arreglos del 23-10 y del 24-10, 1.3.8 y 1.3.9), en dos corridas por SSH; 11 contenedores sanos, migraciones 044, 045 y semilla 113 (booking), 047 y semilla 116 (notification) y 022 y 023 (payment) aplicadas, y 0 errores en los registros. La actualización anterior (22-10-2026) está en 1.3.7 |
+| Última actualización | 27-10-2026, por despliegue continuo (1.3.13): a la 01:03 (hora de Colombia) la web `v1.1.2`, y entre la 01:35 y la 01:37 customer y booking `v1.1.1` y payment-service e infra `v1.1.2`; todas las corridas que terminaron quedaron en verde, con los servicios sanos y la web y la API respondiendo 200. A las 14:30 la app móvil `v1.1.2` llegó a los celulares por internet. Antes, el 26-10-2026 en la noche: `v1.1.0` y `v1.1.1` y la primera corrida del despliegue continuo (1.3.12). Antes, el 26-10-2026 hacia las 12:02 (hora de Colombia): booking-service, payment-service y la web desde `develop`, con el pago al reservar, la migración 049 y la semilla 117 de booking (1.3.11); servicios sanos y 0 errores. Antes, el 24-10-2026 a las 17:12 UTC: solo notification-service, con la migración 048, que corrige la lectura de `pending_delivery` (1.3.10). Antes, ese mismo día hacia las 15:10: `develop` completo de los 10 repositorios (arreglos del 23-10 y del 24-10, 1.3.8 y 1.3.9), en dos corridas por SSH; 11 contenedores sanos, migraciones 044, 045 y semilla 113 (booking), 047 y semilla 116 (notification) y 022 y 023 (payment) aplicadas, y 0 errores en los registros. La actualización anterior (22-10-2026) está en 1.3.7 |
 
 #### 1.1.3 Entorno de destino (VPS / Staging / Producción)
 
@@ -81,6 +81,7 @@
 | 1.9 | 2026-10-24 | Equipo de desarrollo | Actualización de notification-service del 24-10-2026 a las 17:12 UTC con la migración 048 y su resultado (1.3.10); última actualización (1.1.2) |
 | 1.10 | 2026-10-26 | Equipo de desarrollo | Despliegue del pago al reservar del 26-10-2026 hacia las 12:02 (hora de Colombia): booking-service, payment-service y la web, con sus verificaciones (1.3.11); variables nuevas de booking-service y `INTERNAL_API_KEY` obligatoria en payment-service (3.3.2); última actualización (1.1.2) |
 | 1.11 | 2026-10-26 | Equipo de desarrollo | Versiones *v1.1.0* y *v1.1.1*, payment-service desde `main`, primera corrida del despliegue continuo y del APK *versionCode* 6 con la actualización por internet, y arreglos de SonarCloud (1.3.12 y 4.3.4). |
+| 1.12 | 2026-10-27 | Equipo de desarrollo | Versiones *v1.1.1* y *v1.1.2* del 27-10-2026 y sus despliegues automáticos (1.1.1, 1.1.2 y 1.3.13); 58 tablas (2.1.4 y 5.4.5); integración continua con 1 337 pruebas y las de integración de payment contra SQL Server (4.3.3); se quitan del despliegue continuo dos avisos que ya no aplican (4.3.4). |
 
 ### 1.3 Resumen de Cambios (Release Notes)
 
@@ -262,6 +263,12 @@ Las pruebas en vivo hechas antes en local, con las dos fallas simuladas, están 
 - **App móvil.** La publicación de *v1.1.0* (13:13) falló porque faltaba el secreto `EXPO_TOKEN` y no se publicó nada. Con el secreto creado, se publicó el APK *versionCode* 6 a las 22:39 (`/app/version.json`) y la corrida de *v1.1.1* (22:41) comparó la huella nativa del commit con la del APK publicado: como coincidió («La huella coincide: la actualización le llega al APK publicado»), publicó la actualización por internet. Si la huella no coincide, el flujo no publica y pide un APK nuevo, para no mandar a los celulares una actualización que no les sirve.
 - **SonarCloud.** Arreglos del 26-10-2026 en api-gateway (un acceso nulo real en la ruta de autenticación y la comparación de redes CIDR por contenido), security, operations y notification (*@Primary* en los publicadores de RabbitMQ y en los remitentes SMTP y Expo), la web y la app móvil (CI más estricto y avisos de calidad).
 
+#### 1.3.13 Versiones v1.1.1 y v1.1.2 con despliegue continuo (27-10-2026, hora de Colombia)
+
+- **Versiones.** *v1.1.2* de la web (fondos de la portada y del ingreso en WebP); *v1.1.1* de customer-service (los vehículos por id se buscan con una sola consulta de dueños) y de booking-service (400 `VALIDATION_ERROR` en lugar de 500 con una lista de servicios nula o de más de 10 y con un día inválido en el horario, horas alternativas sin las que chocan con otra reserva del mismo vehículo y `bookedBy` solo en las vistas del personal); *v1.1.2* de payment-service (las 17 pruebas de integración corren en el CI contra SQL Server 2022) y de infra (las pruebas de punta a punta envían el modo de pago al reservar). Los PR a `main` de customer, booking, payment e infra los aprobó Brayan Patiño.
+- **Despliegue continuo.** Cada fusión pidió el despliegue al flujo **Desplegar en Azure**, sin entrar por SSH: la corrida de la 01:03 (la web) terminó a la 01:09 y las de la 01:35 y la 01:36 (customer, booking, payment e infra) terminaron a la 01:36 y la 01:37; un pedido que llegó mientras otro corría se canceló y lo atendió el siguiente. Todas las corridas que terminaron quedaron en verde: respaldo de la base, `:prev`, «Listo: todos los servicios están sanos» y «Web y API responden 200». El servidor corre `main`.
+- **App móvil.** La fusión de *v1.1.2* (14:30), que solo cambia la nota del paso de reservar en los cuatro idiomas, corrió `cd.yml`: la huella nativa coincidió con la del APK *versionCode* 6 («La huella coincide: la actualización le llega al APK publicado») y la actualización se publicó por internet, sin APK nuevo.
+
 ---
 
 ## 2. Alcance, Topología y Arquitectura
@@ -304,7 +311,7 @@ Las pruebas en vivo hechas antes en local, con las dos fallas simuladas, están 
 | Artefacto | Detalle |
 |---|---|
 | Motor | **Microsoft SQL Server 2022, edición Express** (contenedor `lavarapido-sqlserver`) |
-| Base de datos | `LavaRapido`: 9 esquemas y 57 tablas — `security` (11), `customer` (3), `booking` (10), `catalog` (3), `execution` (11), `notification` (6), `payment` (7), `promotion` (5), `audit` (1) |
+| Base de datos | `LavaRapido`: 9 esquemas y 58 tablas — `security` (11), `customer` (3), `booking` (10), `catalog` (3), `execution` (11), `notification` (7), `payment` (7), `promotion` (5), `audit` (1) |
 | Migraciones | **Liquibase**: los servicios Java las aplican al arrancar; payment-service las aplica con el contenedor `payment-migrate`. Cada servicio lleva su historial en `dbo.DATABASECHANGELOG_<SERVICIO>` |
 | Volúmenes persistentes | `sqlserver-data` (base), `rabbitmq-data` (colas), `caddy-data` (certificados) |
 | Respaldos | `~/lavarapido/backups/` en el disco de la VM, fuera de Docker: los últimos 14 y la bitácora `backup.log` (3.2) |
@@ -702,14 +709,14 @@ bash ~/lavarapido/lavarapido-infra/deploy/update-server.sh security-service noti
 
 **Desde GitHub, sin SSH:** con la máquina encendida, en el repositorio `lavarapido-infra` → *Actions → Desplegar en Azure → Run workflow*. El botón existe desde el 23-10-2026, cuando `deploy.yml` llegó a `main` (la rama por defecto) con la versión `v1.0.0`; en esa versión el flujo llama a `update-server.sh`, que despliega `develop`. En *Servicios* se deja vacío para actualizar todo o se escriben los nombres (`web payment-service`). Al terminar, el flujo comprueba que la web y la API respondan 200. Usa una llave propia de GitHub (secreto `AZURE_SSH_KEY`) que en el servidor solo puede ejecutar `deploy/ci-deploy.sh`, que valida los nombres y no deja correr dos actualizaciones a la vez. **Al 24-10-2026 el flujo no se ha ejecutado nunca** (el despliegue de ese día se hizo por SSH) y el repositorio no tiene ningún secreto, así que fallaría hasta crear `AZURE_SSH_KEY` e instalar su línea en `authorized_keys` del servidor; mientras tanto se usa la opción por SSH de arriba.
 
-**Integración continua:** desde el 19-10-2026 los 10 repositorios tienen `.github/workflows/ci.yml`, que corre en cada push o pull request a `develop` y `main`, y el resultado aparece como ✓ o ✗ junto a cada commit. Al 24-10-2026 la última corrida de `develop` está en verde en los 10 (1 192 pruebas):
+**Integración continua:** desde el 19-10-2026 los 10 repositorios tienen `.github/workflows/ci.yml`, que corre en cada push o pull request a `develop` y `main`, y el resultado aparece como ✓ o ✗ junto a cada commit. Al 27-10-2026 la última corrida de `main` está en verde en los 10 (1 337 pruebas, incluidas las 17 de integración de payment):
 
 | Repositorio | Qué revisa |
 |---|---|
 | Servicios Java y api-gateway | `./mvnw verify`: compila y corre las pruebas (Java 21) |
-| payment-service | `dotnet build` y `dotnet test` (.NET 8; las de integración se omiten sin SQL Server) |
+| payment-service | `dotnet build` y `dotnet test` (.NET 8). Desde el 27-10-2026 el job «Pruebas de integración» corre las 17 de integración contra SQL Server 2022 con las migraciones de Liquibase, sin omitir ninguna |
 | Front-end-proyecto-web | Compilación de producción y `ng test` |
-| LavadoVehicular-Movil | `tsc --noEmit` y `jest` (`jest-expo`, 25 suites y 73 pruebas). El APK se sigue generando con EAS; `cd.yml` publica la actualización por internet al llegar a `main` (4.3.4) |
+| LavadoVehicular-Movil | `tsc --noEmit` y `jest` (`jest-expo`, 106 pruebas al 27-10-2026). El APK se sigue generando con EAS; `cd.yml` publica la actualización por internet al llegar a `main` (4.3.4) |
 | lavarapido-infra | Sintaxis y `shellcheck` de `deploy/*.sh`, `docker compose config`, `actionlint` de los flujos y sintaxis de `e2e/` y `e2e/remote/`. La batería remota se corre a mano con `e2e.yml` (sin correr todavía contra el servidor) |
 
 #### 4.3.4 Despliegue continuo (activo desde el 26-10-2026)
@@ -718,8 +725,8 @@ El despliegue continuo está fusionado en `develop` desde el 24-10-2026: `lavara
 
 1. Cuando un PR aprobado entra a `main`, el `ci.yml` del repositorio corre el CI y, si pasa, su job **Pedir despliegue** lanza el flujo **Desplegar en Azure** de `lavarapido-infra` con `automatic=true` (secreto `DEPLOY_DISPATCH_TOKEN`: un token *fine-grained* con acceso solo a `lavarapido-infra` y permiso *Actions: Read and write*). Una fusión a `main` de `lavarapido-infra` también despliega. El ✓ de **Pedir despliegue** solo dice que el pedido llegó; el resultado está en *Actions → Desplegar en Azure* de `lavarapido-infra`.
 2. El flujo entra por SSH (`AZURE_SSH_KEY`), respalda la base, baja `main` de todos los repositorios (desde *v1.1.1* de infra también payment-service, que antes se quedaba en `develop` por `DEVELOP_ONLY`) y reconstruye lo que cambió, guardando antes la versión que corre como `:prev`. Si ya hay otra actualización corriendo, por ejemplo la del arranque de la máquina, espera hasta 20 minutos y después actualiza. Luego espera hasta 8 minutos a que **todos** los contenedores queden sanos: si alguno no arranca, el flujo termina en rojo y dice cuál. Si cambió el `Caddyfile`, reinicia Caddy. Al final comprueba que la web y la API respondan 200 y, si no, muestra lo que respondió la API.
-3. Si la máquina está **apagada** (no responden ni el SSH ni el sitio), el flujo automático deja un aviso y no falla; si el sitio responde pero el SSH no, sale en rojo. Al encenderla, `deploy/boot-update.sh` (tarea `@reboot`, instalada en el servidor desde el 24-10-2026) baja lo nuevo de `main` y actualiza si hay algo sin desplegar, comparando con `~/lavarapido/backups/deployed-heads`, que solo se escribe cuando una actualización completa termina bien. Mientras el servidor esté en `develop` (hasta `v1.1.0`), la protección contra bajar de versión detiene esa actualización sin tocar nada. El resultado queda en `~/lavarapido/backups/deploy.log`.
-4. **App móvil (OTA):** no se despliega en Azure. Su `cd.yml` corre con cada push a `main` (no con cambios de solo `.md` o `docs/`) o a mano, pero solo publica desde `main`: repite el CI (`tsc` y `jest`), compara la huella nativa del código con la del APK publicado y, si coincide, corre `eas update --channel preview`; si cambió, falla pidiendo un APK nuevo (`eas build` y `publish:apk`, que siguen siendo a mano). Usa el secreto `EXPO_TOKEN`. Como MOV-08 cambió `eas.json`, el primer paso del móvil a `main` pedirá un APK nuevo.
+3. Si la máquina está **apagada** (no responden ni el SSH ni el sitio), el flujo automático deja un aviso y no falla; si el sitio responde pero el SSH no, sale en rojo. Al encenderla, `deploy/boot-update.sh` (tarea `@reboot`, instalada en el servidor desde el 24-10-2026) baja lo nuevo de `main` y actualiza si hay algo sin desplegar, comparando con `~/lavarapido/backups/deployed-heads`, que solo se escribe cuando una actualización completa termina bien. El resultado queda en `~/lavarapido/backups/deploy.log`.
+4. **App móvil (OTA):** no se despliega en Azure. Su `cd.yml` corre con cada push a `main` (no con cambios de solo `.md` o `docs/`) o a mano, pero solo publica desde `main`: repite el CI (`tsc` y `jest`), compara la huella nativa del código con la del APK publicado y, si coincide, corre `eas update --channel preview`; si cambió, falla pidiendo un APK nuevo (`eas build` y `publish:apk`, que siguen siendo a mano). Usa el secreto `EXPO_TOKEN`.
 
 **Cómo se activó (AC-90 del documento de Acciones Correctivas; los secretos ya están creados desde el 26-10-2026):**
 
@@ -944,7 +951,7 @@ Medición del 19-10-2026, con el sistema en reposo y la máquina recién encendi
 
 ![Changesets de Liquibase ejecutados](capturas/5.4.5-migraciones.png)
 
-*La 039 (aceptación de los documentos legales) quedó aplicada el 19-10-2026; hay 144 changesets `EXECUTED` en los 6 historiales y 57 tablas en los 9 esquemas.*
+*La 039 (aceptación de los documentos legales) quedó aplicada el 19-10-2026; hay 144 changesets `EXECUTED` en los 6 historiales y 57 tablas en los 9 esquemas. Desde la migración 047 de notification (24-10-2026, `pending_delivery`) son 58 tablas.*
 
 ---
 
