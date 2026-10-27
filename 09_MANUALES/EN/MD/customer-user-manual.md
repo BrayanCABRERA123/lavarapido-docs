@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 27, 2026
 
-Manual Type: User Manual for the Customer Role (web application and Android mobile application) · Version 1.4
+Manual Type: User Manual for the Customer Role (web application and Android mobile application) · Version 1.5
 
 ## Version Control
 
@@ -33,6 +33,7 @@ Table 1 records the change history of this document. Every time the development 
 | 1.2 | 2026-10-27 | The alternative times of "That time was just taken" no longer include those that overlap another booking of the same vehicle (10.3 and 13), with the new Figure 16. | Development team |
 | 1.3 | 2026-10-27 | Mobile application screenshots (Figures 26 to 32) in section 10.11; logging out becomes Figure 33. | Development team |
 | 1.4 | 2026-10-27 | Terms and Conditions: section 6 with the 30-minute deadline for digital payment and the limit of one active cash booking (8.1); over-the-air update of the app of October 27 (*v1.1.2*) (10.11 and references). | Development team |
+| 1.5 | 2026-10-27 | Figure 29 taken again with app *v1.1.2*: the note under **Book Now** no longer talks about at-home washing (10.11). | Development team |
 
 *Note.* Dates are written in ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -809,7 +810,7 @@ The **LavaRapidoVehicular** application (version 1.1.1, APK *versionCode* 6, pub
 
 ![Booking in the Mobile App: Payment Option and Summary](capturas/customer-29-mobile-app-book-time-and-payment-option.jpg)
 
-*Note.* Screen scrolled to step 4, with **Digital payment now** chosen.
+*Note.* Screen scrolled to step 4, with **Digital payment now** chosen. Under **Book Now** is the note of app *v1.1.2*: "We will be waiting for you at our location. Arrive a few minutes before your time...".
 
 **Figure 30**
 
