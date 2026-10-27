@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 26, 2026
 
-Manual Type: User Manual for the Operator Role (web application and Android mobile application) · Version 1.1
+Manual Type: User Manual for the Operator Role (web application and Android mobile application) · Version 1.2
 
 ## Version Control
 
@@ -30,6 +30,7 @@ Table 1 records the change history of this document. Every time the development 
 |---|---|---|---|
 | 1.0 | 2026-10-26 | Creation of the manual exclusive to the Operator role, separated from the User Manual (version 4.9) so that each audience has its own document, as the SENA manuals guide recommends. Reviewed against *develop* of October 26, 2026. Added: profile and responsibilities of the operator (section 7.2), first login with the temporary password (8.1), payment method of the booking shown in the service information (10.3), the notification switches and the **Deactivate my account** option of the operator, which exist on the web and were not documented (10.7 and 10.8), and the mobile application (10.9). New screenshots of the operator's profile and settings. | Development team |
 | 1.1 | 2026-10-26 | Mobile application 1.1.1 with APK *versionCode* 6 and the over-the-air update published (10.9). | Development team |
+| 1.2 | 2026-10-27 | Mobile application screenshots (Figures 15 to 18) in section 10.9; logging out becomes Figure 19. | Development team |
 
 *Note.* Dates are written in ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -124,7 +125,7 @@ To explain step by step how the operator must log in, navigate, and use the func
 
 ### 6.3 About the Screenshots
 
-The figures in this manual are real screenshots of the system running with test accounts and data, ordered according to the operator's workflow. The screenshots of the operator's profile and settings were taken on October 26, 2026; the others are from October 19, 2026 and correspond to screens that have not changed since then. Their source is explained in Annex A.
+The figures in this manual are real screenshots of the system running with test accounts and data, ordered according to the operator's workflow. The screenshots of the operator's profile and settings were taken on October 26, 2026; the others are from October 19, 2026 and correspond to screens that have not changed since then. Figures 15 to 18 are from the mobile application. Their source is explained in Annex A.
 
 ## 7. Requirements to Use the System
 
@@ -562,6 +563,32 @@ The **LavaRapidoVehicular** application (version 1.1.1, APK *versionCode* 6, pub
 - **Assigned:** totals of services pending, in progress, and finished today, with filters by date, type of service, and search (section 10.3).
 - **History**, **Ratings** (average, total received, and satisfaction level of the last 12 months, with the detail of each rating), **Alerts**, **Profile**, and **Settings** work as in sections 10.4 to 10.8. If the notice "Did you serve this booking?" arrives, follow section 10.3.
 
+**Figure 15**
+
+*Operator Home in the Mobile App*
+
+![Operator Home in the Mobile App](capturas/operator-16-mobile-app-home.jpg)
+
+**Figure 16**
+
+*Schedule in the Mobile App (Week View)*
+
+![Schedule in the Mobile App (Week View)](capturas/operator-17-mobile-app-schedule.jpg)
+
+**Figure 17**
+
+*Assigned Services in the Mobile App*
+
+![Assigned Services in the Mobile App](capturas/operator-18-mobile-app-assigned-services.jpg)
+
+*Note.* At the end of the list there is a service whose end time passed more than 4 hours ago, with the notice that it can no longer be started.
+
+**Figure 18**
+
+*Operator More Menu in the Mobile App*
+
+![Operator More Menu in the Mobile App](capturas/operator-19-mobile-app-more-menu.jpg)
+
 **Push notifications.** When signing in, the app asks for permission to send notifications. If it is granted, the phone receives at once the notices of assignments, changes, cancellations, and services to close, and tapping one opens the related screen. Android groups them in channels that can be muted from the phone's settings.
 
 **Logging out in the app.** Open **More** and tap **Log Out**, which asks for confirmation; after signing out, the phone stops receiving that account's notifications. Known limitation (Corrective Actions, ACO-39): if the session expires with the app in the background, the phone may keep receiving the account's notices until signing in again or logging out from **More**. On a shared phone, the operator must always log out at the end of the working day.
@@ -607,7 +634,7 @@ Logging out at the end of the working day prevents another person from recording
 
 When signing out, the other tabs of the same browser also go back to the login screen, and the closed session stops working on the server. In the mobile app, the session is closed from **More** (section 10.9).
 
-**Figure 15**
+**Figure 19**
 
 *Log Out Confirmation*
 
@@ -695,7 +722,7 @@ Vehicle Washing Development Team. (2026c). *LavadoVehicular-Movil* (version 1.1.
 
 ### Annex A. Source of the Screenshots
 
-The figures in this manual are real screenshots of the whole system running in Docker with the web at *http://localhost:4200*, on the *develop* branch, with the interface in English. Figures 13 and 14 were taken on October 26, 2026 with a test operator account; the others, on October 19, 2026, and correspond to screens that have not changed since then. Test accounts, vehicles, and bookings created only for the screenshots were used, so no real emails, ID numbers, phone numbers, or plates appear. If a screen changes in a future version, the corresponding screenshot must be taken again with the same file name in the *capturas* folder.
+The figures in this manual are real screenshots of the whole system running in Docker with the web at *http://localhost:4200*, on the *develop* branch, with the interface in English. Figures 13 and 14 were taken on October 26, 2026 with a test operator account; the others, on October 19, 2026, and correspond to screens that have not changed since then. Test accounts, vehicles, and bookings created only for the screenshots were used, so no real emails, ID numbers, phone numbers, or plates appear. The mobile app screenshots were taken on October 27, 2026 with the app's code (*develop*, version 1.1.1) running in Expo's web mode, with the screen size and density of a phone (393 × 852 points, density 2.5), against the same local system and with the same test accounts. The screens are the app's; the only difference from the phone is that the status bar and the operating system permissions do not appear. If a screen changes in a future version, the corresponding screenshot must be taken again with the same file name in the *capturas* folder.
 
 ### Annex B. Delivery Checklist
 

@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 26 de octubre de 2026
 
-Tipo de manual: Manual de usuario del rol Operario (aplicación web y aplicación móvil Android) · Versión 1.1
+Tipo de manual: Manual de usuario del rol Operario (aplicación web y aplicación móvil Android) · Versión 1.2
 
 ## Control de Versiones
 
@@ -30,6 +30,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 |---|---|---|---|
 | 1.0 | 2026-10-26 | Creación del manual exclusivo del rol Operario, separado del Manual de Usuario (versión 4.9) para que cada público tenga su propio documento, según la guía de manuales del SENA. Revisado contra *develop* del 26 de octubre de 2026. Se agregaron: perfil y responsabilidades del operario (sección 7.2), primer ingreso con la contraseña temporal (8.1), forma de pago de la reserva visible en la información del servicio (10.3), interruptores de notificación y opción **Desactivar mi cuenta** del operario, que existen en la web y no estaban documentados (10.7 y 10.8), y aplicación móvil (10.9). Capturas nuevas del perfil y de la configuración del operario. | Equipo de desarrollo |
 | 1.1 | 2026-10-26 | Aplicación móvil 1.1.1 con el APK *versionCode* 6 y la actualización por internet publicada (10.9). | Equipo de desarrollo |
+| 1.2 | 2026-10-27 | Capturas de la aplicación móvil (Figuras 15 a 18) en la sección 10.9; el cierre de sesión pasa a ser la Figura 19. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -124,7 +125,7 @@ Explicar paso a paso cómo el operario debe ingresar, navegar y usar las funcion
 
 ### 6.3 Sobre las Capturas de Pantalla
 
-Las figuras de este manual son capturas reales del sistema funcionando con cuentas y datos de prueba, ordenadas según el flujo de trabajo del operario. Las capturas del perfil y de la configuración del operario se tomaron el 26 de octubre de 2026; las demás son del 19 de octubre de 2026 y corresponden a pantallas que no cambiaron desde entonces. Su origen se explica en el Anexo A.
+Las figuras de este manual son capturas reales del sistema funcionando con cuentas y datos de prueba, ordenadas según el flujo de trabajo del operario. Las capturas del perfil y de la configuración del operario se tomaron el 26 de octubre de 2026; las demás son del 19 de octubre de 2026 y corresponden a pantallas que no cambiaron desde entonces. Las Figuras 15 a 18 son de la aplicación móvil. Su origen se explica en el Anexo A.
 
 ## 7. Requisitos para Usar el Sistema
 
@@ -562,6 +563,32 @@ La aplicación **LavaRapidoVehicular** (versión 1.1.1, APK *versionCode* 6, pub
 - **Asignados:** totales de servicios pendientes, en progreso y finalizados hoy, con filtros por fecha, tipo de servicio y búsqueda (sección 10.3).
 - **Historial**, **Calificaciones** (promedio, total recibido y nivel de satisfacción de los últimos 12 meses, con el detalle de cada calificación), **Avisos**, **Perfil** y **Configuración** funcionan como en las secciones 10.4 a 10.8. Si llega el aviso "¿Atendiste este servicio?", se sigue la sección 10.3.
 
+**Figura 15**
+
+*Inicio del Operario en la Aplicación Móvil*
+
+![Inicio del Operario en la Aplicación Móvil](capturas/operario-16-app-movil-inicio.jpg)
+
+**Figura 16**
+
+*Agenda en la Aplicación Móvil (Vista Semana)*
+
+![Agenda en la Aplicación Móvil (Vista Semana)](capturas/operario-17-app-movil-agenda.jpg)
+
+**Figura 17**
+
+*Servicios Asignados en la Aplicación Móvil*
+
+![Servicios Asignados en la Aplicación Móvil](capturas/operario-18-app-movil-servicios-asignados.jpg)
+
+*Nota.* Al final de la lista aparece un servicio cuya hora de fin pasó hace más de 4 horas, con el aviso de que ya no se puede iniciar.
+
+**Figura 18**
+
+*Menú Más del Operario en la Aplicación Móvil*
+
+![Menú Más del Operario en la Aplicación Móvil](capturas/operario-19-app-movil-menu-mas.jpg)
+
 **Notificaciones push.** Al ingresar, la app pide permiso para enviar notificaciones. Si se acepta, el teléfono recibe al instante los avisos de asignaciones, cambios, cancelaciones y servicios por cerrar, y tocar uno abre la pantalla relacionada. Android los agrupa en canales que se pueden silenciar desde los ajustes del teléfono.
 
 **Cierre de sesión en la app.** Abrir **Más** y tocar **Cerrar Sesión**, que pide confirmación; al cerrar, el teléfono deja de recibir las notificaciones de esa cuenta. Limitación conocida (Acciones Correctivas, ACO-39): si la sesión vence con la app en segundo plano, el teléfono puede seguir recibiendo los avisos de la cuenta hasta que se vuelva a ingresar o se cierre la sesión desde **Más**. En un teléfono compartido, el operario siempre debe cerrar su sesión al terminar la jornada.
@@ -607,7 +634,7 @@ Cerrar la sesión al terminar la jornada evita que otra persona registre servici
 
 Al cerrar sesión, las demás pestañas del mismo navegador también vuelven a la pantalla de inicio de sesión, y la sesión cerrada deja de servir en el servidor. En la app móvil, la sesión se cierra desde **Más** (sección 10.9).
 
-**Figura 15**
+**Figura 19**
 
 *Confirmación del Cierre de Sesión*
 
@@ -695,7 +722,7 @@ Servicio Nacional de Aprendizaje. (2026). *Guía para elaborar manuales de softw
 
 ### Anexo A. Origen de las Capturas
 
-Las figuras de este manual son capturas reales del sistema completo corriendo en Docker con la web en *http://localhost:4200*, sobre la rama *develop*. Las Figuras 13 y 14 se tomaron el 26 de octubre de 2026 con una cuenta de operario de prueba; las demás, el 19 de octubre de 2026, y corresponden a pantallas que no cambiaron desde entonces. Se usaron cuentas, vehículos y reservas de prueba creados solo para las capturas, por lo que no aparecen correos, documentos, teléfonos ni placas reales. Si una pantalla cambia en una versión futura, la captura correspondiente se debe tomar de nuevo con el mismo nombre de archivo de la carpeta *capturas*.
+Las figuras de este manual son capturas reales del sistema completo corriendo en Docker con la web en *http://localhost:4200*, sobre la rama *develop*. Las Figuras 13 y 14 se tomaron el 26 de octubre de 2026 con una cuenta de operario de prueba; las demás, el 19 de octubre de 2026, y corresponden a pantallas que no cambiaron desde entonces. Se usaron cuentas, vehículos y reservas de prueba creados solo para las capturas, por lo que no aparecen correos, documentos, teléfonos ni placas reales. Las capturas de la aplicación móvil se tomaron el 27 de octubre de 2026 con el código de la app (*develop*, versión 1.1.1) ejecutado en el modo web de Expo, con el tamaño y la densidad de pantalla de un celular (393 × 852 puntos, densidad 2,5), contra el mismo sistema local y con las mismas cuentas de prueba. Las pantallas son las de la app; lo único que cambia frente al teléfono es que no aparecen la barra de estado ni los permisos del sistema operativo. Si una pantalla cambia en una versión futura, la captura correspondiente se debe tomar de nuevo con el mismo nombre de archivo de la carpeta *capturas*.
 
 ### Anexo B. Lista de Verificación para la Entrega
 
