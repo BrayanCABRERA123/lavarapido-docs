@@ -1261,7 +1261,7 @@ El flujo principal del negocio recorre los servicios del sistema en el orden sig
 6. Desde 15 minutos antes de la hora, el operario inicia el servicio y al terminar lo finaliza (CU11); la reserva pasa a En proceso y luego a Completada, y los recordatorios pendientes se cancelan. En los servicios de 180 minutos o más, el administrador registra el informe de inspección y lo comparte con el cliente (CU30).
 7. El cliente califica el servicio (CU15).
 
-Si una reserva termina sin registrarse, el sistema solo la cierra cuando no hay duda (CU32): una hora después de su hora de fin, la Programada que nunca se confirmó se cancela y la Confirmada que nunca tuvo operario queda en No asistió. Si tenía operario, pasa a "Por cerrar" y el administrador la cierra con "Se atendió" o "No asistió" (CU29).
+Si una reserva termina sin registrarse, el sistema solo la cierra cuando no hay duda (CU32): una hora después de su hora de fin, la Confirmada que nunca tuvo operario queda en No asistió. Si tenía operario, pasa a "Por cerrar" y el administrador la cierra con "Se atendió" o "No asistió" (CU29).
 
 La regla que define si el pago debe estar aprobado antes de iniciar el servicio sigue abierta (sección 11.3); hoy los pasos 5 y 6 son independientes.
 
