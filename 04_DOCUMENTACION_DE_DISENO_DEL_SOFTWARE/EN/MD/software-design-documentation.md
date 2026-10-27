@@ -15,8 +15,8 @@
 | Apprentices | Brayan Estiven Patiño Cabrera (project lead), Juan Camilo Guilombo Osorio (frontend lead), Merari Urbano (backend lead) |
 | Instructor | Karol Daniela Correa |
 | Training center | Industria |
-| Date | October 26, 2026 |
-| Version | 1.10 |
+| Date | October 27, 2026 |
+| Version | 1.11 |
 
 > *Note.* Cover data was taken from the project's Technical Manual v2.0. All design content was derived from the source code in the `Sistema Lavado Vehicular` repository (Backend, Web, and LavadoVehicular-Movil) and must be validated with the instructor.
 
@@ -499,7 +499,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
 ## 5. Data Model
 
-The `LavaRapido` database (SQL Server 2022) has 57 tables in 9 schemas, created by each service's Liquibase changelogs. Foreign keys only exist within a single schema; references to another service are indexed columns without an FK, validated through the API.
+The `LavaRapido` database (SQL Server 2022) has 58 tables in 9 schemas, created by each service's Liquibase changelogs. Foreign keys only exist within a single schema; references to another service are indexed columns without an FK, validated through the API.
 
 **Table 9**
 
@@ -513,11 +513,11 @@ The `LavaRapido` database (SQL Server 2022) has 57 tables in 9 schemas, created 
 | `catalog` | booking-service | 3 | `005`, `022` |
 | `booking` | booking-service | 10 | `005`, `018`, `021`, `024`, `032` |
 | `execution` | operations-service | 11 | `007`, `033`, `037` |
-| `payment` | payment-service | 7 | `lavarapido-payment-service/db/changelog/changes/008`–`020` |
+| `payment` | payment-service | 7 | `lavarapido-payment-service/db/changelog/changes/008`–`023` |
 | `promotion` | payment-service | 5 | `003`–`007`, `017`, `018` |
-| `notification` | notification-service | 6 | `010`–`038` |
+| `notification` | notification-service | 7 | `010`–`048` |
 
-> *Note.* The `security.custom_role` table was created in `023` and dropped in `026`; it is not counted. Earlier documents (`MODELO-DE-DATOS.md`) mention 43 tables: the changelogs later added `bay_status`, `schedule_history`, `device_token`, `processed_event`, `booking_reminder`, and `booking_tracking`.
+> *Note.* The `security.custom_role` table was created in `023` and dropped in `026`; it is not counted. Earlier documents (`MODELO-DE-DATOS.md`) mention 43 tables: the changelogs later added `bay_status`, `schedule_history`, `device_token`, `processed_event`, `booking_reminder`, `booking_tracking`, and, on October 24, 2026, `pending_delivery` (notification changelog `047`). The 58 tables were counted in the real database on October 27, 2026.
 
 ### 5.1 Common Conventions
 
@@ -637,6 +637,7 @@ erDiagram
   BOOKING_SERVICE ||..o| SERVICE_EXECUTION : "booking_service_id (logical)"
   APP_USER ||..o| OPERATOR : "user_id (logical)"
   NOTIFICATION_TYPE ||--o{ NOTIFICATION : "classifies"
+  NOTIFICATION ||--o{ PENDING_DELIVERY : "is delivered by"
   APP_USER ||..o{ NOTIFICATION : "user_id (logical)"
   APP_USER ||..o{ DEVICE_TOKEN : "user_id (logical)"
   BOOKING ||..o{ BOOKING_REMINDER : "booking_id (logical)"
@@ -756,17 +757,18 @@ Notation: PK = primary key, UK = unique value, → = foreign key, ⇢ = logical 
 - `promotion.promotion(promotion_id PK, code UK, name, description, discount_type_id → discount_type, discount_value, max_discount_amount, min_purchase_amount, is_public, min_completed_booking, valid_from, valid_to, max_redemptions, max_redemptions_per_customer, is_active, price, duration_minutes, icon, featured, benefits, required_points)`
 - `promotion.promotion_service(promotion_service_id PK, promotion_id → promotion, service_id ⇢ catalog.service)`
 - `promotion.promotion_customer(promotion_customer_id PK, promotion_id → promotion, customer_id ⇢ customer.customer, assigned_at, assigned_by)`
-- `promotion.booking_promotion(booking_promotion_id PK, booking_id ⇢ booking.booking, promotion_id → promotion, applied_amount)`
+- `promotion.booking_promotion(booking_promotion_id PK, booking_id ⇢ booking.booking, promotion_id → promotion, applied_amount, discount_percent, max_discount_amount)`
 - `notification.notification_type(notification_type_id PK, code UK, name, display_order, is_active)`
 - `notification.notification(notification_id PK, user_id ⇢ security.app_user, notification_type_id → notification_type, title, message, reference_entity, reference_id, is_read, read_at, sent_at)`
 - `notification.device_token(device_token_id PK, user_id ⇢ security.app_user, token UK, platform, is_active, last_seen_at)`
 - `notification.processed_event(processed_event_id PK, event_id UK, event_type, processed_at)`
 - `notification.booking_reminder(booking_reminder_id PK, booking_id ⇢ booking.booking, user_id ⇢ security.app_user, booking_code, scheduled_start, lead_minutes, remind_at, sent_at)`
 - `notification.booking_tracking(booking_id PK ⇢ booking.booking, booking_code, customer_user_id, operator_user_id, scheduled_start, is_cancelled, unassigned_alert_at, updated_at)`
+- `notification.pending_delivery(pending_delivery_id PK, notification_id → notification, channel, email_address, recipient_name, language, attempts, next_attempt_at, last_error, delivered_at, failed_at, created_at)`, with UK (`notification_id`, `channel`)
 
 ### 5.4 Data Dictionary
 
-There is one dictionary for each of the 57 tables, grouped by schema. The "Null" column shows whether the field accepts NULL; PK = primary key, FK = foreign key, UK = unique value, and ⇢ = logical reference to another service (no FK). Tables that carry the audit block (section 5.1) show it as a single row at the end.
+There is one dictionary for each of the 58 tables, grouped by schema. The "Null" column shows whether the field accepts NULL; PK = primary key, FK = foreign key, UK = unique value, and ⇢ = logical reference to another service (no FK). Tables that carry the audit block (section 5.1) show it as a single row at the end.
 
 #### Schema `security`
 
@@ -1134,7 +1136,7 @@ Establishment, business hours, bays, and bookings. Owner: booking-service.
 | Field | Type | Null | Key | Description |
 | --- | --- | --- | --- | --- |
 | cancellation_reason_id | SMALLINT IDENTITY | No | PK | Identifier |
-| code | NVARCHAR(30) | No | UK | Code (eight seed reasons; `EXPIRED`, from seed `112`, is only used by the system when it cancels an expired scheduled booking, and `PAYMENT_TIMEOUT` (*The payment receipt was not uploaded in time*), from seed `117` of October 26, 2026, is only used by the system when it cancels an overdue booking with digital payment; neither is offered when cancelling by hand) |
+| code | NVARCHAR(30) | No | UK | Code (eight seed reasons; `EXPIRED`, from seed `112`, is kept but no process uses it since `ExpiredBookingsJob` was removed on October 24, 2026 (B-07), and `PAYMENT_TIMEOUT` (*The payment receipt was not uploaded in time*), from seed `117` of October 26, 2026, is only used by the system when it cancels an overdue booking with digital payment; neither is offered when cancelling by hand) |
 | name | NVARCHAR(60) | No |  | Display name |
 | is_customer_fault | BIT | No |  | Whether the customer is at fault |
 | display_order | SMALLINT | No |  | Display order |
@@ -1534,11 +1536,13 @@ Promotions and coupons. Owner: payment-service.
 | booking_id | BIGINT | No | ⇢ booking.booking; UK con promotion_id | Booking |
 | promotion_id | INT | No | FK → promotion | Redeemed promotion |
 | applied_amount | DECIMAL(12,2) | No |  | Discount applied (> 0) |
+| discount_percent | DECIMAL(5,2) | Yes |  | Percentage of a percent coupon (> 0 and ≤ 100) used to recalculate the discount with the current booking total (BIZ-05, changelog `022`); NULL for fixed-amount coupons |
+| max_discount_amount | DECIMAL(12,2) | Yes |  | Cap in pesos of a percent coupon, if the promotion had one (> 0, changelog `022`) |
 | created_at, created_by, updated_at, updated_by, deleted_at, deleted_by, row_version | — | — | | Audit block (section 5.1) |
 
 #### Schema `notification`
 
-Notifications, devices, and reminders. Owner: notification-service.
+Notifications, devices, reminders, and pending push and email deliveries. Owner: notification-service.
 
 **Table 61**
 
@@ -1627,6 +1631,27 @@ Notifications, devices, and reminders. Owner: notification-service.
 | is_cancelled | BIT | No |  | Booking cancelled |
 | updated_at | DATETIME2(3) | No |  | Last update |
 | unassigned_alert_at | DATETIME2(3) | Yes |  | When the "no operator" alert was sent (changelog `031`) |
+
+**Table 67**
+
+*Data dictionary of `notification.pending_delivery` — push and email deliveries pending or to retry*
+
+| Field | Type | Null | Key | Description |
+| --- | --- | --- | --- | --- |
+| pending_delivery_id | BIGINT IDENTITY | No | PK | Delivery identifier |
+| notification_id | BIGINT | No | FK → notification; UK with channel | Notification being delivered |
+| channel | NVARCHAR(10) | No | UK with notification_id | `PUSH` or `EMAIL`; a single delivery per notification and channel (NVARCHAR since changelog `048`) |
+| email_address | NVARCHAR(254) | Yes |  | Destination email (`EMAIL` channel) |
+| recipient_name | NVARCHAR(100) | Yes |  | Recipient name |
+| language | NVARCHAR(5) | Yes |  | Message language (NVARCHAR since changelog `048`) |
+| attempts | INT | No |  | Attempts made (≥ 0, default 0) |
+| next_attempt_at | DATETIME2(3) | No |  | When it is tried again; filtered index of the ones still pending |
+| last_error | NVARCHAR(300) | Yes |  | Last error |
+| delivered_at | DATETIME2(3) | Yes |  | When it was delivered |
+| failed_at | DATETIME2(3) | Yes |  | When it was given up after reaching the retry cap |
+| created_at | DATETIME2(3) | No |  | Creation (default `SYSUTCDATETIME()`) |
+
+The notification and its deliveries are written in the same transaction and go out after the commit; if they fail, a scheduled job retries them up to a cap (changelog `047`, OPS-05).
 
 > *Note.* Source of types and constraints: `.sql` files in `*/src/main/resources/db/changelog/` (Java services) and `lavarapido-payment-service/db/changelog/changes/`, including the `ALTER` statements made after each table was created.
 
@@ -2118,7 +2143,7 @@ classDiagram
 
 - `CustomerVehicleService`: `CustomerAccount`, `CustomerAccountRepository`, `CustomerVehicleRepository`, `VehicleTypeRepository`, `IdentityDirectory`, `LicensePlatePolicy`, `DomainEventPublisher`.
 - `CustomerRegistrationService`: `CustomerAccountRepository`, `DomainEventPublisher`.
-- `VehicleLookupService`: `CustomerAccountRepository`, `CustomerVehicleRepository`.
+- `VehicleLookupService`: `CustomerAccountRepository`, `CustomerVehicleRepository`. Since October 27, 2026 (*v1.1.1*), `byIds` gets the owners of all the vehicles in a single query (`findCustomerIdsOfActiveVehicles`) and loads each account once, instead of one query per vehicle.
 - `VehicleTypeQueryService`: `VehicleTypeRepository`.
 
 ### 6.3 booking-service
@@ -2292,6 +2317,7 @@ classDiagram
     +slots(date, window, activeBays, taken, durationMinutes, stepMinutes, now) List~Slot~
     +freeBay(start, end, activeBays, taken) Optional~Short~
     +alternatives(slots, requested, max) List~LocalTime~
+    +withoutBusyTimes(slots, date, durationMinutes, busy)$ List~Slot~
   }
   class BookingEvent {
     <<event>>
@@ -2421,7 +2447,7 @@ classDiagram
   }
 ```
 
-> *Note.* Outbound adapters: `BookingPersistenceAdapter`, `CatalogPersistenceAdapter`, `SchedulePersistenceAdapter`, and `BayPersistenceAdapter` (JPA); `CustomerServiceDirectory` (REST to customer-service); `RabbitDomainEventPublisher` and `LoggingDomainEventPublisher`. Inbound adapters: `BookingController`, `AdminBookingController`, `OperatorBookingController`, `CatalogController`, `ScheduleController`, and `InternalBookingController` (`/internal/v1/bookings`, with `X-Internal-Key`, including `POST /internal/v1/bookings/{id}/no-show`, which calls `markUnattended`); `PaymentEventsListener` (queue `booking.payment-events`) and `PaymentDeadlineJob` (scheduled job that calls `paymentOverdueBookings` and `cancelForPaymentTimeout`), since October 26, 2026; `PaymentServiceDirectory` (REST to payment-service, with `X-Internal-Key`) implements the outbound port `PaymentStatusDirectory`. `ExpiredBookingsJob` was removed on October 24, 2026 (B-07). Source: `lavarapido-booking-service/src/main/java/com/lavarapido/booking/`.
+> *Note.* Outbound adapters: `BookingPersistenceAdapter`, `CatalogPersistenceAdapter`, `SchedulePersistenceAdapter`, and `BayPersistenceAdapter` (JPA); `CustomerServiceDirectory` (REST to customer-service); `RabbitDomainEventPublisher` and `LoggingDomainEventPublisher`. Inbound adapters: `BookingController`, `AdminBookingController`, `OperatorBookingController`, `CatalogController`, `ScheduleController`, and `InternalBookingController` (`/internal/v1/bookings`, with `X-Internal-Key`, including `POST /internal/v1/bookings/{id}/no-show`, which calls `markUnattended`); `PaymentEventsListener` (queue `booking.payment-events`) and `PaymentDeadlineJob` (scheduled job that calls `paymentOverdueBookings` and `cancelForPaymentTimeout`), since October 26, 2026; `PaymentServiceDirectory` (REST to payment-service, with `X-Internal-Key`) implements the outbound port `PaymentStatusDirectory`. `ExpiredBookingsJob` was removed on October 24, 2026 (B-07). Since October 27, 2026 (*v1.1.1*), `BookingDtos` accepts at most 10 `serviceIds` with no nulls (`MAX_SERVICES`, when creating and rescheduling) and returns 400 `VALIDATION_ERROR` instead of 500, as it does with an invalid day in the opening-hours week; `BookingResponse.from(view, includeOwner)` only fills `bookedBy` and the vehicle owner in the staff views (administrator and operator), not in the customer's; and the alternative times go through `AvailabilityPolicy.withoutBusyTimes`, which removes those that clash with another booking of the same vehicle. Source: `lavarapido-booking-service/src/main/java/com/lavarapido/booking/`.
 
 *Ports used by each service.*
 
@@ -3286,7 +3312,7 @@ classDiagram
 
 ### 6.7 States of the Main Entities
 
-**Table 67**
+**Table 68**
 
 *State transitions allowed by the domain*
 
@@ -3312,14 +3338,14 @@ classDiagram
 
 ## 7. Design Findings and Open Items
 
-**Table 68**
+**Table 69**
 
 *Inconsistencies found when comparing the code with earlier documentation*
 
 | # | Finding | Evidence |
 | --- | --- | --- |
 | 1 | Technical Manual v2.0 says all six microservices are in Java 21; payment-service is in .NET 8 | `lavarapido-payment-service/Directory.Build.props` (`net8.0`) |
-| 2 | `MODELO-DE-DATOS.md` documented 43 tables and SRS v4 (Table 6) said 47; the changelogs create 57 as of October 15, 2026 | Table 9 of this document |
+| 2 | `MODELO-DE-DATOS.md` documented 43 tables and SRS v4 (Table 6) said 47; the changelogs created 57 as of October 15, 2026 and create 58 since notification changelog `047` (October 24, 2026) | Table 9 of this document |
 | 3 | notification subscribed to `booking.created`, but booking does not publish that key. Fixed on October 24, 2026: the binding was removed (notification `8fde2ee`) | notification's `ROUTING_KEYS` |
 | 4 | customer defines the `customer.provisioned`, `VehicleRegistered`, `VehicleUpdated`, `VehicleRemoved`, and `LoyaltyPointsChanged` events, but its only publisher writes them to the log: they never reach RabbitMQ and have no consumer | `CustomerProvisioned.java:15`, `customer/.../adapter/out/messaging/LoggingDomainEventPublisher.java` |
 | 5 | Vehicle inspection, its public report, and the business data in Settings are simulated: they are stored in the browser, not in the backend | `Web/src/app/core/services/inspection-store.ts:20`, `features/admin/services/business-store.ts:52`; on mobile `scheduleMock.ts`, `settingsMock.ts` |
