@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 26, 2026
 
-Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.8
+Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.9
 
 ## Version Control
 
@@ -40,6 +40,7 @@ Table 1 records the change history of this document. Each time the installation 
 | 4.6 | 2026-10-23 | Review against *develop* of October 23, 2026 and version *v1.0.0*: branches and tags of each repository (8.1); variables the Compose file already passes, including *FOLLOW_UP_LOOK_BACK_DAYS*, *ALLOWED_EMAIL_DOMAINS*, *DEMO_\*_PASSWORD*, *ADMIN_DOCUMENT*, and *ADMIN_PHONE*, and *INTERNAL_API_KEY* required for the operator (10.2); the global script *lavarapido-6-services-sqlserver.sql* is not versioned (11.3); the APK used to test push notifications is built with the EAS *preview* profile, because *development* does not exist (13.2); demonstration accounts through variables (15.1). Includes the content of Merari Urbano's *fix/A-05* and *fix/B-02* branches. | Development team |
 | 4.7 | 2026-10-24 | Review against *develop* of October 24, 2026, which runs on the public server since that day (8.1); new variables of the gateway (*AUTH_RATE_LIMIT_\**, *TRUSTED_PROXIES*, *ROUTE_CONNECT_TIMEOUT*, *ROUTE_READ_TIMEOUT*) and of operations-service (*START_LATE_LIMIT*), *INTERNAL_API_KEY* and *BOOKING_SERVICE_URL* in customer-service, and *BOOKING_EXPIRY_CHECK_\** with no effect (10.2); the published web listens on port 8080 (Annex B). | Development team |
 | 4.8 | 2026-10-26 | Payment at booking, reviewed against *develop* of October 26, 2026 and deployed to the public server that day: new booking-service variables (*BOOKING_CASH_ACTIVE_LIMIT*, *BOOKING_PAYMENT_\**, *PAYMENT_SERVICE_URL*) and *INTERNAL_API_KEY* also in payment-service (Table 7); booking-service migration 049 and seed 117 (Table 8); *booking.payment-events* queue and *RABBITMQ_HOST=127.0.0.1* for payment-service outside Docker on Windows (12.5). | Development team |
+| 4.9 | 2026-10-26 | Versions *v1.1.0* (10 repositories, including the first one of the mobile app) and *v1.1.1* (web, mobile app, payment-service, and infra) of October 26, 2026, and recommended tag for an evaluation installation (8.1). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -282,7 +283,7 @@ The project is distributed in one repository per component. All the backend repo
 
 ### 8.1 Cloning the Repositories
 
-The integration branch of the team is *develop*; the most recent version of every service is there. Since October 23, 2026, *main* has the delivered version *v1.0.0* in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra), and *develop* is ahead with the fixes of October 23 and 24 (128 branches that day), which will ship in *v1.1.0*; *develop* is what runs on the public server since October 24, 2026. payment-service has *v1.0.0* since October 24, 2026 (its PR #2 was merged and its *main* includes the whole *develop*); the mobile app has no release yet (PR #1 open; its *main* dates from July 6, 2026) and is installed from *develop*. For an evaluation installation, use tag *v1.0.0* (and *develop* in the app) or *develop* in all of them to see the latest, which is what runs on the public server.
+The integration branch of the team is *develop*; the most recent version of every service is there, and *main* holds the delivered versions. On October 23, 2026 *v1.0.0* was tagged in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra) and on the 24th in payment-service. On October 26, 2026 *v1.1.0* shipped in the 10 repositories, including the mobile app, which had no version until then, and that same day *v1.1.1* in the web, the mobile app, payment-service, and infra. For an evaluation installation, use the most recent tag of each repository (*v1.1.1* where it exists and *v1.1.0* in the others), or *develop* in all of them to see the latest.
 
 ```bash
 mkdir Backend && cd Backend
