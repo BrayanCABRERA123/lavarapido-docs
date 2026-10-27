@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 26, 2026
+October 27, 2026
 
-Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.9
+Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.10
 
 ## Version Control
 
@@ -41,6 +41,7 @@ Table 1 records the change history of this document. Each time the installation 
 | 4.7 | 2026-10-24 | Review against *develop* of October 24, 2026, which runs on the public server since that day (8.1); new variables of the gateway (*AUTH_RATE_LIMIT_\**, *TRUSTED_PROXIES*, *ROUTE_CONNECT_TIMEOUT*, *ROUTE_READ_TIMEOUT*) and of operations-service (*START_LATE_LIMIT*), *INTERNAL_API_KEY* and *BOOKING_SERVICE_URL* in customer-service, and *BOOKING_EXPIRY_CHECK_\** with no effect (10.2); the published web listens on port 8080 (Annex B). | Development team |
 | 4.8 | 2026-10-26 | Payment at booking, reviewed against *develop* of October 26, 2026 and deployed to the public server that day: new booking-service variables (*BOOKING_CASH_ACTIVE_LIMIT*, *BOOKING_PAYMENT_\**, *PAYMENT_SERVICE_URL*) and *INTERNAL_API_KEY* also in payment-service (Table 7); booking-service migration 049 and seed 117 (Table 8); *booking.payment-events* queue and *RABBITMQ_HOST=127.0.0.1* for payment-service outside Docker on Windows (12.5). | Development team |
 | 4.9 | 2026-10-26 | Versions *v1.1.0* (10 repositories, including the first one of the mobile app) and *v1.1.1* (web, mobile app, payment-service, and infra) of October 26, 2026, and recommended tag for an evaluation installation (8.1). | Development team |
+| 4.10 | 2026-10-27 | Versions *v1.1.1* (customer and booking) and *v1.1.2* (web, mobile app, payment-service, and infra) of October 27, 2026 and tags to use (8.1); 58 tables (11.1, 11.5, and checklist); *operations-service.booking-confirmed* queue in the RabbitMQ topology (12.5). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -283,7 +284,7 @@ The project is distributed in one repository per component. All the backend repo
 
 ### 8.1 Cloning the Repositories
 
-The integration branch of the team is *develop*; the most recent version of every service is there, and *main* holds the delivered versions. On October 23, 2026 *v1.0.0* was tagged in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra) and on the 24th in payment-service. On October 26, 2026 *v1.1.0* shipped in the 10 repositories, including the mobile app, which had no version until then, and that same day *v1.1.1* in the web, the mobile app, payment-service, and infra. For an evaluation installation, use the most recent tag of each repository (*v1.1.1* where it exists and *v1.1.0* in the others), or *develop* in all of them to see the latest.
+The integration branch of the team is *develop*; the most recent version of every service is there, and *main* holds the delivered versions. On October 23, 2026 *v1.0.0* was tagged in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra) and on the 24th in payment-service. On October 26, 2026 *v1.1.0* shipped in the 10 repositories, including the mobile app, which had no version until then, and that same day *v1.1.1* in the web, the mobile app, payment-service, and infra. On October 27, 2026 *v1.1.1* shipped in customer-service and booking-service and *v1.1.2* in the web, the mobile app, payment-service, and infra. For an evaluation installation, use the most recent tag of each repository: *v1.1.2* in the web, the mobile app, payment-service, and infra; *v1.1.1* in customer-service and booking-service; and *v1.1.0* in the API Gateway, security-service, operations-service, and notification-service. Each one is the tip of *main*, which is protected in the 10 repositories and is what the public server runs; *develop* has the latest work not yet released in a version.
 
 ```bash
 mkdir Backend && cd Backend
@@ -488,7 +489,7 @@ INTERNAL_API_KEY=********
 
 ## 11. Database Creation and Import
 
-The system uses a single SQL Server 2022 database called *LavaRapido*, divided into nine schemas: *security*, *audit*, *customer*, *catalog*, *booking*, *execution*, *promotion*, *payment*, and *notification* (57 tables). Each service owns its schemas and migrates only them with Liquibase, with its own control tables `DATABASECHANGELOG_<SERVICE>` (Vehicle Washing Development Team, 2026a).
+The system uses a single SQL Server 2022 database called *LavaRapido*, divided into nine schemas: *security*, *audit*, *customer*, *catalog*, *booking*, *execution*, *promotion*, *payment*, and *notification* (58 tables). Each service owns its schemas and migrates only them with Liquibase, with its own control tables `DATABASECHANGELOG_<SERVICE>` (Vehicle Washing Development Team, 2026a).
 
 ### 11.1 Starting SQL Server and Creating the Database
 
@@ -567,7 +568,7 @@ docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -
 ```
 
 ```sql
--- 1) Tables per schema (57 in total when all the services have started)
+-- 1) Tables per schema (58 in total when all the services have started)
 SELECT s.name AS schema_name, COUNT(*) AS tables
 FROM sys.tables t JOIN sys.schemas s ON s.schema_id = t.schema_id
 WHERE s.name IN ('security','audit','customer','catalog','booking',
@@ -684,7 +685,7 @@ This option is for development or debugging; with Option A the service already r
 
 ### 12.5 RabbitMQ and Mail
 
-With *MESSAGING_ENABLED=true*, the services create the RabbitMQ topology when they start (payment-service only publishes: payment results, redeemed coupons, and points earned): the topic exchange *carwash.events*; the queues *customer-service.events* and *notification-service.events*; and their dead-letter queues (*.dlq*), to which a message moves after three failed retries. Since October 26, 2026 booking-service also consumes: it creates the *booking.payment-events* queue (keys *payment.reported* and *payment.confirmed*) and its *booking.payment-events.dlq*. If payment-service runs outside Docker on Windows and does not connect to RabbitMQ, use *RABBITMQ_HOST=127.0.0.1* instead of *localhost*: .NET may resolve *localhost* over IPv6 and Docker Desktop cuts the AMQP connection (finding of the test of October 26, 2026). With *MESSAGING_ENABLED=false*, the system works, but customer profiles are created on the first request of the customer and the notifications that depend on events are not generated.
+With *MESSAGING_ENABLED=true*, the services create the RabbitMQ topology when they start (payment-service only publishes: payment results, redeemed coupons, and points earned): the topic exchange *carwash.events*; the queues *customer-service.events*, *notification-service.events*, and *operations-service.booking-confirmed* (only *booking.confirmed*; it replaced the old *operations-service.events*, which operations-service empties and deletes at start-up); and their dead-letter queues (*.dlq*, through the *carwash.events.dlx* exchange), to which a message moves after three failed retries. Since October 26, 2026 booking-service also consumes: it creates the *booking.payment-events* queue (keys *payment.reported* and *payment.confirmed*) and its *booking.payment-events.dlq*. If payment-service runs outside Docker on Windows and does not connect to RabbitMQ, use *RABBITMQ_HOST=127.0.0.1* instead of *localhost*: .NET may resolve *localhost* over IPv6 and Docker Desktop cuts the AMQP connection (finding of the test of October 26, 2026). With *MESSAGING_ENABLED=false*, the system works, but customer profiles are created on the first request of the customer and the notifications that depend on events are not generated.
 
 With *MAIL_ENABLED=true* and Mailpit, the emails (welcome, recovery code, booking, payment, and coupon notices, inspection reports, and reminders) do not reach real inboxes: they are read at *http://localhost:8025*. With *MAIL_ENABLED=false*, the recovery code is written in the log of security-service.
 
@@ -821,7 +822,7 @@ The verification is done in layers: infrastructure, database, messaging, service
 | No. | Check | Expected result |
 |---|---|---|
 | 1 | Containers | sqlserver and rabbitmq *healthy*; mailpit and the services running. |
-| 2 | Database | The 57 tables in the nine schemas (section 11.5). |
+| 2 | Database | The 58 tables in the nine schemas (section 11.5). |
 | 3 | Initial data | The results of Table 9. |
 | 4 | RabbitMQ | Exchange *carwash.events* and the queues of customer and notification (with messaging active). |
 | 5 | Mailpit | Web interface available. |

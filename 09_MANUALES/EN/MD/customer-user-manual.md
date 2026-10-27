@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 26, 2026
+October 27, 2026
 
-Manual Type: User Manual for the Customer Role (web application and Android mobile application) · Version 1.3
+Manual Type: User Manual for the Customer Role (web application and Android mobile application) · Version 1.4
 
 ## Version Control
 
@@ -32,6 +32,7 @@ Table 1 records the change history of this document. Every time the development 
 | 1.1 | 2026-10-26 | Data Policy with the inspection photographs (8.1); mobile application 1.1.1 with APK *versionCode* 6 and the over-the-air update published (10.11). | Development team |
 | 1.2 | 2026-10-27 | The alternative times of "That time was just taken" no longer include those that overlap another booking of the same vehicle (10.3 and 13), with the new Figure 16. | Development team |
 | 1.3 | 2026-10-27 | Mobile application screenshots (Figures 26 to 32) in section 10.11; logging out becomes Figure 33. | Development team |
+| 1.4 | 2026-10-27 | Terms and Conditions: section 6 with the 30-minute deadline for digital payment and the limit of one active cash booking (8.1); over-the-air update of the app of October 27 (*v1.1.2*) (10.11 and references). | Development team |
 
 *Note.* Dates are written in ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -217,7 +218,7 @@ A customer account is needed to book. The customers create it themselves through
 
 - It is not possible to register two accounts with the same email address or the same ID number: the system shows "An account with this email already exists" or "An account with this ID number already exists" and does not create the account.
 - The server requires both acceptance checkboxes: without them it answers "You must accept the personal data policy (Law 1581) to sign up."
-- The **Terms and Conditions** have 15 sections. Since October 26, 2026 they are written in the third person ("the Customer") and include section 8, **Inspection report and vehicle photographs**: in services of three hours or more, the business may record the condition of the vehicle before and after the service, by phases, with up to five photographs per finding, and share that report with the customer (section 10.8). The **Personal Data Processing Policy** includes those photographs among the data collected (section 4), among the purposes (recording the condition of the vehicle and handling damage claims, section 5), and in retention (they are kept as long as needed to handle claims about the service, section 12).
+- The **Terms and Conditions** have 15 sections. Since October 26, 2026 they are written in the third person ("the Customer"). Section 6, **Bookings, cancellations, and service delivery**, says that with digital payment the receipt must be uploaded within 30 minutes of the booking (or before the service time, if that is sooner), because otherwise the booking is cancelled automatically and the slot is freed, and that with cash payment the customer can have at most one active booking. The terms also include section 8, **Inspection report and vehicle photographs**: in services of three hours or more, the business may record the condition of the vehicle before and after the service, by phases, with up to five photographs per finding, and share that report with the customer (section 10.8). The **Personal Data Processing Policy** includes those photographs among the data collected (section 4), among the purposes (recording the condition of the vehicle and handling damage claims, section 5), and in retention (they are kept as long as needed to handle claims about the service, section 12).
 
 **Figure 2**
 
@@ -764,7 +765,7 @@ The payment method is chosen when booking (section 10.3), and the **Pay service*
 
 ### 10.11 Android Mobile Application
 
-The **LavaRapidoVehicular** application (version 1.1.1, APK *versionCode* 6, published on October 26, 2026) offers the customer the same functions as the web, with the same rules and the same data: a booking made in the app appears on the web and vice versa. This section explains how to install it and how its use differs; the rules of each module are those of sections 10.1 to 10.10.
+The **LavaRapidoVehicular** application (version 1.1.1, APK *versionCode* 6, published on October 26, 2026; on October 27 it received over the internet the corrected note of the booking step, repository *v1.1.2*, without a new APK) offers the customer the same functions as the web, with the same rules and the same data: a booking made in the app appears on the web and vice versa. This section explains how to install it and how its use differs; the rules of each module are those of sections 10.1 to 10.10.
 
 **Installation.** The app is not on Google Play: it is installed from the business's website on an Android phone with an internet connection.
 
@@ -1046,7 +1047,7 @@ Vehicle Washing Development Team. (2026a). *Vehicle washing management system: P
 
 Vehicle Washing Development Team. (2026b). *Front-end-proyecto-web* (develop branch) [Computer software]. GitHub. https://github.com/BrayanCABRERA123/Front-end-proyecto-web
 
-Vehicle Washing Development Team. (2026c). *LavadoVehicular-Movil* (version 1.1.0) [Computer software]. GitHub. https://github.com/merari0322/LavadoVehicular-Movil
+Vehicle Washing Development Team. (2026c). *LavadoVehicular-Movil* (version 1.1.2) [Computer software]. GitHub. https://github.com/merari0322/LavadoVehicular-Movil
 
 ## 15. Annexes
 

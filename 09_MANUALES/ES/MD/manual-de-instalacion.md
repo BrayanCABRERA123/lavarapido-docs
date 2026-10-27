@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-26 de octubre de 2026
+27 de octubre de 2026
 
-Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.9
+Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.10
 
 ## Control de Versiones
 
@@ -41,6 +41,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.7 | 2026-10-24 | Revisión contra *develop* del 24 de octubre de 2026, que corre en el servidor público desde ese día (8.1); variables nuevas del gateway (*AUTH_RATE_LIMIT_\**, *TRUSTED_PROXIES*, *ROUTE_CONNECT_TIMEOUT*, *ROUTE_READ_TIMEOUT*) y de operations-service (*START_LATE_LIMIT*), *INTERNAL_API_KEY* y *BOOKING_SERVICE_URL* en customer-service, y *BOOKING_EXPIRY_CHECK_\** sin efecto (10.2); la web publicada escucha en el puerto 8080 (Anexo B). | Equipo de desarrollo |
 | 4.8 | 2026-10-26 | Pago al reservar, revisado contra *develop* del 26 de octubre de 2026 y desplegado en el servidor público ese día: variables nuevas de booking-service (*BOOKING_CASH_ACTIVE_LIMIT*, *BOOKING_PAYMENT_\**, *PAYMENT_SERVICE_URL*) e *INTERNAL_API_KEY* también en payment-service (Tabla 7); migración 049 y semilla 117 de booking-service (Tabla 8); cola *booking.payment-events* y *RABBITMQ_HOST=127.0.0.1* para payment-service fuera de Docker en Windows (12.5). | Equipo de desarrollo |
 | 4.9 | 2026-10-26 | Versiones *v1.1.0* (10 repositorios, incluida la primera de la app móvil) y *v1.1.1* (web, app móvil, payment-service e infra) del 26 de octubre de 2026, y etiqueta recomendada para una instalación de evaluación (8.1). | Equipo de desarrollo |
+| 4.10 | 2026-10-27 | Versiones *v1.1.1* (customer y booking) y *v1.1.2* (web, app móvil, payment-service e infra) del 27 de octubre de 2026 y etiquetas a usar (8.1); 58 tablas (11.1, 11.5 y lista de verificación); cola *operations-service.booking-confirmed* en la topología de RabbitMQ (12.5). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -283,7 +284,7 @@ El proyecto se distribuye en un repositorio por componente. Todos los repositori
 
 ### 8.1 Clonación de los Repositorios
 
-La rama de integración del equipo es *develop*; allí está la versión más reciente de cada servicio, y *main* guarda las versiones entregadas. El 23 de octubre de 2026 se etiquetó *v1.0.0* en 8 repositorios (web, api-gateway, security, customer, booking, operations, notification e infra) y el 24 en payment-service. El 26 de octubre de 2026 salió *v1.1.0* en los 10 repositorios, incluida la app móvil, que hasta entonces no tenía versión, y ese mismo día *v1.1.1* en la web, la app móvil, payment-service e infra. Para una instalación de evaluación, usar la etiqueta más reciente de cada repositorio (*v1.1.1* donde exista y *v1.1.0* en los demás), o *develop* en todos para ver lo más reciente.
+La rama de integración del equipo es *develop*; allí está la versión más reciente de cada servicio, y *main* guarda las versiones entregadas. El 23 de octubre de 2026 se etiquetó *v1.0.0* en 8 repositorios (web, api-gateway, security, customer, booking, operations, notification e infra) y el 24 en payment-service. El 26 de octubre de 2026 salió *v1.1.0* en los 10 repositorios, incluida la app móvil, que hasta entonces no tenía versión, y ese mismo día *v1.1.1* en la web, la app móvil, payment-service e infra. El 27 de octubre de 2026 salieron *v1.1.1* en customer-service y booking-service y *v1.1.2* en la web, la app móvil, payment-service e infra. Para una instalación de evaluación, usar la etiqueta más reciente de cada repositorio: *v1.1.2* en la web, la app móvil, payment-service e infra; *v1.1.1* en customer-service y booking-service, y *v1.1.0* en el API Gateway, security-service, operations-service y notification-service. Cada una es la punta de *main*, que está protegida en los 10 repositorios y es lo que corre el servidor público; *develop* tiene lo más reciente que todavía no sale en una versión.
 
 ```bash
 mkdir Backend && cd Backend
@@ -488,7 +489,7 @@ INTERNAL_API_KEY=********
 
 ## 11. Creación e Importación de la Base de Datos
 
-El sistema usa una sola base de datos SQL Server 2022 llamada *LavaRapido*, dividida en nueve esquemas: *security*, *audit*, *customer*, *catalog*, *booking*, *execution*, *promotion*, *payment* y *notification* (57 tablas). Cada servicio es dueño de sus esquemas y solo migra los suyos con Liquibase, con sus propias tablas de control `DATABASECHANGELOG_<SERVICIO>` (Equipo de Desarrollo Vehicle Washing, 2026a).
+El sistema usa una sola base de datos SQL Server 2022 llamada *LavaRapido*, dividida en nueve esquemas: *security*, *audit*, *customer*, *catalog*, *booking*, *execution*, *promotion*, *payment* y *notification* (58 tablas). Cada servicio es dueño de sus esquemas y solo migra los suyos con Liquibase, con sus propias tablas de control `DATABASECHANGELOG_<SERVICIO>` (Equipo de Desarrollo Vehicle Washing, 2026a).
 
 ### 11.1 Inicio de SQL Server y Creación de la Base de Datos
 
@@ -567,7 +568,7 @@ docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -
 ```
 
 ```sql
--- 1) Tablas por esquema (57 en total cuando todos los servicios han arrancado)
+-- 1) Tablas por esquema (58 en total cuando todos los servicios han arrancado)
 SELECT s.name AS esquema, COUNT(*) AS tablas
 FROM sys.tables t JOIN sys.schemas s ON s.schema_id = t.schema_id
 WHERE s.name IN ('security','audit','customer','catalog','booking',
@@ -684,7 +685,7 @@ Esta opción es para desarrollo o depuración; con la Opción A el servicio ya c
 
 ### 12.5 RabbitMQ y Correo
 
-Con *MESSAGING_ENABLED=true*, los servicios crean la topología de RabbitMQ al arrancar (payment-service solo publica: resultados de pagos, cupones canjeados y puntos ganados): el exchange de tipo topic *carwash.events*; las colas *customer-service.events* y *notification-service.events*; y sus colas de mensajes muertos (*.dlq*), a las que pasa un mensaje después de tres reintentos fallidos. Desde el 26 de octubre de 2026 booking-service también consume: crea la cola *booking.payment-events* (llaves *payment.reported* y *payment.confirmed*) y su *booking.payment-events.dlq*. Si payment-service corre fuera de Docker en Windows y no se conecta a RabbitMQ, usar *RABBITMQ_HOST=127.0.0.1* en lugar de *localhost*: .NET puede resolver *localhost* por IPv6 y Docker Desktop corta la conexión AMQP (hallazgo de la prueba del 26 de octubre de 2026). Con *MESSAGING_ENABLED=false*, el sistema funciona, pero los perfiles de cliente se crean en la primera solicitud del cliente y no se generan las notificaciones que dependen de eventos.
+Con *MESSAGING_ENABLED=true*, los servicios crean la topología de RabbitMQ al arrancar (payment-service solo publica: resultados de pagos, cupones canjeados y puntos ganados): el exchange de tipo topic *carwash.events*; las colas *customer-service.events*, *notification-service.events* y *operations-service.booking-confirmed* (solo *booking.confirmed*; reemplazó a la vieja *operations-service.events*, que operations-service vacía y borra al arrancar); y sus colas de mensajes muertos (*.dlq*, por el exchange *carwash.events.dlx*), a las que pasa un mensaje después de tres reintentos fallidos. Desde el 26 de octubre de 2026 booking-service también consume: crea la cola *booking.payment-events* (llaves *payment.reported* y *payment.confirmed*) y su *booking.payment-events.dlq*. Si payment-service corre fuera de Docker en Windows y no se conecta a RabbitMQ, usar *RABBITMQ_HOST=127.0.0.1* en lugar de *localhost*: .NET puede resolver *localhost* por IPv6 y Docker Desktop corta la conexión AMQP (hallazgo de la prueba del 26 de octubre de 2026). Con *MESSAGING_ENABLED=false*, el sistema funciona, pero los perfiles de cliente se crean en la primera solicitud del cliente y no se generan las notificaciones que dependen de eventos.
 
 Con *MAIL_ENABLED=true* y Mailpit, los correos (bienvenida, código de recuperación, avisos de reservas, pagos y cupones, informes de inspección y recordatorios) no llegan a buzones reales: se leen en *http://localhost:8025*. Con *MAIL_ENABLED=false*, el código de recuperación se escribe en el registro de security-service.
 
@@ -821,7 +822,7 @@ La verificación se hace por capas: infraestructura, base de datos, mensajería,
 | N.° | Verificación | Resultado esperado |
 |---|---|---|
 | 1 | Contenedores | sqlserver y rabbitmq *healthy*; mailpit y los servicios en ejecución. |
-| 2 | Base de datos | Las 57 tablas en los nueve esquemas (sección 11.5). |
+| 2 | Base de datos | Las 58 tablas en los nueve esquemas (sección 11.5). |
 | 3 | Datos iniciales | Los resultados de la Tabla 9. |
 | 4 | RabbitMQ | Exchange *carwash.events* y las colas de customer y notification (con la mensajería activa). |
 | 5 | Mailpit | Interfaz web disponible. |
