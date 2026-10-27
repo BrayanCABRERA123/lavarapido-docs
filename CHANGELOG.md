@@ -4,6 +4,11 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-10-27 (noche) — Generador de PDF y Word en el repositorio
+
+- `_generador/`: el generador con el que se regeneraron todas las evidencias el 27 de octubre (`generar.py`, `generador_apa.py`, `apa.css` y las plantillas de estilos del Word), con sus instrucciones en `LEEME.md`. Lee las rutas del índice del README, convierte los diagramas Mermaid en imagen, muestra las imágenes dentro de tablas, conserva la tabla de la portada y no parte ninguna figura entre páginas.
+- README: cómo regenerar el PDF y el Word.
+
 ## 2026-10-27 (tarde) — PDF y Word de todas las evidencias regenerados
 
 **Contenido** (español e inglés).
