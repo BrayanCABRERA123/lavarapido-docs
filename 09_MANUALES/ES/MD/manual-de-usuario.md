@@ -14,7 +14,7 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-26 de octubre de 2026
+27 de octubre de 2026
 
 Tipo de manual: Manual de usuario (roles Cliente y Operario, en la web y en la aplicación móvil) · Versión 4.13
 

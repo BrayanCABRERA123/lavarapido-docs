@@ -14,7 +14,7 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-26 de octubre de 2026
+27 de octubre de 2026
 
 Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.12
 
