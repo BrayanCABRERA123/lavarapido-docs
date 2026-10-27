@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 26 de octubre de 2026
 
-Tipo de manual: Manual de usuario (roles Cliente y Operario, en la web y en la aplicación móvil) · Versión 4.11
+Tipo de manual: Manual de usuario (roles Cliente y Operario, en la web y en la aplicación móvil) · Versión 4.12
 
 ## Control de Versiones
 
@@ -44,6 +44,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 4.9 | 2026-10-26 | Pago al reservar, revisado contra *develop* del 26 de octubre de 2026 y desplegado en el servidor público ese día: paso "¿Cómo vas a pagar?" al reservar, plazo de 30 minutos para subir el comprobante del pago digital y máximo una reserva activa en efectivo (10.1.3); reserva cancelada por falta de pago (10.1.4); pantalla de pago según la forma elegida y etiqueta de efectivo (10.1.5 y 10.3.4); mensajes nuevos (Tabla 12) y pregunta frecuente sobre el plazo de pago (13). | Equipo de desarrollo |
 | 4.10 | 2026-10-26 | Se crean el Manual de Usuario del Cliente y el Manual de Usuario del Operario (versión 1.0), con el contenido de este manual separado por rol según la guía del SENA; este manual se conserva como referencia conjunta de los dos roles. Correcciones: el operario también tiene los interruptores de notificación y **Desactivar mi cuenta** (10.2.7), y la app móvil *v1.1.0* ya se publicó (10.3.4). | Equipo de desarrollo |
 | 4.11 | 2026-10-26 | Aplicación móvil 1.1.1: APK *versionCode* 6 y actualización por internet publicados el 26 de octubre de 2026 (10.3 y 10.3.4). | Equipo de desarrollo |
+| 4.12 | 2026-10-27 | Las horas alternativas de "Esa hora ya se ocupó" respetan las otras reservas del mismo vehículo (10.1.3 y 13). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -492,7 +493,7 @@ Cada módulo se documenta con el mismo formato: nombre, descripción, rol que pu
 - Elegir el operario es opcional. Si el operario elegido ya no está libre al confirmar, el sistema asigna otro ("Si el operario que elegiste ya no está libre al confirmar, te asignamos otro."). El operario asignado se ve en el panel y en las notificaciones, y el administrador puede cambiarlo después.
 - Las reservas se pueden hacer con hasta 60 días de anticipación.
 - Si el día está cerrado, el sistema muestra "Ese día el lavadero está cerrado"; si no hay horas libres, "No hay horas libres ese día".
-- Si otra persona toma la hora mientras el cliente está reservando, el sistema no guarda nada, muestra "Esa hora ya se ocupó" y lista las horas libres más cercanas de ese mismo día (hasta cinco) para que el cliente elija otra.
+- Si otra persona toma la hora mientras el cliente está reservando, el sistema no guarda nada, muestra "Esa hora ya se ocupó: Te mostramos las horas libres más cercanas de ese día." y deja en **Selecciona una hora** solo las horas libres más cercanas de ese mismo día (hasta cinco) para que el cliente elija otra. Desde el 27 de octubre de 2026 esas horas también respetan las otras reservas del mismo vehículo: no se ofrece una hora que se cruce con otra reserva activa de ese vehículo, porque un vehículo no puede estar en dos bahías al mismo tiempo.
 - Si la hora elegida no se puede reservar por otro motivo, el sistema explica cuál: "El lavadero no abre ese día. Elige otra fecha.", "A esa hora el servicio no cabe en el horario de atención. Elige otra hora." o "Esa hora ya pasó. Elige una hora más tarde."
 - Un vehículo no puede tener dos reservas a la misma hora ("Ese vehículo ya tiene una reserva a esa hora.").
 - El servicio se presta en el lavadero: el cliente debe llevar el vehículo en la fecha y la hora reservadas.
@@ -1118,7 +1119,7 @@ Cuando la hora está libre, la reserva se confirma de inmediato: el sistema mues
 
 ##### ¿Qué hago si la hora que quiero ya está ocupada?
 
-La pantalla solo ofrece horas libres. Si otra persona toma la hora mientras usted reserva, el sistema sugiere las horas libres más cercanas del mismo día; elija una y confirme.
+La pantalla solo ofrece horas libres. Si otra persona toma la hora mientras usted reserva, el sistema sugiere las horas libres más cercanas del mismo día que su vehículo puede tomar (no las que se cruzan con otra reserva suya); elija una y confirme.
 
 ##### ¿Puedo elegir quién lava mi vehículo?
 
