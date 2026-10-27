@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 26, 2026
+October 27, 2026
 
-Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.9
+Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.10
 
 ## Version Control
 
@@ -39,6 +39,7 @@ Table 1 records the change history of this document. Each time the implementatio
 | 2.7 | 2026-10-24 | Review against *develop* of October 24, 2026, which runs on the public server since that day: criterion E2 with the tests of October 24 (1,119 automated and 73 in the mobile app, 1,192 in total), criterion E6 met (no P0 or P1 open), cloning with *BRANCH=develop* until *v1.1.0*, rollback with *rollback.sh* and the *:prev* images that *update-server.sh* keeps, restore with *payment-migrate*, the protection that prevents downgrading, new variables (*AUTH_RATE_LIMIT_\**, *TRUSTED_PROXIES*, *ROUTE_\*_TIMEOUT*, *START_LATE_LIMIT*, and *INTERNAL_API_KEY* and *BOOKING_SERVICE_URL* in customer-service), and continuous deployment merged into *develop*, with the secrets still missing (R-I04). | Development team |
 | 2.8 | 2026-10-26 | Payment at booking, deployed to the public server on October 26, 2026: *INTERNAL_API_KEY* is now also required by payment-service, and new booking-service variables (*BOOKING_CASH_ACTIVE_LIMIT*, *BOOKING_PAYMENT_\**, *PAYMENT_SERVICE_URL*) in Table 6. | Development team |
 | 2.9 | 2026-10-26 | R-I04: continuous deployment is active since October 26, 2026 (AC-90). | Development team |
+| 2.10 | 2026-10-27 | Review against *main* of October 27, 2026: criterion E2 with that day's tests (1,337, with payment's 17 integration tests in the CI, and 19 of 19 end-to-end), criterion E4 and cloning with versions *v1.1.0*, *v1.1.1*, and *v1.1.2* on *main*, protected in the 10 repositories, public server on *main* through continuous deployment, and phase 6 check with 58 tables and the current RabbitMQ queues. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -107,7 +108,7 @@ In the context of the ADSO program, "software implementation" means **putting a 
 
 ### 4.2 Sources of This Document
 
-The procedure was verified against the code of the eleven repositories of the project (*develop* branch as of October 21, 2026), especially *lavarapido-infra/docker-compose.yml*, *docker-compose.prod.yml*, *.env.example*, and the *deploy* folder, and against the deployment, environments, continuous integration, operation, quality, and project control documentation (Vehicle Washing Development Team, 2026a, 2026b). The detailed installation, administration, and use procedures are not repeated here: they are referenced in the Installation Manual, the Administrator Manual, and the User Manual, version 4.0, and in the Deployment Document of this same folder, which records how the public server was set up.
+The procedure was verified against the code of the eleven repositories of the project (*develop* branch as of October 21, 2026 and, in what was updated later, *main* of October 27, 2026), especially *lavarapido-infra/docker-compose.yml*, *docker-compose.prod.yml*, *.env.example*, and the *deploy* folder, and against the deployment, environments, continuous integration, operation, quality, and project control documentation (Vehicle Washing Development Team, 2026a, 2026b). The detailed installation, administration, and use procedures are not repeated here: they are referenced in the Installation Manual, the Administrator Manual, and the User Manual, version 4.0, and in the Deployment Document of this same folder, which records how the public server was set up.
 
 ## 5. Objective
 
@@ -241,9 +242,9 @@ The implementation **does not start** until all the criteria of Table 5 are met.
 | No. | Criterion | Evidence |
 |---|---|---|
 | E1 | The code of the release is merged into *develop* (or *main*) of the eleven repositories, with no uncommitted work. | Clean *git status* and *git log* with the last commit of each repository. |
-| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, *npx jest* in the mobile app, and the end-to-end suite of *lavarapido-infra/e2e* against the containers, which is run locally because the CI only checks its syntax. | Summaries without failures. Latest *develop* CI (October 24, 2026): 1,119 automated tests in the web, the gateway, and the six services (11 payment integration tests skipped without SQL Server) and 73 in the mobile app, 1,192 in total; the local end-to-end suite (19 tests) last ran on October 21, 2026, and the remote battery (*e2e.yml*, 44 cases) has not been run against the public server yet. |
+| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, *npx jest* in the mobile app, and the end-to-end suite of *lavarapido-infra/e2e* against the containers, which is run locally because the CI only checks its syntax. | Summaries without failures. *main* CI of October 27, 2026: 1,231 automated tests in the web, the gateway, and the six services (including payment's 17 integration tests, which run in the CI against SQL Server 2022 without skipping any) and 106 in the mobile app, 1,337 in total; the local end-to-end suite (19 tests) passed 19 of 19 on October 27, 2026, already sending the payment mode when booking, and the remote battery (*e2e.yml*, 44 cases) has not been run against the public server yet. |
 | E3 | The web application builds in production mode (*npx ng build*). | Folder *dist/* generated without errors. |
-| E4 | The release is tagged in each repository (for example, *v1.0.0*) (section 13). As of October 24, 2026, *v1.0.0* exists in 9 repositories (payment-service has it since that day, with its PR #2 merged); the mobile app has no tag yet (PR #1 open) and is implemented from *develop* until its first release (exception recorded in the corrective actions document, ACO-24). The public server runs *develop* of October 24, which will ship as *v1.1.0*. | *git tag* in each repository. |
+| E4 | The release is tagged in each repository (for example, *v1.1.0*) (section 13). As of October 27, 2026 the 10 repositories have their release on *main*: *v1.1.0* in the API Gateway, security-service, operations-service, and notification-service; *v1.1.1* in customer-service and booking-service; and *v1.1.2* in the web, the mobile app, payment-service, and infra. *main* is protected in all 10 (it only takes changes through a pull request with one approval and a green CI) and the public server runs *main*, which continuous deployment updates on every merge (Deployment Document, section 4.3.4). | *git tag* in each repository. |
 | E5 | The installation, administrator, and user manuals correspond to the release (version 4.0 or later). | Version control of the manuals. |
 | E6 | Open incidents of severity P0 and P1 are resolved; P2 and P3 incidents are recorded with their action in the corrective, preventive, and improvement actions document. | Updated action register. As of October 24, 2026 it is met: no P0 or P1 is open and the 16 open ones (P2 and P3) have an action (Actions document, Table 10). |
 | E7 | The target environment meets the hardware, software, and port requirements. | Checklist of Annex A. |
@@ -275,19 +276,20 @@ Each phase states its person responsible, its estimated duration, the steps, and
 
 1. Install and check Git, Docker with Compose v2, JDK 21, the .NET 8 SDK, and Node.js 22 LTS (Installation Manual, section 7.1). On Windows, confirm that Docker uses the Linux engine with WSL 2.
 2. Check that ports 1433, 5672, 15672, 1025, 8025, 3001 to 3006, 8080, and 4200 are free. If a native Windows SQL Server uses port 1433, stop the *MSSQLSERVER* service.
-3. Clone the repositories **side by side and with their original names**, at the release tag. As of October 24, 2026, tag *v1.0.0* exists in 9 repositories: payment-service has it since that day (its PR #2 was merged and its *main* includes the whole *develop*, so cloning it from *develop*, as in the block below, gives the same result); only the mobile app has no release. The fixes of October 23 and 24 are in *develop*, which is what runs on the public server since October 24, and will reach *main* with *v1.1.0*: to install that version earlier, replace *-b v1.0.0* with *-b develop* (on the public server, *BRANCH=develop*; without it, *setup-server.sh* stops because it never downgrades). The operations repository is called *lavarapido-operation-service* (singular), and *docker-compose.yml* builds it with that name: cloning it with another name makes the build fail.
+3. Clone the repositories **side by side and with their original names**, at the release tag. As of October 27, 2026 the current versions are *v1.1.0* (API Gateway, security-service, operations-service, and notification-service), *v1.1.1* (customer-service and booking-service), and *v1.1.2* (infra, payment-service, and the web); each one is the tip of *main* and is what the public server runs, so cloning with *-b main* gives the same result until another version ships. The operations repository is called *lavarapido-operation-service* (singular), and *docker-compose.yml* builds it with that name: cloning it with another name makes the build fail.
 
 ```bash
 mkdir Backend && cd Backend
-for repo in lavarapido-infra lavarapido-security-service lavarapido-api-gateway \
+for repo in lavarapido-security-service lavarapido-api-gateway \
             lavarapido-notification-service lavarapido-operation-service; do
-  git clone -b v1.0.0 https://github.com/BrayanCABRERA123/$repo.git
+  git clone -b v1.1.0 https://github.com/BrayanCABRERA123/$repo.git
 done
-git clone -b v1.0.0 https://github.com/camiloguilombo12/lavarapido-customer-service.git
-git clone -b v1.0.0 https://github.com/camiloguilombo12/lavarapido-booking-service.git
-git clone -b develop https://github.com/merari0322/lavarapido-payment-service.git   # no tag yet
+git clone -b v1.1.2 https://github.com/BrayanCABRERA123/lavarapido-infra.git
+git clone -b v1.1.1 https://github.com/camiloguilombo12/lavarapido-customer-service.git
+git clone -b v1.1.1 https://github.com/camiloguilombo12/lavarapido-booking-service.git
+git clone -b v1.1.2 https://github.com/merari0322/lavarapido-payment-service.git
 cd .. && mkdir Frontend && cd Frontend
-git clone -b v1.0.0 https://github.com/BrayanCABRERA123/Front-end-proyecto-web.git
+git clone -b v1.1.2 https://github.com/BrayanCABRERA123/Front-end-proyecto-web.git
 ```
 
 4. Create the configuration file and check that Git ignores it:
@@ -406,7 +408,7 @@ for port in 3001 3002 3003 3004 3005 3006 8080; do
 done
 ```
 
-4. Check that the database has 57 tables in the nine schemas (Installation Manual, section 11.5) and that the RabbitMQ topology exists (exchange *carwash.events* and the queues *customer-service.events* and *notification-service.events*, each with its *.dlq*, and *operations-service.events*, which has no dead-letter queue).
+4. Check that the database has 58 tables in the nine schemas (Installation Manual, section 11.5) and that the RabbitMQ topology exists: the exchange *carwash.events*, the dead-letter exchange *carwash.events.dlx*, and the queues *customer-service.events*, *notification-service.events*, *operations-service.booking-confirmed*, and *booking.payment-events*, each with its *.dlq*. The old *operations-service.events* queue is no longer used: operations-service empties and deletes it at start-up.
 
 **Criterion to continue:** the seven responses are *UP* and the number of tables is the expected one. Every service, including payment-service, checks the database in its health endpoint and answers *DOWN* (503) if it is not available.
 
@@ -590,7 +592,7 @@ docker compose stop api-gateway security-service customer-service booking-servic
 ## 13. Release Configuration Management
 
 - **Tagging.** Each implemented release is tagged in the code repositories with the same name (semantic versioning: *vMAJOR.MINOR.PATCH*, for example, *v1.0.0*). Tags make it possible to rebuild exactly what was implemented and to roll back. Status as of October 24, 2026: *v1.0.0* in 9 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra since October 23, and payment-service since the 24th, with its PR #2 merged); the mobile app is missing (PR #1 open), and *develop* already has the fixes of October 23 and 24 for *v1.1.0*.
-- **Branches.** Releases are implemented from *main*, which has the tagged version; payment-service, while it has no release, from *develop*; never from a *feature/\** branch. The public server runs *develop* of October 24, 2026 and is updated with *BRANCH=develop* until *v1.1.0*; afterwards, continuous deployment deploys *main* (Deployment Document, section 4.3.4).
+- **Branches.** Releases are implemented from *main*, which has the tagged version and is protected in the 10 repositories; never from a *feature/\** branch. Since October 26, 2026 the public server runs *main*, and continuous deployment updates it on every approved merge into *main* (Deployment Document, section 4.3.4).
 - **Images.** The Compose file builds *lavarapido/\<service\>:local* images. To keep the previous release, each image is tagged before rebuilding (*docker tag lavarapido/booking-service:local lavarapido/booking-service:prev*, or with the name of the current version, *:v1.0.0*); to go back, do the reverse and *docker compose up -d --no-build \<service\>*. On the public server they do it on their own since October 24, 2026: *update-server.sh* tags *:prev* before rebuilding and *rollback.sh* goes back to that image.
 - **Database.** The schema is versioned with Liquibase; each service keeps its history in *DATABASECHANGELOG_\<SERVICE\>* (payments in *DATABASECHANGELOG_PAYMENT*). An executed changeset is never edited.
 - **Configuration.** *.env.example* is versioned; *.env* is not. Every new variable is added to *.env.example* with a comment and to the *environment* block of the service in *docker-compose.yml*. Those of October 21, 2026 (*SESSION_CHECK_\**, *BOOKING_EXPIRY_\**, and *FOLLOW_UP_\**, nine variables) already follow this rule (action ACO-14, closed on October 23, 2026), as do *ALLOWED_EMAIL_DOMAINS* and *DEMO_\*_PASSWORD* of October 23. Those of October 24 in the gateway (*AUTH_RATE_LIMIT_\**, *TRUSTED_PROXIES*, *ROUTE_\*_TIMEOUT*) and in operations-service (*START_LATE_LIMIT*) have a default value but are not yet in *.env.example* or the compose file (ACO-40).
