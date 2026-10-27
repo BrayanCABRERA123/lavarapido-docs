@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 27 de octubre de 2026
 
-Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.10
+Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.11
 
 ## Control de Versiones
 
@@ -42,6 +42,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.8 | 2026-10-26 | Pago al reservar, revisado contra *develop* del 26 de octubre de 2026 y desplegado en el servidor público ese día: variables nuevas de booking-service (*BOOKING_CASH_ACTIVE_LIMIT*, *BOOKING_PAYMENT_\**, *PAYMENT_SERVICE_URL*) e *INTERNAL_API_KEY* también en payment-service (Tabla 7); migración 049 y semilla 117 de booking-service (Tabla 8); cola *booking.payment-events* y *RABBITMQ_HOST=127.0.0.1* para payment-service fuera de Docker en Windows (12.5). | Equipo de desarrollo |
 | 4.9 | 2026-10-26 | Versiones *v1.1.0* (10 repositorios, incluida la primera de la app móvil) y *v1.1.1* (web, app móvil, payment-service e infra) del 26 de octubre de 2026, y etiqueta recomendada para una instalación de evaluación (8.1). | Equipo de desarrollo |
 | 4.10 | 2026-10-27 | Versiones *v1.1.1* (customer y booking) y *v1.1.2* (web, app móvil, payment-service e infra) del 27 de octubre de 2026 y etiquetas a usar (8.1); 58 tablas (11.1, 11.5 y lista de verificación); cola *operations-service.booking-confirmed* en la topología de RabbitMQ (12.5). | Equipo de desarrollo |
+| 4.11 | 2026-10-27 | payment-service *v1.1.3* (aprobada, pendiente de publicar): *DB_PASSWORD* obligatoria, credenciales de RabbitMQ obligatorias contra un RabbitMQ remoto y base de pruebas local *LavaRapidoPaymentIT* con SQL Server 2022 (variables y sección de payment). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -403,7 +404,7 @@ Si *git check-ignore* no imprime nada, el archivo no está excluido y no se debe
 
 | Variable | La usa | Efecto y valor local |
 |---|---|---|
-| DB_PASSWORD | SQL Server y todos los servicios | Contraseña de la cuenta *sa*. Obligatoria; al menos 8 caracteres con mayúscula, minúscula, número y símbolo, o SQL Server no arranca. |
+| DB_PASSWORD | SQL Server y todos los servicios | Contraseña de la cuenta *sa*. Obligatoria; al menos 8 caracteres con mayúscula, minúscula, número y símbolo, o SQL Server no arranca. Con *v1.1.3* payment-service tampoco arranca sin ella. |
 | DB_NAME | Infraestructura y servicios | Nombre de la base de datos; *LavaRapido*. |
 | DB_USERNAME | Servicios | *sa* en el entorno local. |
 | DB_URL | Servicios Java ejecutados desde el IDE | jdbc:sqlserver://localhost:1433;databaseName=LavaRapido;encrypt=true;trustServerCertificate=true |
@@ -417,7 +418,7 @@ Si *git check-ignore* no imprime nada, el archivo no está excluido y no se debe
 | MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM | security-service y notification-service | Servidor SMTP. En local, Mailpit: localhost, 1025, cualquier usuario y contraseña. Gmail requiere una contraseña de aplicación. |
 | MAIL_DOCKER_HOST | Servicios en Docker | Host SMTP visto desde los contenedores; *mailpit* por defecto. |
 | MESSAGING_ENABLED | Servicios Java y payment-service | *true* publica y consume eventos de RabbitMQ; *false* (por defecto) solo los escribe en el registro. Sin eventos no hay notificaciones, avisos de pago ni avisos de puntos. |
-| RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_USERNAME, RABBITMQ_PASSWORD | Servicios Java y payment-service | localhost, 5672, guest, guest en el entorno local. |
+| RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_USERNAME, RABBITMQ_PASSWORD | Servicios Java y payment-service | localhost, 5672, guest, guest en el entorno local. Con *v1.1.3*, si *MESSAGING_ENABLED=true* y RabbitMQ no está en *localhost* (Docker o servidor), payment-service no arranca sin usuario y contraseña: *guest* solo se acepta con RabbitMQ local. |
 | PUSH_ENABLED, EXPO_ACCESS_TOKEN | notification-service | *true* envía notificaciones push mediante Expo; *false* solo las escribe en el registro. |
 | INTERNAL_API_KEY | security-service, customer-service, booking-service, operations-service, notification-service y, desde el 26 de octubre de 2026, payment-service | Llave de las rutas internas; sin ella no se envían por correo los avisos de reservas, pagos y cupones ni los recordatorios, no se pueden leer los interruptores de notificación de cada usuario, no hay asignación automática y operations-service no puede cerrar como No asistió las reservas confirmadas que terminaron sin operario. Desde *develop* del 23 de octubre de 2026 (E-01) también es obligatoria para que el operario inicie y termine servicios: booking-service solo acepta esas rutas desde operations-service con esta llave. Desde el 24 de octubre de 2026 la usa también customer-service para preguntar a booking-service si un vehículo tiene reservas activas antes de retirarlo: sin ella, retirar un vehículo responde 503 *BOOKING_SERVICE_UNAVAILABLE*; en producción el compose no arranca si falta. Desde el 26 de octubre de 2026 payment-service la exige en su ruta interna (*GET /internal/v1/payments/bookings/{bookingId}/reported*, encabezado *X-Internal-Key*; 401 sin llave o con una errada), y *docker-compose.prod.yml* no arranca sin ella: sin la llave, booking-service no puede comprobar si una reserva digital vencida ya tiene comprobante y no cancela ninguna por falta de pago. |
 | REMINDER_LEADS | notification-service | Anticipación de los recordatorios; *24h,1h* por defecto. |
@@ -681,7 +682,7 @@ cd Backend/lavarapido-payment-service
 dotnet run --project src/PaymentService.Api       # http://localhost:3005
 ```
 
-Esta opción es para desarrollo o depuración; con la Opción A el servicio ya corre en su contenedor (detenerlo primero con *docker compose stop payment-service*). El servicio lee *lavarapido-infra/.env*, escucha en *PAYMENT_PORT* (3005 por defecto) y no arranca sin *JWT_SECRET*. Nunca crea sus tablas: las crea el contenedor *payment-migrate* (sección 11.1). El repositorio también tiene su propio *docker-compose.yml* (SQL Server en el puerto 1434 con la base *lavado_vehicular*) solo para probar las migraciones; no se debe usar para ejecutar el sistema.
+Esta opción es para desarrollo o depuración; con la Opción A el servicio ya corre en su contenedor (detenerlo primero con *docker compose stop payment-service*). El servicio lee *lavarapido-infra/.env*, escucha en *PAYMENT_PORT* (3005 por defecto) y no arranca sin *JWT_SECRET* (desde *v1.1.3*, tampoco sin *DB_PASSWORD*). Nunca crea sus tablas: las crea el contenedor *payment-migrate* (sección 11.1). El repositorio también tiene su propio *docker-compose.yml* (desde *v1.1.3*, SQL Server 2022 en el puerto 1434 con la base *LavaRapidoPaymentIT*, la misma del job "Pruebas de integración" del CI; su contraseña es *MSSQL_SA_PASSWORD* del *.env* de ese repositorio) solo para probar las migraciones y las pruebas de integración; no se debe usar para ejecutar el sistema.
 
 ### 12.5 RabbitMQ y Correo
 

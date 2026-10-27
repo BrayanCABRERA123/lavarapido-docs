@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 27 de octubre de 2026
 
-Tipo de manual: Manual de usuario del rol Cliente (aplicación web y aplicación móvil Android) · Versión 1.4
+Tipo de manual: Manual de usuario del rol Cliente (aplicación web y aplicación móvil Android) · Versión 1.5
 
 ## Control de Versiones
 
@@ -33,6 +33,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 1.2 | 2026-10-27 | Las horas alternativas de "Esa hora ya se ocupó" ya no incluyen las que se cruzan con otra reserva del mismo vehículo (10.3 y 13), con la Figura 16 nueva. | Equipo de desarrollo |
 | 1.3 | 2026-10-27 | Capturas de la aplicación móvil (Figuras 26 a 32) en la sección 10.11; el cierre de sesión pasa a ser la Figura 33. | Equipo de desarrollo |
 | 1.4 | 2026-10-27 | Términos y Condiciones: el apartado 6 con el plazo de 30 minutos del pago digital y el límite de una reserva activa en efectivo (8.1); actualización por internet de la app del 27 de octubre (*v1.1.2*) (10.11 y referencias). | Equipo de desarrollo |
+| 1.5 | 2026-10-27 | Figura 29 tomada de nuevo con la app *v1.1.2*: la nota bajo **Reservar Ahora** ya no habla de lavado a domicilio (10.11). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -809,7 +810,7 @@ La aplicación **LavaRapidoVehicular** (versión 1.1.1, APK *versionCode* 6, pub
 
 ![Reservar en la Aplicación Móvil: Forma de Pago y Resumen](capturas/cliente-29-app-movil-reservar-hora-y-forma-de-pago.jpg)
 
-*Nota.* Pantalla desplazada hasta el paso 4, con **Pago digital ahora** elegido.
+*Nota.* Pantalla desplazada hasta el paso 4, con **Pago digital ahora** elegido. Bajo **Reservar Ahora** se ve la nota de la app *v1.1.2*: "Te esperamos en nuestra sede. Llega unos minutos antes de tu hora...".
 
 **Figura 30**
 

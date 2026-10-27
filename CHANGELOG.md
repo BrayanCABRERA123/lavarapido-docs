@@ -4,6 +4,17 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-10-27 (cierre) — Figura 29 con la app 1.1.2, payment-service v1.1.3 aprobada e índice al día
+
+**Contenido** (español e inglés).
+
+- 09 Usuario del cliente 1.5: Figura 29 tomada de nuevo con la app *v1.1.2* (la nota bajo **Reservar Ahora** ya no habla de lavado a domicilio).
+- 09 Técnico 4.14 e Instalación 4.11: cambios de payment-service que salen en `v1.1.3` (no arranca sin `DB_PASSWORD` y exige usuario y contraseña de un RabbitMQ remoto; base de pruebas local `LavaRapidoPaymentIT` con SQL Server 2022; 275 pruebas en el CI).
+- 07 Despliegue 1.13: subsección 1.3.14 con `v1.1.3` de payment-service aprobada y pendiente de publicar, y lo que exige en producción.
+- 08 Acciones 3.4: avance de ACO-25 (contraseñas fuera del código y revisión del historial; sigue abierta hasta rotarlas).
+- README: versiones de todos los documentos (incluidas las del equipo del 27 de octubre) y de los repositorios. 11 Enlaces: tabla de repositorios y versiones al 27 de octubre.
+- PDF y Word regenerados de los documentos que cambiaron.
+
 ## 2026-10-27 (noche) — Capturas de la aplicación móvil
 
 - 09 Usuario del cliente 1.3: Figuras 26 a 32 de la app (ingreso, inicio, reservar con la forma de pago, pago con plazo, historial y menú Más); el cierre de sesión pasa a ser la Figura 33.
