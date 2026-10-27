@@ -470,13 +470,13 @@ Technologist in Software Analysis and Development (ADSO), Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 24, 2026
+October 27, 2026
 
 <!-- /titlepage -->
 
 ## Abstract
 
-This article describes the design, implementation, and verification of Vehicle Washing (LavaRapido), a web and Android platform for a single-location car wash, developed as a training project in SENA's Technologist in Software Analysis and Development program. The documented problem is that bookings made by phone or in person, handwritten records, discretionary work assignment, and unrecorded cash payments leave no traceability over time slots, service execution, or payments. The work followed a software design documentation (SDD) approach with seven Scrum-inspired sprints. The scope evolved from a mobile, zone-based service with a payment gateway to a single-location car wash with payments by QR or transfer with a receipt reviewed by the administrator, or in cash. The solution consists of six domain microservices (five in Java 21 with Spring Boot 4 and one in .NET 8) behind an API gateway, a SQL Server 2022 database with nine schemas and 57 tables, RabbitMQ messaging, and Angular 21 and React Native clients. As of October 24, 2026, with version *v1.0.0* tagged in 9 of the 10 code repositories and *develop* deployed that day to the public server, 38 of the 41 functional requirements were implemented and 3 were partial, and the latest CI passed 1,192 automated tests (73 of them in the mobile app); on October 21, 707 had been run, including 7 persistence tests against an isolated database, and 19 end-to-end tests against the complete system also passed; the 42 functional cases passed on October 19, 2026. The system also runs on a public server on Azure. Since October 19, 2026, each repository builds and runs its tests with GitHub Actions on every change. The consolidated reports and the validation with users are still pending. The operational benefits for the business remain a hypothesis, because they have not yet been measured with real users.
+This article describes the design, implementation, and verification of Vehicle Washing (LavaRapido), a web and Android platform for a single-location car wash, developed as a training project in SENA's Technologist in Software Analysis and Development program. The documented problem is that bookings made by phone or in person, handwritten records, discretionary work assignment, and unrecorded cash payments leave no traceability over time slots, service execution, or payments. The work followed a software design documentation (SDD) approach with seven Scrum-inspired sprints. The scope evolved from a mobile, zone-based service with a payment gateway to a single-location car wash with payments by QR or transfer with a receipt reviewed by the administrator, or in cash. The solution consists of six domain microservices (five in Java 21 with Spring Boot 4 and one in .NET 8) behind an API gateway, a SQL Server 2022 database with nine schemas and 58 tables, RabbitMQ messaging, and Angular 21 and React Native clients. As of October 27, 2026, with *v1.1.x* versions on *main* in the 10 code repositories, which is what the public server runs through continuous deployment, 38 of the 41 functional requirements were implemented and 3 were partial, and the CI passed 1,337 automated tests (106 of them in the mobile app and 17 integration tests against SQL Server); that day the 19 end-to-end tests against the complete system also passed; the 42 functional cases passed on October 19, 2026. The system also runs on a public server on Azure. Since October 19, 2026, each repository builds and runs its tests with GitHub Actions on every change. The consolidated reports and the validation with users are still pending. The operational benefits for the business remain a hypothesis, because they have not yet been measured with real users.
 
 *Keywords:* microservices, hexagonal architecture, booking system, car wash, QR code payments, software design documentation
 
@@ -504,7 +504,7 @@ The project is also justified by its constraints. Personal data processing must 
 
 ### Objectives
 
-The current project objectives are stated in version 8.0 of the SRS (Guilombo Osorio et al., 2026).
+The current project objectives are stated in version 8.3 of the SRS (Guilombo Osorio et al., 2026).
 
 **General objective.** To develop a web and mobile system that organizes booking, operator assignment, payment, and wash tracking at a car wash, ensuring that every bay and every operator is assigned without schedule overlaps and that every payment is linked to its booking.
 
@@ -595,13 +595,13 @@ Table 1 summarizes the technology stack, taken from the build files of each repo
 | Testing | JUnit 5, Mockito, and Spring Boot Test; xUnit; Vitest |
 | Containers and version control | Docker and Docker Compose; Git and GitHub |
 
-*Note.* Based on the technical manual (Patiño Cabrera et al., 2026c). Continuous integration runs on GitHub Actions in the 10 repositories; deployment to Azure is done over SSH with *update-server.sh*, and continuous deployment (every approved merge into *main* reaches the server on its own) is merged into *develop* since October 24, 2026, with its secrets still to be created.
+*Note.* Based on the technical manual (Patiño Cabrera et al., 2026c). Continuous integration runs on GitHub Actions in the 10 repositories; deployment to Azure is done over SSH with *update-server.sh*, and continuous deployment (every approved merge into *main* reaches the server on its own) is active since October 26, 2026.
 
 Both clients separate the view from its logic with the MVVM pattern: on the web each Angular page uses a ViewModel with signals (36 in total) and in the app each screen uses a React hook with the state and the actions; app changes that do not touch native code are delivered over the internet with EAS Update, and native ones with a new APK that the app requires installing.
 
 ### Analysis Procedure
 
-The status of the requirements was taken from the SRS traceability matrix, verified against the code on October 21, 2026 (Guilombo Osorio et al., 2026). The tests were run again on October 21, 2026: the suites of each Java service with the Maven Wrapper, those of payment-service with the .NET SDK (target *net8.0*), those of the web with Vitest, and the end-to-end tests of *lavarapido-infra/e2e* against the complete system; the 42 functional cases were run on October 19, 2026.
+The status of the requirements was taken from the SRS traceability matrix, verified against the code on October 21, 2026 and reviewed against *main* on October 27, 2026 (Guilombo Osorio et al., 2026). The test counts are those of the *main* CI of October 27, 2026, and that day the 19 end-to-end tests were run again. The previous complete run was on October 21, 2026: the suites of each Java service with the Maven Wrapper, those of payment-service with the .NET SDK (target *net8.0*), those of the web with Vitest, and the end-to-end tests of *lavarapido-infra/e2e* against the complete system; the 42 functional cases were run on October 19, 2026.
 
 ## Results
 
@@ -665,8 +665,8 @@ For academic reasons, all services share one SQL Server instance and database, b
 | booking-service | Java | Catalog, prices, schedule, bays, availability, and bookings | catalog, booking | 13 |
 | operations-service | Java | Operators, shifts, absences, automatic and manual assignment, execution, ratings, and inspection reports | execution | 11 |
 | payment-service | .NET 8 | Receipt payments, refunds, coupons, and loyalty points | payment, promotion | 12 |
-| notification-service | Java | Inbox, push, email, and reminders | notification | 6 |
-| **Total** | | | **9 schemas** | **57** |
+| notification-service | Java | Inbox, push, email with pending deliveries, and reminders | notification | 7 |
+| **Total** | | | **9 schemas** | **58** |
 
 *Note.* Based on the technical manual (Patiño Cabrera et al., 2026c).
 
@@ -702,7 +702,7 @@ stateDiagram-v2
     direction LR
     [*] --> CONFIRMED : book with a free bay
     SCHEDULED --> CONFIRMED : confirm (admin)
-    SCHEDULED --> CANCELLED : cancel or expired
+    SCHEDULED --> CANCELLED : cancel
     CONFIRMED --> CONFIRMED : reschedule (admin)
     CONFIRMED --> IN_PROGRESS : start (operator, from 15 min before)
     CONFIRMED --> CANCELLED : cancel (client before the time, or admin)
@@ -713,49 +713,49 @@ stateDiagram-v2
     NO_SHOW --> [*]
 ```
 
-*Note.* Gray states are final. *Expired*: the system cancels a scheduled booking nobody confirmed one hour after its end time; *ended without operator*: in the same time, a confirmed booking that never had an operator becomes NO_SHOW. A confirmed booking with an operator that nobody recorded is closed by the administrator. Taken from the technical manual (Patiño Cabrera et al., 2026c).
+*Note.* Gray states are final. *PAYMENT_TIMEOUT*: the system cancels a booking with digital payment that reaches its deadline without a receipt; *ended without operator*: one hour after its end time, a confirmed booking that never had an operator becomes NO_SHOW. The automatic cancellation of an expired scheduled booking was removed on October 24, 2026, because every booking starts as confirmed. A confirmed booking with an operator that nobody recorded is closed by the administrator. Taken from the technical manual (Patiño Cabrera et al., 2026c).
 
 ### Compliance With Functional Requirements
 
-The SRS defines 41 functional requirements: the original 29 (RF-001 to RF-026, with RF-004b, RF-012b, and RF-013b), 9 added in version 4.0 because they described functions already built (RF-027 to RF-035), and 3 from version 6.0 (RF-036 to RF-038: inspection report, business data, and operator profile). Table 4 summarizes their status as of October 21, 2026: 40 implemented (98%) and 1 partial.
+The SRS defines 41 functional requirements: the original 29 (RF-001 to RF-026, with RF-004b, RF-012b, and RF-013b), 9 added in version 4.0 because they described functions already built (RF-027 to RF-035), and 3 from version 6.0 (RF-036 to RF-038: inspection report, business data, and operator profile). Table 4 summarizes their status as of October 27, 2026: 38 implemented (93%) and 3 partial.
 
 **Table 4**
 
-*Status of the Functional Requirements as of October 24, 2026*
+*Status of the Functional Requirements as of October 27, 2026*
 
 | Status | Count | Requirements | Remark |
 |---|---|---|---|
 | Implemented | 38 | RF-001 to RF-004 (with RF-004b), RF-006 to RF-014 (with RF-012b and RF-013b), RF-016 to RF-022, and RF-024 to RF-038 | Built and verified against the code and the tests |
-| Partial | 3 | RF-005, RF-015, and RF-023 | They work with one pending case: the web books a single service although the API accepts several, the web payment history does not use the API filters, and the consolidated reports per period are missing |
+| Partial | 3 | RF-005, RF-015, and RF-023 | They work with one pending case: the web books a single service although the API accepts several, the web has no payment history screen, and the consolidated reports per period are missing |
 
-*Note.* Based on the traceability matrix of the SRS, version 8.0 (Guilombo Osorio et al., 2026).
+*Note.* Based on the traceability matrix of the SRS, version 8.3 (Guilombo Osorio et al., 2026).
 
 Two decisions were made through ADRs. Operator assignment was first built as manual assignment by the administrator, supported by a candidate list that shows why each operator is not available (ADR-014); automatic assignment when a booking is confirmed was later added on top of that same policy, and it respects the operator chosen by the customer if that operator is still free. Promotions were redesigned as percentage discount coupons that are unlocked with the points balance without spending it (ADR-015).
 
-Of the 12 non-functional requirements, 3 are implemented and 9 are partial (Guilombo Osorio et al., 2026). The implemented ones are response time (the highest 95th percentile, measured on October 14, 2026, was 686 ms against a 2-second target), event idempotency, and tolerance to failures of external services. Availability and security remain partial: the server's virtual machine is turned on on demand (on October 24, 2026 it was deployed with the 11 containers healthy) and, although since that day the gateway checks the token's session with any scheme and limits the sign-in requests, old secrets remain in the history. The other partial ones are integrity and concurrency (bookings and assignments are already made one at a time with database locks, but integration tests against SQL Server are missing), observability, maintainability, portability, compatibility (web screens do not overflow 360 px, but testing on an Android 8 device is missing), usability (no test with users), and localization.
+Of the 12 non-functional requirements, 3 are implemented and 9 are partial (Guilombo Osorio et al., 2026). The implemented ones are response time (the highest 95th percentile, measured on October 14, 2026, was 686 ms against a 2-second target), event idempotency, and tolerance to failures of external services. Availability and security remain partial: the server's virtual machine is turned on on demand (on October 24, 2026 it was deployed with the 11 containers healthy) and, although since that day the gateway checks the token's session with any scheme and limits the sign-in requests, old secrets remain in the history. The other partial ones are integrity and concurrency (bookings and assignments are already made one at a time with database locks and payment-service's integration tests run against SQL Server, but those of the other services are missing), observability, maintainability, portability, compatibility (web screens do not overflow 360 px, but testing on an Android 8 device is missing), usability (no test with users), and localization.
 
 ### Test Results
 
-The latest *develop* CI of October 24, 2026 passed 1,192 automated tests (1,119 in the web and the backend and 73 in the mobile app), none failed; the 11 payment-service persistence tests are skipped in the CI (on October 23 there were 838 and on October 21, 707), and in the complete run of October 21 seven of them ran against an isolated test database (Table 5). That same day the 19 end-to-end tests of *lavarapido-infra/e2e* passed; they run through the complete system: booking with operator choice and automatic assignment, the flow of the three roles with payment, approval, points, execution, and rating, the inspection report with photos and a public link, and access rules per role, with the gateway session check on. The SRS recorded 347 tests on October 6 (Guilombo Osorio et al., 2026); the difference corresponds to the tests added with each new function.
+The *main* CI of October 27, 2026 passed 1,337 automated tests (1,231 in the web and the backend and 106 in the mobile app), none failed or skipped; since that day payment-service's 17 integration tests run in the CI against SQL Server 2022 with the Liquibase migrations (Table 5). On October 24 there were 1,192, on October 23, 838, and on October 21, 707. On October 27 the 19 end-to-end tests of *lavarapido-infra/e2e* also passed; they run through the complete system: booking with operator choice and automatic assignment, the flow of the three roles with payment, approval, points, execution, and rating, the inspection report with photos and a public link, and access rules per role, with the gateway session check on and sending the payment mode when booking. The SRS recorded 347 tests on October 6 (Guilombo Osorio et al., 2026); the difference corresponds to the tests added with each new function.
 
 **Table 5**
 
-*Results of the Automated Test Run (October 24, 2026)*
+*Results of the Automated Test Run (October 27, 2026)*
 
 | Component | Cases | Passed | Failed | Skipped |
 |---|---|---|---|---|
-| Web application (Angular) | 212 | 212 | 0 | 0 |
+| Web application (Angular) | 242 | 242 | 0 | 0 |
 | api-gateway | 62 | 62 | 0 | 0 |
 | security-service | 200 | 200 | 0 | 0 |
-| customer-service | 82 | 82 | 0 | 0 |
-| booking-service | 95 | 95 | 0 | 0 |
+| customer-service | 83 | 83 | 0 | 0 |
+| booking-service | 137 | 137 | 0 | 0 |
 | operations-service | 110 | 110 | 0 | 0 |
 | notification-service | 133 | 133 | 0 | 0 |
-| payment-service (.NET) | 236 | 225 | 0 | 11 |
-| Mobile app (React Native) | 73 | 73 | 0 | 0 |
-| **Total** | **1,203** | **1,192** | **0** | **11** |
+| payment-service (.NET) | 264 | 264 | 0 | 0 |
+| Mobile app (React Native) | 106 | 106 | 0 | 0 |
+| **Total** | **1,337** | **1,337** | **0** | **0** |
 
-*Note.* Latest GitHub Actions CI on *develop* of each repository: *./mvnw verify* in the Java services, *dotnet test* in payment-service (without the isolated database, so the 11 persistence tests are skipped), *ng test* in the web, and *npm test* in the mobile app. The 19 end-to-end tests are not included in the table.
+*Note.* GitHub Actions CI on *main* of each repository: *./mvnw verify* in the Java services, *dotnet test* in payment-service (the 17 integration tests run in the "Pruebas de integración" job against SQL Server 2022), *ng test* in the web, and *npm test* in the mobile app. The 19 end-to-end tests are not included in the table.
 
 In addition, the 42 functional cases of the test documentation were run on October 19, 2026, against the complete system, all of them passing. In contrast, **there are no recorded results for acceptance cases CA-01 to CA-16** with the business owner, code coverage is not measured, and the Java services have no persistence tests against a real SQL Server outside the end-to-end suite.
 
@@ -776,11 +776,13 @@ Table 6 summarizes the review of the system against the OWASP Top 10. Seven cate
 
 *Note.* Based on the OWASP checklist in the technical manual (Patiño Cabrera et al., 2026c; OWASP Foundation, 2021).
 
+To prevent a person or a bot from blocking the schedule with bookings they do not intend to pay for, since October 26, 2026 the customer chooses how they will pay when booking, digital or cash, and without that value the booking is rejected (400 *INVALID_PAYMENT_MODE*). With cash they can have at most one active booking (409 *CASH_BOOKING_LIMIT*), and a booking with digital payment that does not receive the receipt within 30 minutes, or before the start time if that is sooner, is cancelled automatically with the reason *PAYMENT_TIMEOUT* and frees the slot. Before cancelling, booking-service asks payment-service whether a payment has already been reported, because in the live test a lost event had cancelled a paid booking (Patiño Cabrera et al., 2026a).
+
 Regarding personal data protection, sign-up requires accepting the terms and the data processing policy, and the server stores the date and time of each acceptance, which makes it possible to demonstrate the consent required by Law 1581 of 2012 (Congreso de la República de Colombia, 2012). The profile option formerly called "Delete account" is now called "Deactivate my account", because the account is deactivated and its history is kept.
 
 ### Defect Management and Continual Improvement
 
-As of October 21, 2026, the actions register contained 52 closed corrective actions, 3 open corrective actions, 18 preventive actions, and 16 improvement actions, 8 of which are already closed (Patiño Cabrera et al., 2026a). The corrective closure indicator rose from 64% on October 9 to 95% (52 of 55), above the 70% target, and recurrence was 0%. No open corrective actions of P0 or P1 severity remain: account lockout (AC-25) and consent recording (AC-26) were closed with tests. The closed corrections include high-impact defects, such as booking times shifted by five hours due to time zone handling (AC-01), the possibility of paying two bookings with the same transaction reference (AC-07), a points ledger with no reversal or concurrency control (AC-09), two simultaneous requests that tried to create the same operator (AC-35), and a token that kept working up to an hour after logout (AC-44).
+As of October 27, 2026, the actions register contained 93 closed corrective actions, 19 open corrective actions, 19 preventive actions, and 18 improvement actions (Patiño Cabrera et al., 2026a). The corrective closure indicator was 83% (93 of 112), above the 70% target (it was 64% on October 9 and 95% on October 21, before the reviews of October 23 and 24 opened new corrective actions), and recurrence was 0%. No open corrective actions of P0 or P1 severity remain: account lockout (AC-25) and consent recording (AC-26) were closed with tests. The closed corrections include high-impact defects, such as booking times shifted by five hours due to time zone handling (AC-01), the possibility of paying two bookings with the same transaction reference (AC-07), a points ledger with no reversal or concurrency control (AC-09), two simultaneous requests that tried to create the same operator (AC-35), and a token that kept working up to an hour after logout (AC-44).
 
 Cross-verification of the manuals against the code found 19 discrepancies between the code, the project documentation, and earlier versions of the manuals, for example, the framework version, the number of tables, token validation at the gateway, and the operator assignment mode (Patiño Cabrera et al., 2026c). The review of October 16, 2026, closed the ones still open and brought the manuals to version 4.0, with real screenshots of the system.
 
@@ -809,15 +811,15 @@ The project had no assigned funding; it was developed with the members' own equi
 
 ## Discussion
 
-The results show that the team built a working platform that covers the main business flow: a customer can sign up, register a vehicle, book a slot with real availability and choose an operator if desired, pay by QR or transfer with a receipt, or in cash, and rate the service, and the administrator and operators can manage the operation. With 40 of 41 functional requirements implemented, the product is practically complete; only the consolidated reports per period are missing. Automatic assignment and operator choice, which the previous version of this article listed as pending, were built on top of the same policy as manual assignment. The contrast between functional requirements (98% implemented) and non-functional ones (5 of 12 implemented) shows that the effort focused first on functionality; the qualities that depend on measuring with users or on real devices still lack evidence.
+The results show that the team built a working platform that covers the main business flow: a customer can sign up, register a vehicle, book a slot with real availability and choose an operator if desired, pay by QR or transfer with a receipt, or in cash, and rate the service, and the administrator and operators can manage the operation. With 38 of 41 functional requirements implemented and 3 partial, the product is practically complete; the consolidated reports per period, the web payment history screen, and booking several services from the web are missing. Automatic assignment and operator choice, which the previous version of this article listed as pending, were built on top of the same policy as manual assignment. The contrast between functional requirements (93% implemented) and non-functional ones (3 of 12 implemented and 9 partial) shows that the effort focused first on functionality; the qualities that depend on measuring with users or on real devices still lack evidence.
 
 The decision to use microservices for a single car wash deserves discussion. Newman (2021) presents this style as a way to achieve independent deployments and clear data ownership, at the cost of the complexity of a distributed system. The project mitigated part of that complexity with pragmatic, documented decisions: a single database instance with one owner per schema instead of a database per service (ADR-003), REST communication only when an immediate response is needed (ADR-004), and the explicit decision not to adopt patterns such as Outbox or Saga (Richardson, 2018). The cost of that simplification was recorded as an accepted risk: the possible loss of an event between committing the transaction and publishing it.
 
 The architecture also evolved from what was planned. The technical proposal chose an N-layer architecture with MySQL to reduce technical risk and initial cost, and left the move to microservices as an evolution path if demand grew (Patiño Cabrera et al., 2025). The team adopted microservices from the first version, first with a finer decomposition and then with six services (ADR-002, superseded by ADR-009), and replaced MySQL with SQL Server. Likewise, the scope moved from a mobile, zone-based service with a payment gateway to a single-location car wash with payments by QR or transfer with a receipt reviewed by the administrator, or in cash. These changes simplified the domain (no geolocation, routes, or integration with an external gateway) and avoided collecting card data, but they left the objectives of automatic assignment by proximity, an online gateway, and booking by geographic availability unmet in their original form.
 
-Enforcing the critical rules in the database, and not only in code, proved appropriate for a domain with concurrency: two customers booking the same bay or two administrators approving the same payment do not depend on the application code being correct on every path. With the same criterion, since October 21, 2026 the manual and the automatic assignment of an operator are made one at a time with a SQL Server lock. The team review also found a risk in the first version of the automatic close of bookings, from the same day: it marked as No-show every confirmed booking nobody started, so a service done but not recorded would have appeared as a customer absence in the history and the reports. The design was changed so that the system decides on its own only when it is sure (a booking that never had an operator) and leaves the rest to the administrator in a list of bookings to close. The payment-service persistence tests that cover these cases exist, but they need a dedicated test database; the end-to-end suite does exercise those rules against the real SQL Server of the Docker environment.
+Enforcing the critical rules in the database, and not only in code, proved appropriate for a domain with concurrency: two customers booking the same bay or two administrators approving the same payment do not depend on the application code being correct on every path. With the same criterion, since October 21, 2026 the manual and the automatic assignment of an operator are made one at a time with a SQL Server lock. The team review also found a risk in the first version of the automatic close of bookings, from the same day: it marked as No-show every confirmed booking nobody started, so a service done but not recorded would have appeared as a customer absence in the history and the reports. The design was changed so that the system decides on its own only when it is sure (a booking that never had an operator) and leaves the rest to the administrator in a list of bookings to close. The payment-service integration tests that cover these cases run in the CI against SQL Server 2022 since October 27, 2026; the end-to-end suite does exercise those rules against the real SQL Server of the Docker environment.
 
-The application of hexagonal architecture (Cockburn, 2005) is reflected in the shape of the tests: 1,192 of the 1,203 automated tests run without a database, because they test the domain, the use cases, and the web layer with test doubles instead of the real infrastructure, which makes them fast and deterministic. Since October 19, 2026, these tests run automatically on every change with GitHub Actions; however, the lack of coverage measurement limits the confidence these figures can provide, and the end-to-end suite, which tests the integrated services, is still run by hand. Research by Forsgren et al. (2018) associates continuous integration and test automation with better software delivery performance, which is why the project closed its technical debt TD-006 with GitHub Actions.
+The application of hexagonal architecture (Cockburn, 2005) is reflected in the shape of the tests: 1,320 of the 1,337 automated tests run without a database, because they test the domain, the use cases, and the web layer with test doubles instead of the real infrastructure, which makes them fast and deterministic. Since October 19, 2026, these tests run automatically on every change with GitHub Actions; however, the lack of coverage measurement limits the confidence these figures can provide, and the end-to-end suite, which tests the integrated services, is still run by hand. Research by Forsgren et al. (2018) associates continuous integration and test automation with better software delivery performance, which is why the project closed its technical debt TD-006 with GitHub Actions.
 
 Cross-verification between documentation and code was one of the most useful contributions of the process: the 19 discrepancies found show that, even with an approach that puts design before code, documentation becomes outdated if it is not changed in the same change as the code, as captured in the project's lesson learned L-09 (Patiño Cabrera et al., 2026a). The ADRs (Nygard, 2011) allowed scope changes, such as manual operator assignment, to be justified rather than appearing as silent non-compliance.
 
@@ -827,13 +829,13 @@ This work has important limitations. First, there is no evidence from users: the
 
 ## Conclusions
 
-The project designed and implemented a microservices platform for a single-location car wash that integrates bookings with real availability, automatic and manual work assignment, execution, payments by QR or transfer with a receipt reviewed by the administrator or in cash, notifications, loyalty, and inspection reports. The resulting architecture, with six domain services, a gateway, a 57-table database with one owner per schema, and asynchronous messaging, was documented in fifteen ADRs and verified against the code. Against the six specific objectives of the SRS, vehicle registration and booking from the web and Android, schedule and bay validation with alternative times, operator assignment without schedule overlaps, payment recording with receipt review, and ratings with points that unlock promotions were achieved; the administrative module is built, except for the consolidated reports per period, which are the only gap against the requirements. Compared with the original proposal, the mobile, zone-based service and the online payment gateway were removed from scope.
+The project designed and implemented a microservices platform for a single-location car wash that integrates bookings with real availability, automatic and manual work assignment, execution, payments by QR or transfer with a receipt reviewed by the administrator or in cash, notifications, loyalty, and inspection reports. The resulting architecture, with six domain services, a gateway, a 58-table database with one owner per schema, and asynchronous messaging, was documented in fifteen ADRs and verified against the code. Against the six specific objectives of the SRS, vehicle registration and booking from the web and Android, schedule and bay validation with alternative times, operator assignment without schedule overlaps, payment recording with receipt review, and ratings with points that unlock promotions were achieved; the administrative module is built, except for the consolidated reports per period, which are the only gap against the requirements. Compared with the original proposal, the mobile, zone-based service and the online payment gateway were removed from scope.
 
-The verified status is favorable on the technical side: 38 of 41 functional requirements implemented and 3 partial, 1,192 automated tests in the latest CI, 19 end-to-end tests, and 42 functional cases passing with no failures, and the system deployed on a public server with HTTPS. The critical business rules are enforced in the database, which protects the system against concurrency in bookings, assignments, payments, and points.
+The verified status is favorable on the technical side: 38 of 41 functional requirements implemented and 3 partial, 1,337 automated tests in the CI of October 27, 2026, 19 end-to-end tests, and 42 functional cases passing with no failures, and the system deployed on a public server with HTTPS. The critical business rules are enforced in the database, which protects the system against concurrency in bookings, assignments, payments, and points.
 
-At the same time, the most important step to operate with real users is still missing: validation with the business. Running the new end-to-end battery against the public server and releasing version *v1.1.0* are also missing. Therefore, the operational benefits stated in the problem remain a hypothesis that this work neither confirms nor refutes.
+At the same time, the most important step to operate with real users is still missing: validation with the business. Running the new end-to-end battery against the public server is also missing; versions *v1.1.0* to *v1.1.2* were already released on October 26 and 27, 2026, and the server runs *main* through continuous deployment. Therefore, the operational benefits stated in the problem remain a hypothesis that this work neither confirms nor refutes.
 
-As future work, the documentation itself proposes: running the acceptance cases and a controlled pilot to establish the baseline for the success measures; bringing the end-to-end tests into continuous integration; adding persistence tests against a real SQL Server and coverage measurement; completing the consolidated reports per period; extending the request rate limit to the whole API; and, if the project moves beyond the academic setting, adopting RS256 signing, refresh tokens, Outbox, populated auditing, and a database or database login per service (Patiño Cabrera et al., 2026c).
+As future work, the documentation itself proposes: running the acceptance cases and a controlled pilot to establish the baseline for the success measures; bringing the end-to-end tests into continuous integration; extending to the Java services the integration tests against a real SQL Server that payment-service already has, and measuring coverage; completing the consolidated reports per period; extending the request rate limit to the whole API; and, if the project moves beyond the academic setting, adopting RS256 signing, refresh tokens, Outbox, populated auditing, and a database or database login per service (Patiño Cabrera et al., 2026c).
 
 ## References
 
@@ -849,7 +851,7 @@ Fielding, R. T. (2000). *Architectural styles and the design of network-based so
 
 Forsgren, N., Humble, J., & Kim, G. (2018). *Accelerate: The science of lean software and DevOps: Building and scaling high performing technology organizations*. IT Revolution Press.
 
-Guilombo Osorio, J. C., Patiño Cabrera, B. E., & Urbano Quintero, M. (2026). *Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos* [Software requirements specification (SRS) of the LavaRápido system: Web and mobile booking and management platform for a car wash] (Version 8.0) [Unpublished document]. Servicio Nacional de Aprendizaje.
+Guilombo Osorio, J. C., Patiño Cabrera, B. E., & Urbano Quintero, M. (2026). *Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos* [Software requirements specification (SRS) of the LavaRápido system: Web and mobile booking and management platform for a car wash] (Version 8.3) [Unpublished document]. Servicio Nacional de Aprendizaje.
 
 Hohpe, G., & Woolf, B. (2003). *Enterprise integration patterns: Designing, building, and deploying messaging solutions*. Addison-Wesley.
 
@@ -877,11 +879,11 @@ OWASP Foundation. (2021). *OWASP Top 10:2021*. https://owasp.org/Top10/
 
 Patiño Cabrera, B. E., Guilombo Osorio, J. C., & Urbano, M. (2025). *Propuesta técnica y económica: Sistema integral para la gestión de servicios móviles de lavado vehicular* [Technical and economic proposal: Comprehensive system for managing mobile car wash services] [Unpublished document]. Servicio Nacional de Aprendizaje.
 
-Patiño Cabrera, B. E., Guilombo Osorio, J. C., & Urbano, M. (2026a). *Documentation of corrective, preventive, and improvement actions for the software: Vehicle Washing Management System (Vehicle Washing)* (Version 2.7) [Unpublished document]. Servicio Nacional de Aprendizaje.
+Patiño Cabrera, B. E., Guilombo Osorio, J. C., & Urbano, M. (2026a). *Documentation of corrective, preventive, and improvement actions for the software: Vehicle Washing Management System (Vehicle Washing)* (Version 3.3) [Unpublished document]. Servicio Nacional de Aprendizaje.
 
-Patiño Cabrera, B. E., Guilombo Osorio, J. C., & Urbano, M. (2026b). *Software implementation procedure: Vehicle Washing Management System (Vehicle Washing)* (Version 2.6) [Unpublished document]. Servicio Nacional de Aprendizaje.
+Patiño Cabrera, B. E., Guilombo Osorio, J. C., & Urbano, M. (2026b). *Software implementation procedure: Vehicle Washing Management System (Vehicle Washing)* (Version 2.10) [Unpublished document]. Servicio Nacional de Aprendizaje.
 
-Patiño Cabrera, B. E., Guilombo Osorio, J. C., & Urbano, M. (2026c). *Technical manual: Vehicle Washing Management System (Vehicle Washing)* (Version 4.7) [Unpublished document]. Servicio Nacional de Aprendizaje.
+Patiño Cabrera, B. E., Guilombo Osorio, J. C., & Urbano, M. (2026c). *Technical manual: Vehicle Washing Management System (Vehicle Washing)* (Version 4.13) [Unpublished document]. Servicio Nacional de Aprendizaje.
 
 Provos, N., & Mazières, D. (1999). A future-adaptable password scheme. In *Proceedings of the 1999 USENIX Annual Technical Conference, FREENIX Track* (pp. 81–91). USENIX Association.
 
@@ -908,6 +910,6 @@ Table A1 lists the information that was not found in the folders reviewed (proje
 | 1 | Results with users | Cases CA-01 to CA-16, requirements validation with the client, and final tests with the client have no recorded results; hypotheses D-01 to D-10 remain pending | No operational benefits are reported; stated as a limitation |
 | 2 | Background on comparable systems | No review of car wash booking systems or industry studies | The framework is limited to technical concepts |
 | 3 | Actual sprint dates | The activity plan records only estimated dates (January 1 to July 15) | Reported as planned dates |
-| 4 | Pending tests | 7 payment-service persistence tests skipped without a dedicated test database | Table 5 reports only what was run |
+| 4 | Pending tests | Integration tests against SQL Server of the Java services (payment-service's 17 run in the CI since October 27, 2026) | Table 5 reports only what was run |
 
 *Note.* Prepared by the authors from the review of the project folders.
