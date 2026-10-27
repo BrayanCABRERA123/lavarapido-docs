@@ -8,7 +8,7 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 1.4, 21 de octubre de 2026
+Versión 1.5, 27 de octubre de 2026
 
 ---
 
@@ -153,7 +153,7 @@ Cada decisión importante quedó registrada como ADR (Architecture Decision Reco
 
 *Nota.* Ambientes previstos en la propuesta; los costos de la sección 8.2 se calcularon con estas especificaciones.
 
-**Seguimiento al 21 de octubre de 2026.** Para la demostración académica, el sistema se desplegó en una máquina virtual de Microsoft Azure (suscripción *Azure for Students*, tamaño B2as_v2: 2 vCPU, 7,7 GB de RAM y 64 GB de disco SSD, Ubuntu 24.04 LTS), con los once contenedores, Caddy como entrada HTTPS y la aplicación Android servida en */app*. Con todos los contenedores activos usa unos 3,3 GB de RAM, por lo que el tamaño de producción de la Tabla 5 sigue siendo holgado. El procedimiento completo está en el Documento de Despliegue (carpeta 07). En el proyecto académico la integración continua no se hizo con Jenkins sino con GitHub Actions: los 10 repositorios de código compilan y corren sus pruebas en cada cambio, y `lavarapido-infra` tiene además un flujo manual que actualiza el servidor. Desde el 20 y el 21 de octubre el servidor respalda la base todos los días y antes de cada actualización, verifica cada respaldo con una restauración de prueba y guarda los últimos 14; Caddy envía encabezados de seguridad y una política de contenido; Docker revisa la salud de todos los contenedores y limita el tamaño de sus registros. Desde el 21 de octubre el API Gateway también corta los tokens de las sesiones cerradas preguntando a security-service, con la respuesta guardada 30 segundos por token, sin cambiar la decisión de usar JWT.
+**Seguimiento al 27 de octubre de 2026.** Para la demostración académica, el sistema se desplegó en una máquina virtual de Microsoft Azure (suscripción *Azure for Students*, tamaño B2as_v2: 2 vCPU, 7,7 GB de RAM y 64 GB de disco SSD, Ubuntu 24.04 LTS), con los once contenedores, Caddy como entrada HTTPS y la aplicación Android servida en */app*. Con todos los contenedores activos usa unos 3,3 GB de RAM, por lo que el tamaño de producción de la Tabla 5 sigue siendo holgado. El procedimiento completo está en el Documento de Despliegue (carpeta 07). En el proyecto académico la integración continua no se hizo con Jenkins sino con GitHub Actions: los 10 repositorios de código compilan y corren sus pruebas en cada cambio, y desde el 26 de octubre de 2026 el despliegue continuo está activo: cada fusión aprobada a `main`, rama protegida en los 10 repositorios, le pide al flujo "Desplegar en Azure" de `lavarapido-infra` que actualice el servidor, que corre lo que está en `main`; ese flujo también se puede correr a mano. Desde el 20 y el 21 de octubre el servidor respalda la base todos los días y antes de cada actualización, verifica cada respaldo con una restauración de prueba y guarda los últimos 14; Caddy envía encabezados de seguridad y una política de contenido; Docker revisa la salud de todos los contenedores y limita el tamaño de sus registros. Desde el 21 de octubre el API Gateway también corta los tokens de las sesiones cerradas preguntando a security-service, con la respuesta guardada 30 segundos por token, sin cambiar la decisión de usar JWT.
 
 ### 4.4 Usuario final
 
