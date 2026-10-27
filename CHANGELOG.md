@@ -15,6 +15,20 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 - README: versiones de todos los documentos (incluidas las del equipo del 27 de octubre) y de los repositorios. 11 Enlaces: tabla de repositorios y versiones al 27 de octubre.
 - PDF y Word regenerados de los documentos que cambiaron.
 
+## 2026-10-27 — Revisión de las evidencias contra `main` del 27 de octubre
+
+**Contenido** (español e inglés). Revisado contra `main` de los 10 repositorios de código del 27 de octubre de 2026 (booking y customer `v1.1.1`; web, app móvil, payment e infra `v1.1.2`) y el CI de ese día: 1 337 pruebas automatizadas (989 de los servicios, 242 de la web y 106 de la app móvil), con las 17 de integración de payment-service contra SQL Server 2022, y 19 de 19 de punta a punta en local.
+
+- 01 SRS 8.3: 38 RF implementados y 3 parciales (RF-005, RF-015 y RF-023); 58 tablas; RF-005 e INV-BOOK-003 con máximo 10 servicios y 400 `VALIDATION_ERROR`; RF-006 y CU06 con alternativas que respetan las otras reservas del vehículo; RF-021 con el día inválido; `bookedBy` solo para el personal (RF-033); CU05 con "¿Cómo vas a pagar?" y sus flujos alternos; CU32 con el vencimiento del pago digital; se quita la cancelación automática `EXPIRED`, que ya no existe en booking (RN-BOOK-01, CU29, CU32 y Figura 4); RF-015 sin pantalla web de historial de pagos; RNF-003 y Tabla 58 con las pruebas del 27 de octubre.
+- 02 Análisis 2.8: validación de la lista de servicios y alternativas por vehículo (2.2 y 3.2). 03 Propuesta 1.5: despliegue continuo activo. 04 Diseño 1.11: 58 tablas, diccionario de `notification.pending_delivery` (Tabla 67; las siguientes pasan a 68 y 69), columnas `discount_percent` y `max_discount_amount` de `booking_promotion`, changelogs de payment hasta el 023 y cambios del 27 de octubre en booking y customer. 05 Artefactos: versiones vigentes, variables del pago al reservar (Tabla 8) y corrida de punta a punta.
+- 06 Pruebas: Tabla 5f con 1 337, integración de payment en el CI (brecha 3 cerrada para payment), corrida de punta a punta del 27 de octubre, `paymentMode` en CP-08 y casos nuevos CP-43 a CP-46 (cubiertos por pruebas automáticas en verde en el CI), RF-015 sin pantalla.
+- 07 Procedimiento 2.10 (criterios E2 y E4, clonado con las etiquetas actuales, 58 tablas y colas actuales de RabbitMQ) y Despliegue 1.12 (estado de la versión, subsección 1.3.13 con los despliegues automáticos del 27 de octubre, CI y 58 tablas).
+- 08 Acciones 3.3: AC-91 a AC-93 cerradas (400 en lugar de 500, `bookedBy` visible para el cliente y alternativas que el vehículo no podía tomar); ACO-42 a ACO-44 abiertas (contacto legal de ejemplo, reservas sin paginar y pantalla de historial de pagos); H-01 y H-02 corregidos, H-15 y H-21 parciales; Tabla 10: 93 de 112 (83 %).
+- 09 Técnico 4.13, Instalación 4.10, Usuario del cliente 1.4 (apartado 6 de los términos), Usuario del operario 1.3 y portadas de Usuario y Administrador al 27 de octubre.
+- 10 Artículo (APA 7, IEEE y ACM, español e inglés): 58 tablas, 1 337 pruebas, versiones `v1.1.x` en los 10 repositorios, 38 RF implementados y 3 parciales, despliegue continuo activo, estado de las acciones y un párrafo sobre el pago al reservar. **El PDF y el Word del artículo no se regeneraron**: el generador del repositorio no cubre sus formatos IEEE y ACM, así que siguen siendo los del 24 de octubre.
+- 11 Enlaces y README: versión del SRS, pruebas, despliegues del 27 de octubre, lista de verificación y datos de contacto de ejemplo de los textos legales; `main` protegida en el flujo de trabajo.
+- PDF y Word regenerados de 01 a 09 y PDF de 11.
+
 ## 2026-10-27 (noche) — Capturas de la aplicación móvil
 
 - 09 Usuario del cliente 1.3: Figuras 26 a 32 de la app (ingreso, inicio, reservar con la forma de pago, pago con plazo, historial y menú Más); el cierre de sesión pasa a ser la Figura 33.
