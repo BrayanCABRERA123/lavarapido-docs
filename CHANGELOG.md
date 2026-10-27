@@ -4,6 +4,17 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-10-26 (noche) — Manuales de usuario por rol (cliente y operario) y versiones v1.1.0 y v1.1.1
+
+**Contenido** (español e inglés). Verificado contra `develop` del 26 de octubre de 2026 (web `dcfd2e2`, móvil `b921582`, infra `14cc594`) y las etiquetas `v1.1.0` (10 repositorios) y `v1.1.1` (web, móvil, payment-service e infra) de ese día.
+
+- 09 **Manual de usuario del cliente 1.0** (nuevo): `manual-de-usuario-cliente.md` / `customer-user-manual.md`, con la plantilla mínima del manual de usuario de la guía del SENA y el formato de cada módulo (nombre, descripción, rol, ruta, pasos, captura, resultado y observaciones). Incluye el pago al reservar, las pantallas de pago digital (con plazo) y en efectivo (botón **Confirmar reserva**), las insignias del historial, el reporte de inspección público (`/report/:token`) que no estaba documentado, los términos y condiciones con el apartado 8 (informe de inspección y fotografías) y la app móvil 1.1.0. 25 figuras.
+- 09 **Manual de usuario del operario 1.0** (nuevo): `manual-de-usuario-operario.md` / `operator-user-manual.md`, con permisos y responsabilidades del operario, primer ingreso con la contraseña temporal, forma de pago visible en el servicio y los interruptores de notificación y **Desactivar mi cuenta**, que el operario tiene en la web y no estaban documentados. 15 figuras.
+- Capturas nuevas en español y en inglés (26 de octubre, sistema completo en Docker con datos de prueba): reserva con el paso "¿Cómo vas a pagar?", confirmación en efectivo, pago digital con plazo, pago en efectivo, QR y comprobante, historial con insignias, perfil y configuración del operario. Las demás figuras de los dos manuales nuevos son las capturas vigentes del manual de usuario, copiadas con nombres `cliente-*` / `customer-*` y `operario-*` / `operator-*`.
+- 09 Usuario 4.10 (se conserva como referencia conjunta; perfil y configuración del operario corregidos; app 1.1.0 publicada), Técnico 4.10, Instalación 4.9 y Administrador 4.10: versiones `v1.1.0` y `v1.1.1` del 26 de octubre; payment-service se despliega desde `main` desde infra `v1.1.1`.
+- README: índice con los dos manuales nuevos, versiones de los manuales y tabla de repositorios con las versiones del 26 de octubre.
+- **PDF y Word regenerados** de los seis manuales (técnico, instalación, usuario, usuario del cliente, usuario del operario y administrador) en los dos idiomas.
+
 ## 2026-10-26 — Pago al reservar: modo de pago, efectivo con límite y vencimiento del pago digital
 
 **Contenido** (español e inglés). Mitigación de reservas masivas, a partir de la pregunta de la preparación de la sustentación (¿qué impide que un bot o una persona bloquee la agenda?) y de la recomendación del instructor. Verificado contra `develop` del 26 de octubre de 2026: booking `db156cb`, payment `d94cde5`, web `7f8aca5`, móvil `acf4e6d` e infra `0f949e5`. Desplegado en Azure ese día hacia las 12:02 (hora de Colombia): booking-service, payment-service y la web.
