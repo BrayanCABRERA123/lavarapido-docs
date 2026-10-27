@@ -3,9 +3,9 @@
 Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano Quintero  
 *Servicio Nacional de Aprendizaje (SENA), Centro de la Industria, la Empresa y los Servicios, Regional Huila, Colombia*
 
-*Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556. Instructora: Karol Daniela Correa. 24 de octubre de 2026.*
+*Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556. Instructora: Karol Daniela Correa. 27 de octubre de 2026.*
 
-***Resumen*—Este artículo describe el diseño, la implementación y la verificación de Vehicle Washing (LavaRapido), una plataforma web y Android para un lavadero vehicular de una sola sede, desarrollada como proyecto formativo del SENA. El problema documentado es que las reservas por llamada, los registros a mano, la asignación discrecional del trabajo y los pagos en efectivo sin registro no dejan trazabilidad sobre turnos, servicios ni pagos. El trabajo siguió un enfoque de documentación de diseño de software (SDD) con siete sprints inspirados en Scrum, y su alcance evolucionó desde un servicio móvil por zonas con pasarela de pagos hacia un lavadero de sede única con pagos por QR o transferencia con comprobante revisado por el administrador, o en efectivo. La solución integra seis microservicios (cinco en Java 21 con Spring Boot 4 y uno en .NET 8) detrás de un API Gateway, SQL Server 2022 con 57 tablas, RabbitMQ y clientes en Angular 21 y React Native. Al 24 de octubre de 2026, con la versión *v1.0.0* etiquetada en 9 de los 10 repositorios de código y *develop* desplegado ese día en el servidor público, 38 de los 41 requisitos funcionales estaban implementados y 3 eran parciales, y el último CI aprobó 1 192 pruebas automatizadas (73 de ellas de la app móvil); el 21 de octubre se habían ejecutado 707, incluidas 7 de persistencia contra una base aislada, y 19 pruebas de punta a punta contra el sistema completo, también aprobadas; los 42 casos funcionales pasaron el 19 de octubre de 2026. El sistema corre además en un servidor público en Azure. Desde el 19 de octubre de 2026, cada repositorio compila y corre sus pruebas con GitHub Actions en cada cambio. Quedan pendientes los reportes consolidados y la validación con personas usuarias. Los beneficios operativos siguen siendo una hipótesis, porque no se han medido con personas usuarias reales.**
+***Resumen*—Este artículo describe el diseño, la implementación y la verificación de Vehicle Washing (LavaRapido), una plataforma web y Android para un lavadero vehicular de una sola sede, desarrollada como proyecto formativo del SENA. El problema documentado es que las reservas por llamada, los registros a mano, la asignación discrecional del trabajo y los pagos en efectivo sin registro no dejan trazabilidad sobre turnos, servicios ni pagos. El trabajo siguió un enfoque de documentación de diseño de software (SDD) con siete sprints inspirados en Scrum, y su alcance evolucionó desde un servicio móvil por zonas con pasarela de pagos hacia un lavadero de sede única con pagos por QR o transferencia con comprobante revisado por el administrador, o en efectivo. La solución integra seis microservicios (cinco en Java 21 con Spring Boot 4 y uno en .NET 8) detrás de un API Gateway, SQL Server 2022 con 58 tablas, RabbitMQ y clientes en Angular 21 y React Native. Al 27 de octubre de 2026, con versiones *v1.1.x* en *main* de los 10 repositorios de código, que es lo que corre el servidor público por despliegue continuo, 38 de los 41 requisitos funcionales estaban implementados y 3 eran parciales, y el CI aprobó 1 337 pruebas automatizadas (106 de ellas de la app móvil y 17 de integración contra SQL Server); ese día pasaron también las 19 pruebas de punta a punta contra el sistema completo; los 42 casos funcionales pasaron el 19 de octubre de 2026. El sistema corre además en un servidor público en Azure. Desde el 19 de octubre de 2026, cada repositorio compila y corre sus pruebas con GitHub Actions en cada cambio. Quedan pendientes los reportes consolidados y la validación con personas usuarias. Los beneficios operativos siguen siendo una hipótesis, porque no se han medido con personas usuarias reales.**
 
 ***Palabras clave*—microservicios, arquitectura hexagonal, sistema de reservas, lavado vehicular, pagos con código QR, documentación de diseño de software**
 
@@ -31,7 +31,7 @@ El proyecto también se justifica por sus restricciones. El tratamiento de datos
 
 ### C. Objetivos
 
-Los objetivos vigentes del proyecto están en la versión 8.0 de la SRS [1].
+Los objetivos vigentes del proyecto están en la versión 8.3 de la SRS [1].
 
 **Objetivo general.** Desarrollar un sistema web y móvil que organice la reserva, la asignación de operarios, el pago y el seguimiento de los lavados en un lavadero de vehículos, garantizando que cada bahía y cada operario se asignen sin cruces de horario y que cada pago quede asociado a su reserva.
 
@@ -78,7 +78,7 @@ El proyecto toma como marco de sus acciones correctivas, preventivas y de mejora
 
 ### A. Tipo de Estudio
 
-Se trata de un trabajo de desarrollo tecnológico aplicado, presentado como estudio de caso único y de alcance descriptivo. La unidad de análisis es el sistema construido. La evidencia proviene de los artefactos del proyecto: el código de once repositorios, la documentación de diseño (requisitos, quince ADR, modelos de datos, contratos OpenAPI), los manuales técnicos verificados contra el código y los registros de pruebas y de acciones de mejora [21], [22]. La SRS, en su versión 8.0, sigue la estructura de IEEE 830 [23] y los contenidos de ISO/IEC/IEEE 29148 [24], y define 41 requisitos funcionales, 12 requisitos no funcionales clasificados según el modelo de calidad de ISO/IEC 25010 [25], 32 casos de uso y una matriz de trazabilidad con el estado de cada requisito [1].
+Se trata de un trabajo de desarrollo tecnológico aplicado, presentado como estudio de caso único y de alcance descriptivo. La unidad de análisis es el sistema construido. La evidencia proviene de los artefactos del proyecto: el código de once repositorios, la documentación de diseño (requisitos, quince ADR, modelos de datos, contratos OpenAPI), los manuales técnicos verificados contra el código y los registros de pruebas y de acciones de mejora [21], [22]. La SRS, en su versión 8.3, sigue la estructura de IEEE 830 [23] y los contenidos de ISO/IEC/IEEE 29148 [24], y define 41 requisitos funcionales, 12 requisitos no funcionales clasificados según el modelo de calidad de ISO/IEC 25010 [25], 32 casos de uso y una matriz de trazabilidad con el estado de cada requisito [1].
 
 ### B. Contexto y Participantes
 
@@ -121,13 +121,13 @@ La Tabla I resume la pila tecnológica, tomada de los archivos de construcción 
 | Pruebas | JUnit 5, Mockito y Spring Boot Test; xUnit; Vitest |
 | Contenedores y control de versiones | Docker y Docker Compose; Git y GitHub |
 
-*Nota.* Elaborado a partir del manual técnico [22]. La integración continua se hace con GitHub Actions en los 10 repositorios; el despliegue en Azure se hace por SSH con *update-server.sh*, y el despliegue continuo (cada fusión aprobada a *main* llega sola al servidor) está fusionado en *develop* desde el 24 de octubre de 2026, a falta de crear sus secretos.
+*Nota.* Elaborado a partir del manual técnico [22]. La integración continua se hace con GitHub Actions en los 10 repositorios; el despliegue en Azure se hace por SSH con *update-server.sh*, y el despliegue continuo (cada fusión aprobada a *main* llega sola al servidor) está activo desde el 26 de octubre de 2026.
 
 Los dos clientes separan la vista de su lógica con el patrón MVVM: en la web cada página de Angular usa un ViewModel con señales (36 en total) y en la app cada pantalla usa un hook de React con el estado y las acciones; los cambios de la app que no tocan código nativo se entregan por internet con EAS Update, y los nativos, con un APK nuevo que la app obliga a instalar.
 
 ### F. Procedimiento de Análisis
 
-El estado de los requisitos se tomó de la matriz de trazabilidad de la SRS, verificada contra el código el 21 de octubre de 2026 [1]. Las pruebas se volvieron a ejecutar el 21 de octubre de 2026: las suites de cada servicio Java con el Maven Wrapper, las de payment-service con el SDK de .NET (destino *net8.0*), las de la web con Vitest y las pruebas de punta a punta de *lavarapido-infra/e2e* contra el sistema completo; los 42 casos funcionales se ejecutaron el 19 de octubre de 2026.
+El estado de los requisitos se tomó de la matriz de trazabilidad de la SRS, verificada contra el código el 21 de octubre de 2026 y revisada contra *main* el 27 de octubre de 2026 [1]. Los conteos de pruebas son los del CI de *main* del 27 de octubre de 2026, y ese día se corrieron otra vez las 19 de punta a punta. La ejecución completa anterior fue el 21 de octubre de 2026: las suites de cada servicio Java con el Maven Wrapper, las de payment-service con el SDK de .NET (destino *net8.0*), las de la web con Vitest y las pruebas de punta a punta de *lavarapido-infra/e2e* contra el sistema completo; los 42 casos funcionales se ejecutaron el 19 de octubre de 2026.
 
 ## IV. Resultados
 
@@ -188,8 +188,8 @@ Por razones académicas, todos los servicios comparten una instancia y una base 
 | booking-service | Java | Catálogo, precios, horario, bahías, disponibilidad y reservas | catalog, booking | 13 |
 | operations-service | Java | Operarios, turnos, ausencias, asignación automática y manual, ejecución, calificaciones e informes de inspección | execution | 11 |
 | payment-service | .NET 8 | Pagos con comprobante, reembolsos, cupones y puntos de fidelización | payment, promotion | 12 |
-| notification-service | Java | Bandeja, push, correo y recordatorios | notification | 6 |
-| **Total** | | | **9 esquemas** | **57** |
+| notification-service | Java | Bandeja, push, correo con entregas pendientes y recordatorios | notification | 7 |
+| **Total** | | | **9 esquemas** | **58** |
 
 *Nota.* Elaborado a partir del manual técnico [22].
 
@@ -220,10 +220,10 @@ stateDiagram-v2
     direction LR
     [*] --> CONFIRMED : reservar con bahía libre
     SCHEDULED --> CONFIRMED : confirmar (admin)
-    SCHEDULED --> CANCELLED : cancelar o vencida
+    SCHEDULED --> CANCELLED : cancelar
     CONFIRMED --> CONFIRMED : reprogramar (admin)
     CONFIRMED --> IN_PROGRESS : iniciar (operario, desde 15 min antes)
-    CONFIRMED --> CANCELLED : cancelar (cliente antes de la hora, o admin)
+    CONFIRMED --> CANCELLED : cancelar (cliente antes de la hora, admin, o PAYMENT_TIMEOUT)
     CONFIRMED --> NO_SHOW : no asistió, o terminó sin operario
     IN_PROGRESS --> COMPLETED : finalizar (operario)
     COMPLETED --> [*]
@@ -233,47 +233,47 @@ stateDiagram-v2
 
 **Fig. 2.** Diagrama de Estados de la Reserva
 
-*Nota.* Los estados en gris son finales. *Vencida*: el sistema cancela la reserva programada que nadie confirmó una hora después de su hora de fin; *terminó sin operario*: en el mismo plazo, la confirmada que nunca tuvo operario pasa a NO_SHOW. La confirmada con operario que nadie registró la cierra el administrador. Tomado del manual técnico [22], con las etiquetas traducidas.
+*Nota.* Los estados en gris son finales. *PAYMENT_TIMEOUT*: el sistema cancela la reserva con pago digital que llega a su plazo sin comprobante; *terminó sin operario*: una hora después de su hora de fin, la confirmada que nunca tuvo operario pasa a NO_SHOW. La cancelación automática de la programada vencida se quitó el 24 de octubre de 2026, porque toda reserva nace confirmada. La confirmada con operario que nadie registró la cierra el administrador. Tomado del manual técnico [22], con las etiquetas traducidas.
 
 ### C. Cumplimiento de los Requisitos Funcionales
 
-La SRS define 41 requisitos funcionales: los 29 originales (RF-001 a RF-026, con RF-004b, RF-012b y RF-013b), 9 que se incorporaron en la versión 4.0 porque describían funciones ya construidas (RF-027 a RF-035) y 3 de la versión 6.0 (RF-036 a RF-038: informe de inspección, datos del negocio y ficha del operario). La Tabla IV resume su estado al 21 de octubre de 2026: 40 implementados (98 %) y 1 parcial.
+La SRS define 41 requisitos funcionales: los 29 originales (RF-001 a RF-026, con RF-004b, RF-012b y RF-013b), 9 que se incorporaron en la versión 4.0 porque describían funciones ya construidas (RF-027 a RF-035) y 3 de la versión 6.0 (RF-036 a RF-038: informe de inspección, datos del negocio y ficha del operario). La Tabla IV resume su estado al 27 de octubre de 2026: 38 implementados (93 %) y 3 parciales.
 
 **TABLA IV**  
-*Estado de los Requisitos Funcionales al 24 de Octubre de 2026*
+*Estado de los Requisitos Funcionales al 27 de Octubre de 2026*
 
 | Estado | Cantidad | Requisitos | Observación |
 |---|---|---|---|
 | Implementado | 38 | RF-001 a RF-004 (con RF-004b), RF-006 a RF-014 (con RF-012b y RF-013b), RF-016 a RF-022 y RF-024 a RF-038 | Construidos y verificados contra el código y las pruebas |
-| Parcial | 3 | RF-005, RF-015 y RF-023 | Funcionan con un caso pendiente: la web reserva un solo servicio aunque la API acepta varios, el historial de pagos de la web no usa los filtros de la API y faltan los reportes consolidados por periodo |
+| Parcial | 3 | RF-005, RF-015 y RF-023 | Funcionan con un caso pendiente: la web reserva un solo servicio aunque la API acepta varios, la web no tiene pantalla de historial de pagos y faltan los reportes consolidados por periodo |
 
-*Nota.* Elaborado a partir de la matriz de trazabilidad de la SRS, versión 8.0 [1].
+*Nota.* Elaborado a partir de la matriz de trazabilidad de la SRS, versión 8.3 [1].
 
 Dos decisiones se tomaron mediante ADR. La asignación de operarios se construyó primero como asignación manual del administrador, apoyada en una lista de candidatos con el motivo por el que cada operario no está disponible (ADR-014); sobre esa misma política se agregó después la asignación automática al confirmarse la reserva, que respeta el operario que el cliente elige si sigue libre. Las promociones se rediseñaron como cupones de descuento porcentual que se desbloquean con el saldo de puntos, sin consumirlos (ADR-015).
 
-De los 12 requisitos no funcionales, 3 están implementados y 9 son parciales [1]. Los implementados son el tiempo de respuesta (el percentil 95 más alto, medido el 14 de octubre de 2026, fue de 686 ms frente a una meta de 2 segundos), la idempotencia de los eventos y la tolerancia a fallos de los servicios externos. La disponibilidad y la seguridad siguen parciales: la máquina virtual del servidor se enciende bajo demanda (el 24 de octubre de 2026 quedó desplegada con los 11 contenedores sanos) y, aunque desde ese día el gateway revisa la sesión del token con cualquier esquema y limita las solicitudes del inicio de sesión, quedan secretos antiguos en el historial. Los otros parciales son la integridad y la concurrencia (las reservas y las asignaciones ya se hacen una a la vez con candados de la base de datos, pero faltan pruebas de integración contra SQL Server), la observabilidad, la mantenibilidad, la portabilidad, la compatibilidad (las pantallas web no se salen de 360 px, pero falta probar en un dispositivo con Android 8), la usabilidad (sin prueba con personas usuarias) y la localización.
+De los 12 requisitos no funcionales, 3 están implementados y 9 son parciales [1]. Los implementados son el tiempo de respuesta (el percentil 95 más alto, medido el 14 de octubre de 2026, fue de 686 ms frente a una meta de 2 segundos), la idempotencia de los eventos y la tolerancia a fallos de los servicios externos. La disponibilidad y la seguridad siguen parciales: la máquina virtual del servidor se enciende bajo demanda (el 24 de octubre de 2026 quedó desplegada con los 11 contenedores sanos) y, aunque desde ese día el gateway revisa la sesión del token con cualquier esquema y limita las solicitudes del inicio de sesión, quedan secretos antiguos en el historial. Los otros parciales son la integridad y la concurrencia (las reservas y las asignaciones ya se hacen una a la vez con candados de la base de datos y las pruebas de integración de payment-service corren contra SQL Server, pero faltan las de los demás servicios), la observabilidad, la mantenibilidad, la portabilidad, la compatibilidad (las pantallas web no se salen de 360 px, pero falta probar en un dispositivo con Android 8), la usabilidad (sin prueba con personas usuarias) y la localización.
 
 ### D. Resultados de las Pruebas
 
-El último CI de *develop* del 24 de octubre de 2026 aprobó 1 192 pruebas automatizadas (1 119 de la web y el backend y 73 de la app móvil), ninguna fallida; las 11 de persistencia de payment-service se omiten en el CI (el 23 de octubre eran 838 y el 21 de octubre, 707), y en la ejecución completa del 21 de octubre siete de ellas corrieron contra una base de pruebas aislada (Tabla V). Ese mismo día pasaron las 19 pruebas de punta a punta de *lavarapido-infra/e2e*, que recorren el sistema completo: reserva con elección de operario y asignación automática, flujo de los tres roles con pago, aprobación, puntos, ejecución y calificación, informe de inspección con fotos y enlace público, y reglas de acceso por rol, ya con el chequeo de sesión del gateway activo. La SRS registraba 347 pruebas el 6 de octubre [1]; la diferencia corresponde a las pruebas que se agregaron con cada función nueva.
+El CI de *main* del 27 de octubre de 2026 aprobó 1 337 pruebas automatizadas (1 231 de la web y el backend y 106 de la app móvil), ninguna fallida ni omitida; desde ese día las 17 de integración de payment-service corren en el CI contra SQL Server 2022 con las migraciones de Liquibase (Tabla V). El 24 de octubre eran 1 192, el 23 de octubre 838 y el 21 de octubre 707. El 27 de octubre pasaron también las 19 pruebas de punta a punta de *lavarapido-infra/e2e*, que recorren el sistema completo: reserva con elección de operario y asignación automática, flujo de los tres roles con pago, aprobación, puntos, ejecución y calificación, informe de inspección con fotos y enlace público, y reglas de acceso por rol, ya con el chequeo de sesión del gateway activo y enviando el modo de pago al reservar. La SRS registraba 347 pruebas el 6 de octubre [1]; la diferencia corresponde a las pruebas que se agregaron con cada función nueva.
 
 **TABLA V**  
-*Resultados de la Ejecución de las Pruebas Automatizadas (24 de Octubre de 2026)*
+*Resultados de la Ejecución de las Pruebas Automatizadas (27 de Octubre de 2026)*
 
 | Componente | Casos | Aprobados | Fallidos | Omitidos |
 |---|---|---|---|---|
-| Aplicación web (Angular) | 212 | 212 | 0 | 0 |
+| Aplicación web (Angular) | 242 | 242 | 0 | 0 |
 | api-gateway | 62 | 62 | 0 | 0 |
 | security-service | 200 | 200 | 0 | 0 |
-| customer-service | 82 | 82 | 0 | 0 |
-| booking-service | 95 | 95 | 0 | 0 |
+| customer-service | 83 | 83 | 0 | 0 |
+| booking-service | 137 | 137 | 0 | 0 |
 | operations-service | 110 | 110 | 0 | 0 |
 | notification-service | 133 | 133 | 0 | 0 |
-| payment-service (.NET) | 236 | 225 | 0 | 11 |
-| Aplicación móvil (React Native) | 73 | 73 | 0 | 0 |
-| **Total** | **1 203** | **1 192** | **0** | **11** |
+| payment-service (.NET) | 264 | 264 | 0 | 0 |
+| Aplicación móvil (React Native) | 106 | 106 | 0 | 0 |
+| **Total** | **1 337** | **1 337** | **0** | **0** |
 
-*Nota.* Último CI de GitHub Actions en *develop* de cada repositorio: *./mvnw verify* en los servicios Java, *dotnet test* en payment-service (sin la base aislada, por eso se omiten las 11 de persistencia), *ng test* en la web y *npm test* en la app móvil. Las 19 pruebas de punta a punta no se incluyen en la tabla.
+*Nota.* CI de GitHub Actions en *main* de cada repositorio: *./mvnw verify* en los servicios Java, *dotnet test* en payment-service (las 17 de integración corren en el job "Pruebas de integración" contra SQL Server 2022), *ng test* en la web y *npm test* en la app móvil. Las 19 pruebas de punta a punta no se incluyen en la tabla.
 
 Además, los 42 casos funcionales de la documentación de pruebas se ejecutaron el 19 de octubre de 2026 contra el sistema completo, todos aprobados. En cambio, **no hay resultados registrados de los casos de aceptación CA-01 a CA-16** con el responsable del negocio, no se mide la cobertura de código y los servicios Java no tienen pruebas de persistencia contra un SQL Server real fuera de la suite de punta a punta.
 
@@ -293,11 +293,13 @@ La Tabla VI resume la revisión del sistema frente a OWASP Top 10. Siete categor
 
 *Nota.* Elaborado a partir de la lista de verificación OWASP del manual técnico [14], [22].
 
+Para evitar que una persona o un bot bloquee la agenda con reservas que no piensa pagar, desde el 26 de octubre de 2026 el cliente elige al reservar cómo va a pagar, digital o en efectivo, y sin ese dato la reserva se rechaza (400 *INVALID_PAYMENT_MODE*). En efectivo puede tener como máximo una reserva activa (409 *CASH_BOOKING_LIMIT*), y una reserva con pago digital que no recibe el comprobante en 30 minutos, o antes de la hora de inicio si es más pronto, se cancela sola con el motivo *PAYMENT_TIMEOUT* y libera el horario. Antes de cancelar, booking-service le pregunta a payment-service si ya hay un pago reportado, porque en la prueba en vivo un evento perdido llegó a cancelar una reserva pagada [21].
+
 Respecto de la protección de datos personales, el registro exige aceptar los términos y la política de tratamiento de datos, y el servidor guarda la fecha y la hora de cada aceptación, lo que permite demostrar el consentimiento exigido por la Ley 1581 de 2012 [3]. La opción del perfil que se llamaba "Eliminar cuenta" pasó a llamarse "Desactivar mi cuenta", porque la cuenta se desactiva y su historial se conserva.
 
 ### F. Gestión de Defectos y Mejora Continua
 
-Al 21 de octubre de 2026, el registro de acciones contenía 52 acciones correctivas cerradas, 3 correctivas abiertas, 18 preventivas y 16 de mejoramiento, de las cuales 8 ya están cerradas [21]. El indicador de cierre de correctivas subió de 64 % el 9 de octubre a 95 % (52 de 55), por encima de la meta de 70 %, y la reincidencia fue de 0 %. Ya no quedan correctivas abiertas de severidad P0 ni P1: el bloqueo de cuenta (AC-25) y el registro del consentimiento (AC-26) se cerraron con pruebas. Entre las correcciones cerradas figuran defectos de alto impacto, como horas de reserva desplazadas cinco horas por el manejo de zonas horarias (AC-01), la posibilidad de pagar dos reservas con la misma referencia de transacción (AC-07), un libro de puntos sin reversión ni control de concurrencia (AC-09) dos solicitudes simultáneas que intentaban crear el mismo operario (AC-35) y un token que seguía sirviendo hasta una hora después de cerrar sesión (AC-44).
+Al 27 de octubre de 2026, el registro de acciones contenía 93 acciones correctivas cerradas, 19 correctivas abiertas, 19 preventivas y 18 de mejoramiento [21]. El indicador de cierre de correctivas fue de 83 % (93 de 112), por encima de la meta de 70 % (el 9 de octubre era 64 % y el 21 de octubre, 95 %, antes de que las revisiones del 23 y del 24 de octubre abrieran correctivas nuevas), y la reincidencia fue de 0 %. Ya no quedan correctivas abiertas de severidad P0 ni P1: el bloqueo de cuenta (AC-25) y el registro del consentimiento (AC-26) se cerraron con pruebas. Entre las correcciones cerradas figuran defectos de alto impacto, como horas de reserva desplazadas cinco horas por el manejo de zonas horarias (AC-01), la posibilidad de pagar dos reservas con la misma referencia de transacción (AC-07), un libro de puntos sin reversión ni control de concurrencia (AC-09) dos solicitudes simultáneas que intentaban crear el mismo operario (AC-35) y un token que seguía sirviendo hasta una hora después de cerrar sesión (AC-44).
 
 La verificación cruzada de los manuales contra el código encontró 19 discrepancias entre el código, la documentación del proyecto y las versiones anteriores de los manuales, por ejemplo, la versión del framework, el número de tablas, la validación de tokens en el gateway y el modo de asignación de operarios [22]. La revisión del 16 de octubre de 2026 cerró las que seguían abiertas y llevó los manuales a la versión 4.0, con capturas reales del sistema.
 
@@ -325,15 +327,15 @@ El proyecto no tuvo financiación asignada; se desarrolló con equipos de los in
 
 ## V. Discusión
 
-Los resultados muestran que el equipo construyó una plataforma funcional que cubre el flujo principal del negocio: un cliente puede registrarse, registrar su vehículo, reservar un turno con disponibilidad real y elegir operario si quiere, pagar por QR o transferencia con comprobante, o en efectivo, y calificar el servicio, y el administrador y los operarios pueden gestionar la operación. Con 40 de 41 requisitos funcionales implementados, el producto está prácticamente completo; solo faltan los reportes consolidados por periodo. La asignación automática y la elección del operario, que en la versión anterior de este artículo figuraban como pendientes, se construyeron sobre la misma política de la asignación manual. El contraste entre requisitos funcionales (98 % implementados) y no funcionales (5 de 12 implementados) muestra que el esfuerzo se concentró primero en la funcionalidad; las cualidades que dependen de medir con personas usuarias o en dispositivos reales siguen sin evidencia.
+Los resultados muestran que el equipo construyó una plataforma funcional que cubre el flujo principal del negocio: un cliente puede registrarse, registrar su vehículo, reservar un turno con disponibilidad real y elegir operario si quiere, pagar por QR o transferencia con comprobante, o en efectivo, y calificar el servicio, y el administrador y los operarios pueden gestionar la operación. Con 38 de 41 requisitos funcionales implementados y 3 parciales, el producto está prácticamente completo; faltan los reportes consolidados por periodo, la pantalla web del historial de pagos y la reserva de varios servicios desde la web. La asignación automática y la elección del operario, que en la versión anterior de este artículo figuraban como pendientes, se construyeron sobre la misma política de la asignación manual. El contraste entre requisitos funcionales (93 % implementados) y no funcionales (3 de 12 implementados y 9 parciales) muestra que el esfuerzo se concentró primero en la funcionalidad; las cualidades que dependen de medir con personas usuarias o en dispositivos reales siguen sin evidencia.
 
 La decisión de usar microservicios para un solo lavadero merece discusión. Newman [5] presenta este estilo como una forma de lograr despliegues independientes y propiedad clara de los datos, a costa de la complejidad de un sistema distribuido. El proyecto mitigó parte de esa complejidad con decisiones pragmáticas y documentadas: una sola instancia de base de datos con un dueño por esquema en lugar de una base por servicio (ADR-003), comunicación REST solo cuando se necesita una respuesta inmediata (ADR-004) y la renuncia explícita a patrones como Outbox o Saga [6]. El costo de esa simplificación quedó registrado como riesgo aceptado: la posible pérdida de un evento entre la confirmación de la transacción y su publicación.
 
 La arquitectura también evolucionó respecto de lo planeado. La propuesta técnica eligió una arquitectura en N capas con MySQL para reducir el riesgo técnico y el costo inicial, y dejó la migración a microservicios como una ruta de evolución si la demanda crecía [4]. El equipo adoptó los microservicios desde la primera versión, primero con una descomposición más fina y luego con seis servicios (ADR-002, reemplazado por ADR-009), y cambió MySQL por SQL Server. De igual forma, el alcance pasó de un servicio móvil por zonas con pasarela de pagos a un lavadero de sede única con pagos por QR o transferencia con comprobante revisado por el administrador, o en efectivo. Estos cambios simplificaron el dominio (sin geolocalización, rutas ni integración con una pasarela externa) y evitaron recoger datos de tarjetas, pero dejaron sin cumplir, en su forma original, los objetivos de asignación automática por cercanía, pasarela en línea y reserva según la disponibilidad geográfica.
 
-Garantizar las reglas críticas en la base de datos, y no solo en el código, resultó adecuado para un dominio con concurrencia: dos clientes que reservan la misma bahía o dos administradores que aprueban el mismo pago no dependen de que el código de la aplicación sea correcto en todos sus caminos. Con el mismo criterio, desde el 21 de octubre de 2026 la asignación manual y la automática de un operario se hacen una a la vez con un candado de SQL Server. La revisión del equipo encontró además un riesgo en la primera versión del cierre automático de reservas, del mismo día: marcaba como No asistió toda reserva confirmada que nadie iniciaba, de modo que un servicio atendido pero no registrado habría quedado como ausencia del cliente en el historial y en los reportes. El diseño se cambió para que el sistema decida solo cuando está seguro (la reserva que nunca tuvo operario) y deje las demás al administrador en una lista de reservas por cerrar. Las pruebas de persistencia de payment-service que cubren estos casos existen, pero necesitan una base de pruebas dedicada; la suite de punta a punta sí ejercita esas reglas contra el SQL Server real del entorno Docker.
+Garantizar las reglas críticas en la base de datos, y no solo en el código, resultó adecuado para un dominio con concurrencia: dos clientes que reservan la misma bahía o dos administradores que aprueban el mismo pago no dependen de que el código de la aplicación sea correcto en todos sus caminos. Con el mismo criterio, desde el 21 de octubre de 2026 la asignación manual y la automática de un operario se hacen una a la vez con un candado de SQL Server. La revisión del equipo encontró además un riesgo en la primera versión del cierre automático de reservas, del mismo día: marcaba como No asistió toda reserva confirmada que nadie iniciaba, de modo que un servicio atendido pero no registrado habría quedado como ausencia del cliente en el historial y en los reportes. El diseño se cambió para que el sistema decida solo cuando está seguro (la reserva que nunca tuvo operario) y deje las demás al administrador en una lista de reservas por cerrar. Las pruebas de integración de payment-service que cubren estos casos corren en el CI contra SQL Server 2022 desde el 27 de octubre de 2026; la suite de punta a punta sí ejercita esas reglas contra el SQL Server real del entorno Docker.
 
-La aplicación de la arquitectura hexagonal [8] se refleja en la forma de las pruebas: 1 192 de las 1 203 pruebas automatizadas se ejecutan sin base de datos, porque prueban el dominio, los casos de uso y la capa web con dobles de prueba en lugar de la infraestructura real, lo que las hace rápidas y deterministas. Desde el 19 de octubre de 2026 esas pruebas corren solas en cada cambio con GitHub Actions; sin embargo, la ausencia de medición de cobertura limita la confianza que estas cifras pueden dar, y la suite de punta a punta, que prueba los servicios integrados, todavía se corre a mano. La investigación de Forsgren et al. [20] asocia la integración continua y la automatización de pruebas con un mejor desempeño en la entrega de software; por eso el proyecto cerró su deuda técnica TD-006 con GitHub Actions.
+La aplicación de la arquitectura hexagonal [8] se refleja en la forma de las pruebas: 1 320 de las 1 337 pruebas automatizadas se ejecutan sin base de datos, porque prueban el dominio, los casos de uso y la capa web con dobles de prueba en lugar de la infraestructura real, lo que las hace rápidas y deterministas. Desde el 19 de octubre de 2026 esas pruebas corren solas en cada cambio con GitHub Actions; sin embargo, la ausencia de medición de cobertura limita la confianza que estas cifras pueden dar, y la suite de punta a punta, que prueba los servicios integrados, todavía se corre a mano. La investigación de Forsgren et al. [20] asocia la integración continua y la automatización de pruebas con un mejor desempeño en la entrega de software; por eso el proyecto cerró su deuda técnica TD-006 con GitHub Actions.
 
 La verificación cruzada entre documentación y código fue uno de los aportes más útiles del proceso: las 19 discrepancias encontradas muestran que, incluso con un enfoque que pone el diseño antes del código, la documentación se desactualiza si no se modifica en el mismo cambio que el código, como recoge la lección aprendida L-09 del proyecto [21]. Los ADR [18] permitieron que los cambios de alcance, como la asignación manual de operarios, quedaran justificados en lugar de aparecer como incumplimientos silenciosos.
 
@@ -343,17 +345,17 @@ Este trabajo tiene limitaciones importantes. Primera, no hay evidencia con perso
 
 ## VI. Conclusiones
 
-El proyecto diseñó e implementó una plataforma de microservicios para un lavadero vehicular de una sola sede que integra reservas con disponibilidad real, asignación automática y manual del trabajo, ejecución, pagos por QR o transferencia con comprobante revisado por el administrador o en efectivo, notificaciones, fidelización e informes de inspección. La arquitectura resultante, con seis servicios de dominio, un gateway, una base de datos de 57 tablas con un dueño por esquema y mensajería asíncrona, se documentó en quince ADR y se verificó contra el código. Frente a los seis objetivos específicos de la SRS, se cumplieron el registro de vehículos y la reserva desde la web y Android, la validación del horario y de las bahías con horas alternativas, la asignación de operarios sin cruces de horario, el registro de pagos con revisión del comprobante y la calificación con puntos que desbloquean promociones; el módulo administrativo está construido, salvo los reportes consolidados por periodo, que son la única brecha frente a los requisitos. Respecto de la propuesta original, el servicio móvil por zonas y la pasarela de pagos en línea se retiraron del alcance.
+El proyecto diseñó e implementó una plataforma de microservicios para un lavadero vehicular de una sola sede que integra reservas con disponibilidad real, asignación automática y manual del trabajo, ejecución, pagos por QR o transferencia con comprobante revisado por el administrador o en efectivo, notificaciones, fidelización e informes de inspección. La arquitectura resultante, con seis servicios de dominio, un gateway, una base de datos de 58 tablas con un dueño por esquema y mensajería asíncrona, se documentó en quince ADR y se verificó contra el código. Frente a los seis objetivos específicos de la SRS, se cumplieron el registro de vehículos y la reserva desde la web y Android, la validación del horario y de las bahías con horas alternativas, la asignación de operarios sin cruces de horario, el registro de pagos con revisión del comprobante y la calificación con puntos que desbloquean promociones; el módulo administrativo está construido, salvo los reportes consolidados por periodo, que son la única brecha frente a los requisitos. Respecto de la propuesta original, el servicio móvil por zonas y la pasarela de pagos en línea se retiraron del alcance.
 
-El estado verificado es favorable en lo técnico: 38 de 41 requisitos funcionales implementados y 3 parciales, 1 192 pruebas automatizadas en el último CI, 19 pruebas de punta a punta y 42 casos funcionales aprobados sin fallos, y el sistema desplegado en un servidor público con HTTPS. Las reglas críticas del negocio se garantizan en la base de datos, lo que protege el sistema frente a la concurrencia en reservas, asignaciones, pagos y puntos.
+El estado verificado es favorable en lo técnico: 38 de 41 requisitos funcionales implementados y 3 parciales, 1 337 pruebas automatizadas en el CI del 27 de octubre de 2026, 19 pruebas de punta a punta y 42 casos funcionales aprobados sin fallos, y el sistema desplegado en un servidor público con HTTPS. Las reglas críticas del negocio se garantizan en la base de datos, lo que protege el sistema frente a la concurrencia en reservas, asignaciones, pagos y puntos.
 
-Al mismo tiempo, falta lo más importante para operar con personas usuarias reales: la validación con el negocio. También falta correr contra el servidor público la batería de punta a punta nueva y liberar la versión *v1.1.0*. Por tanto, los beneficios operativos planteados en el problema siguen siendo una hipótesis que este trabajo no confirma ni refuta.
+Al mismo tiempo, falta lo más importante para operar con personas usuarias reales: la validación con el negocio. También falta correr contra el servidor público la batería de punta a punta nueva; las versiones *v1.1.0* a *v1.1.2* ya se liberaron el 26 y el 27 de octubre de 2026, y el servidor corre *main* por despliegue continuo. Por tanto, los beneficios operativos planteados en el problema siguen siendo una hipótesis que este trabajo no confirma ni refuta.
 
-Como trabajo futuro, la propia documentación propone: ejecutar los casos de aceptación y un piloto controlado que establezca la línea base de las medidas de éxito; llevar a la integración continua las pruebas de punta a punta; agregar pruebas de persistencia con SQL Server real y medición de cobertura; completar los reportes consolidados por periodo; extender el límite de solicitudes a toda la API; y, si el proyecto sale del ámbito académico, adoptar firma RS256, tokens de actualización, Outbox, auditoría poblada y una base de datos o un inicio de sesión de base de datos por servicio [22].
+Como trabajo futuro, la propia documentación propone: ejecutar los casos de aceptación y un piloto controlado que establezca la línea base de las medidas de éxito; llevar a la integración continua las pruebas de punta a punta; extender a los servicios Java las pruebas de integración con SQL Server real que ya tiene payment-service y medir la cobertura; completar los reportes consolidados por periodo; extender el límite de solicitudes a toda la API; y, si el proyecto sale del ámbito académico, adoptar firma RS256, tokens de actualización, Outbox, auditoría poblada y una base de datos o un inicio de sesión de base de datos por servicio [22].
 
 ## Referencias
 
-[1] J. C. Guilombo Osorio, B. E. Patiño Cabrera y M. Urbano Quintero, «Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos», versión 8.0, documento no publicado, Servicio Nacional de Aprendizaje, 2026.
+[1] J. C. Guilombo Osorio, B. E. Patiño Cabrera y M. Urbano Quintero, «Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos», versión 8.3, documento no publicado, Servicio Nacional de Aprendizaje, 2026.
 
 [2] Equipo de Desarrollo Vehicle Washing, *Vehicle Washing Management System: Project Documentation* (vehicle-w-docs), documentación de proyecto no publicada, 2026. [En línea]. Disponible en: https://github.com/code-sena/vehicle-w-docs
 
@@ -393,9 +395,9 @@ Como trabajo futuro, la propia documentación propone: ejecutar los casos de ace
 
 [20] N. Forsgren, J. Humble y G. Kim, *Accelerate: The Science of Lean Software and DevOps: Building and Scaling High Performing Technology Organizations*. IT Revolution Press, 2018.
 
-[21] B. E. Patiño Cabrera, J. C. Guilombo Osorio y M. Urbano, «Documentación de acciones correctivas, preventivas y de mejoramiento del software: Sistema de Gestión de Lavado Vehicular (Vehicle Washing),» versión 2.7, documento no publicado, Servicio Nacional de Aprendizaje, 2026.
+[21] B. E. Patiño Cabrera, J. C. Guilombo Osorio y M. Urbano, «Documentación de acciones correctivas, preventivas y de mejoramiento del software: Sistema de Gestión de Lavado Vehicular (Vehicle Washing),» versión 3.3, documento no publicado, Servicio Nacional de Aprendizaje, 2026.
 
-[22] B. E. Patiño Cabrera, J. C. Guilombo Osorio y M. Urbano, «Manual técnico: Sistema de Gestión de Lavado Vehicular (Vehicle Washing),» versión 4.7, documento no publicado, Servicio Nacional de Aprendizaje, 2026.
+[22] B. E. Patiño Cabrera, J. C. Guilombo Osorio y M. Urbano, «Manual técnico: Sistema de Gestión de Lavado Vehicular (Vehicle Washing),» versión 4.13, documento no publicado, Servicio Nacional de Aprendizaje, 2026.
 
 [23] *IEEE Recommended Practice for Software Requirements Specifications*, IEEE Std 830-1998, 1998.
 
@@ -407,7 +409,7 @@ Como trabajo futuro, la propia documentación propone: ejecutar los casos de ace
 
 [27] Equipo de Desarrollo Vehicle Washing, *Plan de actividades Scrum del proyecto LavaRapido* (scrum1.1), hoja de cálculo no publicada, Servicio Nacional de Aprendizaje, 2026.
 
-[28] B. E. Patiño Cabrera, J. C. Guilombo Osorio y M. Urbano, «Procedimiento de implementación del software: Sistema de Gestión de Lavado Vehicular (Vehicle Washing),» versión 2.6, documento no publicado, Servicio Nacional de Aprendizaje, 2026.
+[28] B. E. Patiño Cabrera, J. C. Guilombo Osorio y M. Urbano, «Procedimiento de implementación del software: Sistema de Gestión de Lavado Vehicular (Vehicle Washing),» versión 2.10, documento no publicado, Servicio Nacional de Aprendizaje, 2026.
 
 ## Apéndice
 
@@ -423,7 +425,7 @@ La Tabla A1 lista la información que no se encontró en las carpetas revisadas 
 | 1 | Resultados con personas usuarias | Los casos CA-01 a CA-16, la validación con el cliente y las pruebas finales con el cliente no tienen resultados registrados; las hipótesis D-01 a D-10 siguen pendientes | No se reportan beneficios operativos; se declara como limitación |
 | 2 | Antecedentes de sistemas comparables | No hay revisión de sistemas de reservas para lavaderos ni estudios del sector | El marco se limita a conceptos técnicos |
 | 3 | Fechas reales de los sprints | El plan de actividades solo registra fechas estimadas (1 de enero a 15 de julio) | Se reportan como fechas planeadas |
-| 4 | Pruebas pendientes | 7 pruebas de persistencia de payment-service omitidas sin una base de pruebas dedicada | La Tabla V reporta solo lo ejecutado |
+| 4 | Pruebas pendientes | Pruebas de integración contra SQL Server de los servicios Java (las 17 de payment-service corren en el CI desde el 27 de octubre de 2026) | La Tabla V reporta solo lo ejecutado |
 
 *Nota.* Elaborado por los autores a partir de la revisión de las carpetas del proyecto.
 
