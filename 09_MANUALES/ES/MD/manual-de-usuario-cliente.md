@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 26 de octubre de 2026
 
-Tipo de manual: Manual de usuario del rol Cliente (aplicación web y aplicación móvil Android) · Versión 1.0
+Tipo de manual: Manual de usuario del rol Cliente (aplicación web y aplicación móvil Android) · Versión 1.1
 
 ## Control de Versiones
 
@@ -28,7 +28,8 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 
 | Versión | Fecha | Descripción del cambio | Responsable |
 |---|---|---|---|
-| 1.0 | 2026-10-26 | Creación del manual exclusivo del rol Cliente, separado del Manual de Usuario (versión 4.9) para que cada público tenga su propio documento, según la guía de manuales del SENA. Revisado contra *develop* del 26 de octubre de 2026: pago al reservar (sección 10.3), pantalla de pago según la forma elegida (10.5), nueva sección del reporte de inspección del vehículo que el lavadero comparte por enlace (10.8), términos y condiciones actualizados con la cláusula del informe de inspección y sus fotografías (8.1) y aplicación móvil en la versión 1.1.0 (10.11). Capturas nuevas de la reserva con el paso "¿Cómo vas a pagar?", de la confirmación en efectivo, de las pantallas de pago digital (con plazo) y en efectivo, y del historial con las insignias de pago. | Equipo de desarrollo |
+| 1.0 | 2026-10-26 | Creación del manual exclusivo del rol Cliente, separado del Manual de Usuario (versión 4.9) para que cada público tenga su propio documento, según la guía de manuales del SENA. Revisado contra *develop* del 26 de octubre de 2026: pago al reservar (sección 10.3), pantalla de pago según la forma elegida (10.5), nueva sección del reporte de inspección del vehículo que el lavadero comparte por enlace (10.8), términos y condiciones actualizados con la cláusula del informe de inspección y sus fotografías (8.1) y aplicación móvil (10.11). Capturas nuevas de la reserva con el paso "¿Cómo vas a pagar?", de la confirmación en efectivo, de las pantallas de pago digital (con plazo) y en efectivo, y del historial con las insignias de pago. | Equipo de desarrollo |
+| 1.1 | 2026-10-26 | Política de Datos con las fotografías de la inspección (8.1); aplicación móvil 1.1.1 con el APK *versionCode* 6 y la actualización por internet publicada (10.11). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -214,7 +215,7 @@ Para reservar se necesita una cuenta de cliente. El cliente la crea él mismo co
 
 - No es posible registrar dos cuentas con el mismo correo ni con el mismo número de documento: el sistema muestra "Ya existe una cuenta con este correo" o "Ya existe una cuenta con este número de documento" y no crea la cuenta.
 - El servidor exige las dos casillas de aceptación: sin ellas responde "Debes aceptar el tratamiento de datos personales (Ley 1581) para registrarte."
-- Los **Términos y Condiciones** tienen 15 apartados. Desde el 26 de octubre de 2026 están redactados en tercera persona ("el Cliente") e incluyen el apartado 8, **Informe de inspección y fotografías del vehículo**: en los servicios de tres horas o más, el lavadero puede registrar el estado del vehículo antes y después del servicio, por fases, con hasta cinco fotografías por hallazgo, y compartir ese informe con el cliente (sección 10.8).
+- Los **Términos y Condiciones** tienen 15 apartados. Desde el 26 de octubre de 2026 están redactados en tercera persona ("el Cliente") e incluyen el apartado 8, **Informe de inspección y fotografías del vehículo**: en los servicios de tres horas o más, el lavadero puede registrar el estado del vehículo antes y después del servicio, por fases, con hasta cinco fotografías por hallazgo, y compartir ese informe con el cliente (sección 10.8). La **Política de Tratamiento de Datos Personales** incluye esas fotografías entre los datos que se recolectan (apartado 4), entre las finalidades (registrar el estado del vehículo y atender reclamaciones por daños, apartado 5) y en la conservación (se guardan el tiempo necesario para atender reclamaciones sobre el servicio, apartado 12).
 
 **Figura 2**
 
@@ -753,7 +754,7 @@ La forma de pago se elige al reservar (sección 10.3), y la pantalla **Pagar ser
 
 ### 10.11 Aplicación Móvil Android
 
-La aplicación **LavaRapidoVehicular** (versión 1.1.0, publicada el 26 de octubre de 2026) ofrece al cliente las mismas funciones que la web, con las mismas reglas y los mismos datos: una reserva hecha en la app aparece en la web y al revés. Esta sección explica cómo instalarla y en qué cambia su uso; las reglas de cada módulo son las de las secciones 10.1 a 10.10.
+La aplicación **LavaRapidoVehicular** (versión 1.1.1, APK *versionCode* 6, publicada el 26 de octubre de 2026) ofrece al cliente las mismas funciones que la web, con las mismas reglas y los mismos datos: una reserva hecha en la app aparece en la web y al revés. Esta sección explica cómo instalarla y en qué cambia su uso; las reglas de cada módulo son las de las secciones 10.1 a 10.10.
 
 **Instalación.** La app no está en Google Play: se instala desde la web del lavadero en un teléfono Android con conexión a internet.
 

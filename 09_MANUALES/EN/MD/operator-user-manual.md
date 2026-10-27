@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 26, 2026
 
-Manual Type: User Manual for the Operator Role (web application and Android mobile application) · Version 1.0
+Manual Type: User Manual for the Operator Role (web application and Android mobile application) · Version 1.1
 
 ## Version Control
 
@@ -28,7 +28,8 @@ Table 1 records the change history of this document. Every time the development 
 
 | Version | Date | Description of the change | Responsible |
 |---|---|---|---|
-| 1.0 | 2026-10-26 | Creation of the manual exclusive to the Operator role, separated from the User Manual (version 4.9) so that each audience has its own document, as the SENA manuals guide recommends. Reviewed against *develop* of October 26, 2026. Added: profile and responsibilities of the operator (section 7.2), first login with the temporary password (8.1), payment method of the booking shown in the service information (10.3), the notification switches and the **Deactivate my account** option of the operator, which exist on the web and were not documented (10.7 and 10.8), and mobile application version 1.1.0 (10.9). New screenshots of the operator's profile and settings. | Development team |
+| 1.0 | 2026-10-26 | Creation of the manual exclusive to the Operator role, separated from the User Manual (version 4.9) so that each audience has its own document, as the SENA manuals guide recommends. Reviewed against *develop* of October 26, 2026. Added: profile and responsibilities of the operator (section 7.2), first login with the temporary password (8.1), payment method of the booking shown in the service information (10.3), the notification switches and the **Deactivate my account** option of the operator, which exist on the web and were not documented (10.7 and 10.8), and the mobile application (10.9). New screenshots of the operator's profile and settings. | Development team |
+| 1.1 | 2026-10-26 | Mobile application 1.1.1 with APK *versionCode* 6 and the over-the-air update published (10.9). | Development team |
 
 *Note.* Dates are written in ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -548,7 +549,7 @@ Each module is documented with the format of the manuals guide: name, descriptio
 
 ### 10.9 Android Mobile Application
 
-The **LavaRapidoVehicular** application (version 1.1.0, published on October 26, 2026) offers the operator the same functions as the web, with the same rules and the same data: a service started in the app appears started on the web and vice versa. It is the most practical way to work in the washing area.
+The **LavaRapidoVehicular** application (version 1.1.1, APK *versionCode* 6, published on October 26, 2026) offers the operator the same functions as the web, with the same rules and the same data: a service started in the app appears started on the web and vice versa. It is the most practical way to work in the washing area.
 
 **Installation and updates.** The app is not on Google Play. On the welcome screen of the web, tap the download button or scan the QR code (file */app/LavaRapidoVehicular.apk*), open the file, and tap **Install**; the first time, Android asks to allow the browser to install applications. If the business publishes a new APK, the app shows **Update the app to continue** with the **Download** button, and screen changes arrive on their own with **Update ready** and **Restart now**.
 
