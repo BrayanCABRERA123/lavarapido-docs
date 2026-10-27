@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 26 de octubre de 2026
 
-Tipo de manual: Manual de usuario del rol Cliente (aplicación web y aplicación móvil Android) · Versión 1.2
+Tipo de manual: Manual de usuario del rol Cliente (aplicación web y aplicación móvil Android) · Versión 1.3
 
 ## Control de Versiones
 
@@ -31,6 +31,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 | 1.0 | 2026-10-26 | Creación del manual exclusivo del rol Cliente, separado del Manual de Usuario (versión 4.9) para que cada público tenga su propio documento, según la guía de manuales del SENA. Revisado contra *develop* del 26 de octubre de 2026: pago al reservar (sección 10.3), pantalla de pago según la forma elegida (10.5), nueva sección del reporte de inspección del vehículo que el lavadero comparte por enlace (10.8), términos y condiciones actualizados con la cláusula del informe de inspección y sus fotografías (8.1) y aplicación móvil (10.11). Capturas nuevas de la reserva con el paso "¿Cómo vas a pagar?", de la confirmación en efectivo, de las pantallas de pago digital (con plazo) y en efectivo, y del historial con las insignias de pago. | Equipo de desarrollo |
 | 1.1 | 2026-10-26 | Política de Datos con las fotografías de la inspección (8.1); aplicación móvil 1.1.1 con el APK *versionCode* 6 y la actualización por internet publicada (10.11). | Equipo de desarrollo |
 | 1.2 | 2026-10-27 | Las horas alternativas de "Esa hora ya se ocupó" ya no incluyen las que se cruzan con otra reserva del mismo vehículo (10.3 y 13), con la Figura 16 nueva. | Equipo de desarrollo |
+| 1.3 | 2026-10-27 | Capturas de la aplicación móvil (Figuras 26 a 32) en la sección 10.11; el cierre de sesión pasa a ser la Figura 33. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -129,7 +130,7 @@ Explicar paso a paso cómo el cliente debe registrarse, ingresar, navegar y usar
 
 ### 6.3 Sobre las Capturas de Pantalla
 
-Las figuras de este manual son capturas reales del sistema funcionando con cuentas y datos de prueba, ordenadas según el flujo de uso. Las pantallas de reserva, pago e historial (Figuras 13 a 15 y 18 a 21) se tomaron de nuevo el 26 de octubre de 2026 para mostrar el pago al reservar y la Figura 16, el 27 de octubre; las demás son del 19 de octubre de 2026 y no cambiaron desde entonces. Su origen se explica en el Anexo A.
+Las figuras de este manual son capturas reales del sistema funcionando con cuentas y datos de prueba, ordenadas según el flujo de uso. Las pantallas de reserva, pago e historial (Figuras 13 a 15 y 18 a 21) se tomaron de nuevo el 26 de octubre de 2026 para mostrar el pago al reservar y la Figura 16, el 27 de octubre; las demás son del 19 de octubre de 2026 y no cambiaron desde entonces. Las Figuras 26 a 32 son de la aplicación móvil. Su origen se explica en el Anexo A.
 
 ## 7. Requisitos para Usar el Sistema
 
@@ -783,6 +784,52 @@ La aplicación **LavaRapidoVehicular** (versión 1.1.1, APK *versionCode* 6, pub
 - **Historial:** filtros **Todos**, **Activas**, **Completadas** y **Canceladas**, búsqueda por servicio, vehículo o código, y el detalle de cada reserva con **Pagar ahora**, **Cancelar reserva** y **Calificar Servicio** (sección 10.6).
 - **Mis vehículos**, **Avisos**, **Perfil** y **Configuración** funcionan como en las secciones 10.2, 10.7, 10.9 y 10.10.
 
+**Figura 26**
+
+*Ingreso a la Aplicación Móvil*
+
+![Ingreso a la Aplicación Móvil](capturas/cliente-26-app-movil-ingreso.jpg)
+
+**Figura 27**
+
+*Inicio del Cliente en la Aplicación Móvil*
+
+![Inicio del Cliente en la Aplicación Móvil](capturas/cliente-27-app-movil-inicio.jpg)
+
+**Figura 28**
+
+*Reservar en la Aplicación Móvil: Vehículo y Servicio*
+
+![Reservar en la Aplicación Móvil: Vehículo y Servicio](capturas/cliente-28-app-movil-reservar-vehiculo-y-servicio.jpg)
+
+**Figura 29**
+
+*Reservar en la Aplicación Móvil: Forma de Pago y Resumen*
+
+![Reservar en la Aplicación Móvil: Forma de Pago y Resumen](capturas/cliente-29-app-movil-reservar-hora-y-forma-de-pago.jpg)
+
+*Nota.* Pantalla desplazada hasta el paso 4, con **Pago digital ahora** elegido.
+
+**Figura 30**
+
+*Pago con el Plazo en la Aplicación Móvil*
+
+![Pago con el Plazo en la Aplicación Móvil](capturas/cliente-30-app-movil-pagar-servicio-con-plazo.jpg)
+
+*Nota.* Se abre sola después de **Reservar Ahora** con pago digital; en la app la pantalla se titula **Pasarela de Pagos**.
+
+**Figura 31**
+
+*Historial en la Aplicación Móvil*
+
+![Historial en la Aplicación Móvil](capturas/cliente-31-app-movil-historial.jpg)
+
+**Figura 32**
+
+*Menú Más del Cliente en la Aplicación Móvil*
+
+![Menú Más del Cliente en la Aplicación Móvil](capturas/cliente-32-app-movil-menu-mas.jpg)
+
 **Notificaciones push.** Al ingresar, la app pide permiso para enviar notificaciones. Si se acepta, el teléfono recibe por push los mismos avisos de la bandeja (recordatorios 24 horas y 1 hora antes, operario asignado, servicio iniciado y terminado, pagos, puntos y cupones, entre otros), y tocar uno abre la pantalla relacionada. Android los agrupa en los canales **Recordatorios**, **Promociones y puntos**, **Confirmaciones**, **Cancelaciones**, **Mensajes del servicio** y **Sistema**, que se pueden silenciar desde los ajustes del teléfono. La app muestra el motivo exacto de los errores del servidor en los cuatro idiomas.
 
 **Cierre de sesión en la app.** Abrir **Más** y tocar **Cerrar Sesión**, que pide confirmación; al cerrar, el teléfono deja de recibir las notificaciones de esa cuenta. Limitación conocida, registrada en el documento de Acciones Correctivas (ACO-39): si la sesión vence mientras la app está en segundo plano, el teléfono puede seguir recibiendo las notificaciones de esa cuenta hasta que se vuelva a iniciar sesión o se cierre la sesión desde **Más**.
@@ -875,7 +922,7 @@ Cerrar la sesión al terminar evita que otra persona use la cuenta, especialment
 
 Al cerrar sesión, las demás pestañas del mismo navegador también vuelven a la pantalla de inicio de sesión, y si en una pestaña se entra con otra cuenta, las otras se recargan con esa cuenta. La sesión cerrada tampoco sirve en el servidor, aunque alguien hubiera copiado su acceso. En la app móvil, la sesión se cierra desde **Más** (sección 10.11).
 
-**Figura 26**
+**Figura 33**
 
 *Confirmación del Cierre de Sesión*
 
@@ -1005,7 +1052,7 @@ Servicio Nacional de Aprendizaje. (2026). *Guía para elaborar manuales de softw
 
 ### Anexo A. Origen de las Capturas
 
-Las figuras de este manual son capturas reales del sistema completo corriendo en Docker con la web en *http://localhost:4200*, sobre la rama *develop*. Las Figuras 13 a 15 y 18 a 21 se tomaron el 26 de octubre de 2026 para mostrar el pago al reservar, con una cuenta de cliente y un código QR de prueba, y la Figura 16 el 27 de octubre de 2026, con reservas de prueba que ocupaban las bahías a esa hora; las demás, el 19 de octubre de 2026, y corresponden a pantallas que no cambiaron desde entonces. Se usaron cuentas, vehículos, reservas y pagos de prueba creados solo para las capturas, por lo que no aparecen correos, documentos, teléfonos, placas ni cuentas bancarias reales. Si una pantalla cambia en una versión futura, la captura correspondiente se debe tomar de nuevo con el mismo nombre de archivo de la carpeta *capturas*.
+Las figuras de este manual son capturas reales del sistema completo corriendo en Docker con la web en *http://localhost:4200*, sobre la rama *develop*. Las Figuras 13 a 15 y 18 a 21 se tomaron el 26 de octubre de 2026 para mostrar el pago al reservar, con una cuenta de cliente y un código QR de prueba, y la Figura 16 el 27 de octubre de 2026, con reservas de prueba que ocupaban las bahías a esa hora; las demás, el 19 de octubre de 2026, y corresponden a pantallas que no cambiaron desde entonces. Se usaron cuentas, vehículos, reservas y pagos de prueba creados solo para las capturas, por lo que no aparecen correos, documentos, teléfonos, placas ni cuentas bancarias reales. Las capturas de la aplicación móvil se tomaron el 27 de octubre de 2026 con el código de la app (*develop*, versión 1.1.1) ejecutado en el modo web de Expo, con el tamaño y la densidad de pantalla de un celular (393 × 852 puntos, densidad 2,5), contra el mismo sistema local y con las mismas cuentas de prueba. Las pantallas son las de la app; lo único que cambia frente al teléfono es que no aparecen la barra de estado ni los permisos del sistema operativo. Si una pantalla cambia en una versión futura, la captura correspondiente se debe tomar de nuevo con el mismo nombre de archivo de la carpeta *capturas*.
 
 ### Anexo B. Lista de Verificación para la Entrega
 
