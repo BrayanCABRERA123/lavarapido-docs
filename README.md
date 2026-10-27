@@ -58,7 +58,7 @@ lavarapido-docs/
 - Carpetas de evidencia: número de dos dígitos y nombre en mayúsculas con guiones bajos (`09_MANUALES`).
 - Markdown: minúsculas separadas por guiones, en el idioma de la carpeta (`manual-de-usuario.md`, `user-manual.md`).
 - PDF y Word: número de la evidencia y título con mayúscula inicial (`09_Manual_De_Usuario.pdf`).
-- El Markdown es la fuente: se edita primero y después se regeneran el PDF y el Word.
+- El Markdown es la fuente: se edita primero y después se regeneran el PDF y el Word con `python _generador/generar.py` (instrucciones en [_generador/LEEME.md](_generador/LEEME.md)).
 - Cada cambio de contenido sube la versión del documento, actualiza su fecha y agrega una fila a su control de versiones y una entrada en [CHANGELOG.md](CHANGELOG.md).
 
 ## Repositorios del proyecto
@@ -132,7 +132,7 @@ Each document is available in Markdown (MD), PDF, and Word, in Spanish (ES) and 
 - `NN_EVIDENCE_NAME/` (01 to 09): one folder per evidence, with `ES/` and `EN/`, each containing `MD/` (Markdown source and its `capturas/` screenshots), `PDF/` (APA 7 reading version), and `WORD/` (editable version).
 - `10_ARTICULO_DEL_PROYECTO/`: `MD`, `PDF`, and `WORD`; each file is bilingual.
 - `11_ENLACES_DE_EVIDENCIAS/`: `ES/` and `EN/`, each with `MD/` and `PDF/`.
-- The Markdown is the source: edit it first, then regenerate the PDF and Word files. Each content change raises the document version, updates its date, and adds a row to its version control table and an entry to [CHANGELOG.md](CHANGELOG.md).
+- The Markdown is the source: edit it first, then regenerate the PDF and Word files with `python _generador/generar.py` (instructions in [_generador/LEEME.md](_generador/LEEME.md)). Each content change raises the document version, updates its date, and adds a row to its version control table and an entry to [CHANGELOG.md](CHANGELOG.md).
 
 ## Team Git Guide
 
