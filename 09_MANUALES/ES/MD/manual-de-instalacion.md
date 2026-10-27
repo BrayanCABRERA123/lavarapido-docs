@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 26 de octubre de 2026
 
-Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.8
+Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.9
 
 ## Control de Versiones
 
@@ -40,6 +40,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.6 | 2026-10-23 | Revisión contra *develop* del 23 de octubre de 2026 y la versión *v1.0.0*: ramas y etiquetas de cada repositorio (8.1); variables que el compose ya pasa, incluidas *FOLLOW_UP_LOOK_BACK_DAYS*, *ALLOWED_EMAIL_DOMAINS*, *DEMO_\*_PASSWORD*, *ADMIN_DOCUMENT* y *ADMIN_PHONE*, e *INTERNAL_API_KEY* obligatoria para el operario (10.2); el script global *lavarapido-6-services-sqlserver.sql* no está versionado (11.3); el APK de prueba de las notificaciones push se compila con el perfil *preview* de EAS, porque *development* no existe (13.2); cuentas de demostración por variables (15.1). Incluye el contenido de las ramas *fix/A-05* y *fix/B-02* de Merari Urbano. | Equipo de desarrollo |
 | 4.7 | 2026-10-24 | Revisión contra *develop* del 24 de octubre de 2026, que corre en el servidor público desde ese día (8.1); variables nuevas del gateway (*AUTH_RATE_LIMIT_\**, *TRUSTED_PROXIES*, *ROUTE_CONNECT_TIMEOUT*, *ROUTE_READ_TIMEOUT*) y de operations-service (*START_LATE_LIMIT*), *INTERNAL_API_KEY* y *BOOKING_SERVICE_URL* en customer-service, y *BOOKING_EXPIRY_CHECK_\** sin efecto (10.2); la web publicada escucha en el puerto 8080 (Anexo B). | Equipo de desarrollo |
 | 4.8 | 2026-10-26 | Pago al reservar, revisado contra *develop* del 26 de octubre de 2026 y desplegado en el servidor público ese día: variables nuevas de booking-service (*BOOKING_CASH_ACTIVE_LIMIT*, *BOOKING_PAYMENT_\**, *PAYMENT_SERVICE_URL*) e *INTERNAL_API_KEY* también en payment-service (Tabla 7); migración 049 y semilla 117 de booking-service (Tabla 8); cola *booking.payment-events* y *RABBITMQ_HOST=127.0.0.1* para payment-service fuera de Docker en Windows (12.5). | Equipo de desarrollo |
+| 4.9 | 2026-10-26 | Versiones *v1.1.0* (10 repositorios, incluida la primera de la app móvil) y *v1.1.1* (web, app móvil, payment-service e infra) del 26 de octubre de 2026, y etiqueta recomendada para una instalación de evaluación (8.1). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -282,7 +283,7 @@ El proyecto se distribuye en un repositorio por componente. Todos los repositori
 
 ### 8.1 Clonación de los Repositorios
 
-La rama de integración del equipo es *develop*; allí está la versión más reciente de cada servicio. Desde el 23 de octubre de 2026, *main* tiene la versión entregada *v1.0.0* en 8 repositorios (web, api-gateway, security, customer, booking, operations, notification e infra), y *develop* va adelante con los arreglos del 23 y del 24 de octubre (128 ramas ese día), que saldrán en *v1.1.0*; *develop* es lo que corre en el servidor público desde el 24 de octubre de 2026. payment-service tiene *v1.0.0* desde el 24 de octubre de 2026 (su PR #2 se fusionó y su *main* incluye todo *develop*); la app móvil todavía no tiene versión (PR #1 abierto; su *main* es del 6 de julio de 2026) y se instala desde *develop*. Para una instalación de evaluación, usar la etiqueta *v1.0.0* (y *develop* en la app) o *develop* en todos para ver lo más reciente, que es lo que corre en el servidor público.
+La rama de integración del equipo es *develop*; allí está la versión más reciente de cada servicio, y *main* guarda las versiones entregadas. El 23 de octubre de 2026 se etiquetó *v1.0.0* en 8 repositorios (web, api-gateway, security, customer, booking, operations, notification e infra) y el 24 en payment-service. El 26 de octubre de 2026 salió *v1.1.0* en los 10 repositorios, incluida la app móvil, que hasta entonces no tenía versión, y ese mismo día *v1.1.1* en la web, la app móvil, payment-service e infra. Para una instalación de evaluación, usar la etiqueta más reciente de cada repositorio (*v1.1.1* donde exista y *v1.1.0* en los demás), o *develop* en todos para ver lo más reciente.
 
 ```bash
 mkdir Backend && cd Backend
