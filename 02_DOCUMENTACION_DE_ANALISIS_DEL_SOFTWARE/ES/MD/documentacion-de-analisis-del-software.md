@@ -8,7 +8,7 @@ Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-Versión 2.7, 26 de octubre de 2026
+Versión 2.8, 27 de octubre de 2026
 
 ---
 
@@ -21,7 +21,7 @@ Este documento muestra cómo se comporta LavaRápido cuando alguien lo usa: qué
 3. **Diagramas de actividades** de los procesos de negocio.
 4. **Diagramas de estados** de las entidades que cambian de estado (reserva, pago, ejecución del servicio, promoción e informe de inspección).
 
-El 21 de octubre de 2026 se actualizaron, contra el código de ese día, el cierre de sesión que deja sin efecto el token (sección 2.8), el candado de la asignación de operarios (sección 2.4), el comprobante de máximo 2 MB y el efectivo que solo aparece si su cuenta está activa (secciones 2.5 y 3.4), y el tratamiento de las reservas que terminaron sin que nadie las cerrara (secciones 4.1 y 4.3): el sistema solo cambia el estado cuando no hay duda y lo demás pasa a la lista "Por cerrar" del administrador. El 20 de octubre de 2026 el contenido se revisó otra vez contra el código: el cliente solo cancela (la reprogramación la hace el administrador), se quitó el cambio de rol de las cuentas, se corrigieron las secuencias y los estados que no coincidían, y los casos de uso y diagramas se dibujaron de nuevo con líneas rectas y sin cruces. El 19 de octubre de 2026 se agregaron los casos de uso CU31 y CU32, la recuperación de la contraseña (sección 2.10) y el ciclo de vida de la cuenta (sección 4.6), y las capturas del inventario de pantallas se tomaron de nuevo con datos de demostración. El 17 de octubre de 2026 se agregaron el consentimiento de los documentos legales en el registro (sección 2.1) y el informe de inspección desde la aplicación móvil (sección 2.9). Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol. El 23 de octubre de 2026 (versión 2.5) se agregó que recuperar la contraseña revoca todas las sesiones (sección 2.10) y que, si security-service no responde, el gateway deja pasar la petición (*fail-open*); el resto del análisis sigue vigente contra *develop* de ese día. El 24 de octubre de 2026 (versión 2.6), contra *develop* de ese día, la matriz de permisos pasó a ser de solo lectura (secciones 2.7 y 3.6 e inventario de pantallas) y se quitó la cancelación automática de las reservas programadas vencidas, porque todas nacen confirmadas (sección 4.1). El 26 de octubre de 2026 (versión 2.7), contra *develop* de ese día, se agregó el pago al reservar: el cliente elige cómo va a pagar al reservar, con un máximo de una reserva activa en efectivo (secciones 2.2 y 3.2); payment-service avisa con `payment.reported` cuando el cliente sube el comprobante (sección 2.5), y una reserva con pago digital que llega a su plazo sin comprobante se cancela sola con el motivo `PAYMENT_TIMEOUT`, después de preguntarle a payment-service (secciones 2.11 y 4.1).
+El 21 de octubre de 2026 se actualizaron, contra el código de ese día, el cierre de sesión que deja sin efecto el token (sección 2.8), el candado de la asignación de operarios (sección 2.4), el comprobante de máximo 2 MB y el efectivo que solo aparece si su cuenta está activa (secciones 2.5 y 3.4), y el tratamiento de las reservas que terminaron sin que nadie las cerrara (secciones 4.1 y 4.3): el sistema solo cambia el estado cuando no hay duda y lo demás pasa a la lista "Por cerrar" del administrador. El 20 de octubre de 2026 el contenido se revisó otra vez contra el código: el cliente solo cancela (la reprogramación la hace el administrador), se quitó el cambio de rol de las cuentas, se corrigieron las secuencias y los estados que no coincidían, y los casos de uso y diagramas se dibujaron de nuevo con líneas rectas y sin cruces. El 19 de octubre de 2026 se agregaron los casos de uso CU31 y CU32, la recuperación de la contraseña (sección 2.10) y el ciclo de vida de la cuenta (sección 4.6), y las capturas del inventario de pantallas se tomaron de nuevo con datos de demostración. El 17 de octubre de 2026 se agregaron el consentimiento de los documentos legales en el registro (sección 2.1) y el informe de inspección desde la aplicación móvil (sección 2.9). Los diagramas están hechos en Mermaid. Se revisaron contra el código y el sistema en ejecución el 9 de octubre de 2026, y se actualizaron contra el código el 15 de octubre de 2026 con el bloqueo de cuenta, la asignación automática, la elección de operario, la ventana de inicio del servicio, la alerta de reserva sin operario y el informe de inspección. Al final está el inventario de pantallas, con capturas por rol. El 23 de octubre de 2026 (versión 2.5) se agregó que recuperar la contraseña revoca todas las sesiones (sección 2.10) y que, si security-service no responde, el gateway deja pasar la petición (*fail-open*); el resto del análisis sigue vigente contra *develop* de ese día. El 24 de octubre de 2026 (versión 2.6), contra *develop* de ese día, la matriz de permisos pasó a ser de solo lectura (secciones 2.7 y 3.6 e inventario de pantallas) y se quitó la cancelación automática de las reservas programadas vencidas, porque todas nacen confirmadas (sección 4.1). El 26 de octubre de 2026 (versión 2.7), contra *develop* de ese día, se agregó el pago al reservar: el cliente elige cómo va a pagar al reservar, con un máximo de una reserva activa en efectivo (secciones 2.2 y 3.2); payment-service avisa con `payment.reported` cuando el cliente sube el comprobante (sección 2.5), y una reserva con pago digital que llega a su plazo sin comprobante se cancela sola con el motivo `PAYMENT_TIMEOUT`, después de preguntarle a payment-service (secciones 2.11 y 4.1). El 27 de octubre de 2026 (versión 2.8), contra `main` de ese día (booking *v1.1.1*), una lista de servicios nula, vacía o de más de 10 responde 400 `VALIDATION_ERROR` en lugar de 500, y las horas alternativas ya no incluyen las que chocan con otra reserva del mismo vehículo (secciones 2.2 y 3.2). Las capturas del rol Cliente del inventario de pantallas (sección 5.3) son las del 19 de octubre y no muestran esos cambios.
 
 La especificación completa de cada requisito y caso de uso (actores, precondición, flujo normal, flujos alternos y postcondición) está en el *Informe de especificación de requisitos*, secciones 5 y 7.3; aquí se citan por su identificador (RF-XXX, CUXX).
 
@@ -256,6 +256,9 @@ sequenceDiagram
     C->>W: Elige un operario (opcional)
     C->>W: ¿Cómo vas a pagar? Pago digital ahora o efectivo en el lavadero, y confirma
     W->>B: POST /api/v1/bookings {…, preferredOperatorId, paymentMode}
+    alt serviceIds nulo, vacío o con más de 10 servicios
+        B-->>W: 400 VALIDATION_ERROR
+    end
     alt sin paymentMode o con un valor no válido (solo el cliente)
         B-->>W: 400 INVALID_PAYMENT_MODE
     end
@@ -277,11 +280,11 @@ sequenceDiagram
     else el vehículo ya tiene otra reserva a esa hora
         B-->>W: 409 VEHICLE_ALREADY_BOOKED
     else horario ocupado
-        B-->>W: 409 SLOT_UNAVAILABLE + motivo + hasta 5 horas alternativas
+        B-->>W: 409 SLOT_UNAVAILABLE + motivo + hasta 5 horas alternativas sin cruce con otras reservas del vehículo
     end
 ```
 
-*Fuente:* `booking-service` (`BookingService.create`, `Booking.confirmNew`, `AvailabilityPolicy`, `PaymentPolicy`), `operations-service` (`AvailableOperatorsController`), contratos en `07-api/contracts/openapi/`. El límite de efectivo (`BOOKING_CASH_ACTIVE_LIMIT`, 1) se cuenta con la agenda bloqueada y solo con las reservas activas (Programada, Confirmada o En proceso) que hizo el propio cliente (`booked_by`). El administrador no está obligado a enviar `paymentMode`, y sus reservas no tienen plazo ni límite.
+*Fuente:* `booking-service` (`BookingService.create`, `Booking.confirmNew`, `AvailabilityPolicy`, `PaymentPolicy`), `operations-service` (`AvailableOperatorsController`), contratos en `07-api/contracts/openapi/`. El límite de efectivo (`BOOKING_CASH_ACTIVE_LIMIT`, 1) se cuenta con la agenda bloqueada y solo con las reservas activas (Programada, Confirmada o En proceso) que hizo el propio cliente (`booked_by`). El administrador no está obligado a enviar `paymentMode`, y sus reservas no tienen plazo ni límite. Desde el 27 de octubre de 2026, una reserva lleva como máximo 10 servicios (`BookingDtos.MAX_SERVICES`, también al reprogramar): una lista nula, vacía o más larga responde 400 `VALIDATION_ERROR` en lugar de 500, y las horas alternativas quitan las que se cruzan con otra reserva del mismo vehículo (`AvailabilityPolicy.withoutBusyTimes`).
 
 ### 2.3 Recordatorios y alerta de reserva sin operario (ADR-011)
 
@@ -738,7 +741,7 @@ flowchart TD
     start([Inicio]) --> veh{¿Cliente tiene<br/>al menos un vehículo?}
     veh -->|No| regveh["Pedir que registre un vehículo (CU26)"]
     regveh --> stop0([Fin])
-    veh -->|Sí| sel[Elegir vehículo y uno o más servicios]
+    veh -->|Sí| sel[Elegir vehículo y de 1 a 10 servicios]
     sel --> price[Mostrar precio según el tipo de vehículo]
     price --> date[Elegir fecha y hora]
     date --> op{"¿Quiere elegir operario?<br/>(lista de libres a esa hora)"}
@@ -751,7 +754,7 @@ flowchart TD
     cashno --> pay
     cashlim -->|No| check
     check --> avail{¿Hay bahía libre<br/>en esa franja?}
-    avail -->|No| alt[Ofrecer hasta 5 horas alternativas del mismo día]
+    avail -->|No| alt[Ofrecer hasta 5 horas alternativas del mismo día<br/>sin cruce con otras reservas del vehículo]
     alt --> date
     avail -->|Sí| confirm[Confirmar reserva: asignar bahía, congelar precios]
     confirm --> notif["Notificar confirmación, programar recordatorios 24h/1h<br/>y asignar operario (sección 3.3)"]

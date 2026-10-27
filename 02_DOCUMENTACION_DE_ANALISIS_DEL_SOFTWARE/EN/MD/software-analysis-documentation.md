@@ -8,7 +8,7 @@ Software Analysis and Development Technologist program (ADSO), group (ficha) 314
 
 Instructor: Karol Daniela Correa
 
-Version 2.7, October 26, 2026
+Version 2.8, October 27, 2026
 
 ---
 
@@ -21,7 +21,7 @@ This document shows how LavaRápido behaves when someone uses it: what happens, 
 3. **Activity diagrams** of the business processes.
 4. **State diagrams** of the entities that change status (booking, payment, service execution, promotion and inspection report).
 
-On October 21, 2026, the following were updated against the code of that day: the sign-out that voids the token (section 2.8), the lock on operator assignment (section 2.4), the receipt of at most 2 MB and the cash option that only appears while its account is active (sections 2.5 and 3.4), and the handling of bookings that ended without anyone closing them (sections 4.1 and 4.3): the system only changes the status when there is no doubt, and the rest goes to the administrator's "To close" list. On October 20, 2026, the content was checked again against the code: the client only cancels (the administrator reschedules), the role change of accounts was removed, the sequences and states that did not match were corrected, and the use case and other diagrams were redrawn with straight lines and no crossings. On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end. On October 23, 2026 (version 2.5) it was added that recovering the password revokes all sessions (section 2.10) and that, if security-service does not answer, the gateway lets the request through (*fail-open*); the rest of the analysis still holds against *develop* of that day. On October 24, 2026 (version 2.6), against *develop* of that day, the permission matrix became read-only (sections 2.7 and 3.6 and the screen inventory) and the automatic cancellation of expired scheduled bookings was removed, because every booking is created confirmed (section 4.1). On October 26, 2026 (version 2.7), against *develop* of that day, payment at booking was added: the customer chooses how they will pay when booking, with at most one active cash booking (sections 2.2 and 3.2); payment-service announces with `payment.reported` when the customer uploads the receipt (section 2.5), and a booking with digital payment that reaches its deadline without a receipt is cancelled automatically with the reason `PAYMENT_TIMEOUT`, after asking payment-service (sections 2.11 and 4.1).
+On October 21, 2026, the following were updated against the code of that day: the sign-out that voids the token (section 2.8), the lock on operator assignment (section 2.4), the receipt of at most 2 MB and the cash option that only appears while its account is active (sections 2.5 and 3.4), and the handling of bookings that ended without anyone closing them (sections 4.1 and 4.3): the system only changes the status when there is no doubt, and the rest goes to the administrator's "To close" list. On October 20, 2026, the content was checked again against the code: the client only cancels (the administrator reschedules), the role change of accounts was removed, the sequences and states that did not match were corrected, and the use case and other diagrams were redrawn with straight lines and no crossings. On October 19, 2026, use cases CU31 and CU32, password recovery (section 2.10) and the account life cycle (section 4.6) were added, and the screenshots of the screen inventory were taken again with demo data. On October 17, 2026, the consent to the legal documents at registration (section 2.1) and the inspection report from the mobile app (section 2.9) were added. The diagrams are written in Mermaid. They were checked against the code and the running system on October 9, 2026, and updated against the code on October 15, 2026 with the account lockout, automatic assignment, operator choice, the service start window, the alert for bookings without an operator and the inspection report. The screen inventory, with screenshots by role, is at the end. On October 23, 2026 (version 2.5) it was added that recovering the password revokes all sessions (section 2.10) and that, if security-service does not answer, the gateway lets the request through (*fail-open*); the rest of the analysis still holds against *develop* of that day. On October 24, 2026 (version 2.6), against *develop* of that day, the permission matrix became read-only (sections 2.7 and 3.6 and the screen inventory) and the automatic cancellation of expired scheduled bookings was removed, because every booking is created confirmed (section 4.1). On October 26, 2026 (version 2.7), against *develop* of that day, payment at booking was added: the customer chooses how they will pay when booking, with at most one active cash booking (sections 2.2 and 3.2); payment-service announces with `payment.reported` when the customer uploads the receipt (section 2.5), and a booking with digital payment that reaches its deadline without a receipt is cancelled automatically with the reason `PAYMENT_TIMEOUT`, after asking payment-service (sections 2.11 and 4.1). On October 27, 2026 (version 2.8), against `main` of that day (booking *v1.1.1*), a null, empty, or longer-than-10 list of services returns 400 `VALIDATION_ERROR` instead of 500, and the alternative times no longer include those that clash with another booking of the same vehicle (sections 2.2 and 3.2). The customer screenshots of the screen inventory (section 5.3) are those of October 19 and do not show these changes.
 
 The full specification of each requirement and use case (actors, precondition, main flow, alternative flows and postcondition) is in the *Software Requirements Specification*, sections 5 and 7.3; here they are cited by their identifier (RF-XXX, CUXX).
 
@@ -256,6 +256,9 @@ sequenceDiagram
     C->>W: Chooses an operator (optional)
     C->>W: How will you pay? Digital payment now or cash at the car wash, and confirms
     W->>B: POST /api/v1/bookings {…, preferredOperatorId, paymentMode}
+    alt serviceIds null, empty, or with more than 10 services
+        B-->>W: 400 VALIDATION_ERROR
+    end
     alt no paymentMode or an invalid value (customer only)
         B-->>W: 400 INVALID_PAYMENT_MODE
     end
@@ -277,11 +280,11 @@ sequenceDiagram
     else the vehicle already has another booking at that time
         B-->>W: 409 VEHICLE_ALREADY_BOOKED
     else slot taken
-        B-->>W: 409 SLOT_UNAVAILABLE + reason + up to 5 alternative times
+        B-->>W: 409 SLOT_UNAVAILABLE + reason + up to 5 alternative times without clashes with other bookings of the vehicle
     end
 ```
 
-*Source:* `booking-service` (`BookingService.create`, `Booking.confirmNew`, `AvailabilityPolicy`, `PaymentPolicy`), `operations-service` (`AvailableOperatorsController`), contracts in `07-api/contracts/openapi/`. The cash limit (`BOOKING_CASH_ACTIVE_LIMIT`, 1) is counted with the schedule locked and only with the active bookings (Scheduled, Confirmed, or In progress) made by the customer themselves (`booked_by`). The administrator does not have to send `paymentMode`, and their bookings have no deadline or limit.
+*Source:* `booking-service` (`BookingService.create`, `Booking.confirmNew`, `AvailabilityPolicy`, `PaymentPolicy`), `operations-service` (`AvailableOperatorsController`), contracts in `07-api/contracts/openapi/`. The cash limit (`BOOKING_CASH_ACTIVE_LIMIT`, 1) is counted with the schedule locked and only with the active bookings (Scheduled, Confirmed, or In progress) made by the customer themselves (`booked_by`). The administrator does not have to send `paymentMode`, and their bookings have no deadline or limit. Since October 27, 2026, a booking has at most 10 services (`BookingDtos.MAX_SERVICES`, also when rescheduling): a null, empty, or longer list returns 400 `VALIDATION_ERROR` instead of 500, and the alternative times leave out those that clash with another booking of the same vehicle (`AvailabilityPolicy.withoutBusyTimes`).
 
 ### 2.3 Reminders and alert for bookings without an operator (ADR-011)
 
@@ -738,7 +741,7 @@ flowchart TD
     start([Start]) --> veh{Does the customer have<br/>at least one vehicle?}
     veh -->|No| regveh["Ask them to register a vehicle (CU26)"]
     regveh --> stop0([End])
-    veh -->|Yes| sel[Choose vehicle and one or more services]
+    veh -->|Yes| sel[Choose vehicle and 1 to 10 services]
     sel --> price[Show the price for the vehicle type]
     price --> date[Choose date and time]
     date --> op{"Does the customer want to choose the operator?<br/>(list of those free at that time)"}
@@ -751,7 +754,7 @@ flowchart TD
     cashno --> pay
     cashlim -->|No| check
     check --> avail{Is there a free bay<br/>in that slot?}
-    avail -->|No| alt[Offer up to 5 alternative times on the same day]
+    avail -->|No| alt[Offer up to 5 alternative times on the same day<br/>without clashes with other bookings of the vehicle]
     alt --> date
     avail -->|Yes| confirm[Confirm booking: assign bay, freeze prices]
     confirm --> notif["Send confirmation, schedule 24h/1h reminders<br/>and assign an operator (section 3.3)"]
