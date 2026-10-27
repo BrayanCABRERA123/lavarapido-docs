@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 26 de octubre de 2026
 
-Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.11
+Tipo de manual: Manual de administrador (administradores del negocio y administradores de TI) · Versión 4.12
 
 ## Control de Versiones
 
@@ -43,6 +43,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.9 | 2026-10-26 | Pago al reservar, revisado contra *develop* del 26 de octubre de 2026 y desplegado en el servidor público ese día: la forma de pago aparece en el detalle de la reserva, las reservas digitales sin comprobante se cancelan solas con el motivo *PAYMENT_TIMEOUT* y el cliente tiene como máximo una reserva activa en efectivo (12.3); el efectivo lo registra el administrador, sin comprobante (12.6); variables nuevas (11.6). | Equipo de desarrollo |
 | 4.10 | 2026-10-26 | La tarea de arranque del servidor se explica con *v1.1.0* ya publicada el 26 de octubre de 2026 (14.6). | Equipo de desarrollo |
 | 4.11 | 2026-10-26 | El despliegue continuo está activo desde el 26 de octubre de 2026 (14.6). | Equipo de desarrollo |
+| 4.12 | 2026-10-27 | Máximo 10 servicios por reserva y alternativas que respetan las otras reservas del vehículo (gestión de reservas). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -586,6 +587,7 @@ La pantalla **Reservas** (ruta */admin/reservations*) lista las reservas con **C
 
 - **Pago digital:** el cliente tiene 30 minutos (o hasta la hora de inicio, si es más pronto) para subir el comprobante. Si no lo sube, el sistema cancela la reserva con el motivo **No se subió el comprobante de pago a tiempo** (*PAYMENT_TIMEOUT*), libera la bahía y el cliente recibe el aviso de cancelación. Ese motivo, como *EXPIRED*, lo usa solo el sistema y no aparece al cancelar a mano. Antes de cancelar, el sistema le pregunta al servicio de pagos si la reserva ya tiene un pago en revisión o aprobado; si lo tiene, no la cancela.
 - **Efectivo en el lavadero:** el cliente puede tener como máximo una reserva activa en efectivo; el cupo vuelve cuando esa reserva se completa, se cancela o queda como No asistió (no cuando el administrador registra el pago). El administrador registra el pago cuando el cliente paga (sección 12.6).
+- Una reserva admite como máximo 10 servicios (desde el 27 de octubre de 2026). Si la hora elegida ya no está libre, las horas alternativas que ofrece el sistema no incluyen las que se cruzan con otra reserva del mismo vehículo.
 - Las reservas que crea el administrador con **Nueva Reserva** no están obligadas a llevar forma de pago y no tienen plazo ni límite. Reprogramar una reserva no cambia su forma de pago ni su plazo.
 4. Hacer clic en **Exportar** para descargar la lista en Excel, PDF o CSV.
 

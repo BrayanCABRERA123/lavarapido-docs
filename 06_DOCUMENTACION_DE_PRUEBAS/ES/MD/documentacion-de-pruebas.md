@@ -233,7 +233,7 @@ El 23 de octubre de 2026 se etiquetó *v1.0.0* en 8 repositorios (757 pruebas) y
 | payment-service: dominio | `dotnet test` | 134 | 134 | 0 | 0 | +15: `AMOUNT_CHANGED`, cupón de porcentaje, aviso de reserva cancelada |
 | payment-service: aplicación | (mismo comando) | 52 | 52 | 0 | 0 | +20: canje del cliente (BIZ-02), cola paginada (E-10), efectivo inactivo (C-04), tipo de descuento (D-01) |
 | payment-service: API | (mismo comando) | 34 | 34 | 0 | 0 | +34: proyecto nuevo con las pruebas por rol (F-04) y los identificadores obligatorios (BIZ-13) |
-| payment-service: infraestructura | (mismo comando, sin `PAYMENT_INTEGRATION_DB`) | 5 | 5 | 0 | 11 | +5 sin base; las 11 de persistencia se omiten en el CI |
+| payment-service: infraestructura | (mismo comando, sin `PAYMENT_INTEGRATION_DB`) | 5 | 5 | 0 | 11 | +5 sin base; las 11 de persistencia se omitían en el CI (desde el 27 de octubre de 2026 corren en el job "Pruebas de integración", contra SQL Server con las migraciones de Liquibase) |
 | App móvil | `npm test -- --ci` | 73 | 73 | 0 | 0 | +60: pago, refresco, errores, operario, cola paginada, descuento fijo (25 suites) |
 | **Total** | | **1 192** | **1 192** | **0** | **11** | **+354** |
 
@@ -276,7 +276,7 @@ El 26 de octubre de 2026 el equipo probó en vivo el pago al reservar (modo de p
 | Web (Angular) | 239 | 212 | Paso de la forma de pago, insignia del plazo y etiqueta de efectivo en el historial, pantalla de pago según el modo, códigos de error y Términos y Condiciones |
 | App móvil | 100 | 73 | Paso de la forma de pago (`useReservePaymentStep`), insignia, etiqueta de efectivo, pantalla de pago según el modo y textos (Jest) |
 
-> *Nota.* Elaborado por los autores a partir de las suites de *develop* de cada repositorio del 26 de octubre de 2026. Con los conteos de la Tabla 5d para los demás artefactos, el total es 1 306 sin las pruebas del proyecto de infraestructura de payment (el 24 de octubre eran 1 187 con el mismo criterio). La app móvil todavía no tiene el cambio en los celulares: sale por OTA al fusionar a *main* (*v1.1.0*).
+> *Nota.* Elaborado por los autores a partir de las suites de *develop* de cada repositorio del 26 de octubre de 2026. Con los conteos de la Tabla 5d para los demás artefactos, el total es 1 306 sin las pruebas del proyecto de infraestructura de payment (el 24 de octubre eran 1 187 con el mismo criterio). La app móvil recibió el cambio con la OTA de *v1.1.1* el 26 de octubre de 2026. El 27 de octubre de 2026 booking-service subió a 137 pruebas (alternativas que respetan las otras reservas del vehículo, máximo 10 servicios y 400 en la semana del horario inválida) y customer-service a 83 (dueños de muchos vehículos en una consulta), y las pruebas de punta a punta envían la forma de pago.
 
 ## 4. Casos de prueba funcionales
 

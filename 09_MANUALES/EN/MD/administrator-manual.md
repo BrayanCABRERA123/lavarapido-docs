@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 26, 2026
 
-Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.11
+Manual Type: Administrator Manual (Business Administrators and IT Administrators) · Version 4.12
 
 ## Version Control
 
@@ -43,6 +43,7 @@ Table 1 records the change history of this document. Each time an administrative
 | 4.9 | 2026-10-26 | Payment at booking, reviewed against *develop* of October 26, 2026 and deployed to the public server that day: the payment method appears in the booking detail, digital bookings without a receipt are cancelled automatically with the reason *PAYMENT_TIMEOUT*, and the customer has at most one active cash booking (12.3); cash is recorded by the administrator, without a receipt (12.6); new variables (11.6). | Development team |
 | 4.10 | 2026-10-26 | The server boot task is explained with *v1.1.0* already published on October 26, 2026 (14.6). | Development team |
 | 4.11 | 2026-10-26 | Continuous deployment is active since October 26, 2026 (14.6). | Development team |
+| 4.12 | 2026-10-27 | At most 10 services per booking and alternatives that respect the other bookings of the vehicle (booking management). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -586,6 +587,7 @@ The **Bookings** screen (route */admin/reservations*) lists the bookings with **
 
 - **Digital payment:** the customer has 30 minutes (or until the start time, if that comes first) to upload the receipt. If they do not, the system cancels the booking with the reason **The payment receipt was not uploaded in time** (*PAYMENT_TIMEOUT*), frees the bay, and the customer receives the cancellation notice. That reason, like *EXPIRED*, is used only by the system and does not appear when cancelling by hand. Before cancelling, the system asks the payment service whether the booking already has a payment in review or approved; if it does, it does not cancel it.
 - **Cash at the car wash:** the customer can have at most one active cash booking; the slot comes back when that booking is completed, cancelled, or marked No-show (not when the administrator records the payment). The administrator records the payment when the customer pays (section 12.6).
+- A booking accepts at most 10 services (since October 27, 2026). If the chosen time is no longer free, the alternative times the system offers do not include those that overlap another booking of the same vehicle.
 - Bookings the administrator creates with **New Booking** do not have to include a payment method and have no deadline or limit. Rescheduling a booking does not change its payment method or its deadline.
 4. Click **Export** to download the list in Excel, PDF, or CSV.
 

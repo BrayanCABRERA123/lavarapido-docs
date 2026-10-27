@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 26 de octubre de 2026
 
-Tipo de manual: Manual de usuario del rol Cliente (aplicación web y aplicación móvil Android) · Versión 1.1
+Tipo de manual: Manual de usuario del rol Cliente (aplicación web y aplicación móvil Android) · Versión 1.2
 
 ## Control de Versiones
 
@@ -30,6 +30,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que el e
 |---|---|---|---|
 | 1.0 | 2026-10-26 | Creación del manual exclusivo del rol Cliente, separado del Manual de Usuario (versión 4.9) para que cada público tenga su propio documento, según la guía de manuales del SENA. Revisado contra *develop* del 26 de octubre de 2026: pago al reservar (sección 10.3), pantalla de pago según la forma elegida (10.5), nueva sección del reporte de inspección del vehículo que el lavadero comparte por enlace (10.8), términos y condiciones actualizados con la cláusula del informe de inspección y sus fotografías (8.1) y aplicación móvil (10.11). Capturas nuevas de la reserva con el paso "¿Cómo vas a pagar?", de la confirmación en efectivo, de las pantallas de pago digital (con plazo) y en efectivo, y del historial con las insignias de pago. | Equipo de desarrollo |
 | 1.1 | 2026-10-26 | Política de Datos con las fotografías de la inspección (8.1); aplicación móvil 1.1.1 con el APK *versionCode* 6 y la actualización por internet publicada (10.11). | Equipo de desarrollo |
+| 1.2 | 2026-10-27 | Las horas alternativas de "Esa hora ya se ocupó" ya no incluyen las que se cruzan con otra reserva del mismo vehículo (10.3 y 13), con la Figura 16 nueva. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -128,7 +129,7 @@ Explicar paso a paso cómo el cliente debe registrarse, ingresar, navegar y usar
 
 ### 6.3 Sobre las Capturas de Pantalla
 
-Las figuras de este manual son capturas reales del sistema funcionando con cuentas y datos de prueba, ordenadas según el flujo de uso. Las pantallas de reserva, pago e historial (Figuras 13 a 15 y 17 a 20) se tomaron de nuevo el 26 de octubre de 2026 para mostrar el pago al reservar; las demás son del 19 de octubre de 2026 y no cambiaron desde entonces. Su origen se explica en el Anexo A.
+Las figuras de este manual son capturas reales del sistema funcionando con cuentas y datos de prueba, ordenadas según el flujo de uso. Las pantallas de reserva, pago e historial (Figuras 13 a 15 y 18 a 21) se tomaron de nuevo el 26 de octubre de 2026 para mostrar el pago al reservar y la Figura 16, el 27 de octubre; las demás son del 19 de octubre de 2026 y no cambiaron desde entonces. Su origen se explica en el Anexo A.
 
 ## 7. Requisitos para Usar el Sistema
 
@@ -450,7 +451,7 @@ Cada módulo se documenta con el formato de la guía de manuales: nombre, descri
 - Elegir el operario es opcional. Si el operario elegido ya no está libre al confirmar, el sistema asigna otro ("Si el operario que elegiste ya no está libre al confirmar, te asignamos otro."). El operario asignado se ve en el panel y en las notificaciones, y el administrador puede cambiarlo después.
 - Las reservas se pueden hacer con hasta 60 días de anticipación.
 - Si el día está cerrado, el sistema muestra "Ese día el lavadero está cerrado"; si no hay horas libres, "No hay horas libres ese día".
-- Si otra persona toma la hora mientras el cliente está reservando, el sistema no guarda nada, muestra "Esa hora ya se ocupó" y lista las horas libres más cercanas de ese mismo día (hasta cinco) para que el cliente elija otra.
+- Si otra persona toma la hora mientras el cliente está reservando, el sistema no guarda nada, muestra "Esa hora ya se ocupó: Te mostramos las horas libres más cercanas de ese día." y deja en **Selecciona una hora** solo las horas libres más cercanas de ese mismo día (hasta cinco) para que el cliente elija otra. Desde el 27 de octubre de 2026 esas horas también respetan las otras reservas del mismo vehículo: no se ofrece una hora que se cruce con otra reserva activa de ese vehículo, porque un vehículo no puede estar en dos bahías al mismo tiempo.
 - Si la hora elegida no se puede reservar por otro motivo, el sistema explica cuál: "El lavadero no abre ese día. Elige otra fecha.", "A esa hora el servicio no cabe en el horario de atención. Elige otra hora." o "Esa hora ya pasó. Elige una hora más tarde."
 - Un vehículo no puede tener dos reservas a la misma hora ("Ese vehículo ya tiene una reserva a esa hora.").
 - El servicio se presta en el lavadero: el cliente debe llevar el vehículo en la fecha y la hora reservadas.
@@ -477,6 +478,14 @@ Cada módulo se documenta con el formato de la guía de manuales: nombre, descri
 *Confirmación de una Reserva con Pago en Efectivo*
 
 ![Confirmación de una Reserva con Pago en Efectivo](capturas/cliente-15-confirmacion-de-una-reserva-con-pago-en-efectivo.jpg)
+
+**Figura 16**
+
+*Aviso "Esa Hora ya se Ocupó" con las Horas Alternativas*
+
+![Aviso "Esa Hora ya se Ocupó" con las Horas Alternativas](capturas/cliente-15b-aviso-esa-hora-ya-se-ocupo-con-horas-alternativas.jpg)
+
+*Nota.* Al cerrar el aviso, **Selecciona una hora** solo ofrece las alternativas. En la prueba del 27 de octubre de 2026 el vehículo ya tenía una reserva a las 10:00 y la hora pedida era las 09:30: para otro vehículo el sistema sugería 08:00, 08:30, 09:00, 10:30 y 11:00, y para este, 07:30, 08:00, 08:30, 09:00 y 11:00, porque las 10:30 se cruzan con su otra reserva.
 
 ### 10.4 Consultar o Cancelar una Reserva
 
@@ -514,7 +523,7 @@ Cada módulo se documenta con el formato de la guía de manuales: nombre, descri
 
 *Nota.* Elaborado por los autores a partir de los estados de la reserva definidos en el sistema.
 
-**Figura 16**
+**Figura 17**
 
 *Confirmación de la Cancelación de una Reserva*
 
@@ -586,7 +595,7 @@ La forma de pago se elige al reservar (sección 10.3), y la pantalla **Pagar ser
 
 *Nota.* En las tarjetas del Historial estos estados se muestran como Pendiente de verificación, En revisión, Pagado, Rechazado y Reembolsado.
 
-**Figura 17**
+**Figura 18**
 
 *Pantalla de Pago con el Plazo para Subir el Comprobante*
 
@@ -594,13 +603,13 @@ La forma de pago se elige al reservar (sección 10.3), y la pantalla **Pagar ser
 
 *Nota.* Se abre sola después de reservar con pago digital.
 
-**Figura 18**
+**Figura 19**
 
 *Pantalla de Pago de una Reserva en Efectivo*
 
 ![Pantalla de Pago de una Reserva en Efectivo](capturas/cliente-18-seleccion-del-metodo-de-pago-y-resumen-de-la-reserva.jpg)
 
-**Figura 19**
+**Figura 20**
 
 *Método de Pago, Código QR y Carga del Comprobante*
 
@@ -632,13 +641,13 @@ La forma de pago se elige al reservar (sección 10.3), y la pantalla **Pagar ser
 
 **Observaciones o restricciones:** La calificación es opcional, se permite una sola vez por reserva y solo cuando la reserva está Completada; después no se puede modificar. Si no hay reservas para los filtros elegidos, el sistema muestra "No se encontraron servicios".
 
-**Figura 20**
+**Figura 21**
 
 *Historial con Filtros*
 
 ![Historial con Filtros](capturas/cliente-20-historial-con-filtros.jpg)
 
-**Figura 21**
+**Figura 22**
 
 *Calificación de un Servicio Completado*
 
@@ -667,7 +676,7 @@ La forma de pago se elige al reservar (sección 10.3), y la pantalla **Pagar ser
 
 **Observaciones o restricciones:** El sistema envía recordatorios 24 horas y 1 hora antes de cada reserva. Los avisos que cambian algo para el cliente también llegan por correo: bienvenida, reserva creada, confirmada o cancelada y recordatorios, pago confirmado, rechazado o reembolsado, cupón canjeado o desbloqueado, e informe de inspección. El avance del servicio (operario asignado, iniciado y completado) y los puntos ganados llegan solo a la bandeja y como notificación push. El código de recuperación de la contraseña siempre llega por correo. Los interruptores de **Configuración > Notificaciones** deciden solo los canales externos; la bandeja siempre recibe todos los avisos. Una notificación eliminada no se puede recuperar.
 
-**Figura 22**
+**Figura 23**
 
 *Centro de Notificaciones del Cliente*
 
@@ -717,7 +726,7 @@ La forma de pago se elige al reservar (sección 10.3), y la pantalla **Pagar ser
 
 **Observaciones o restricciones:** Si la contraseña actual es incorrecta, el cambio se rechaza ("La contraseña actual es incorrecta"); la nueva contraseña debe ser distinta de la actual. La cuenta se desactiva, no se borra: el cliente ya no puede ingresar y sus sesiones se cierran, pero se conserva el historial de reservas y pagos. Para reactivarla, debe contactar al administrador. La **Dirección** se guarda en la cuenta, por lo que aparece igual en cualquier dispositivo.
 
-**Figura 23**
+**Figura 24**
 
 *Perfil del Cliente*
 
@@ -746,7 +755,7 @@ La forma de pago se elige al reservar (sección 10.3), y la pantalla **Pagar ser
 
 **Observaciones o restricciones:** Desactivar **Notificaciones push en el celular** detiene los avisos al teléfono; desactivar **Recordatorios por Email** detiene solo los correos de recordatorio; desactivar **Promociones y Ofertas** detiene los avisos por correo y push de los cupones desbloqueados. Ningún interruptor afecta la bandeja. Si el cambio no se puede guardar, el sistema muestra "No se pudieron guardar tus preferencias de notificación. Inténtalo de nuevo." Las fechas se muestran en el formato del idioma seleccionado.
 
-**Figura 24**
+**Figura 25**
 
 *Pantalla de Configuración del Cliente*
 
@@ -866,7 +875,7 @@ Cerrar la sesión al terminar evita que otra persona use la cuenta, especialment
 
 Al cerrar sesión, las demás pestañas del mismo navegador también vuelven a la pantalla de inicio de sesión, y si en una pestaña se entra con otra cuenta, las otras se recargan con esa cuenta. La sesión cerrada tampoco sirve en el servidor, aunque alguien hubiera copiado su acceso. En la app móvil, la sesión se cierra desde **Más** (sección 10.11).
 
-**Figura 25**
+**Figura 26**
 
 *Confirmación del Cierre de Sesión*
 
@@ -892,7 +901,7 @@ Cuando la hora está libre, la reserva se confirma de inmediato: la reserva apar
 
 ##### ¿Qué hago si la hora que quiero ya está ocupada?
 
-La pantalla solo ofrece horas libres. Si otra persona toma la hora mientras usted reserva, el sistema sugiere las horas libres más cercanas del mismo día; elija una y confirme.
+La pantalla solo ofrece horas libres. Si otra persona toma la hora mientras usted reserva, el sistema sugiere las horas libres más cercanas del mismo día que su vehículo puede tomar (no las que se cruzan con otra reserva suya); elija una y confirme.
 
 ##### ¿Puedo elegir quién lava mi vehículo?
 
@@ -996,7 +1005,7 @@ Servicio Nacional de Aprendizaje. (2026). *Guía para elaborar manuales de softw
 
 ### Anexo A. Origen de las Capturas
 
-Las figuras de este manual son capturas reales del sistema completo corriendo en Docker con la web en *http://localhost:4200*, sobre la rama *develop*. Las Figuras 13 a 15 y 17 a 20 se tomaron el 26 de octubre de 2026 para mostrar el pago al reservar, con una cuenta de cliente y un código QR de prueba; las demás, el 19 de octubre de 2026, y corresponden a pantallas que no cambiaron desde entonces. Se usaron cuentas, vehículos, reservas y pagos de prueba creados solo para las capturas, por lo que no aparecen correos, documentos, teléfonos, placas ni cuentas bancarias reales. Si una pantalla cambia en una versión futura, la captura correspondiente se debe tomar de nuevo con el mismo nombre de archivo de la carpeta *capturas*.
+Las figuras de este manual son capturas reales del sistema completo corriendo en Docker con la web en *http://localhost:4200*, sobre la rama *develop*. Las Figuras 13 a 15 y 18 a 21 se tomaron el 26 de octubre de 2026 para mostrar el pago al reservar, con una cuenta de cliente y un código QR de prueba, y la Figura 16 el 27 de octubre de 2026, con reservas de prueba que ocupaban las bahías a esa hora; las demás, el 19 de octubre de 2026, y corresponden a pantallas que no cambiaron desde entonces. Se usaron cuentas, vehículos, reservas y pagos de prueba creados solo para las capturas, por lo que no aparecen correos, documentos, teléfonos, placas ni cuentas bancarias reales. Si una pantalla cambia en una versión futura, la captura correspondiente se debe tomar de nuevo con el mismo nombre de archivo de la carpeta *capturas*.
 
 ### Anexo B. Lista de Verificación para la Entrega
 

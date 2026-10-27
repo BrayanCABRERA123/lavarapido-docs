@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 26, 2026
 
-Manual Type: User Manual for the Customer Role (web application and Android mobile application) · Version 1.1
+Manual Type: User Manual for the Customer Role (web application and Android mobile application) · Version 1.2
 
 ## Version Control
 
@@ -30,6 +30,7 @@ Table 1 records the change history of this document. Every time the development 
 |---|---|---|---|
 | 1.0 | 2026-10-26 | Creation of the manual exclusive to the Customer role, separated from the User Manual (version 4.9) so that each audience has its own document, as the SENA manuals guide recommends. Reviewed against *develop* of October 26, 2026: payment at booking (section 10.3), payment screen according to the method chosen (10.5), new section on the vehicle inspection report that the business shares by link (10.8), terms and conditions updated with the clause on the inspection report and its photographs (8.1), and the mobile application (10.11). New screenshots of the booking with the "How will you pay?" step, the cash confirmation, the digital (with deadline) and cash payment screens, and the history with the payment badges. | Development team |
 | 1.1 | 2026-10-26 | Data Policy with the inspection photographs (8.1); mobile application 1.1.1 with APK *versionCode* 6 and the over-the-air update published (10.11). | Development team |
+| 1.2 | 2026-10-27 | The alternative times of "That time was just taken" no longer include those that overlap another booking of the same vehicle (10.3 and 13), with the new Figure 16. | Development team |
 
 *Note.* Dates are written in ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -128,7 +129,7 @@ To explain step by step how the customer must register, log in, navigate, and us
 
 ### 6.3 About the Screenshots
 
-The figures in this manual are real screenshots of the system running with test accounts and data, ordered according to the flow of use. The booking, payment, and history screens (Figures 13 to 15 and 17 to 20) were taken again on October 26, 2026 to show payment at booking; the others are from October 19, 2026 and have not changed since then. Their source is explained in Annex A.
+The figures in this manual are real screenshots of the system running with test accounts and data, ordered according to the flow of use. The booking, payment, and history screens (Figures 13 to 15 and 18 to 21) were taken again on October 26, 2026 to show payment at booking and Figure 16 on October 27; the others are from October 19, 2026 and have not changed since then. Their source is explained in Annex A.
 
 ## 7. Requirements to Use the System
 
@@ -450,7 +451,7 @@ Each module is documented with the format of the manuals guide: name, descriptio
 - Choosing the operator is optional. If the chosen operator is no longer free when the booking is confirmed, the system assigns another one ("If the operator you chose is no longer free when we confirm, we assign another one."). The assigned operator is shown in the dashboard and in the notifications, and the administrator can change it later.
 - Bookings can be made up to 60 days in advance.
 - If the day is closed, the system shows "The car wash is closed that day"; if there are no free times, "No free times that day".
-- If another person takes the time while the customer is booking, the system saves nothing, shows "That time was just taken", and lists the closest free times of that same day (up to five) so that the customer can choose another one.
+- If another person takes the time while the customer is booking, the system saves nothing, shows "That time was just taken: Here are the closest free times of that day.", and leaves in **Select a time** only the closest free times of that same day (up to five) so that the customer can choose another one. Since October 27, 2026 those times also respect the other bookings of the same vehicle: a time that overlaps another active booking of that vehicle is not offered, because a vehicle cannot be in two bays at the same time.
 - If the chosen time cannot be booked for another reason, the system explains which one: "The car wash is closed that day. Choose another date.", "At that time the service does not fit in the opening hours. Choose another time.", or "That time has already passed. Choose a later time."
 - A vehicle cannot have two bookings at the same time ("That vehicle already has a booking at that time.").
 - The service is provided at the business: the customer must bring the vehicle on the booked date and time.
@@ -477,6 +478,14 @@ Each module is documented with the format of the manuals guide: name, descriptio
 *Confirmation of a Booking Paid in Cash*
 
 ![Confirmation of a Booking Paid in Cash](capturas/customer-15-confirmation-of-a-cash-booking.jpg)
+
+**Figure 16**
+
+*"That Time Was Just Taken" Notice With the Alternative Times*
+
+!["That Time Was Just Taken" Notice With the Alternative Times](capturas/customer-15b-that-time-was-just-taken-notice-with-alternative-times.jpg)
+
+*Note.* After closing the notice, **Select a time** only offers the alternatives. In the test of October 27, 2026 the vehicle already had a booking at 10:00 and the requested time was 09:30: for another vehicle the system suggested 08:00, 08:30, 09:00, 10:30, and 11:00, and for this one, 07:30, 08:00, 08:30, 09:00, and 11:00, because 10:30 overlaps its other booking.
 
 ### 10.4 View or Cancel a Booking
 
@@ -514,7 +523,7 @@ Each module is documented with the format of the manuals guide: name, descriptio
 
 *Note.* Prepared by the authors from the booking statuses defined in the system.
 
-**Figure 16**
+**Figure 17**
 
 *Booking Cancellation Confirmation*
 
@@ -586,7 +595,7 @@ The payment method is chosen when booking (section 10.3), and the **Pay service*
 
 *Note.* On the History cards these statuses are shown as Pending verification, Under review, Paid, Rejected, and Refunded.
 
-**Figure 17**
+**Figure 18**
 
 *Payment Screen With the Deadline to Upload the Receipt*
 
@@ -594,13 +603,13 @@ The payment method is chosen when booking (section 10.3), and the **Pay service*
 
 *Note.* It opens on its own after booking with digital payment.
 
-**Figure 18**
+**Figure 19**
 
 *Payment Screen of a Booking Paid in Cash*
 
 ![Payment Screen of a Booking Paid in Cash](capturas/customer-18-payment-method-selection-and-booking-summary.jpg)
 
-**Figure 19**
+**Figure 20**
 
 *Payment Method, QR Code, and Receipt Upload*
 
@@ -632,13 +641,13 @@ The payment method is chosen when booking (section 10.3), and the **Pay service*
 
 **Notes or restrictions:** Rating is optional, is allowed only once per booking, and only when the booking is Completed; it cannot be modified afterwards. If there are no bookings for the filters chosen, the system shows "No services found".
 
-**Figure 20**
+**Figure 21**
 
 *History With Filters*
 
 ![History With Filters](capturas/customer-20-history-with-filters.jpg)
 
-**Figure 21**
+**Figure 22**
 
 *Rating of a Completed Service*
 
@@ -667,7 +676,7 @@ The payment method is chosen when booking (section 10.3), and the **Pay service*
 
 **Notes or restrictions:** The system sends reminders 24 hours and 1 hour before each booking. Notices that change something for the customer are also sent by email: welcome, booking created, confirmed, or cancelled and reminders, payment confirmed, rejected, or refunded, coupon redeemed or unlocked, and inspection report. The progress of the service (operator assigned, started, and completed) and the points earned arrive only in the inbox and as push notifications. The password recovery code always arrives by email. The switches of **Settings > Notifications** decide only the external channels; the inbox always receives every notice. A deleted notification cannot be recovered.
 
-**Figure 22**
+**Figure 23**
 
 *Customer Notification Center*
 
@@ -717,7 +726,7 @@ The payment method is chosen when booking (section 10.3), and the **Pay service*
 
 **Notes or restrictions:** If the current password is wrong, the change is rejected ("The current password is incorrect"); the new password must be different from the current one. The account is deactivated, not erased: the customer can no longer log in and the sessions are closed, but the history of bookings and payments is kept. To reactivate it, the customer must contact the administrator. The **Address** is saved in the account, so it appears the same on any device.
 
-**Figure 23**
+**Figure 24**
 
 *Customer Profile*
 
@@ -746,7 +755,7 @@ The payment method is chosen when booking (section 10.3), and the **Pay service*
 
 **Notes or restrictions:** Turning off **Push notifications on your phone** stops the notices to the phone; turning off **Email Reminders** stops only the reminder emails; turning off **Promotions and Offers** stops the email and push alerts of unlocked coupons. The inbox is not affected by any switch. If the change cannot be saved, the system shows "Your notification preferences could not be saved. Please try again." Dates are shown in the format of the selected language.
 
-**Figure 24**
+**Figure 25**
 
 *Customer Settings Screen*
 
@@ -866,7 +875,7 @@ Logging out when finished prevents another person from using the account, especi
 
 When signing out, the other tabs of the same browser also go back to the login screen, and if another account signs in on one tab, the others reload with that account. The closed session does not work on the server either, even if someone had copied its access. In the mobile app, the session is closed from **More** (section 10.11).
 
-**Figure 25**
+**Figure 26**
 
 *Log Out Confirmation*
 
@@ -892,7 +901,7 @@ When the time is free, the booking is confirmed at once: it appears in the dashb
 
 ##### What do I do if the time I want is already taken?
 
-The screen only offers free times. If another person takes the time while you book, the system suggests the closest free times of the same day; choose one and confirm.
+The screen only offers free times. If another person takes the time while you book, the system suggests the closest free times of the same day that your vehicle can take (not those that overlap another booking of yours); choose one and confirm.
 
 ##### Can I choose who washes my vehicle?
 
@@ -996,7 +1005,7 @@ Vehicle Washing Development Team. (2026c). *LavadoVehicular-Movil* (version 1.1.
 
 ### Annex A. Source of the Screenshots
 
-The figures in this manual are real screenshots of the whole system running in Docker with the web at *http://localhost:4200*, on the *develop* branch, with the interface in English. Figures 13 to 15 and 17 to 20 were taken on October 26, 2026 to show payment at booking, with a test customer account and a test QR code; the others, on October 19, 2026, and correspond to screens that have not changed since then. Test accounts, vehicles, bookings, and payments created only for the screenshots were used, so no real emails, ID numbers, phone numbers, plates, or bank accounts appear. If a screen changes in a future version, the corresponding screenshot must be taken again with the same file name in the *capturas* folder.
+The figures in this manual are real screenshots of the whole system running in Docker with the web at *http://localhost:4200*, on the *develop* branch, with the interface in English. Figures 13 to 15 and 18 to 21 were taken on October 26, 2026 to show payment at booking, with a test customer account and a test QR code, and Figure 16 on October 27, 2026, with test bookings that filled the bays at that time; the others, on October 19, 2026, and correspond to screens that have not changed since then. Test accounts, vehicles, bookings, and payments created only for the screenshots were used, so no real emails, ID numbers, phone numbers, plates, or bank accounts appear. If a screen changes in a future version, the corresponding screenshot must be taken again with the same file name in the *capturas* folder.
 
 ### Annex B. Delivery Checklist
 

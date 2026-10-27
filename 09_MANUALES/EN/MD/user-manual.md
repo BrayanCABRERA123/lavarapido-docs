@@ -16,7 +16,7 @@ Instructor: Karol Daniela Correa
 
 October 26, 2026
 
-Manual Type: User Manual (Customer and Operator Roles, on the web and in the mobile application) · Version 4.11
+Manual Type: User Manual (Customer and Operator Roles, on the web and in the mobile application) · Version 4.12
 
 ## Version Control
 
@@ -44,6 +44,7 @@ Table 1 records the change history of this document. Each time the development t
 | 4.9 | 2026-10-26 | Payment at booking, reviewed against *develop* of October 26, 2026 and deployed to the public server that day: "How will you pay?" step when booking, 30-minute deadline to upload the digital payment receipt, and at most one active cash booking (10.1.3); booking cancelled for lack of payment (10.1.4); payment screen according to the chosen method and cash label (10.1.5 and 10.3.4); new messages (Table 12) and a frequently asked question about the payment deadline (13). | Development team |
 | 4.10 | 2026-10-26 | The Customer User Manual and the Operator User Manual (version 1.0) are created, with the content of this manual separated by role as the SENA guide recommends; this manual is kept as a joint reference for both roles. Corrections: the operator also has the notification switches and **Deactivate my account** (10.2.7), and mobile app *v1.1.0* is already published (10.3.4). | Development team |
 | 4.11 | 2026-10-26 | Mobile application 1.1.1: APK *versionCode* 6 and over-the-air update published on October 26, 2026 (10.3 and 10.3.4). | Development team |
+| 4.12 | 2026-10-27 | The alternative times of "That time was just taken" respect the other bookings of the same vehicle (10.1.3 and 13). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -492,7 +493,7 @@ Each module is documented with the same format: name, description, role that can
 - Choosing the operator is optional. If the chosen operator is no longer free when the booking is confirmed, the system assigns another one ("If the operator you chose is no longer free when we confirm, we assign another one."). The assigned operator is shown in the dashboard and in the notifications, and the administrator can change it later.
 - Bookings can be made up to 60 days in advance.
 - If the day is closed, the system shows "The car wash is closed that day"; if there are no free times, "No free times that day".
-- If another person takes the time while the customer is booking, the system saves nothing, shows "That time was just taken", and lists the closest free times of that same day (up to five) so that the customer can choose another one.
+- If another person takes the time while the customer is booking, the system saves nothing, shows "That time was just taken: Here are the closest free times of that day.", and leaves in **Select a time** only the closest free times of that same day (up to five) so that the customer can choose another one. Since October 27, 2026 those times also respect the other bookings of the same vehicle: a time that overlaps another active booking of that vehicle is not offered, because a vehicle cannot be in two bays at the same time.
 - If the chosen time cannot be booked for another reason, the system explains which one: "The car wash is closed that day. Choose another date.", "At that time the service does not fit in the opening hours. Choose another time.", or "That time has already passed. Choose a later time."
 - A vehicle cannot have two bookings at the same time ("That vehicle already has a booking at that time.").
 - The service is provided at the business: the customer must bring the vehicle on the booked date and time.
@@ -1118,7 +1119,7 @@ When the time is free, the booking is confirmed at once: the system shows "Booki
 
 ##### What do I do if the time I want is already taken?
 
-The screen only offers free times. If another person takes the time while you book, the system suggests the closest free times of the same day; choose one and confirm.
+The screen only offers free times. If another person takes the time while you book, the system suggests the closest free times of the same day that your vehicle can take (not those that overlap another booking of yours); choose one and confirm.
 
 ##### Can I choose who washes my vehicle?
 

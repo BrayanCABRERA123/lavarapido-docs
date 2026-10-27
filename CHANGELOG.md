@@ -4,6 +4,15 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-10-27 — Cambios de booking, customer, payment e infra de la madrugada
+
+**Contenido** (español e inglés). Verificado contra `develop` del 27 de octubre de 2026 (booking `c648730`, customer `c9ac51c`, payment `6cb806f`, infra `f9a44d0`) y en el entorno local con booking y customer reconstruidos.
+
+- 09 Usuario del cliente 1.2: las horas alternativas de "Esa hora ya se ocupó" ya no incluyen las que se cruzan con otra reserva del mismo vehículo (10.3 y 13); Figura 16 nueva (ES y EN) tomada el 27 de octubre con el aviso, y las figuras siguientes renumeradas (17 a 26).
+- 09 Usuario 4.12, Administrador 4.12 (máximo 10 servicios por reserva y alternativas) y Técnico 4.12 (`AvailabilityPolicy.withoutBusyTimes`, máximo 10 `serviceIds` sin nulos, 400 `VALIDATION_ERROR` en la semana del horario, `bookedBy` solo para el personal, consulta única de dueños en customer, job "Pruebas de integración" de payment y conteos: booking 137, customer 83).
+- 06 Pruebas: pruebas de persistencia de payment en el CI y conteos del 27 de octubre.
+- **PDF y Word regenerados** de los manuales técnico, de usuario, de usuario del cliente y de administrador. Siguen pendientes los de 01 a 08 y el PDF de 11.
+
 ## 2026-10-26 (cierre) — Despliegue continuo activo, APK 1.1.1, términos y Política de Datos, SonarCloud
 
 **Contenido** (español e inglés). Verificado en GitHub Actions (`lavarapido-infra`, `deploy.yml`; `LavadoVehicular-Movil`, `cd.yml`), en `/app/version.json` del servidor público y en los archivos de traducción de la web.
