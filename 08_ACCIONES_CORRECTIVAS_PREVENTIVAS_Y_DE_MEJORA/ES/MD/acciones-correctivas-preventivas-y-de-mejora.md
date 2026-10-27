@@ -16,7 +16,7 @@ Instructora: Karol Daniela Correa
 
 26 de octubre de 2026
 
-Tipo de documento: Registro de acciones correctivas, preventivas y de mejoramiento (equipo de desarrollo e instructora) · Versión 3.1
+Tipo de documento: Registro de acciones correctivas, preventivas y de mejoramiento (equipo de desarrollo e instructora) · Versión 3.2
 
 ## Control de Versiones
 
@@ -41,6 +41,7 @@ La Tabla 1 registra el historial de cambios de este documento. El registro de ac
 | 2.9 | 2026-10-24 | Se cerró AC-87: después del despliegue del 24 de octubre, notification-service no podía leer *pending_delivery* (columnas VARCHAR de la migración 047) y no enviaba push ni correos; la migración 048 las pasó a NVARCHAR y se desplegó ese día a las 17:12 UTC. Se recalculó la Tabla 10 (87 de 103) y se agregó la lección L-19 sobre las pruebas de integración contra SQL Server (RNF-003). | Equipo de desarrollo |
 | 3.0 | 2026-10-26 | Pago al reservar. Se cerró AC-88, acción preventiva y de mejora que nació de la pregunta de la sustentación y de la recomendación del instructor: mitigación de reservas masivas con el modo de pago al reservar, el efectivo con límite y el vencimiento del pago digital. Se cerró AC-89: en la prueba en vivo se perdió un evento y el job canceló una reserva pagada, y ahora booking le pregunta a payment antes de cancelar. Se abrió ACO-41 (tolerancia por retraso en el efectivo). Se recalcularon la Tabla 10 (89 de 106) y el conteo de pruebas, y se agregaron la lección L-20 y las acciones nuevas en el Anexo C. | Equipo de desarrollo |
 | 3.1 | 2026-10-26 | Versiones *v1.1.0* y *v1.1.1*. Se cerró ACO-19 como AC-90: el despliegue continuo corrió solo por primera vez la noche del 26 de octubre y la OTA del móvil se publicó tras comprobar la huella nativa. ACO-24 quedó solo con la protección de *develop*. Se actualizaron la Tabla 10 (90 de 106), AM-17, H-15 y el Anexo C. | Equipo de desarrollo |
+| 3.2 | 2026-10-27 | Conteo de pruebas del 27 de octubre de 2026 (booking 137, customer-service 83: 1 311) y pruebas de persistencia de payment en el CI (Tabla 10). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -424,7 +425,7 @@ Las acciones preventivas atacan las causas de riesgos que todavía no se han mat
 | Cierre en plazo | Acciones cerradas dentro del plazo de su severidad / acciones cerradas × 100 | ≥ 90 % | Por medir desde la versión 1.0 |
 | Reincidencia | Correctivas cerradas cuyo problema reaparece / correctivas cerradas × 100 | 0 % | 0 % |
 | Defectos escapados | Defectos encontrados en aceptación u operación / defectos totales del periodo × 100 | Tendencia a la baja | Por medir desde la primera implementación |
-| Pruebas automatizadas | Pruebas ejecutadas y aprobadas en todos los repositorios | Creciente | Al 26 de octubre de 2026 cambiaron booking (133), payment-service (247, sin las de integración), la web (239) y la app móvil (100); con los demás artefactos del último CI del 24 de octubre, 1 306 sin el proyecto de infraestructura de payment (el 24 de octubre eran 1 187 con el mismo criterio y 1 192 con él). Además, la prueba en vivo del pago al reservar del 26 de octubre (11 pruebas, 2 de ellas fallas simuladas), 19 de punta a punta el 21 de octubre y 42 casos funcionales el 19 de octubre |
+| Pruebas automatizadas | Pruebas ejecutadas y aprobadas en todos los repositorios | Creciente | Al 26 de octubre de 2026 cambiaron booking (133), payment-service (247, sin las de integración), la web (239) y la app móvil (100); con los demás artefactos del último CI del 24 de octubre, 1 306 sin el proyecto de infraestructura de payment (el 24 de octubre eran 1 187 con el mismo criterio y 1 192 con él); el 27 de octubre de 2026 booking subió a 137 y customer-service a 83, para 1 311 con el mismo criterio, y las 11 pruebas de persistencia de payment empezaron a correr en el CI contra SQL Server. Además, la prueba en vivo del pago al reservar del 26 de octubre (11 pruebas, 2 de ellas fallas simuladas), 19 de punta a punta el 21 de octubre y 42 casos funcionales el 19 de octubre |
 
 *Nota.* Elaborado por los autores. El conteo de pruebas corresponde al último CI de *develop* de cada repositorio del 24 de octubre de 2026 (el 23 de octubre eran 838; en *v1.0.0*, 757; el 21 de octubre, 707); en la versión 1.0 se contaban anotaciones (unas 400). El 26 de octubre de 2026 se agregaron los conteos de booking, payment, la web y la app móvil (documento de Pruebas, Tabla 5f). Las correctivas registradas cuentan AC-01 a AC-90 (AC-88 es preventiva y de mejora, pero tiene número AC) y las 16 ACO abiertas.
 
