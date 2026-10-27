@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 26, 2026
+October 27, 2026
 
-Manual Type: User Manual for the Operator Role (web application and Android mobile application) · Version 1.2
+Manual Type: User Manual for the Operator Role (web application and Android mobile application) · Version 1.3
 
 ## Version Control
 
@@ -31,6 +31,7 @@ Table 1 records the change history of this document. Every time the development 
 | 1.0 | 2026-10-26 | Creation of the manual exclusive to the Operator role, separated from the User Manual (version 4.9) so that each audience has its own document, as the SENA manuals guide recommends. Reviewed against *develop* of October 26, 2026. Added: profile and responsibilities of the operator (section 7.2), first login with the temporary password (8.1), payment method of the booking shown in the service information (10.3), the notification switches and the **Deactivate my account** option of the operator, which exist on the web and were not documented (10.7 and 10.8), and the mobile application (10.9). New screenshots of the operator's profile and settings. | Development team |
 | 1.1 | 2026-10-26 | Mobile application 1.1.1 with APK *versionCode* 6 and the over-the-air update published (10.9). | Development team |
 | 1.2 | 2026-10-27 | Mobile application screenshots (Figures 15 to 18) in section 10.9; logging out becomes Figure 19. | Development team |
+| 1.3 | 2026-10-27 | Reference of the mobile application with repository version *v1.1.2*, of October 27, 2026 (References). | Development team |
 
 *Note.* Dates are written in ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -716,7 +717,7 @@ Vehicle Washing Development Team. (2026a). *Vehicle washing management system: P
 
 Vehicle Washing Development Team. (2026b). *Front-end-proyecto-web* (develop branch) [Computer software]. GitHub. https://github.com/BrayanCABRERA123/Front-end-proyecto-web
 
-Vehicle Washing Development Team. (2026c). *LavadoVehicular-Movil* (version 1.1.0) [Computer software]. GitHub. https://github.com/merari0322/LavadoVehicular-Movil
+Vehicle Washing Development Team. (2026c). *LavadoVehicular-Movil* (version 1.1.2) [Computer software]. GitHub. https://github.com/merari0322/LavadoVehicular-Movil
 
 ## 15. Annexes
 
