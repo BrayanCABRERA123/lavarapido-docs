@@ -459,7 +459,7 @@ The project is also justified by its constraints. Personal data processing must 
 
 ### 1.3. Objectives
 
-The current project objectives are stated in version 8.3 of the SRS [Guilombo Osorio et al. 2026].
+The current project objectives are stated in version 8.4 of the SRS [Guilombo Osorio et al. 2026].
 
 **General objective.** To develop a web and mobile system that organizes booking, operator assignment, payment, and wash tracking at a car wash, ensuring that every bay and every operator is assigned without schedule overlaps and that every payment is linked to its booking.
 
@@ -671,7 +671,7 @@ The SRS defines 41 functional requirements: the original 29 (RF-001 to RF-026, w
 | Implemented | 38 | RF-001 to RF-004 (with RF-004b), RF-006 to RF-014 (with RF-012b and RF-013b), RF-016 to RF-022, and RF-024 to RF-038 | Built and verified against the code and the tests |
 | Partial | 3 | RF-005, RF-015, and RF-023 | They work with one pending case: the web books a single service although the API accepts several, the web has no payment history screen, and the consolidated reports per period are missing |
 
-*Note.* Based on the traceability matrix of the SRS, version 8.3 [Guilombo Osorio et al. 2026].
+*Note.* Based on the traceability matrix of the SRS, version 8.4 [Guilombo Osorio et al. 2026].
 
 Two decisions were made through ADRs. Operator assignment was first built as manual assignment by the administrator, supported by a candidate list that shows why each operator is not available (ADR-014); automatic assignment when a booking is confirmed was later added on top of that same policy, and it respects the operator chosen by the customer if that operator is still free. Promotions were redesigned as percentage discount coupons that are unlocked with the points balance without spending it (ADR-015).
 
@@ -788,7 +788,7 @@ Roy T. Fielding. 2000. *Architectural Styles and the Design of Network-based Sof
 
 Nicole Forsgren, Jez Humble, and Gene Kim. 2018. *Accelerate: The Science of Lean Software and DevOps: Building and Scaling High Performing Technology Organizations*. IT Revolution Press.
 
-Juan Camilo Guilombo Osorio, Brayan Estiven Patiño Cabrera, and Merari Urbano Quintero. 2026. *Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos* [Software requirements specification (SRS) of the LavaRápido system: Web and mobile booking and management platform for a car wash] (Version 8.3). Unpublished document. Servicio Nacional de Aprendizaje.
+Juan Camilo Guilombo Osorio, Brayan Estiven Patiño Cabrera, and Merari Urbano Quintero. 2026. *Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos* [Software requirements specification (SRS) of the LavaRápido system: Web and mobile booking and management platform for a car wash] (Version 8.4). Unpublished document. Servicio Nacional de Aprendizaje.
 
 Gregor Hohpe and Bobby Woolf. 2003. *Enterprise Integration Patterns: Designing, Building, and Deploying Messaging Solutions*. Addison-Wesley.
 
@@ -816,11 +816,11 @@ OWASP Foundation. 2021. *OWASP Top 10:2021*. https://owasp.org/Top10/
 
 Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2025. *Propuesta técnica y económica: Sistema integral para la gestión de servicios móviles de lavado vehicular* [Technical and economic proposal: Comprehensive system for managing mobile car wash services]. Unpublished document. Servicio Nacional de Aprendizaje.
 
-Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2026a. *Documentation of Corrective, Preventive, and Improvement Actions for the Software: Vehicle Washing Management System (Vehicle Washing)* (Version 3.3). Unpublished document. Servicio Nacional de Aprendizaje.
+Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2026a. *Documentation of Corrective, Preventive, and Improvement Actions for the Software: Vehicle Washing Management System (Vehicle Washing)* (Version 3.5). Unpublished document. Servicio Nacional de Aprendizaje.
 
-Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2026b. *Software Implementation Procedure: Vehicle Washing Management System (Vehicle Washing)* (Version 2.10). Unpublished document. Servicio Nacional de Aprendizaje.
+Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2026b. *Software Implementation Procedure: Vehicle Washing Management System (Vehicle Washing)* (Version 2.11). Unpublished document. Servicio Nacional de Aprendizaje.
 
-Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2026c. *Technical Manual: Vehicle Washing Management System (Vehicle Washing)* (Version 4.13). Unpublished document. Servicio Nacional de Aprendizaje.
+Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2026c. *Technical Manual: Vehicle Washing Management System (Vehicle Washing)* (Version 4.15). Unpublished document. Servicio Nacional de Aprendizaje.
 
 Niels Provos and David Mazières. 1999. A Future-Adaptable Password Scheme. In *Proceedings of the 1999 USENIX Annual Technical Conference, FREENIX Track*. USENIX Association, 81–91.
 
