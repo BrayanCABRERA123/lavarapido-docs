@@ -4,6 +4,21 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-11-04 — payment-service v1.1.3, 1 348 pruebas y PDF y Word del artículo
+
+**Contenido** (español e inglés). Revisado contra GitHub el 4 de noviembre de 2026: `v1.1.3` de payment-service se fusionó en `main` el 27 de octubre (PR #15 y PR #16) y su etiqueta y release se publicaron el 4 de noviembre; el despliegue automático que pidió esa fusión encontró la máquina apagada, así que se instala al encenderla. Con esa versión, el CI de `main` aprobó 275 pruebas de payment-service (dominio 142, aplicación 61, API 47 e integración 25, de ellas 12 contra SQL Server 2022), 1 000 de los servicios y 1 348 en total (antes, 264 y 1 337).
+
+- 01 SRS 8.4: Tabla 58 y RNF-003 con las pruebas de payment-service `v1.1.3`; la tabla del equipo con el usuario de GitHub en lugar del correo.
+- 05 Artefactos: versiones en `main` con `v1.1.3` de payment-service.
+- 06 Pruebas: Tablas 4 y 5f y brecha 3 con las 275 pruebas de payment-service y el total de 1 348; referencias al SRS v8.4.
+- 07 Procedimiento 2.11 (criterios E2 y E4 y clonado con `v1.1.3`) y Despliegue 1.14 (versión en la ficha técnica, subsección 1.3.14 con la fusión, la etiqueta y el despliegue pendiente, e integración continua con 1 348 pruebas).
+- 08 Acciones 3.5: indicador de pruebas automatizadas, ACO-25 con el estado de `v1.1.3` y H-23 con la rama `main` de `vehicle-w-docs`, al día con `docs`.
+- 09 Técnico 4.15 (versiones, despliegue pendiente de `v1.1.3`, 1 348 pruebas y cuatro proyectos de prueba en payment-service) e Instalación 4.12 (etiqueta `v1.1.3` al clonar y proyectos de prueba de payment).
+- 10 Artículo (APA 7, IEEE y ACM, español e inglés): 1 348 pruebas, 12 de integración contra SQL Server, `v1.1.3` pendiente de desplegar y versiones vigentes de los documentos citados. **El PDF y el Word de los tres formatos se regeneraron** desde el Markdown con el formato de los anteriores; en APA 7 la Figura 1 ya no se parte entre dos páginas.
+- 11 Enlaces: fecha de entrega según la guía del instructor (tag `final-delivery-2026`, todavía sin crear), tabla de repositorios al 4 de noviembre (payment-service `v1.1.3` y `vehicle-w-docs` con `main` al día con `docs`), pruebas y SRS v8.4.
+- README: versiones y fechas del índice, repositorios y nota del artículo.
+- PDF y Word regenerados de los documentos que cambiaron.
+
 ## 2026-10-27 (cierre) — Figura 29 con la app 1.1.2, payment-service v1.1.3 aprobada e índice al día
 
 **Contenido** (español e inglés).
