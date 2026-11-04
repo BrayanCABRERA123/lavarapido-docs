@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-27 de octubre de 2026
+4 de noviembre de 2026
 
-Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.10
+Tipo de documento: Procedimiento de implementación (equipo de desarrollo, administrador de TI y responsable del negocio) · Versión 2.11
 
 ## Control de Versiones
 
@@ -40,6 +40,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 2.8 | 2026-10-26 | Pago al reservar, desplegado en el servidor público el 26 de octubre de 2026: *INTERNAL_API_KEY* ahora también la exige payment-service, y variables nuevas de booking-service (*BOOKING_CASH_ACTIVE_LIMIT*, *BOOKING_PAYMENT_\**, *PAYMENT_SERVICE_URL*) en la Tabla 6. | Equipo de desarrollo |
 | 2.9 | 2026-10-26 | R-I04: el despliegue continuo está activo desde el 26 de octubre de 2026 (AC-90). | Equipo de desarrollo |
 | 2.10 | 2026-10-27 | Revisión contra *main* del 27 de octubre de 2026: criterio E2 con las pruebas de ese día (1 337, con las 17 de integración de payment en el CI, y 19 de 19 de punta a punta), criterio E4 y clonado con las versiones *v1.1.0*, *v1.1.1* y *v1.1.2* en *main*, protegida en los 10 repositorios, servidor público en *main* por despliegue continuo y verificación de la fase 6 con 58 tablas y las colas actuales de RabbitMQ. | Equipo de desarrollo |
+| 2.11 | 2026-11-04 | payment-service *v1.1.3*, fusionada en *main* el 27 de octubre y etiquetada el 4 de noviembre de 2026: criterio E2 con 1 348 pruebas (275 de payment, con las 12 de integración contra SQL Server en el CI), criterio E4 y clonado con *v1.1.3*. | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -242,9 +243,9 @@ La implementación **no comienza** hasta que se cumplan todos los criterios de l
 | N.° | Criterio | Evidencia |
 |---|---|---|
 | E1 | El código de la versión está integrado en *develop* (o en *main*) de los once repositorios, sin trabajo sin confirmar. | *git status* limpio y *git log* con el último commit de cada repositorio. |
-| E2 | Las pruebas automáticas pasan: *./mvnw -B verify* en los servicios Java y en el gateway, *dotnet test* en payment-service, *ng test* en la web, *npx jest* en la app móvil y la suite de punta a punta de *lavarapido-infra/e2e* contra los contenedores, que se corre en local porque el CI solo revisa su sintaxis. | Resúmenes sin fallos. CI de *main* del 27 de octubre de 2026: 1 231 pruebas automatizadas en la web, el gateway y los seis servicios (incluidas las 17 de integración de payment, que corren en el CI contra SQL Server 2022 sin omitir ninguna) y 106 de la app móvil, 1 337 en total; la suite de punta a punta local (19 pruebas) pasó 19 de 19 el 27 de octubre de 2026, ya enviando el modo de pago al reservar, y la batería remota (*e2e.yml*, 44 casos) todavía no se ha corrido contra el servidor público. |
+| E2 | Las pruebas automáticas pasan: *./mvnw -B verify* en los servicios Java y en el gateway, *dotnet test* en payment-service, *ng test* en la web, *npx jest* en la app móvil y la suite de punta a punta de *lavarapido-infra/e2e* contra los contenedores, que se corre en local porque el CI solo revisa su sintaxis. | Resúmenes sin fallos. CI de *main* del 27 de octubre de 2026: 1 242 pruebas automatizadas en la web, el gateway y los seis servicios (incluidas las 275 de payment-service *v1.1.3*, con sus 12 de integración, que corren en el CI contra SQL Server 2022 sin omitir ninguna) y 106 de la app móvil, 1 348 en total; la suite de punta a punta local (19 pruebas) pasó 19 de 19 el 27 de octubre de 2026, ya enviando el modo de pago al reservar, y la batería remota (*e2e.yml*, 44 casos) todavía no se ha corrido contra el servidor público. |
 | E3 | La aplicación web compila en modo producción (*npx ng build*). | Carpeta *dist/* generada sin errores. |
-| E4 | La versión está etiquetada en cada repositorio (por ejemplo, *v1.1.0*) (sección 13). Al 27 de octubre de 2026 los 10 repositorios tienen su versión en *main*: *v1.1.0* en el API Gateway, security-service, operations-service y notification-service; *v1.1.1* en customer-service y booking-service, y *v1.1.2* en la web, la app móvil, payment-service e infra. *main* está protegida en los 10 (solo recibe cambios por *pull request* con una aprobación y el CI en verde) y el servidor público corre *main*, que el despliegue continuo actualiza con cada fusión (Documento de Despliegue, sección 4.3.4). | *git tag* en cada repositorio. |
+| E4 | La versión está etiquetada en cada repositorio (por ejemplo, *v1.1.0*) (sección 13). Al 4 de noviembre de 2026 los 10 repositorios tienen su versión en *main*: *v1.1.0* en el API Gateway, security-service, operations-service y notification-service; *v1.1.1* en customer-service y booking-service; *v1.1.2* en la web, la app móvil e infra, y *v1.1.3* en payment-service (fusionada el 27 de octubre y etiquetada el 4 de noviembre de 2026). *main* está protegida en los 10 (solo recibe cambios por *pull request* con una aprobación y el CI en verde) y el servidor público corre *main*, que el despliegue continuo actualiza con cada fusión (Documento de Despliegue, sección 4.3.4); la *v1.1.3* de payment-service se fusionó con la máquina apagada y se instala sola al encenderla (*deploy/boot-update.sh*). | *git tag* en cada repositorio. |
 | E5 | Los manuales de instalación, administrador y usuario corresponden a la versión (versión 4.0 o posterior). | Control de versiones de los manuales. |
 | E6 | Las incidencias abiertas de severidad P0 y P1 están resueltas; las P2 y P3 están registradas con su acción en el documento de acciones correctivas, preventivas y de mejoramiento. | Registro de acciones actualizado. Al 24 de octubre de 2026 se cumple: no hay ninguna P0 ni P1 abierta y las 16 abiertas (P2 y P3) tienen acción (documento de Acciones, Tabla 10). |
 | E7 | El entorno de destino cumple los requisitos de hardware, software y puertos. | Lista de verificación del Anexo A. |
@@ -276,7 +277,7 @@ Cada fase indica su responsable, su duración estimada, los pasos y la evidencia
 
 1. Instalar y verificar Git, Docker con Compose v2, JDK 21, .NET 8 SDK y Node.js 22 LTS (Manual de Instalación, sección 7.1). En Windows, confirmar que Docker usa el motor Linux con WSL 2.
 2. Comprobar que los puertos 1433, 5672, 15672, 1025, 8025, 3001 a 3006, 8080 y 4200 estén libres. Si hay un SQL Server nativo de Windows en el 1433, detener el servicio *MSSQLSERVER*.
-3. Clonar los repositorios **uno al lado del otro y con su nombre original**, en la etiqueta de la versión. Al 27 de octubre de 2026 las versiones vigentes son *v1.1.0* (API Gateway, security-service, operations-service y notification-service), *v1.1.1* (customer-service y booking-service) y *v1.1.2* (infra, payment-service y la web); cada una es la punta de *main* y es lo que corre el servidor público, así que clonar con *-b main* da lo mismo mientras no salga otra versión. El repositorio de operaciones se llama *lavarapido-operation-service* (en singular) y *docker-compose.yml* lo construye con ese nombre: clonarlo con otro nombre hace fallar la construcción.
+3. Clonar los repositorios **uno al lado del otro y con su nombre original**, en la etiqueta de la versión. Al 4 de noviembre de 2026 las versiones vigentes son *v1.1.0* (API Gateway, security-service, operations-service y notification-service), *v1.1.1* (customer-service y booking-service), *v1.1.2* (infra y la web) y *v1.1.3* (payment-service); cada una es la punta de *main*, así que clonar con *-b main* da lo mismo mientras no salga otra versión. El repositorio de operaciones se llama *lavarapido-operation-service* (en singular) y *docker-compose.yml* lo construye con ese nombre: clonarlo con otro nombre hace fallar la construcción.
 
 ```bash
 mkdir Backend && cd Backend
@@ -287,7 +288,7 @@ done
 git clone -b v1.1.2 https://github.com/BrayanCABRERA123/lavarapido-infra.git
 git clone -b v1.1.1 https://github.com/camiloguilombo12/lavarapido-customer-service.git
 git clone -b v1.1.1 https://github.com/camiloguilombo12/lavarapido-booking-service.git
-git clone -b v1.1.2 https://github.com/merari0322/lavarapido-payment-service.git
+git clone -b v1.1.3 https://github.com/merari0322/lavarapido-payment-service.git
 cd .. && mkdir Frontend && cd Frontend
 git clone -b v1.1.2 https://github.com/BrayanCABRERA123/Front-end-proyecto-web.git
 ```

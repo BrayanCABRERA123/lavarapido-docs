@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 27, 2026
+November 4, 2026
 
-Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.10
+Document Type: Implementation Procedure (Development Team, IT Administrator, and Business Owner) · Version 2.11
 
 ## Version Control
 
@@ -40,6 +40,7 @@ Table 1 records the change history of this document. Each time the implementatio
 | 2.8 | 2026-10-26 | Payment at booking, deployed to the public server on October 26, 2026: *INTERNAL_API_KEY* is now also required by payment-service, and new booking-service variables (*BOOKING_CASH_ACTIVE_LIMIT*, *BOOKING_PAYMENT_\**, *PAYMENT_SERVICE_URL*) in Table 6. | Development team |
 | 2.9 | 2026-10-26 | R-I04: continuous deployment is active since October 26, 2026 (AC-90). | Development team |
 | 2.10 | 2026-10-27 | Review against *main* of October 27, 2026: criterion E2 with that day's tests (1,337, with payment's 17 integration tests in the CI, and 19 of 19 end-to-end), criterion E4 and cloning with versions *v1.1.0*, *v1.1.1*, and *v1.1.2* on *main*, protected in the 10 repositories, public server on *main* through continuous deployment, and phase 6 check with 58 tables and the current RabbitMQ queues. | Development team |
+| 2.11 | 2026-11-04 | payment-service *v1.1.3*, merged into *main* on October 27 and tagged on November 4, 2026: criterion E2 with 1,348 tests (275 in payment, with the 12 integration tests against SQL Server in the CI), criterion E4, and cloning with *v1.1.3*. | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -242,9 +243,9 @@ The implementation **does not start** until all the criteria of Table 5 are met.
 | No. | Criterion | Evidence |
 |---|---|---|
 | E1 | The code of the release is merged into *develop* (or *main*) of the eleven repositories, with no uncommitted work. | Clean *git status* and *git log* with the last commit of each repository. |
-| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, *npx jest* in the mobile app, and the end-to-end suite of *lavarapido-infra/e2e* against the containers, which is run locally because the CI only checks its syntax. | Summaries without failures. *main* CI of October 27, 2026: 1,231 automated tests in the web, the gateway, and the six services (including payment's 17 integration tests, which run in the CI against SQL Server 2022 without skipping any) and 106 in the mobile app, 1,337 in total; the local end-to-end suite (19 tests) passed 19 of 19 on October 27, 2026, already sending the payment mode when booking, and the remote battery (*e2e.yml*, 44 cases) has not been run against the public server yet. |
+| E2 | The automated tests pass: *./mvnw -B verify* in the Java services and the gateway, *dotnet test* in payment-service, *ng test* in the web, *npx jest* in the mobile app, and the end-to-end suite of *lavarapido-infra/e2e* against the containers, which is run locally because the CI only checks its syntax. | Summaries without failures. *main* CI of October 27, 2026: 1,242 automated tests in the web, the gateway, and the six services (including the 275 of payment-service *v1.1.3*, with its 12 integration tests, which run in the CI against SQL Server 2022 without skipping any) and 106 in the mobile app, 1,348 in total; the local end-to-end suite (19 tests) passed 19 of 19 on October 27, 2026, already sending the payment mode when booking, and the remote battery (*e2e.yml*, 44 cases) has not been run against the public server yet. |
 | E3 | The web application builds in production mode (*npx ng build*). | Folder *dist/* generated without errors. |
-| E4 | The release is tagged in each repository (for example, *v1.1.0*) (section 13). As of October 27, 2026 the 10 repositories have their release on *main*: *v1.1.0* in the API Gateway, security-service, operations-service, and notification-service; *v1.1.1* in customer-service and booking-service; and *v1.1.2* in the web, the mobile app, payment-service, and infra. *main* is protected in all 10 (it only takes changes through a pull request with one approval and a green CI) and the public server runs *main*, which continuous deployment updates on every merge (Deployment Document, section 4.3.4). | *git tag* in each repository. |
+| E4 | The release is tagged in each repository (for example, *v1.1.0*) (section 13). As of November 4, 2026 the 10 repositories have their release on *main*: *v1.1.0* in the API Gateway, security-service, operations-service, and notification-service; *v1.1.1* in customer-service and booking-service; *v1.1.2* in the web, the mobile app, and infra; and *v1.1.3* in payment-service (merged on October 27 and tagged on November 4, 2026). *main* is protected in all 10 (it only takes changes through a pull request with one approval and a green CI) and the public server runs *main*, which continuous deployment updates on every merge (Deployment Document, section 4.3.4); payment-service *v1.1.3* was merged while the machine was off and installs itself when it is turned on (*deploy/boot-update.sh*). | *git tag* in each repository. |
 | E5 | The installation, administrator, and user manuals correspond to the release (version 4.0 or later). | Version control of the manuals. |
 | E6 | Open incidents of severity P0 and P1 are resolved; P2 and P3 incidents are recorded with their action in the corrective, preventive, and improvement actions document. | Updated action register. As of October 24, 2026 it is met: no P0 or P1 is open and the 16 open ones (P2 and P3) have an action (Actions document, Table 10). |
 | E7 | The target environment meets the hardware, software, and port requirements. | Checklist of Annex A. |
@@ -276,7 +277,7 @@ Each phase states its person responsible, its estimated duration, the steps, and
 
 1. Install and check Git, Docker with Compose v2, JDK 21, the .NET 8 SDK, and Node.js 22 LTS (Installation Manual, section 7.1). On Windows, confirm that Docker uses the Linux engine with WSL 2.
 2. Check that ports 1433, 5672, 15672, 1025, 8025, 3001 to 3006, 8080, and 4200 are free. If a native Windows SQL Server uses port 1433, stop the *MSSQLSERVER* service.
-3. Clone the repositories **side by side and with their original names**, at the release tag. As of October 27, 2026 the current versions are *v1.1.0* (API Gateway, security-service, operations-service, and notification-service), *v1.1.1* (customer-service and booking-service), and *v1.1.2* (infra, payment-service, and the web); each one is the tip of *main* and is what the public server runs, so cloning with *-b main* gives the same result until another version ships. The operations repository is called *lavarapido-operation-service* (singular), and *docker-compose.yml* builds it with that name: cloning it with another name makes the build fail.
+3. Clone the repositories **side by side and with their original names**, at the release tag. As of November 4, 2026 the current versions are *v1.1.0* (API Gateway, security-service, operations-service, and notification-service), *v1.1.1* (customer-service and booking-service), *v1.1.2* (infra and the web), and *v1.1.3* (payment-service); each one is the tip of *main*, so cloning with *-b main* gives the same result until another version ships. The operations repository is called *lavarapido-operation-service* (singular), and *docker-compose.yml* builds it with that name: cloning it with another name makes the build fail.
 
 ```bash
 mkdir Backend && cd Backend
@@ -287,7 +288,7 @@ done
 git clone -b v1.1.2 https://github.com/BrayanCABRERA123/lavarapido-infra.git
 git clone -b v1.1.1 https://github.com/camiloguilombo12/lavarapido-customer-service.git
 git clone -b v1.1.1 https://github.com/camiloguilombo12/lavarapido-booking-service.git
-git clone -b v1.1.2 https://github.com/merari0322/lavarapido-payment-service.git
+git clone -b v1.1.3 https://github.com/merari0322/lavarapido-payment-service.git
 cd .. && mkdir Frontend && cd Frontend
 git clone -b v1.1.2 https://github.com/BrayanCABRERA123/Front-end-proyecto-web.git
 ```
