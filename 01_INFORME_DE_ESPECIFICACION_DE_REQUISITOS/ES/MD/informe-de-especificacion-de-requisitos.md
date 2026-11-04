@@ -208,11 +208,11 @@ Desarrollar un sistema web y móvil que organice la reserva, la asignación de o
 **Tabla 5**
 *Equipo del Proyecto*
 
-| Nombre | Rol | Responsabilidad | Contacto |
+| Nombre | Rol | Responsabilidad | Usuario de GitHub |
 |---|---|---|---|
-| Brayan Estiven Patiño Cabrera | Líder de proyecto | Coordina el desarrollo, gestiona el alcance y el cronograma, y vela por el cumplimiento de los requisitos. | bspc1507@gmail.com |
-| Merari Urbano Quintero | Líder de backend | Desarrolla la lógica de negocio de los servicios y su exposición por la API REST. | merariurbano0322@gmail.com |
-| Juan Camilo Guilombo Osorio | Líder de frontend | Diseña y desarrolla las interfaces web y móvil, y cuida la consistencia visual entre plataformas. | cguilombo587@gmail.com |
+| Brayan Estiven Patiño Cabrera | Líder de proyecto | Coordina el desarrollo, gestiona el alcance y el cronograma, y vela por el cumplimiento de los requisitos. | `BrayanCABRERA123` |
+| Merari Urbano Quintero | Líder de backend | Desarrolla la lógica de negocio de los servicios y su exposición por la API REST. | `merari0322` |
+| Juan Camilo Guilombo Osorio | Líder de frontend | Diseña y desarrolla las interfaces web y móvil, y cuida la consistencia visual entre plataformas. | `camiloguilombo12` |
 
 *Nota.* Los tres integrantes son aprendices del programa Tecnólogo en Análisis y Desarrollo de Software del SENA, ficha 3145556.
 
