@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructor: Karol Daniela Correa
 
-October 27, 2026
+November 4, 2026
 
-Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.11
+Manual Type: Installation Manual (Infrastructure and DevOps Staff) · Version 4.12
 
 ## Version Control
 
@@ -43,6 +43,7 @@ Table 1 records the change history of this document. Each time the installation 
 | 4.9 | 2026-10-26 | Versions *v1.1.0* (10 repositories, including the first one of the mobile app) and *v1.1.1* (web, mobile app, payment-service, and infra) of October 26, 2026, and recommended tag for an evaluation installation (8.1). | Development team |
 | 4.10 | 2026-10-27 | Versions *v1.1.1* (customer and booking) and *v1.1.2* (web, mobile app, payment-service, and infra) of October 27, 2026 and tags to use (8.1); 58 tables (11.1, 11.5, and checklist); *operations-service.booking-confirmed* queue in the RabbitMQ topology (12.5). | Development team |
 | 4.11 | 2026-10-27 | payment-service *v1.1.3* (approved, pending publication): *DB_PASSWORD* required, RabbitMQ credentials required against a remote RabbitMQ, and local test database *LavaRapidoPaymentIT* with SQL Server 2022 (variables and payment section). | Development team |
+| 4.12 | 2026-11-04 | payment-service *v1.1.3* merged into *main* on October 27 and tagged on November 4, 2026: tag to use when cloning (8.1) and payment's test projects (9.3). | Development team |
 
 *Note.* Dates are written in the ISO 8601 format (year-month-day). Prepared by the development team.
 
@@ -285,7 +286,7 @@ The project is distributed in one repository per component. All the backend repo
 
 ### 8.1 Cloning the Repositories
 
-The integration branch of the team is *develop*; the most recent version of every service is there, and *main* holds the delivered versions. On October 23, 2026 *v1.0.0* was tagged in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra) and on the 24th in payment-service. On October 26, 2026 *v1.1.0* shipped in the 10 repositories, including the mobile app, which had no version until then, and that same day *v1.1.1* in the web, the mobile app, payment-service, and infra. On October 27, 2026 *v1.1.1* shipped in customer-service and booking-service and *v1.1.2* in the web, the mobile app, payment-service, and infra. For an evaluation installation, use the most recent tag of each repository: *v1.1.2* in the web, the mobile app, payment-service, and infra; *v1.1.1* in customer-service and booking-service; and *v1.1.0* in the API Gateway, security-service, operations-service, and notification-service. Each one is the tip of *main*, which is protected in the 10 repositories and is what the public server runs; *develop* has the latest work not yet released in a version.
+The integration branch of the team is *develop*; the most recent version of every service is there, and *main* holds the delivered versions. On October 23, 2026 *v1.0.0* was tagged in 8 repositories (web, api-gateway, security, customer, booking, operations, notification, and infra) and on the 24th in payment-service. On October 26, 2026 *v1.1.0* shipped in the 10 repositories, including the mobile app, which had no version until then, and that same day *v1.1.1* in the web, the mobile app, payment-service, and infra. On October 27, 2026 *v1.1.1* shipped in customer-service and booking-service and *v1.1.2* in the web, the mobile app, payment-service, and infra, and that same day payment-service *v1.1.3* was merged into *main*; it was tagged on November 4, 2026. For an evaluation installation, use the most recent tag of each repository: *v1.1.3* in payment-service; *v1.1.2* in the web, the mobile app, and infra; *v1.1.1* in customer-service and booking-service; and *v1.1.0* in the API Gateway, security-service, operations-service, and notification-service. Each one is the tip of *main*, which is protected in the 10 repositories and is what the public server runs (payment-service *v1.1.3* installs itself on the server when it is turned on, because it was off when the release was merged); *develop* has the latest work not yet released in a version.
 
 ```bash
 mkdir Backend && cd Backend
@@ -357,7 +358,7 @@ cd Backend/lavarapido-security-service
 ```bash
 cd Backend/lavarapido-payment-service
 dotnet restore
-dotnet test               # domain, application, and integration tests (xUnit)
+dotnet test               # domain, application, API, and integration tests (xUnit)
 ```
 
 ### 9.4 Web Application
