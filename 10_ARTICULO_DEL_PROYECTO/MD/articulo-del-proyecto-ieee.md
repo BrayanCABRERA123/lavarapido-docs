@@ -465,7 +465,7 @@ The project is also justified by its constraints. Personal data processing must 
 
 ### C. Objectives
 
-The current project objectives are stated in version 8.3 of the SRS [1].
+The current project objectives are stated in version 8.4 of the SRS [1].
 
 **General objective.** To develop a web and mobile system that organizes booking, operator assignment, payment, and wash tracking at a car wash, ensuring that every bay and every operator is assigned without schedule overlaps and that every payment is linked to its booking.
 
@@ -681,7 +681,7 @@ The SRS defines 41 functional requirements: the original 29 (RF-001 to RF-026, w
 | Implemented | 38 | RF-001 to RF-004 (with RF-004b), RF-006 to RF-014 (with RF-012b and RF-013b), RF-016 to RF-022, and RF-024 to RF-038 | Built and verified against the code and the tests |
 | Partial | 3 | RF-005, RF-015, and RF-023 | They work with one pending case: the web books a single service although the API accepts several, the web has no payment history screen, and the consolidated reports per period are missing |
 
-*Note.* Based on the traceability matrix of the SRS, version 8.3 [1].
+*Note.* Based on the traceability matrix of the SRS, version 8.4 [1].
 
 Two decisions were made through ADRs. Operator assignment was first built as manual assignment by the administrator, supported by a candidate list that shows why each operator is not available (ADR-014); automatic assignment when a booking is confirmed was later added on top of that same policy, and it respects the operator chosen by the customer if that operator is still free. Promotions were redesigned as percentage discount coupons that are unlocked with the points balance without spending it (ADR-015).
 
@@ -789,7 +789,7 @@ As future work, the documentation itself proposes: running the acceptance cases 
 
 ## References
 
-[1] J. C. Guilombo Osorio, B. E. Patiño Cabrera and M. Urbano Quintero, “Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos” [Software requirements specification (SRS) of the LavaRápido system: Web and mobile booking and management platform for a car wash], version 8.3, unpublished document, Servicio Nacional de Aprendizaje, 2026.
+[1] J. C. Guilombo Osorio, B. E. Patiño Cabrera and M. Urbano Quintero, “Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos” [Software requirements specification (SRS) of the LavaRápido system: Web and mobile booking and management platform for a car wash], version 8.4, unpublished document, Servicio Nacional de Aprendizaje, 2026.
 
 [2] Vehicle Washing Development Team, *Vehicle Washing Management System: Project Documentation* (vehicle-w-docs), unpublished project documentation, 2026. [Online]. Available: https://github.com/code-sena/vehicle-w-docs
 
@@ -829,9 +829,9 @@ As future work, the documentation itself proposes: running the acceptance cases 
 
 [20] N. Forsgren, J. Humble and G. Kim, *Accelerate: The Science of Lean Software and DevOps: Building and Scaling High Performing Technology Organizations*. IT Revolution Press, 2018.
 
-[21] B. E. Patiño Cabrera, J. C. Guilombo Osorio and M. Urbano, “Documentation of Corrective, Preventive, and Improvement Actions for the Software: Vehicle Washing Management System (Vehicle Washing),” version 3.3, unpublished document, Servicio Nacional de Aprendizaje, 2026.
+[21] B. E. Patiño Cabrera, J. C. Guilombo Osorio and M. Urbano, “Documentation of Corrective, Preventive, and Improvement Actions for the Software: Vehicle Washing Management System (Vehicle Washing),” version 3.5, unpublished document, Servicio Nacional de Aprendizaje, 2026.
 
-[22] B. E. Patiño Cabrera, J. C. Guilombo Osorio and M. Urbano, “Technical Manual: Vehicle Washing Management System (Vehicle Washing),” version 4.13, unpublished document, Servicio Nacional de Aprendizaje, 2026.
+[22] B. E. Patiño Cabrera, J. C. Guilombo Osorio and M. Urbano, “Technical Manual: Vehicle Washing Management System (Vehicle Washing),” version 4.15, unpublished document, Servicio Nacional de Aprendizaje, 2026.
 
 [23] *IEEE Recommended Practice for Software Requirements Specifications*, IEEE Std 830-1998, 1998.
 
@@ -843,7 +843,7 @@ As future work, the documentation itself proposes: running the acceptance cases 
 
 [27] Vehicle Washing Development Team, *Plan de actividades Scrum del proyecto LavaRapido* [Scrum activity plan of the LavaRapido project] (scrum1.1), unpublished spreadsheet, Servicio Nacional de Aprendizaje, 2026.
 
-[28] B. E. Patiño Cabrera, J. C. Guilombo Osorio and M. Urbano, “Software Implementation Procedure: Vehicle Washing Management System (Vehicle Washing),” version 2.10, unpublished document, Servicio Nacional de Aprendizaje, 2026.
+[28] B. E. Patiño Cabrera, J. C. Guilombo Osorio and M. Urbano, “Software Implementation Procedure: Vehicle Washing Management System (Vehicle Washing),” version 2.11, unpublished document, Servicio Nacional de Aprendizaje, 2026.
 
 ## Appendix
 
