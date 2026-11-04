@@ -208,11 +208,11 @@ To develop a web and mobile system that organizes the booking, operator assignme
 **Table 5**
 *Project Team*
 
-| Name | Role | Responsibility | Contact |
+| Name | Role | Responsibility | GitHub user |
 |---|---|---|---|
-| Brayan Estiven Patiño Cabrera | Project lead | Coordinates development, manages scope and schedule, and makes sure the requirements are met. | bspc1507@gmail.com |
-| Merari Urbano Quintero | Backend lead | Develops the business logic of the services and exposes it through the REST API. | merariurbano0322@gmail.com |
-| Juan Camilo Guilombo Osorio | Frontend lead | Designs and develops the web and mobile interfaces, and keeps the visual style consistent across platforms. | cguilombo587@gmail.com |
+| Brayan Estiven Patiño Cabrera | Project lead | Coordinates development, manages scope and schedule, and makes sure the requirements are met. | `BrayanCABRERA123` |
+| Merari Urbano Quintero | Backend lead | Develops the business logic of the services and exposes it through the REST API. | `merari0322` |
+| Juan Camilo Guilombo Osorio | Frontend lead | Designs and develops the web and mobile interfaces, and keeps the visual style consistent across platforms. | `camiloguilombo12` |
 
 *Note.* All three members are apprentices of SENA's Software Analysis and Development Technologist program, group 3145556.
 
