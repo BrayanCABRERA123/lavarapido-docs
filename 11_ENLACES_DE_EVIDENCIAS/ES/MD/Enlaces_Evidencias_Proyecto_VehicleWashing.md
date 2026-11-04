@@ -10,7 +10,7 @@
 | Equipo de trabajo | Equipo de Desarrollo Vehicle Washing (equipo 8 en la evaluación del instructor del 21/10/2026) |
 | Integrantes | Juan Camilo Guilombo Osorio, Brayan Estiven Patiño Cabrera, Merari Urbano Quintero |
 | Instructora | Karol Daniela Correa |
-| Fecha de entrega | Entrega final para el registro de software según la guía del instructor (`04-final-delivery` en `code-sena/ADSO-3145556`), con fecha límite el 04/11/2026 a las 23:59 (hora de Colombia). Cada repositorio se marca con el tag `final-delivery-2026`, que al 04/11/2026 todavía no se ha creado |
+| Fecha de entrega | Entrega final para el registro de software según la guía del instructor (`04-final-delivery` en `code-sena/ADSO-3145556`), con fecha límite el 05/11/2026 a las 23:59 (hora de Colombia), según la presentación de la entrega; el README de la guía dice 04/11/2026. Cada repositorio se marca con el tag `final-delivery-2026`, que al 04/11/2026 todavía no se ha creado |
 | Fecha de actualización de este documento | 4 de noviembre de 2026 |
 
 ---

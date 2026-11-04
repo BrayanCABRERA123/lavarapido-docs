@@ -10,7 +10,7 @@
 | Work team | Vehicle Washing Development Team (team 8 in the instructor's evaluation of 10/21/2026) |
 | Members | Juan Camilo Guilombo Osorio, Brayan Estiven Patiño Cabrera, Merari Urbano Quintero |
 | Instructor | Karol Daniela Correa |
-| Delivery date | Final delivery for the software registration according to the instructor's guide (`04-final-delivery` in `code-sena/ADSO-3145556`), due on 11/04/2026 at 23:59 (Colombia time). Each repository is marked with the `final-delivery-2026` tag, which has not been created yet as of 11/04/2026 |
+| Delivery date | Final delivery for the software registration according to the instructor's guide (`04-final-delivery` in `code-sena/ADSO-3145556`), due on 11/05/2026 at 23:59 (Colombia time), according to the delivery presentation; the guide README says 11/04/2026. Each repository is marked with the `final-delivery-2026` tag, which has not been created yet as of 11/04/2026 |
 | Last update of this document | November 4, 2026 |
 
 ---
