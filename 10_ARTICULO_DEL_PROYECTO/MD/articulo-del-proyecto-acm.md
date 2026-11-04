@@ -32,7 +32,7 @@ El proyecto también se justifica por sus restricciones. El tratamiento de datos
 
 ### 1.3. Objetivos
 
-Los objetivos vigentes del proyecto están en la versión 8.3 de la SRS [Guilombo Osorio et al. 2026].
+Los objetivos vigentes del proyecto están en la versión 8.4 de la SRS [Guilombo Osorio et al. 2026].
 
 **Objetivo general.** Desarrollar un sistema web y móvil que organice la reserva, la asignación de operarios, el pago y el seguimiento de los lavados en un lavadero de vehículos, garantizando que cada bahía y cada operario se asignen sin cruces de horario y que cada pago quede asociado a su reserva.
 
@@ -79,7 +79,7 @@ El proyecto toma como marco de sus acciones correctivas, preventivas y de mejora
 
 ### 3.1. Tipo de Estudio
 
-Se trata de un trabajo de desarrollo tecnológico aplicado, presentado como estudio de caso único y de alcance descriptivo. La unidad de análisis es el sistema construido. La evidencia proviene de los artefactos del proyecto: el código de once repositorios, la documentación de diseño (requisitos, quince ADR, modelos de datos, contratos OpenAPI), los manuales técnicos verificados contra el código y los registros de pruebas y de acciones de mejora [Patiño Cabrera et al. 2026a; Patiño Cabrera et al. 2026b]. La SRS, en su versión 8.3, sigue la estructura de IEEE 830 [IEEE 1998] y los contenidos de ISO/IEC/IEEE 29148 [ISO/IEC/IEEE 2018], y define 41 requisitos funcionales, 12 requisitos no funcionales clasificados según el modelo de calidad de ISO/IEC 25010 [ISO/IEC 2023], 32 casos de uso y una matriz de trazabilidad con el estado de cada requisito [Guilombo Osorio et al. 2026].
+Se trata de un trabajo de desarrollo tecnológico aplicado, presentado como estudio de caso único y de alcance descriptivo. La unidad de análisis es el sistema construido. La evidencia proviene de los artefactos del proyecto: el código de once repositorios, la documentación de diseño (requisitos, quince ADR, modelos de datos, contratos OpenAPI), los manuales técnicos verificados contra el código y los registros de pruebas y de acciones de mejora [Patiño Cabrera et al. 2026a; Patiño Cabrera et al. 2026b]. La SRS, en su versión 8.4, sigue la estructura de IEEE 830 [IEEE 1998] y los contenidos de ISO/IEC/IEEE 29148 [ISO/IEC/IEEE 2018], y define 41 requisitos funcionales, 12 requisitos no funcionales clasificados según el modelo de calidad de ISO/IEC 25010 [ISO/IEC 2023], 32 casos de uso y una matriz de trazabilidad con el estado de cada requisito [Guilombo Osorio et al. 2026].
 
 ### 3.2. Contexto y Participantes
 
@@ -244,7 +244,7 @@ La SRS define 41 requisitos funcionales: los 29 originales (RF-001 a RF-026, con
 | Implementado | 38 | RF-001 a RF-004 (con RF-004b), RF-006 a RF-014 (con RF-012b y RF-013b), RF-016 a RF-022 y RF-024 a RF-038 | Construidos y verificados contra el código y las pruebas |
 | Parcial | 3 | RF-005, RF-015 y RF-023 | Funcionan con un caso pendiente: la web reserva un solo servicio aunque la API acepta varios, la web no tiene pantalla de historial de pagos y faltan los reportes consolidados por periodo |
 
-*Nota.* Elaborado a partir de la matriz de trazabilidad de la SRS, versión 8.3 [Guilombo Osorio et al. 2026].
+*Nota.* Elaborado a partir de la matriz de trazabilidad de la SRS, versión 8.4 [Guilombo Osorio et al. 2026].
 
 Dos decisiones se tomaron mediante ADR. La asignación de operarios se construyó primero como asignación manual del administrador, apoyada en una lista de candidatos con el motivo por el que cada operario no está disponible (ADR-014); sobre esa misma política se agregó después la asignación automática al confirmarse la reserva, que respeta el operario que el cliente elige si sigue libre. Las promociones se rediseñaron como cupones de descuento porcentual que se desbloquean con el saldo de puntos, sin consumirlos (ADR-015).
 
@@ -365,7 +365,7 @@ Roy T. Fielding. 2000. *Architectural Styles and the Design of Network-based Sof
 
 Nicole Forsgren, Jez Humble, and Gene Kim. 2018. *Accelerate: The Science of Lean Software and DevOps: Building and Scaling High Performing Technology Organizations*. IT Revolution Press.
 
-Juan Camilo Guilombo Osorio, Brayan Estiven Patiño Cabrera, and Merari Urbano Quintero. 2026. *Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos* (Versión 8.3). Documento no publicado. Servicio Nacional de Aprendizaje.
+Juan Camilo Guilombo Osorio, Brayan Estiven Patiño Cabrera, and Merari Urbano Quintero. 2026. *Especificación de requisitos de software (SRS) del sistema LavaRápido: Plataforma web y móvil de reservas y gestión para un lavadero de vehículos* (Versión 8.4). Documento no publicado. Servicio Nacional de Aprendizaje.
 
 Gregor Hohpe and Bobby Woolf. 2003. *Enterprise Integration Patterns: Designing, Building, and Deploying Messaging Solutions*. Addison-Wesley.
 
@@ -393,11 +393,11 @@ OWASP Foundation. 2021. *OWASP Top 10:2021*. https://owasp.org/Top10/
 
 Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2025. *Propuesta técnica y económica: Sistema integral para la gestión de servicios móviles de lavado vehicular*. Documento no publicado. Servicio Nacional de Aprendizaje.
 
-Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2026a. *Documentación de acciones correctivas, preventivas y de mejoramiento del software: Sistema de Gestión de Lavado Vehicular (Vehicle Washing)* (Versión 3.3). Documento no publicado. Servicio Nacional de Aprendizaje.
+Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2026a. *Documentación de acciones correctivas, preventivas y de mejoramiento del software: Sistema de Gestión de Lavado Vehicular (Vehicle Washing)* (Versión 3.5). Documento no publicado. Servicio Nacional de Aprendizaje.
 
-Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2026b. *Manual técnico: Sistema de Gestión de Lavado Vehicular (Vehicle Washing)* (Versión 4.13). Documento no publicado. Servicio Nacional de Aprendizaje.
+Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2026b. *Manual técnico: Sistema de Gestión de Lavado Vehicular (Vehicle Washing)* (Versión 4.15). Documento no publicado. Servicio Nacional de Aprendizaje.
 
-Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2026c. *Procedimiento de implementación del software: Sistema de Gestión de Lavado Vehicular (Vehicle Washing)* (Versión 2.10). Documento no publicado. Servicio Nacional de Aprendizaje.
+Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, and Merari Urbano. 2026c. *Procedimiento de implementación del software: Sistema de Gestión de Lavado Vehicular (Vehicle Washing)* (Versión 2.11). Documento no publicado. Servicio Nacional de Aprendizaje.
 
 Niels Provos and David Mazières. 1999. A Future-Adaptable Password Scheme. In *Proceedings of the 1999 USENIX Annual Technical Conference, FREENIX Track*. USENIX Association, 81–91.
 
