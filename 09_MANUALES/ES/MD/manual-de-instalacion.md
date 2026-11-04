@@ -14,9 +14,9 @@ Ficha 3145556
 
 Instructora: Karol Daniela Correa
 
-27 de octubre de 2026
+4 de noviembre de 2026
 
-Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.11
+Tipo de manual: Manual de instalación (personal de infraestructura y DevOps) · Versión 4.12
 
 ## Control de Versiones
 
@@ -43,6 +43,7 @@ La Tabla 1 registra el historial de cambios de este documento. Cada vez que camb
 | 4.9 | 2026-10-26 | Versiones *v1.1.0* (10 repositorios, incluida la primera de la app móvil) y *v1.1.1* (web, app móvil, payment-service e infra) del 26 de octubre de 2026, y etiqueta recomendada para una instalación de evaluación (8.1). | Equipo de desarrollo |
 | 4.10 | 2026-10-27 | Versiones *v1.1.1* (customer y booking) y *v1.1.2* (web, app móvil, payment-service e infra) del 27 de octubre de 2026 y etiquetas a usar (8.1); 58 tablas (11.1, 11.5 y lista de verificación); cola *operations-service.booking-confirmed* en la topología de RabbitMQ (12.5). | Equipo de desarrollo |
 | 4.11 | 2026-10-27 | payment-service *v1.1.3* (aprobada, pendiente de publicar): *DB_PASSWORD* obligatoria, credenciales de RabbitMQ obligatorias contra un RabbitMQ remoto y base de pruebas local *LavaRapidoPaymentIT* con SQL Server 2022 (variables y sección de payment). | Equipo de desarrollo |
+| 4.12 | 2026-11-04 | payment-service *v1.1.3* fusionada en *main* el 27 de octubre y etiquetada el 4 de noviembre de 2026: etiqueta a usar en la clonación (8.1) y proyectos de prueba de payment (9.3). | Equipo de desarrollo |
 
 *Nota.* Las fechas se escriben en formato ISO 8601 (año-mes-día). Elaborado por el equipo de desarrollo.
 
@@ -285,7 +286,7 @@ El proyecto se distribuye en un repositorio por componente. Todos los repositori
 
 ### 8.1 Clonación de los Repositorios
 
-La rama de integración del equipo es *develop*; allí está la versión más reciente de cada servicio, y *main* guarda las versiones entregadas. El 23 de octubre de 2026 se etiquetó *v1.0.0* en 8 repositorios (web, api-gateway, security, customer, booking, operations, notification e infra) y el 24 en payment-service. El 26 de octubre de 2026 salió *v1.1.0* en los 10 repositorios, incluida la app móvil, que hasta entonces no tenía versión, y ese mismo día *v1.1.1* en la web, la app móvil, payment-service e infra. El 27 de octubre de 2026 salieron *v1.1.1* en customer-service y booking-service y *v1.1.2* en la web, la app móvil, payment-service e infra. Para una instalación de evaluación, usar la etiqueta más reciente de cada repositorio: *v1.1.2* en la web, la app móvil, payment-service e infra; *v1.1.1* en customer-service y booking-service, y *v1.1.0* en el API Gateway, security-service, operations-service y notification-service. Cada una es la punta de *main*, que está protegida en los 10 repositorios y es lo que corre el servidor público; *develop* tiene lo más reciente que todavía no sale en una versión.
+La rama de integración del equipo es *develop*; allí está la versión más reciente de cada servicio, y *main* guarda las versiones entregadas. El 23 de octubre de 2026 se etiquetó *v1.0.0* en 8 repositorios (web, api-gateway, security, customer, booking, operations, notification e infra) y el 24 en payment-service. El 26 de octubre de 2026 salió *v1.1.0* en los 10 repositorios, incluida la app móvil, que hasta entonces no tenía versión, y ese mismo día *v1.1.1* en la web, la app móvil, payment-service e infra. El 27 de octubre de 2026 salieron *v1.1.1* en customer-service y booking-service y *v1.1.2* en la web, la app móvil, payment-service e infra, y ese mismo día se fusionó en *main* *v1.1.3* de payment-service, etiquetada el 4 de noviembre de 2026. Para una instalación de evaluación, usar la etiqueta más reciente de cada repositorio: *v1.1.3* en payment-service; *v1.1.2* en la web, la app móvil e infra; *v1.1.1* en customer-service y booking-service, y *v1.1.0* en el API Gateway, security-service, operations-service y notification-service. Cada una es la punta de *main*, que está protegida en los 10 repositorios y es lo que corre el servidor público (*v1.1.3* de payment-service se instala en el servidor cuando se encienda, porque estaba apagado al fusionarla); *develop* tiene lo más reciente que todavía no sale en una versión.
 
 ```bash
 mkdir Backend && cd Backend
@@ -357,7 +358,7 @@ cd Backend/lavarapido-security-service
 ```bash
 cd Backend/lavarapido-payment-service
 dotnet restore
-dotnet test               # pruebas de dominio, de aplicación y de integración (xUnit)
+dotnet test               # pruebas de dominio, de aplicación, de la API y de integración (xUnit)
 ```
 
 ### 9.4 Aplicación Web
