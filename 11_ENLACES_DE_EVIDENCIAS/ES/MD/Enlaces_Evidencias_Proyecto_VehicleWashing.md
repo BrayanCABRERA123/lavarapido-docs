@@ -148,7 +148,7 @@ Estado al 27/10/2026; las casillas sin marcar tienen su responsable.
 - [ ] La documentación, los repositorios y la aplicación son coherentes: lo que describen el SRS y los manuales existe en el código de `develop`. *Parcial: el SRS v8.4 marca 3 RF y 9 RNF como parciales y el documento de Acciones Correctivas registra lo que sigue abierto (19 acciones al 27/10/2026, ninguna P0 ni P1).*
 - [ ] No se presentan simulaciones (mocks, `json-server`, datos de ejemplo) como funcionalidades reales. *Desde el 24/10/2026 la app y la web ya no muestran los datos de ejemplo de la sede (la semilla 113 los borra de la base); los textos legales de la web y de la app todavía dicen "Express Car Wash S.A.S." (decisión del equipo), y su correo (datos@expresscarwash.co), teléfono (+57 300 123 4567), NIT y domicilio son de ejemplo y deben reemplazarse por los reales (ACO-42).*
 - [ ] No hay credenciales ni datos sensibles: `.env` no está versionado (solo `.env.example`) y no hay tokens ni contraseñas en el historial. *Parcial: ver el criterio de seguridad de la sección 5.*
-- [ ] El PDF exportado conserva los enlaces activos (hacer clic en al menos uno por sección). *Pendiente de comprobar en el PDF regenerado (Brayan Cabrera).*
+- [x] El PDF exportado conserva los enlaces activos (hacer clic en al menos uno por sección). *Comprobado el 04/11/2026: el PDF regenerado tiene 148 enlaces activos, distribuidos en todas sus secciones.*
 
 ---
 
