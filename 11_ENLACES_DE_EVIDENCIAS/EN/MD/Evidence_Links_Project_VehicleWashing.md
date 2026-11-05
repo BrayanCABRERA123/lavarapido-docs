@@ -148,7 +148,7 @@ Status as of 10/27/2026; unchecked boxes have their owner.
 - [ ] The documentation, repositories, and application are consistent: what the SRS and the manuals describe exists in the `develop` code. *Partial: SRS v8.4 marks 3 RF and 9 RNF as partial and the Corrective Actions document records what is still open (19 actions as of 10/27/2026, none P0 or P1).*
 - [ ] No simulations (mocks, `json-server`, sample data) are presented as real functionality. *Since 10/24/2026 the app and the web no longer show the business sample data (seed 113 removes it from the database); the legal texts of the web and the app still say "Express Car Wash S.A.S." (team decision), and their email (datos@expresscarwash.co), phone (+57 300 123 4567), tax ID (NIT), and address are examples that must be replaced with the real ones (ACO-42).*
 - [ ] There are no credentials or sensitive data: `.env` is not versioned (only `.env.example`) and there are no tokens or passwords in the history. *Partial: see the security criterion in section 5.*
-- [ ] The exported PDF keeps the links active (click at least one per section). *Pending to check in the regenerated PDF (Brayan Cabrera).*
+- [x] The exported PDF keeps the links active (click at least one per section). *Checked on 11/04/2026: the regenerated PDF has 144 active links, spread across all its sections.*
 
 ---
 
