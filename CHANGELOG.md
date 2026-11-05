@@ -4,6 +4,15 @@ Registro de los cambios de este repositorio de evidencias, del más reciente al 
 
 *Changes to this evidence repository, newest first. Each document also has its own version control table. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).*
 
+## 2026-11-04 (tarde) — Costo del artículo, v1.1.3 en producción y matriz de evidencias
+
+**Contenido** (español e inglés), a partir de la revisión de Brayan Cabrera del 4 de noviembre de 2026.
+
+- 10 Artículo (APA 7, IEEE y ACM): la Tabla 7 y su párrafo usan el presupuesto de la propuesta técnica vigente (versión 1.5): COP 212.925.240 y una operación de COP 2.391.070 al mes; la cifra de 2025 (COP 148.173.000) queda solo como antecedente en la nota. Se agregó la referencia a la propuesta vigente. El resumen ya no dice que `v1.1.3` está pendiente de desplegar.
+- `v1.1.3` de payment-service en producción desde el 4 de noviembre, al encender la máquina: 07 Despliegue y Procedimiento, 09 Técnico e Instalación, 11 Enlaces y README. Corrige la entrada anterior, que la daba como pendiente de desplegar.
+- 11 Enlaces: casillas marcadas tras comprobarlas el 4 de noviembre: los 121 enlaces públicos abren sin iniciar sesión, `vehicle-w-docs` ya es público y el PDF conserva sus enlaces activos.
+- PDF y Word regenerados del artículo, 07, los manuales técnico y de instalación y el PDF de 11.
+
 ## 2026-11-04 — payment-service v1.1.3, 1 348 pruebas y PDF y Word del artículo
 
 **Contenido** (español e inglés). Revisado contra GitHub el 4 de noviembre de 2026: `v1.1.3` de payment-service se fusionó en `main` el 27 de octubre (PR #15 y PR #16) y su etiqueta y release se publicaron el 4 de noviembre; el despliegue automático que pidió esa fusión encontró la máquina apagada, así que se instala al encenderla. Con esa versión, el CI de `main` aprobó 275 pruebas de payment-service (dominio 142, aplicación 61, API 47 e integración 25, de ellas 12 contra SQL Server 2022), 1 000 de los servicios y 1 348 en total (antes, 264 y 1 337).
