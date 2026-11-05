@@ -5,7 +5,7 @@ Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano Quint
 
 *Tecnólogo en Análisis y Desarrollo de Software (ADSO), ficha 3145556. Instructora: Karol Daniela Correa. 4 de noviembre de 2026.*
 
-***Resumen*—Este artículo describe el diseño, la implementación y la verificación de Vehicle Washing (LavaRapido), una plataforma web y Android para un lavadero vehicular de una sola sede, desarrollada como proyecto formativo del SENA. El problema documentado es que las reservas por llamada, los registros a mano, la asignación discrecional del trabajo y los pagos en efectivo sin registro no dejan trazabilidad sobre turnos, servicios ni pagos. El trabajo siguió un enfoque de documentación de diseño de software (SDD) con siete sprints inspirados en Scrum, y su alcance evolucionó desde un servicio móvil por zonas con pasarela de pagos hacia un lavadero de sede única con pagos por QR o transferencia con comprobante revisado por el administrador, o en efectivo. La solución integra seis microservicios (cinco en Java 21 con Spring Boot 4 y uno en .NET 8) detrás de un API Gateway, SQL Server 2022 con 58 tablas, RabbitMQ y clientes en Angular 21 y React Native. Al 27 de octubre de 2026, con versiones *v1.1.x* en *main* de los 10 repositorios de código, que el servidor público toma por despliegue continuo (la *v1.1.3* de payment-service, fusionada ese día, quedó pendiente de desplegar), 38 de los 41 requisitos funcionales estaban implementados y 3 eran parciales, y el CI aprobó 1 348 pruebas automatizadas (106 de ellas de la app móvil y 12 de integración contra SQL Server); ese día pasaron también las 19 pruebas de punta a punta contra el sistema completo; los 42 casos funcionales pasaron el 19 de octubre de 2026. El sistema corre además en un servidor público en Azure. Desde el 19 de octubre de 2026, cada repositorio compila y corre sus pruebas con GitHub Actions en cada cambio. Quedan pendientes los reportes consolidados y la validación con personas usuarias. Los beneficios operativos siguen siendo una hipótesis, porque no se han medido con personas usuarias reales.**
+***Resumen*—Este artículo describe el diseño, la implementación y la verificación de Vehicle Washing (LavaRapido), una plataforma web y Android para un lavadero vehicular de una sola sede, desarrollada como proyecto formativo del SENA. El problema documentado es que las reservas por llamada, los registros a mano, la asignación discrecional del trabajo y los pagos en efectivo sin registro no dejan trazabilidad sobre turnos, servicios ni pagos. El trabajo siguió un enfoque de documentación de diseño de software (SDD) con siete sprints inspirados en Scrum, y su alcance evolucionó desde un servicio móvil por zonas con pasarela de pagos hacia un lavadero de sede única con pagos por QR o transferencia con comprobante revisado por el administrador, o en efectivo. La solución integra seis microservicios (cinco en Java 21 con Spring Boot 4 y uno en .NET 8) detrás de un API Gateway, SQL Server 2022 con 58 tablas, RabbitMQ y clientes en Angular 21 y React Native. Al 27 de octubre de 2026, con versiones *v1.1.x* en *main* de los 10 repositorios de código, que el servidor público toma por despliegue continuo (la *v1.1.3* de payment-service, fusionada ese día, se publicó con su etiqueta el 4 de noviembre de 2026 y ya está en producción), 38 de los 41 requisitos funcionales estaban implementados y 3 eran parciales, y el CI aprobó 1 348 pruebas automatizadas (106 de ellas de la app móvil y 12 de integración contra SQL Server); ese día pasaron también las 19 pruebas de punta a punta contra el sistema completo; los 42 casos funcionales pasaron el 19 de octubre de 2026. El sistema corre además en un servidor público en Azure. Desde el 19 de octubre de 2026, cada repositorio compila y corre sus pruebas con GitHub Actions en cada cambio. Quedan pendientes los reportes consolidados y la validación con personas usuarias. Los beneficios operativos siguen siendo una hipótesis, porque no se han medido con personas usuarias reales.**
 
 ***Palabras clave*—microservicios, arquitectura hexagonal, sistema de reservas, lavado vehicular, pagos con código QR, documentación de diseño de software**
 
@@ -305,21 +305,22 @@ La verificación cruzada de los manuales contra el código encontró 19 discrepa
 
 ### G. Costos
 
-El proyecto no tuvo financiación asignada; se desarrolló con equipos de los integrantes y herramientas gratuitas o de nivel gratuito. La propuesta técnica y económica estimó el costo del proyecto en condiciones reales en COP 148.173.000 [4], distribuidos como muestra la Tabla VII. El 79 % del costo corresponde al recurso humano.
+El proyecto no tuvo financiación asignada; se desarrolló con equipos de los integrantes y herramientas gratuitas o de nivel gratuito. La propuesta técnica y económica vigente (versión 1.5) estima el costo del proyecto en condiciones reales en COP 212.925.240 para 28 semanas de trabajo, con salida a producción en la semana 23, y una operación mensual de COP 2.391.070 después del lanzamiento [29], distribuidos como muestra la Tabla VII. El 90 % del total corresponde al recurso humano.
 
 **TABLA VII**  
-*Presupuesto Estimado del Proyecto en Condiciones Reales*
+*Presupuesto Estimado del Proyecto en Condiciones Reales (Propuesta Vigente)*
 
 | Rubro | Detalle | Valor (COP) |
 |---|---|---|
-| Hardware | Cuatro computadores portátiles (Core i7 o Ryzen 7, 16–32 GB de RAM) a 5.500.000 cada uno, monitores, periféricos, enrutador y disco externo | 27.500.000 |
-| Software | Licencia de Windows 10 Pro; el resto de las herramientas es gratuito | 400.000 |
-| Servidores | Servidor virtual (VPS), almacenamiento para respaldos, licencia de Windows Server y memoria adicional | 273.000 |
-| Recurso humano | Líder de proyecto (40.000.000), analista y desarrollador frontend (32.000.000), diseñadora de la base de datos y documentadora (15.000.000) y desarrollo backend conjunto (30.000.000) | 117.000.000 |
-| Otros | Sin desglose en la propuesta | 3.000.000 |
-| **Total** | | **148.173.000** |
+| Recursos humanos | Siete roles durante 28 semanas, con 3.546 horas de trabajo | 190.806.000 |
+| Infraestructura y hosting | Servidores y servicios en la nube durante el proyecto | 1.851.300 |
+| Licencias, herramientas y servicios de terceros | El resto de las herramientas es gratuito o de nivel gratuito | 101.100 |
+| Equipos y otros gastos | Teléfono Android de pruebas, desplazamientos al lavadero e impresión | 810.000 |
+| **Costo directo** | | **193.568.400** |
+| Contingencia | 10 % del costo directo | 19.356.840 |
+| **Total del proyecto** | | **212.925.240** |
 
-*Nota.* Elaborado a partir de la propuesta técnica y económica y de su hoja de cálculo de hardware, software, servidores y recurso humano [4]. La propuesta se calculó sobre la pila tecnológica inicial (Windows 10 Pro, MySQL y arquitectura en capas), anterior al cambio a microservicios y SQL Server.
+*Nota.* Elaborado a partir de la Tabla 25 de la propuesta técnica y económica, versión 1.5 [29]. La primera versión de la propuesta (2025) estimaba COP 148.173.000 sobre la pila tecnológica inicial (Windows 10 Pro, MySQL y arquitectura en capas) [4]; la versión vigente recalculó el presupuesto para la arquitectura de microservicios y el despliegue en la nube.
 
 ### H. Resultados con Personas Usuarias
 
@@ -411,6 +412,8 @@ Como trabajo futuro, la propia documentación propone: ejecutar los casos de ace
 
 [28] B. E. Patiño Cabrera, J. C. Guilombo Osorio y M. Urbano, «Procedimiento de implementación del software: Sistema de Gestión de Lavado Vehicular (Vehicle Washing),» versión 2.11, documento no publicado, Servicio Nacional de Aprendizaje, 2026.
 
+[29] J. C. Guilombo Osorio, B. E. Patiño Cabrera y M. Urbano Quintero, «Propuesta técnica y económica del sistema LavaRápido», versión 1.5, documento no publicado, Servicio Nacional de Aprendizaje, 2026.
+
 ## Apéndice
 
 ### Información No Disponible en los Documentos del Proyecto
@@ -439,7 +442,7 @@ Brayan Estiven Patiño Cabrera, Juan Camilo Guilombo Osorio, Merari Urbano Quint
 
 *Technologist in Software Analysis and Development (ADSO), Ficha 3145556. Instructor: Karol Daniela Correa. November 4, 2026.*
 
-***Abstract*—This article describes the design, implementation, and verification of Vehicle Washing (LavaRapido), a web and Android platform for a single-location car wash, developed as a training project in SENA's Technologist in Software Analysis and Development program. The documented problem is that bookings made by phone or in person, handwritten records, discretionary work assignment, and unrecorded cash payments leave no traceability over time slots, service execution, or payments. The work followed a software design documentation (SDD) approach with seven Scrum-inspired sprints. The scope evolved from a mobile, zone-based service with a payment gateway to a single-location car wash with payments by QR or transfer with a receipt reviewed by the administrator, or in cash. The solution consists of six domain microservices (five in Java 21 with Spring Boot 4 and one in .NET 8) behind an API gateway, a SQL Server 2022 database with nine schemas and 58 tables, RabbitMQ messaging, and Angular 21 and React Native clients. As of October 27, 2026, with *v1.1.x* versions on *main* in the 10 code repositories, which the public server takes through continuous deployment (payment-service *v1.1.3*, merged that day, was left waiting to be deployed), 38 of the 41 functional requirements were implemented and 3 were partial, and the CI passed 1,348 automated tests (106 of them in the mobile app and 12 integration tests against SQL Server); that day the 19 end-to-end tests against the complete system also passed; the 42 functional cases passed on October 19, 2026. The system also runs on a public server on Azure. Since October 19, 2026, each repository builds and runs its tests with GitHub Actions on every change. The consolidated reports and the validation with users are still pending. The operational benefits for the business remain a hypothesis, because they have not yet been measured with real users.**
+***Abstract*—This article describes the design, implementation, and verification of Vehicle Washing (LavaRapido), a web and Android platform for a single-location car wash, developed as a training project in SENA's Technologist in Software Analysis and Development program. The documented problem is that bookings made by phone or in person, handwritten records, discretionary work assignment, and unrecorded cash payments leave no traceability over time slots, service execution, or payments. The work followed a software design documentation (SDD) approach with seven Scrum-inspired sprints. The scope evolved from a mobile, zone-based service with a payment gateway to a single-location car wash with payments by QR or transfer with a receipt reviewed by the administrator, or in cash. The solution consists of six domain microservices (five in Java 21 with Spring Boot 4 and one in .NET 8) behind an API gateway, a SQL Server 2022 database with nine schemas and 58 tables, RabbitMQ messaging, and Angular 21 and React Native clients. As of October 27, 2026, with *v1.1.x* versions on *main* in the 10 code repositories, which the public server takes through continuous deployment (payment-service *v1.1.3*, merged that day, was tagged on November 4, 2026, and is already in production), 38 of the 41 functional requirements were implemented and 3 were partial, and the CI passed 1,348 automated tests (106 of them in the mobile app and 12 integration tests against SQL Server); that day the 19 end-to-end tests against the complete system also passed; the 42 functional cases passed on October 19, 2026. The system also runs on a public server on Azure. Since October 19, 2026, each repository builds and runs its tests with GitHub Actions on every change. The consolidated reports and the validation with users are still pending. The operational benefits for the business remain a hypothesis, because they have not yet been measured with real users.**
 
 ***Index Terms*—microservices, hexagonal architecture, booking system, car wash, QR code payments, software design documentation**
 
@@ -739,21 +742,22 @@ Cross-verification of the manuals against the code found 19 discrepancies betwee
 
 ### G. Costs
 
-The project had no assigned funding; it was developed with the members' own equipment and free or free-tier tools. The technical and economic proposal estimated the project cost under real conditions at COP 148,173,000 [4], distributed as shown in Table VII. Human resources account for 79% of the cost.
+The project had no assigned funding; it was developed with the members' own equipment and free or free-tier tools. The current technical and economic proposal (version 1.5) estimates the project cost under real conditions at COP 212,925,240 for 28 weeks of work, with production release in week 23, and a monthly operation of COP 2,391,070 after launch [29], distributed as shown in Table VII. Human resources account for 90% of the total.
 
 **TABLE VII**  
-*Estimated Project Budget Under Real Conditions*
+*Estimated Project Budget Under Real Conditions (Current Proposal)*
 
 | Item | Detail | Amount (COP) |
 |---|---|---|
-| Hardware | Four laptops (Core i7 or Ryzen 7, 16–32 GB of RAM) at 5,500,000 each, monitors, peripherals, router, and external drive | 27,500,000 |
-| Software | Windows 10 Pro license; all other tools are free | 400,000 |
-| Servers | Virtual private server (VPS), backup storage, Windows Server license, and additional memory | 273,000 |
-| Human resources | Project lead (40,000,000), analyst and frontend developer (32,000,000), database designer and documenter (15,000,000), and joint backend development (30,000,000) | 117,000,000 |
-| Other | Not itemized in the proposal | 3,000,000 |
-| **Total** | | **148,173,000** |
+| Human resources | Seven roles over 28 weeks, with 3,546 hours of work | 190,806,000 |
+| Infrastructure and hosting | Cloud servers and services during the project | 1,851,300 |
+| Licenses, tools, and third-party services | All other tools are free or free tier | 101,100 |
+| Equipment and other expenses | Android test phone, trips to the car wash, and printing | 810,000 |
+| **Direct cost** | | **193,568,400** |
+| Contingency | 10% of the direct cost | 19,356,840 |
+| **Project total** | | **212,925,240** |
 
-*Note.* Based on the technical and economic proposal and its hardware, software, server, and human resources spreadsheet [4]. The proposal was calculated on the initial technology stack (Windows 10 Pro, MySQL, and a layered architecture), before the move to microservices and SQL Server.
+*Note.* Based on Table 25 of the technical and economic proposal, version 1.5 [29]. The first version of the proposal (2025) estimated COP 148,173,000 on the initial technology stack (Windows 10 Pro, MySQL, and a layered architecture) [4]; the current version recalculated the budget for the microservices architecture and cloud deployment.
 
 ### H. Results With Users
 
@@ -844,6 +848,8 @@ As future work, the documentation itself proposes: running the acceptance cases 
 [27] Vehicle Washing Development Team, *Plan de actividades Scrum del proyecto LavaRapido* [Scrum activity plan of the LavaRapido project] (scrum1.1), unpublished spreadsheet, Servicio Nacional de Aprendizaje, 2026.
 
 [28] B. E. Patiño Cabrera, J. C. Guilombo Osorio and M. Urbano, “Software Implementation Procedure: Vehicle Washing Management System (Vehicle Washing),” version 2.11, unpublished document, Servicio Nacional de Aprendizaje, 2026.
+
+[29] J. C. Guilombo Osorio, B. E. Patiño Cabrera and M. Urbano Quintero, “Propuesta técnica y económica del sistema LavaRápido” [Technical and economic proposal for the LavaRápido system], version 1.5, unpublished document, Servicio Nacional de Aprendizaje, 2026.
 
 ## Appendix
 
